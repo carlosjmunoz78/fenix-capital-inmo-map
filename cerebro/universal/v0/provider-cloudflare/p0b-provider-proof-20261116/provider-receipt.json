@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "status": "PASS_LIMITED_PROVIDER_LIFECYCLE",
+  "scope": {
+    "company_id_literal": "fenix-capital",
+    "company_registry_mapping_verified": false,
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "provider": "CLOUDFLARE_WORKERS",
+    "version": "p0b-provider-proof-v0.1.0",
+    "policy_version": "p0b-proof-policy-v1",
+    "policy_engine_evaluated": false
+  },
+  "correlation": {
+    "run_id": "p0b-lab-provider-cycle-20261116-01",
+    "job_id": "p0b-fact001-provider-cycle-20261116-01",
+    "request_id": "p0b-operator-api-20261116-01",
+    "receipt_id": "p0b-audit-receipt-20261116-01",
+    "ids_are_local_audit_only": true,
+    "provider_echoed_any_correlation_ids": false,
+    "source_sha256_local": "b88c0e7e182965488b34b31eb93adeed2377b603e07b8e84b36e6270400985d3"
+  },
+  "target": "cerebro-fact001-p0b-proof-20261116-lab",
+  "executor": "CHATGPT_CLOUDFLARE_UNIVERSAL_OPERATOR",
+  "facts": {
+    "before": {
+      "worker_count": 39,
+      "target_exists": false
+    },
+    "create": {
+      "upload_success": true,
+      "worker_count_after": 40,
+      "target_in_script_list": true,
+      "created_at_utc": "2026-11-16T16:56:38.580101Z",
+      "version_id": "ac121573-2b78-4e54-91f5-23c6fa2bcac9",
+      "deployment_id": "36f267e8-d973-42d2-9a01-57b650f24984",
+      "provider_settings_readback": true,
+      "bindings_count": 0,
+      "secrets_count": 0,
+      "crons_count": 0,
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "custom_routes_count": 0,
+      "custom_domains_count": 0
+    },
+    "delete": {
+      "target_version_matches_created": true,
+      "delete_success": true,
+      "force": false
+    },
+    "after": {
+      "worker_count": 39,
+      "target_exists": false,
+      "target_domains_count": 0,
+      "target_routes_count": 0,
+      "rollback_provider_readback_verified": true
+    }
+  },
+  "gates": {
+    "provider_create_readback_verified": true,
+    "provider_delete_readback_verified": true,
+    "historical_fact001_job_correlated": false,
+    "executed_by_existing_fact001_runtime": false,
+    "d1_command_event_write": false,
+    "business_result_receipt_verified": false,
+    "owner_gateway_policy_authorized": false,
+    "company_registry_verified": false,
+    "prod_execution_authorized": false
+  },
+  "cost": {
+    "new_subscriptions_eur": 0,
+    "measured_provider_consumption_eur": null,
+    "additional_cost_total_verified": false
+  }
+}

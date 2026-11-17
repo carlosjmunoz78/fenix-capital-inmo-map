@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0.0",
+  "name": "LAB-CF-CANARY-001",
+  "company_id": "fenix",
+  "engine_id": "LAB-CF-CANARY-001",
+  "environment": "LAB",
+  "version": "0.3.0",
+  "role": "CLOUDFLARE_PROVIDER_CONTROL_CANARY",
+  "canonical_fact_registry_179_modified": false,
+  "state": {
+    "deployed": true,
+    "provider": "Cloudflare",
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "resource_id": "cerebro-operativa-control-canary-lab",
+    "workers_dev": false,
+    "preview_urls": false,
+    "schedules": [],
+    "routes": [],
+    "requests_verified": false,
+    "cron_events_verified": false,
+    "observed_at": "2026-11-15T15:43:01.301Z",
+    "version_active": "3e25b452-96c9-492f-9f7e-9b57bcc81c69",
+    "paused_flag_effective": true,
+    "control_config_verified_at": "2026-11-15T17:14:56.513Z",
+    "real_queue_messages_processed_verified": 2,
+    "deterministic_work_units_acked": 1
+  },
+  "constraints": {
+    "cron_free_quota_total": 5,
+    "cron_in_use": 5,
+    "incremental_cron_attempted": true,
+    "incremental_cron_accepted": false,
+    "provider_error": 10072,
+    "additional_subscription_eur": 0,
+    "canary_external_effects": 0
+  },
+  "controls": {
+    "pause_cron": {
+      "status": "INERT_EMPTY_FINAL_CONFIRMED"
+    },
+    "resume_cron": {
+      "status": "BLOCKED",
+      "reason": "MONEY_LIMIT",
+      "provider_error": 10072
+    },
+    "readback": {
+      "status": "VERIFIED"
+    },
+    "write_from_console": {
+      "status": "NOT_CONNECTED"
+    },
+    "provider_config_pause_resume": {
+      "status": "PHYSICAL_VERIFIED_CANARY_ONLY",
+      "effective_source": "Cloudflare deployments + deployed version resources",
+      "receipts": "physical-provider-control-2026-11-15.json",
+      "paused_final": true,
+      "autonomous_work_verified": false,
+      "console_write_connected": false
+    },
+    "queue_runtime": {
+      "status": "PHYSICAL_VERIFIED_CANARY_ONLY",
+      "real_messages": 2,
+      "work_unit_receipts": 1,
+      "paused_skip_receipts": 1,
+      "source": "queue-physical-acceptance-2026-11-15.json",
+      "console_dispatch_connected": false,
+      "scheduler_connected": false,
+      "queue_consumer_canary_only": true
+    }
+  },
+  "dependencies": {
+    "external_services": [],
+    "database": [],
+    "queues": [],
+    "secrets": [],
+    "web_routes": [],
+    "other_workers_mutated": [],
+    "queue": {
+      "name": "cerebro-operativa-control-canary-queue-lab-eu",
+      "id": "2404f1e2dbe2407dbdd37e6957855033",
+      "jurisdiction": "eu",
+      "existing_queue_modified": false
+    },
+    "kv": {
+      "name": "cerebro-operativa-control-canary-receipts-lab-eu",
+      "id": "afe8a24354714ebcb317326415003b7e",
+      "jurisdiction": "eu",
+      "receipt_ttl_seconds": 86400,
+      "consistency": "eventual"
+    }
+  },
+  "backups": {
+    "source": "worker.mjs",
+    "configuration": "../observations/cloudflare-free-cron-capacity-2026-11-15.json",
+    "existing_crons_snapshot": true,
+    "original_cloudflare_deployed_version": "99aeccb9-190f-4110-8267-ff58de59ae8e",
+    "control_source": "worker.control-v0.mjs",
+    "paused_version": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+    "resumed_version": "44d92703-d66c-467f-b59d-eba113e2d954",
+    "queue_worker_source": "worker.queue-v0.mjs",
+    "paused_queue_version": "3e25b452-96c9-492f-9f7e-9b57bcc81c69",
+    "resumed_queue_version": "823ad15a-7af3-4f07-80f1-7601ab6919fb"
+  },
+  "rollback": {
+    "target_crons": [],
+    "target_workers_dev": false,
+    "target_preview_urls": false,
+    "physical_readback": true,
+    "delete_without_snapshot": false,
+    "control_flag_true_redeployed_from_resumed": true,
+    "queue_paused_redeployed": true,
+    "queue_paused_readback_verified": true,
+    "existing_five_crons_verified_unchanged": true
+  },
+  "human_required": [
+    "MONEY_LIMIT",
+    "SECURITY_INCIDENT"
+  ],
+  "release": {
+    "mode": "DRAFT_LAB_ONLY",
+    "production_eligible": false,
+    "no_paid_plan": true,
+    "next_gate": "Read-only API and controlled queue dispatch through CEREBRO Gateway without Cloudflare credentials in browser, then engine-specific staged promotion; no direct provider write auth in Vercel until security transfer permitted."
+  },
+  "source_paths": [
+    "worker.mjs",
+    "RUNBOOK_REAL_CRON_CONTROL_V0.md",
+    "../observations/cloudflare-free-cron-capacity-2026-11-15.json",
+    "worker.control-v0.mjs",
+    "worker.control-v0.test.mjs",
+    "physical-provider-control-2026-11-15.json",
+    "worker.queue-v0.mjs",
+    "worker.queue-v0.test.mjs",
+    "queue-physical-acceptance-2026-11-15.json"
+  ]
+}

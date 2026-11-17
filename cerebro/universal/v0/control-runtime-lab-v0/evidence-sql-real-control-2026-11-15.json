@@ -1,0 +1,44 @@
+{
+  "observed_at": "2026-11-15T15:43:52.797917Z",
+  "source": "SUPABASE_PREPROD_PHYSICAL_SQL_RPCS",
+  "company_id": "fenix",
+  "engine_id": "LAB-DEMO-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "operations": [
+    {
+      "action": "RESUME",
+      "expected_revision": 1,
+      "before_state": "PAUSED",
+      "after_state": "RUNNING",
+      "receipt_id": "a30de547-4d3a-4a70-90f2-48cf301e88fd",
+      "result": "APPLIED"
+    },
+    {
+      "action": "PAUSE",
+      "expected_revision": 2,
+      "before_state": "RUNNING",
+      "after_state": "PAUSED",
+      "receipt_id": "75f859a7-ae2f-47f9-9a77-823eac4d6ec1",
+      "result": "APPLIED"
+    }
+  ],
+  "readback": {
+    "desired_state": "PAUSED",
+    "revision": 3,
+    "priority": 3,
+    "work_units": 0,
+    "last_receipt_id": "75f859a7-ae2f-47f9-9a77-823eac4d6ec1"
+  },
+  "limitations": [
+    "Authenticated UI POST in Opera not verified",
+    "RPC physical service_role operation is not browser owner E2E",
+    "No autonomous scheduled work",
+    "Does not control any business engine"
+  ],
+  "risk_controls": {
+    "scope_isolated": true,
+    "no_other_motor_change": true,
+    "additional_subscription_eur": 0
+  }
+}

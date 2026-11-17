@@ -5,6 +5,18 @@ import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi
 import {fetchOwnerUniverseLab,type OwnerUniverseResult,type UniverseCompanyRequest} from './cerebroOperativaLabUniverseApi';
 import {createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupported,preferredSpanishVoice,spanishVoices,speechText,type CerebroSpeechRecognition} from './cerebroVoice';
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
+import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
+import {answerDiagnosticRequest,classifyDiagnosticRequest} from './cerebroOperativaDiagnostics';
+import {readDeviceLive} from './cerebroDeviceLiveApi';
+import {readJobFleetLive} from './cerebroAgentJobLiveApi';
+import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
+import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction,type LabWorkerState} from './cerebroLabWorkerControlApi';
+import {describeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
+import {verifyLabReceiptCausality} from './cerebroLabReceiptCausality';
+import {extractExactEngineId,describeEngineLookup} from './cerebroOperativaEngineLookup';
+import engineRegistry from '../cerebro/registry/engine-registry-detailed-20261113.json';
+import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention,answerCloudflareQueueAudit} from './cerebroCloudflareFleetApi';
+import socialAudit from '../cerebro/universal/v0/provider-social/social-private-meta-audit-2026-11-15.json';
 import './cerebro-operative-console.css';
 
 /**
@@ -20,6 +32,9 @@ export default function CerebroOperativeCockpitV3Bridge(){
  const chat=useCerebroOperativaChat();
  const[company,setCompany]=useState<Company>('fenix');
  const[composer,setComposer]=useState('');
+ const[operatorAnswer,setOperatorAnswer]=useState<{question:string;text:string}|null>(null);
+ const[fleetSending,setFleetSending]=useState(false);
+ const[labPending,setLabPending]=useState<{action:LabWorkerAction;revision:number;priority:number|null;before:LabWorkerState}|null>(null);
  const[dictating,setDictating]=useState(false);
  const[dictationError,setDictationError]=useState('');
  const[ttsActive,setTtsActive]=useState(false);
@@ -63,12 +78,187 @@ export default function CerebroOperativeCockpitV3Bridge(){
   if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
  async function submit(){
   const text=composer.trim();
-  if(!isOwnerCompany||!chat.ready||chat.sending||!text)return;
+  if(!isOwnerCompany||chat.sending||fleetSending||!text)return;
+  const host=typeof window!=='undefined'?window.location.hostname:'';
+  const preview=host==='fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app'||/^fenix-capital-preprod-[a-z0-9]+[.]vercel[.]app$/.test(host);
+  const question=preview?classifyFleetQuestion(text):null;
+  const diagnostic=preview?classifyDiagnosticRequest(text):null;
+  // Answer advisory questions even about off-screen or named providers; never intercept control intents.
+  if(diagnostic&&question?.kind!=='control'){
+   setFleetSending(true);
+   try{
+    if(diagnostic==='JOB_EVIDENCE'){
+     const current=await readJobFleetLive();
+     if(current.kind==='ready'){
+      const d=current.data;
+      const names:{[key:string]:string}={JARVIS_WORK:'JARVIS',BROWSER_V2:'Navegador V2',CREATIVE_V1:'Productora'};
+      const totals=d.source_totals.map(x=>names[x.source]+': '+x.total_rows+
+       ' trabajos históricos, último cambio '+(x.last_updated_at||'SIN_FECHA')).join('. ');
+      const alert=d.attention_groups.map(x=>names[x.source]+' '+x.engine_id+
+       ' '+x.status+' '+x.records+' casos (prioridad de REVISIÓN '+x.priority_suggestion+
+       ', no actuación ni fallo actual demostrado)').join('; ');
+      const cost=d.cost_metrics;
+      const metrics='Métricas del navegador: '+cost.total_samples+' muestras; '+
+       cost.cost_samples+' costes incrementales registrados, suma '+
+       (cost.recorded_incremental_cost_eur===null?'NO_MEDIDO':String(cost.recorded_incremental_cost_eur)+' EUR')+
+       '; duración p50 '+(cost.p50_duration_seconds??'NO_MEDIDO')+' s, p90 '+
+       (cost.p90_duration_seconds??'NO_MEDIDO')+' s. Coste TOTAL de infraestructura NO_MEDIDO.';
+      setOperatorAnswer({question:text,text:'LECTURA ACTUAL DE REGISTROS HISTÓRICOS LAB: '+d.observed_at+
+       '. '+totals+'. Pendientes de revisión: '+(alert||'no acreditados en esta muestra')+
+       '. '+metrics+' Agentes y subagentes reales, trabajo actual y latidos independientes: NO VERIFICADOS. '+
+       'PREPROD es etiqueta de registros en BD LAB, no App PREPROD operativa. '+
+       'Los tiempos históricos no son una ETA; sin ejecución ni control de trabajos.'});
+     }else{
+      setOperatorAnswer({question:text,text:'TRABAJOS NO VERIFICADOS: '+current.reason+
+       '. Sin lectura actual de JARVIS, navegador y productora; no se atribuyen cero fallos ni actividad. '+
+       'No se ha ejecutado ningún control.'});
+     }
+    }else if(diagnostic==='DEVICE_HISTORY'){
+     const current=await readDeviceLive();
+     if(current.kind==='ready'){
+      const d=current.data;
+      const rows=d.environments.map(x=>x.environment+' (solo etiquetas de la BD LAB): '+
+       x.not_revoked_count+' registros no revocados, '+x.heartbeat_5m_count+' latidos últimos 5 min, '+
+       x.heartbeat_24h_count+' latidos últimas 24 h, '+x.commands_total+' órdenes, '+
+       x.commands_completed+' completadas, '+x.commands_failed+' fallidas históricas, '+
+       x.semantically_verified_receipts+' resultados semánticamente verificados; duración de éxitos comparables ('+
+       x.comparable_successful_duration_samples+'): p50 '+(x.p50_completed_seconds??'NO_MEDIDO')+
+       ' s, p90 '+(x.p90_completed_seconds??'NO_MEDIDO')+' s.').join(' ');
+      setOperatorAnswer({question:text,text:'LECTURA ACTUAL LAB, origen '+d.source+
+       ', observada '+d.observed_at+'. '+rows+
+       ' Agentes, subagentes y trabajos autónomos activos: DESCONOCIDOS, no cero. '+
+       'Estado ONLINE almacenado y latido de dispositivo NO acreditan autonomía. '+
+       'PREPROD es etiqueta histórica en Supabase LAB, NO App PREPROD activa. '+
+       'Coste real: NO_MEDIDO; duraciones históricas no son ETA futura. Consulta de solo lectura; ninguna orden ejecutada.'});
+     }else{
+      const fleet=await readFleetLab();
+      setOperatorAnswer({question:text,text:'LECTURA ACTUAL NO DISPONIBLE: '+current.reason+
+       '. A continuación, información fechada, NO EN VIVO. '+answerDiagnosticRequest(diagnostic,fleet,text)});
+     }
+    }else{
+     const fleet=await readFleetLab();
+     setOperatorAnswer({question:text,text:answerDiagnosticRequest(diagnostic,fleet,text)});
+    }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(preview&&/(?:^|[^A-Z0-9])LAB-DEMO-001(?:$|[^A-Z0-9])/i.test(text)){
+   setFleetSending(true);
+   try{
+    const read=await readLabWorkerState();
+    if(read.kind!=='ready'||!read.data){setOperatorAnswer({question:text,text:'El estado del worker LAB no es verificable: '+read.reason+'. Sin ejecución.'});return;}
+    if(question?.kind==='control'){
+     const action=question.action as LabWorkerAction;
+     if(!['PAUSE','RESUME','PRIORITIZE'].includes(action)){
+      setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA: '+action+' no tiene ejecutor seguro conectado para LAB-DEMO-001. Acelerar no equivale a priorizar. Estado del worker intacto.'});
+      setComposer('');return;
+     }
+     const priorityText=text.match(/(?:prioridad\s*|\bal\s*)([1-5])\b/i)?.[1];
+     const priority=action==='PRIORITIZE'?(priorityText?Number(priorityText):null):null;
+     if(action==='PRIORITIZE'&&priority===null){setOperatorAnswer({question:text,text:'Indica una prioridad exacta entre 1 y 5 (por ejemplo: «priorizar LAB-DEMO-001 al 4»). Ningún cambio aplicado.'});return;}
+     setLabPending({action,revision:read.data.revision,priority,before:read.data});
+     setOperatorAnswer({question:text,text:'PROPUESTA, NO EJECUTADA: '+action+' sobre LAB-DEMO-001, empresa Fénix, entorno LAB, revisión '+read.data.revision+(priority!==null?', prioridad '+priority:'')+'. Confirma la operación exacta o cancela. No afecta a otros motores.'});
+    }else{
+     setLabPending(null);
+     setOperatorAnswer({question:text,text:describeLabRuntimeEvidence(read.data)});
+    }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(preview&&/(?:SOC-(?:IG|FB)-FINANCIAL-REAL-ESTATE-V1|(?:instagram|facebook)\s+autoqual)/i.test(text)){
+   setFleetSending(true);
+   try{
+    const key=/instagram|SOC-IG/i.test(text)?'SOC-IG-FINANCIAL-REAL-ESTATE-V1':'SOC-FB-FINANCIAL-REAL-ESTATE-V1';
+    const e=socialAudit.engines.find(x=>x.engine_id===key);
+    if(!e)throw Error('SOCIAL_AUDIT_MISSING');
+    setOperatorAnswer({question:text,text:question?.kind==='control'?
+     'ORDEN NO EJECUTADA. El motor '+key+' tiene registro histórico en LAB, pero Operativa no tiene adaptador autenticado para pausar, reanudar ni activar AUTOQUAL. No se ha cambiado nada.':
+     'AUDITORÍA HISTÓRICA (NO EN VIVO, '+socialAudit.audit_date+'): motor '+key+' tiene Worker '+e.provider_worker+
+     ' desplegado y D1 con jurisdicción UE, PR #'+e.github_pr+' en borrador; sin cron ni URL workers.dev. AUTOQUAL_ENABLED=false y GROQ_ENABLED=false en la configuración comprobada. Agentes y subagentes activos, últimos jobs y salud de ejecución: DESCONOCIDOS. Sin permisos de escritura desde Operativa.'});
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(question&&/(?:colas?|queues?|backlog|mensajes pendientes|consumidores?)/i.test(text)){
+   setFleetSending(true);
+   try{
+    if(question.kind==='control')setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA: la inspección de Cloudflare Queues es un archivo auditado. Los controles de despacho y prioridad todavía no están autenticados desde esta consola.'});
+    else setOperatorAnswer({question:text,text:answerCloudflareQueueAudit(text)});
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(question&&(/cloudflare|workers?/i.test(text)||/LAB-CF-CANARY-001/i.test(text)||/cerebro-(?:instagram|facebook|jarvis|fact001|ums001|linkedin|social|model)-[a-z0-9-]+/i.test(text))){
+   setFleetSending(true);
+   try{
+    if(question.kind==='control'){
+     setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA. El conector Cloudflare disponible en Operativa es estrictamente de solo lectura. Antes de pausar o reactivar este Worker se necesitan su contrato, snapshot, permisos específicos, rollback y confirmación verificable.'});
+    }else{
+     const read=await readCloudflareFleet({refresh:true});
+     const matched=resolveCloudflareWorkerMention(text,read)||undefined;
+     setOperatorAnswer({question:text,text:answerCloudflareFleet(read,matched)});
+    }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+
+  // Query named motors even when absent from the visible cards; never grant control from a selector.
+  const exactEngine=preview?extractExactEngineId(text):null;
+  if(exactEngine){
+   setFleetSending(true);
+   try{
+    if(question?.kind==='control'){
+     setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA: '+question.action+' '+exactEngine+
+      '. NO_CONECTADO: adaptador no certificado. Sin cambios de estado, costes o permisos.'});
+    }else{
+     const [universe,proof]=await Promise.all([fetchOwnerUniverseLab('fenix'),readUniversalOperativaLab()]);
+     const definition=engineRegistry.engines.find(x=>x.engine_id===exactEngine);
+     setOperatorAnswer({question:text,text:describeEngineLookup({engineId:exactEngine,universe,proof,definition})});
+    }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(question){
+   setFleetSending(true);
+   try{
+    const read=question.kind==='query'?await readFleetLab():{kind:'unavailable',snapshot:null,reason:'CONTROL_PREFLIGHT_ONLY'} as const;
+    let answer=answerFleetQuestion(read,question);
+    setOperatorAnswer({question:text,text:answer});
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(!chat.ready){
+   setOperatorAnswer({question:text,text:'El Gateway conversacional general no está verificado. La consulta no se ha enviado ni ha ejecutado cambios.'});
+   return;
+  }
+  setOperatorAnswer(null);
   const ok=await chat.sendText(text);
   if(ok){
    setComposer(previous=>previous.trim()===text?'':previous);
    setDictationError('');
   }else setDictationError('No se ha confirmado el envío. Se conserva el mensaje para reintentar.');
+ }
+ async function confirmLabControl(){
+  if(!labPending||fleetSending)return;
+  const expected=labPending;
+  setLabPending(null);setFleetSending(true);
+  try{
+   const receipt=await applyLabWorkerAction({action:expected.action,priority:expected.priority,
+    expected_revision:expected.revision,idempotency_key:'labctrl-'+crypto.randomUUID()});
+   if(receipt.kind!=='ready'||!receipt.data){setOperatorAnswer({question:'Control LAB-DEMO-001',text:'Operación NO CERTIFICADA: '+receipt.reason+'. Comprobar estado y recibos antes de reintentar.'});return;}
+   const post=await readLabWorkerState();
+   const a=receipt.data.after,p=post.data;
+   const proof=verifyLabReceiptCausality(expected.before,expected.action,expected.priority,receipt.data,p);
+   const confirmed=post.kind==='ready'&&proof.verified;
+   setOperatorAnswer({question:'Control '+expected.action+' LAB-DEMO-001',text:confirmed?
+    'CONTROL REAL LAB VERIFICADO: '+expected.action+' · antes '+receipt.data.before.desired_state+' / revisión '+receipt.data.before.revision+', después '+a.desired_state+' / revisión '+a.revision+', prioridad '+a.priority+', pasos '+a.work_units+'. Recibo '+receipt.data.receipt_id+'.':
+    'Recibo '+receipt.data.receipt_id+' recibido pero la transición NO ESTÁ CERTIFICADA ('+proof.reason+'); no se declara éxito. Se requiere revisión.'});
+  }finally{setFleetSending(false)}
  }
  function changeCompany(next:Company){
   if(next===company)return;
@@ -76,7 +266,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
    setDictationError('Finaliza la conversación o el dictado antes de cambiar de empresa.');
    return;
   }
-  setDictationError('');setComposer('');setSelectedRun(null);setCompany(next);
+  setDictationError('');setComposer('');setOperatorAnswer(null);setLabPending(null);setSelectedRun(null);setCompany(next);
  }
  function toggleVoice(){
   if(!isOwnerCompany||dictating||!chat.ready||chat.sending)return;
@@ -163,7 +353,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
    ?'Dictado integrado no disponible en Opera. Para dictar gratis, pulsa Windows + H con el cursor en el campo.'
    :chat.voiceActive?(chat.voiceListening?'Micrófono escuchando…':chat.voiceSpeaking?'CEREBRO está hablando…':'Preparando micrófono; comprueba el permiso del navegador.')
    :/micrófono|reconocimiento de voz|audio no|voz no/i.test(chat.statusMessage)?chat.statusMessage:'';
- const snapshot={ready:chat.ready,sending:chat.sending,voiceActive:chat.voiceActive,
+ const snapshot={ready:chat.ready,sending:chat.sending||fleetSending||!!labPending,voiceActive:chat.voiceActive,
   voiceListening:chat.voiceListening,voiceSpeaking:chat.voiceSpeaking};
  return <CerebroOperativeCockpitV3
   snapshot={snapshot}
@@ -178,6 +368,10 @@ export default function CerebroOperativeCockpitV3Bridge(){
   runs={isOwnerCompany?runs:[]} onOpenRun={setSelectedRun}
   ownerUniverse={ownerResult?.company===company?ownerResult.result:EMPTY}
   chatLines={isOwnerCompany?chat.lines:[]}
+  operatorAnswer={isOwnerCompany?operatorAnswer:null}
+  labProposal={isOwnerCompany?labPending:null}
+  onConfirmLabProposal={()=>{void confirmLabControl()}}
+  onCancelLabProposal={()=>{setLabPending(null);setOperatorAnswer({question:'Control LAB',text:'Orden cancelada sin ejecución.'})}}
  >
   {selectedRun?<div className="operativa-inspector-backdrop"
    onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}>

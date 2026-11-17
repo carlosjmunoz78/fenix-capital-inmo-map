@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "LIVE_LAB_SCOPED_TOKEN_PERMISSION_PROBE",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "timestamp_utc": "2026-11-16T22:05:43.724Z",
+  "evidence_source": "Cloudflare D1 real, one-shot cron invoked from original FACT-001 runtime",
+  "permission_probe_id": "FACT001-P0B-PERMISSION-PROBE-20261116",
+  "probed_token_binding": "CF_WORKERS_TOKEN",
+  "permission_results": {
+    "worker_scripts_list_http": 200,
+    "zone_worker_routes_http": 403,
+    "worker_domains_http": 200,
+    "worker_settings_http": 200
+  },
+  "read_scope_issue_confirmed": "Workers Routes Read permission missing or denied by token policy",
+  "credential_value_retrieved": false,
+  "credential_value_disclosed": false,
+  "zone_id": "a00ec81375b4acb02f9bd6e0fd64942f",
+  "zone_name": "fenixcapital.es",
+  "permission_group_identified": {
+    "name": "Workers Routes Read",
+    "id": "2072033d694d415a936eaeb94e6405b8",
+    "scope": "com.cloudflare.api.account.zone"
+  },
+  "mitigation_plan": "Use a separate zone-limited read-only token for routes GET, not broaden the current Workers mutation token",
+  "runtime_restored": {
+    "version": "543b68e8-cd59-4960-9f17-d66276416389",
+    "traffic_percentage": 100,
+    "deployment_id": "4a316a8a-4b87-4445-8d30-2be227e30d3b",
+    "private": true,
+    "cron": "*/5 * * * *"
+  },
+  "signed_durable_receipts_observed": 0,
+  "prod_promotion_allowed": false
+}

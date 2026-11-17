@@ -3,7 +3,7 @@ import { Calculator, Eye, EyeOff, LogOut, Minimize2, Moon, Sun, X } from 'lucide
 import type { Session } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { calculateMortgage } from './calculator';
-import { fetchAppApi, IS_PRODUCTION, supabase } from './supabase';
+import { fetchAppApi, IS_PRODUCTION, STAGED_OWNER_HOST, supabase } from './supabase';
 import DirectionDashboard from './DirectionDashboard';
 import TransitionScreen from './TransitionScreen';
 import './logo.css';
@@ -109,6 +109,9 @@ export default function App(){
         return;
       }
       if(data.session && !remembered && !activeThisBrowser){
+        // Never revoke a session held by another staged tab merely because this
+        // tab was opened independently. PROD retains its previous lifecycle.
+        if(STAGED_OWNER_HOST){if(mounted){setSession(null);setAuthReady(true);}return;}
         await supabase.auth.signOut();
         if(mounted){setSession(null);setAuthReady(true);}
         return;
@@ -116,6 +119,12 @@ export default function App(){
       if(mounted){setSession(data.session);setAuthReady(true);}
     });
     const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{
+      // Ignore cross-tab auth broadcasts for an unremembered staged session.
+      if(STAGED_OWNER_HOST&&event!=='PASSWORD_RECOVERY'&&
+         localStorage.getItem('fenix-remember-device')!=='true'&&
+         sessionStorage.getItem('fenix-session-active')!=='1'){
+        setSession(null);return;
+      }
       setSession(next);
       if(event==='PASSWORD_RECOVERY'){
         setPasswordRecovery(true);
@@ -180,8 +189,23 @@ export default function App(){
       return;
     }
     setLoadingLogin(true);
+    // Set the chosen persistence mode BEFORE auth events write the token.
+    // Restore the previous policy if the staged sign-in fails.
+    const previousRemember=localStorage.getItem('fenix-remember-device');
+    const previousActive=sessionStorage.getItem('fenix-session-active');
+    if(STAGED_OWNER_HOST){
+      localStorage.setItem('fenix-remember-device',rememberDevice?'true':'false');
+      if(rememberDevice)sessionStorage.removeItem('fenix-session-active');
+      else sessionStorage.setItem('fenix-session-active','1');
+    }
     const {error}=await supabase.auth.signInWithPassword({email,password});
     if(error){
+      if(STAGED_OWNER_HOST){
+        if(previousRemember===null)localStorage.removeItem('fenix-remember-device');
+        else localStorage.setItem('fenix-remember-device',previousRemember);
+        if(previousActive===null)sessionStorage.removeItem('fenix-session-active');
+        else sessionStorage.setItem('fenix-session-active',previousActive);
+      }
       setAuthError('No se pudo iniciar sesión. Revisa el usuario y la contraseña.');
       setLoadingLogin(false);
       return;

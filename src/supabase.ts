@@ -1,7 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import { createStagedOwnerAuthStorage } from './stagedOwnerAuthStorage';
 
 const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'').toLowerCase();
 const productionHostname=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
+// Only immutable/staged Vercel candidate hosts use same-origin owner bootstrap.
+// app.fenixcapital.es keeps its unchanged direct Supabase Gateway contract.
+const stagedOwnerHostname=typeof window!=='undefined'&&/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(window.location.hostname);
+export const STAGED_OWNER_HOST=stagedOwnerHostname;
 export const IS_PRODUCTION=productionHostname||runtimeEnv==='production'||runtimeEnv==='prod';
 
 const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co';
@@ -21,7 +26,7 @@ const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test';
 const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`;
 const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2';
 const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth';
-const authStorage={
+const legacyAuthStorage={
   getItem(key:string){
     const current=window.localStorage.getItem(key);
     if(current!==null)return current;
@@ -37,6 +42,12 @@ const authStorage={
   setItem(key:string,value:string){window.localStorage.setItem(key,value)},
   removeItem(key:string){window.localStorage.removeItem(key)}
 };
+
+// Isolate staged, non-remembered sessions; production and all other hosts use
+// exactly the legacy adapter. In particular this does not change App PROD.
+const authStorage=stagedOwnerHostname
+  ?createStagedOwnerAuthStorage(window.localStorage,window.sessionStorage,AUTH_STORAGE_KEY)
+  :legacyAuthStorage;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
@@ -97,7 +108,12 @@ async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ini
   const timeoutId=controller?globalThis.setTimeout(()=>controller.abort(),timeoutMs):null;
   let response:Response;
   try{
-    response=await fetch(`${SUPABASE_URL}/functions/v1/${functionName(baseFunctionName)}${path}`,{
+    const stagedResource=baseFunctionName==='fenix-app-gateway'&&IS_PRODUCTION&&stagedOwnerHostname
+      ?(path==='/session/context'?'context':path==='/navigation'?'navigation':null):null;
+    const target=stagedResource
+      ?`/api/cerebro-owner-bootstrap?resource=${stagedResource}`
+      :`${SUPABASE_URL}/functions/v1/${functionName(baseFunctionName)}${path}`;
+    response=await fetch(target,{
       ...init,
       signal:controller?.signal??upstreamSignal,
       headers:{
@@ -157,7 +173,9 @@ export async function fetchUserAdminApi<T>(path='',init?:RequestInit):Promise<{s
 export async function fetchAppApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init,6000);
   if(path==='/navigation'&&(result.status===0||result.status>=500))return{status:200,data:safeNavigationFallback() as T};
-  if(path==='/session/context'&&(result.status===0||result.status>=500)){
+  // Stage owner access must never be synthesized from mutable user_metadata.
+  // The live Gateway must certify CARLOS-ADMIN before any owner UI is shown.
+  if(!stagedOwnerHostname&&path==='/session/context'&&(result.status===0||result.status>=500)){
     const {data:{session}}=await supabase.auth.getSession();
     const fallback=authenticatedContextFallback(session);
     if(fallback)return{status:200,data:fallback as T};

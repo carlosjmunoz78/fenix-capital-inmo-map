@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "LAB-CF-CANARY-001",
+  "environment": "LAB",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "observed_at": "2026-11-15T15:43:01.301Z",
+  "resource_name": "cerebro-operativa-control-canary-lab",
+  "previous_worker_count": 37,
+  "worker_count_now": 38,
+  "quota": {
+    "provider": "Cloudflare",
+    "plan": "Workers Free",
+    "limit_cron_triggers_per_account": 5,
+    "existing_cron_triggers": 5,
+    "free_slots": 0,
+    "source": "Cloudflare REST PUT Worker schedules",
+    "api_error_code": 10072,
+    "error_class": "MONEY_LIMIT",
+    "request_status": 400,
+    "paid_upgrade_authorized": false
+  },
+  "canary": {
+    "created": true,
+    "workers_dev_enabled": false,
+    "preview_urls_enabled": false,
+    "schedules_before": [],
+    "schedules_after": [],
+    "scheduled_invocations_verified": false,
+    "no_outbound_network": true
+  },
+  "existing_cron_proof": [
+    {
+      "worker": "cerebro-facebook-buffer-replenisher-lab",
+      "crons": [
+        "*/20 * * * *"
+      ]
+    },
+    {
+      "worker": "cerebro-fact001-headless-operator-lab-20261111",
+      "crons": [
+        "*/5 * * * *"
+      ]
+    },
+    {
+      "worker": "cerebro-fact001-recovery-runner-lab",
+      "crons": [
+        "*/5 * * * *"
+      ]
+    },
+    {
+      "worker": "cerebro-ums001-multisource-scout-lab-eu",
+      "crons": [
+        "12 7 * * *"
+      ]
+    },
+    {
+      "worker": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
+      "crons": [
+        "23 6 * * *"
+      ]
+    }
+  ],
+  "acceptance": {
+    "isolation_verified": true,
+    "private_verified": true,
+    "no_new_paid_subscription": true,
+    "cron_resume_verified": false,
+    "cron_pause_verified": false,
+    "quota_guard_verified": true,
+    "executed_no_effective_work": true
+  },
+  "provider_semantics": "schedule API rejected sixth trigger due hard account Free quota; no existing cron modified; no public Worker routing enabled",
+  "next_gate": "Do not reattempt adding a cron; design a single shared scheduler with existing capacity and snapshot/OLD_VS_NEW/rollback before any migration, without touching staging or paid plan."
+}

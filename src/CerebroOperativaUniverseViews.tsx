@@ -1,13 +1,15 @@
 import {Building2,ChevronRight,Layers3,ShieldCheck} from 'lucide-react';
-import CerebroEngineCatalog from './CerebroEngineCatalog';
+import CerebroEngineCatalog,{type AgentEngineFilter} from './CerebroEngineCatalog';
 import type {OwnerUniverseResult,UniverseCompanyRequest} from './cerebroOperativaLabUniverseApi';
 
 type Section='entidades'|'proyectos'|'motores';
 type Props={
  section:Section;scope:UniverseCompanyRequest;result:OwnerUniverseResult;
+  activitySource:'LIVE'|'CACHED'|'UNAVAILABLE';
  onCompanyChange:(company:UniverseCompanyRequest)=>void;
  onNavigate:(section:Section|'trabajos')=>void;
  observedEngines:{id:string;count:number;running:number}[];
+ agentFilter?:AgentEngineFilter|null;onClearAgentFilter?:()=>void;
 };
 const NAMES:Record<string,string>={fenix:'Fénix',aion:'AION',captacasa:'CAPTACASA'};
 const KNOWN=['fenix','aion','captacasa'];
@@ -20,7 +22,7 @@ function stateMessage(result:OwnerUniverseResult){
 }
 function Empty({text}:{text:string}){return <p className="op3-source-empty">{text}</p>}
 export default function CerebroOperativaUniverseViews({
- section,scope,result,onCompanyChange,onNavigate,observedEngines
+ section,scope,result,activitySource,onCompanyChange,onNavigate,observedEngines,agentFilter,onClearAgentFilter
 }:Props){
  const data=result.data;
  const registry=result.kind==='ready'||result.kind==='partial'?data?.registry:null;
@@ -75,8 +77,9 @@ export default function CerebroOperativaUniverseViews({
     <Empty text="No se ha podido verificar el registro de proyectos para este contexto."/ >}
    <p className="op3-source-note">Fuente: jarvis_project_overlay_v1. No representa el inventario de todos los proyectos de todas las empresas.</p>
   </div>}
-  {section==='motores'&&<CerebroEngineCatalog sourceReady={sourceReady} factoryReady={factoryReady}
-   engines={engines} factoryCatalog={catalog} scaffolded={scaffolded} observed={observed} scope={scope}/>}
+  {section==='motores'&&<CerebroEngineCatalog key={agentFilter?.id||'general'} agentFilter={agentFilter} onClearAgentFilter={onClearAgentFilter} sourceReady={sourceReady} factoryReady={factoryReady}
+   engines={engines} factoryCatalog={catalog} scaffolded={scaffolded} observed={observed} scope={scope}
+    activitySource={activitySource}/>}
 
  </div>;
 }

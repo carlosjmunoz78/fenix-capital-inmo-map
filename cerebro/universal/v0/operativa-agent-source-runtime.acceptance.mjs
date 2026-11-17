@@ -1,0 +1,48 @@
+/** Private, read-only CI acceptance for actual Vercel server source materialization.
+ * Imports the actual TypeScript API using Node 24 built-in type stripping, without dependencies or browser credentials.
+ */
+import assert from 'node:assert/strict';
+import {buildCerebroAgentDirectoryV0,queryCerebroAgentDirectoryV0,validateCerebroAgentDirectoryQueryV0} from '../../../api/cerebro-agent-directory.ts';
+ const roles=buildCerebroAgentDirectoryV0();
+ assert.equal(roles.length,2506,'11 canonical + 569 FB + 529 media + 191 SEO + 569 IG + 569 LI + 39 IG dept + 29 templates');
+ assert.equal(new Set(roles.map(x=>x.kind+':'+x.id)).size,2506);
+ assert.equal(roles.filter(x=>x.kind==='SUBAGENT_ROLE').length,2106);
+ assert.equal(roles.filter(x=>x.family==='SEO_ENTERPRISE').length,191);
+ assert.equal(roles.filter(x=>x.family==='SEO_ENTERPRISE'&&x.kind==='SUBAGENT_ROLE').length,141);
+ assert(roles.filter(x=>x.family==='SEO_ENTERPRISE').every(x=>x.engine_ids.includes('SEO-001')));
+ assert.equal(roles.filter(x=>x.family==='MEDIA_STUDIO').length,529);
+ assert.equal(roles.filter(x=>x.family==='SOCIAL_FACEBOOK'&&x.kind==='AGENT_ROLE').length,42);
+ assert.equal(roles.filter(x=>x.family==='SOCIAL_FACEBOOK'&&x.kind==='SUBAGENT_ROLE').length,527);
+ assert.equal(roles.filter(x=>x.kind==='SUBAGENT_TEMPLATE').length,29);
+ assert(roles.filter(x=>x.kind==='SUBAGENT_ROLE').every(x=>x.parent_id&&
+  (x.parent_id.startsWith('UMS:')||x.parent_id.startsWith('FB-')||x.parent_id.startsWith('SEO-D')||x.parent_id.startsWith('IG-')||x.parent_id.startsWith('LI-'))));
+ assert(roles.every(x=>!x.runtime_verified&&x.purpose_plain&&x.source_url));
+ const q=new URLSearchParams({company_id:'fenix',kind:'ALL',family:'ALL',offset:'0',limit:'100'});
+ const req=validateCerebroAgentDirectoryQueryV0(q);
+ assert.equal(req.limit,100);
+ const page=queryCerebroAgentDirectoryV0(q);
+ assert.equal(page.page.total,2506);
+ assert.equal(page.records.length,100);
+ assert.equal(page.page.next_offset,100);
+ assert.equal(page.counts.media_studio_source_roles,529);
+ assert.equal(page.counts.registered_logical_subagent_roles,2106);
+ assert.equal(page.counts.facebook_source_components,569);
+ assert.equal(page.counts.seo_source_profiles,191);
+ assert.equal(page.counts.instagram_source_components,569);
+ assert.equal(page.counts.linkedin_source_components,569);
+ assert.equal(page.counts.instagram_department_roles,39);
+ assert.equal(roles.filter(x=>x.family==='SOCIAL_INSTAGRAM'&&x.kind==='SUBAGENT_ROLE').length,527);
+ assert.equal(roles.filter(x=>x.family==='SOCIAL_LINKEDIN'&&x.kind==='SUBAGENT_ROLE').length,527);
+ assert.equal(page.counts.total_runtime_instances,null);
+ assert.equal(page.coverage,'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS');
+ const prod=queryCerebroAgentDirectoryV0(new URLSearchParams({company_id:'fenix',kind:'SUBAGENT_ROLE',family:'MEDIA_STUDIO',offset:'375',limit:'25'}));
+ assert.equal(prod.page.total,384);
+ assert.equal(prod.records.length,9);
+ assert(prod.records.every(x=>x.family==='MEDIA_STUDIO'&&x.kind==='SUBAGENT_ROLE'));
+ const engineering=queryCerebroAgentDirectoryV0(new URLSearchParams({company_id:'fenix',kind:'ALL',family:'ENGINEERING',limit:'100'}));
+ assert.equal(engineering.page.total,10);
+ for(const bad of [{company_id:'aion'},{company_id:'fenix',limit:'1000'},{company_id:'fenix',offset:'-1'},
+  {company_id:'fenix',kind:'UNAUTHORIZED'},{company_id:'fenix',extra:'hello'}])
+  assert.throws(()=>validateCerebroAgentDirectoryQueryV0(new URLSearchParams(bad)));
+ console.log('CEREBRO directory runtime GREEN:',{total:2506,media:529,facebook:569,instagram:569,linkedin:569,seo:191,subagent_roles:2106,
+  social_roles:42,seo_profiles:191,templates:29,pagination:'validated',scope:'owner-only runtime separate',prod:false});

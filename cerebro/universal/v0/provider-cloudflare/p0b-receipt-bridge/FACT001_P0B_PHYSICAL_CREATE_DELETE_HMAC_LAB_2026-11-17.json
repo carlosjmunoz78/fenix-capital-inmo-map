@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_type": "FACT001_P0B_DIRECT_PROVIDER_AND_DURABLE_LEDGER_LAB",
+  "checked_at_utc": "2026-11-17T17:27:46.137Z",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0",
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "zone": "fenixcapital.es"
+  },
+  "route_token_check": {
+    "source": "ONE_SHOT_LAB_PRIVATE_WORKER_CLOUDFLARE_API",
+    "immutable_d1_table": "fact001_p0b_routes_read_probe_20261117",
+    "id": "FACT001-P0B-PERMISSION-PROBE-20261117-ROUTES-ONLY",
+    "state": "COMPLETE",
+    "scripts_http": 200,
+    "routes_http": 200,
+    "domains_http": 200,
+    "settings_http": 200,
+    "token_value_accessed": false
+  },
+  "cycle": {
+    "resource_name": "cerebro-fact001-managed-lab-ui261117a",
+    "max_cost_eur_per_job": 0,
+    "create": {
+      "job_id": "FACT001-OPERATIVA-P0B-261117-SIGNED-CREATE-01",
+      "state": "COMPLETED",
+      "phase": "CREATED_V1_PRIVATE",
+      "attempts": 1,
+      "error_code": null,
+      "receipt_id": "4731668e-aa63-48f4-9320-1c6ce6e7a02f"
+    },
+    "delete": {
+      "job_id": "FACT001-OPERATIVA-P0B-261117-SIGNED-DELETE-01",
+      "state": "COMPLETED",
+      "phase": "OWNED_WORKER_REMOVED",
+      "attempts": 1,
+      "error_code": null,
+      "receipt_id": "0aa4c71d-c933-44ea-aa0d-e094e6ce7cda"
+    },
+    "provider_post_delete": {
+      "workers_inventory_absent": true,
+      "script_get_http": 404,
+      "zone_routes_count": 0,
+      "domains_count": 0,
+      "ownership_state": "DELETED",
+      "ownership_version": null
+    }
+  },
+  "ledger": {
+    "name": "fact001_provider_receipts_lab_v0",
+    "new_receipts": 2,
+    "signature_scheme": "HMAC-SHA256-LAB-V0",
+    "signer": "FACT001_RUNNER_LAB",
+    "signature_is_provider_native": false,
+    "readback_status": "READBACK_MATCHED_UNATTESTED",
+    "external_crypto_verification_complete": false,
+    "prod_promotion_allowed": false,
+    "immutable_triggers_present": true
+  },
+  "runner_final": {
+    "name": "cerebro-fact001-headless-operator-lab-20261111",
+    "active_version": "14ac6590-7bf7-46bd-b831-623fc15253ed",
+    "percentage": 100,
+    "workers_dev": false,
+    "preview_urls": false,
+    "cron": "*/5 * * * *",
+    "FACT001_P0B_SCOPE_PROBE_ENABLED": false,
+    "FACT001_RECEIPTS_ENABLED": false,
+    "route_read_secret_binding_present": true,
+    "pending_jobs": 0
+  },
+  "preview": {
+    "project": "fenix-capital-preprod-app",
+    "git_sha": "406d3fb0b169f328f68233b353edac279928aad9",
+    "vercel_deployment_id": "dpl_61adBsE3gVK7y714bHohUFdbfzGn",
+    "url": "https://fenix-capital-preprod-7h9x0qtgn.vercel.app/cerebro?section=operativa&visual_lab=cockpit-v3",
+    "deployment_state": "READY",
+    "anonymous_browser_observation": "AUTHENTICATION_REQUIRED",
+    "authenticated_ui_acceptance": false
+  },
+  "open_gates": [
+    "EXTERNAL_INDEPENDENT_HMAC_VERIFIER_WITH_SERVER_CREDENTIAL",
+    "D1_READ_AUTH_GATEWAY_OWNER_INTEGRATION",
+    "CANONICAL_COMPANY_ID_MAPPING",
+    "AUTHENTICATED_UI_E2E_ACCEPTANCE",
+    "POLICY_TRIBUNAL_AND_ROLLBACK_ACCEPTANCE",
+    "COST_MEASUREMENT"
+  ],
+  "production_promotion": "HOLD",
+  "new_subscriptions_eur": 0,
+  "actual_incremental_usage_eur": "NOT_MEASURED",
+  "change_policy": "NO_GIT_MAIN_MERGE_NO_APP_CRM_PROD_DNS_WORDPRESS_TRADING_MUTATION"
+}

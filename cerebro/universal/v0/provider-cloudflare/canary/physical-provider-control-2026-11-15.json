@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "LAB-CF-CANARY-001",
+  "environment": "LAB",
+  "provider": "CLOUDFLARE_WORKERS",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "resource_name": "cerebro-operativa-control-canary-lab",
+  "source": "CLOUDFLARE_API_DEPLOYMENTS_AND_VERSIONS_READBACK",
+  "historical_receipt": true,
+  "proof_window_utc": {
+    "started": "2026-11-15T16:27:00.966Z",
+    "resumed_at": "2026-11-15T16:29:09.718Z",
+    "paused_at": "2026-11-15T16:29:49.567Z"
+  },
+  "immutable_versions": {
+    "preexisting_original": "99aeccb9-190f-4110-8267-ff58de59ae8e",
+    "canary_paused": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+    "canary_resumed": "44d92703-d66c-467f-b59d-eba113e2d954"
+  },
+  "changes": [
+    {
+      "action": "DEPLOY_SAFE_PAUSED",
+      "deployment_id": "79cf7555-0b7b-42d9-bda9-55a0c71217d8",
+      "version_id": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+      "effective_flag": "CONTROL_PAUSED=true",
+      "readback_verified": true
+    },
+    {
+      "action": "RESUME_INTERNAL_CONFIG",
+      "deployment_id": "4464f9d2-93a0-4ed2-941b-a3eaee487ce4",
+      "version_id": "44d92703-d66c-467f-b59d-eba113e2d954",
+      "effective_flag": "CONTROL_PAUSED=false",
+      "readback_verified": true,
+      "observed_at": "2026-11-15T16:29:09.718Z"
+    },
+    {
+      "action": "PAUSE_INTERNAL_CONFIG",
+      "deployment_id": "fe57b5f7-48b7-44a9-8cbc-ddbbcbca5134",
+      "version_id": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+      "effective_flag": "CONTROL_PAUSED=true",
+      "readback_verified": true,
+      "observed_at": "2026-11-15T16:29:49.567Z"
+    }
+  ],
+  "final": {
+    "active_deployment_id": "fe57b5f7-48b7-44a9-8cbc-ddbbcbca5134",
+    "active_version_id": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+    "control_paused": true,
+    "schedules": [],
+    "workers_dev_enabled": false,
+    "preview_urls_enabled": false,
+    "active_agent_verified": false,
+    "scheduled_invocation_verified": false,
+    "actual_external_work_verified": false
+  },
+  "baseline_crons_preserved": true,
+  "baseline_crons": [
+    {
+      "worker": "cerebro-facebook-buffer-replenisher-lab",
+      "cron": "*/20 * * * *"
+    },
+    {
+      "worker": "cerebro-fact001-headless-operator-lab-20261111",
+      "cron": "*/5 * * * *"
+    },
+    {
+      "worker": "cerebro-fact001-recovery-runner-lab",
+      "cron": "*/5 * * * *"
+    },
+    {
+      "worker": "cerebro-ums001-multisource-scout-lab-eu",
+      "cron": "12 7 * * *"
+    },
+    {
+      "worker": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
+      "cron": "23 6 * * *"
+    }
+  ],
+  "safety": {
+    "canonical_main_modified": false,
+    "other_workers_modified": false,
+    "cron_triggers_changed": 0,
+    "public_routes_added": 0,
+    "subscriptions_added": 0,
+    "external_provider_actions_from_canary": 0,
+    "actual_incremental_provider_usage_unmeasured": true
+  },
+  "important_provider_semantics": "GET Worker /settings returned latest uploaded version flag false before deployment; true effective state must join GET /deployments first + GET /versions/{deployed_version_id}; never equate latest-settings with deployed effective config.",
+  "limits": {
+    "provider_action_verified": true,
+    "autonomous_worker_execution_verified": false,
+    "console_write_adapter_connected": false,
+    "owner_console_POST_verified": false,
+    "cron_quota_5of5": true,
+    "provider_API_immediate_version_rollback_verified": true,
+    "rollback_to_original_v010_physically_tested": false
+  }
+}

@@ -1,0 +1,583 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CEREBRO_SOCIAL_FACEBOOK_AGENT_ROLE_DESIGN_V1",
+  "source_url": "https://app.notion.com/p/40181b1a756d815abbd4dd9470f2918d",
+  "source_title": "CEREBRO OS · Social Family Factory · Arquitectura universal multired y multiempresa · V1 · 22-10-2026",
+  "source_date": "2026-10-22",
+  "source_type": "DOCUMENTED_ARCHITECTURE_NOT_RUNTIME",
+  "family": "SOCIAL_FACEBOOK",
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "status": "DEFINED_LOGICAL_ROLES_NOT_INSTALLED",
+  "prod_authorized": false,
+  "explanation_provenance": "plain_purpose is a descriptive paraphrase of role name, not a verified runtime capability",
+  "roles": [
+    {
+      "id": "FB-00",
+      "technical_name": "Family Facebook Orchestrator",
+      "plain_purpose": "Coordina los roles de Facebook y reparte las tareas entre especialistas.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-01",
+      "technical_name": "Market Intelligence",
+      "plain_purpose": "Estudia el mercado para saber qué contenidos y campañas pueden interesar.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-02",
+      "technical_name": "Territorial Intelligence",
+      "plain_purpose": "Analiza ciudades y zonas para adaptar las publicaciones al territorio.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-03",
+      "technical_name": "Audience & Buyer Persona",
+      "plain_purpose": "Estudia a quién nos dirigimos y qué necesita cada tipo de cliente.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-04",
+      "technical_name": "Financial Audience Specialists",
+      "plain_purpose": "Investiga públicos interesados en financiación y productos financieros.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-05",
+      "technical_name": "Real-Estate Audience Specialists",
+      "plain_purpose": "Investiga públicos que quieren comprar, vender o alquilar inmuebles.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-06",
+      "technical_name": "Strategy",
+      "plain_purpose": "Define la estrategia y el orden de las acciones en Facebook.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-07",
+      "technical_name": "Offer & Funnel",
+      "plain_purpose": "Prepara ofertas y recorridos para convertir interés en oportunidades.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-08",
+      "technical_name": "Content Planning",
+      "plain_purpose": "Organiza qué contenidos se preparan y cuándo publicar.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-09",
+      "technical_name": "Copy & Persuasion",
+      "plain_purpose": "Redacta textos persuasivos adecuados para Facebook.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-10",
+      "technical_name": "Hook Lab",
+      "plain_purpose": "Propone comienzos que capten la atención en publicaciones y vídeos.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-11",
+      "technical_name": "CTA Lab",
+      "plain_purpose": "Prepara llamadas a la acción claras para cada contenido.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-12",
+      "technical_name": "Script Factory",
+      "plain_purpose": "Elabora guiones para publicaciones, anuncios y vídeos.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-13",
+      "technical_name": "Creative Direction",
+      "plain_purpose": "Define el aspecto y estilo visual de los materiales.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-14",
+      "technical_name": "Image Factory",
+      "plain_purpose": "Prepara las imágenes requeridas por las campañas.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-15",
+      "technical_name": "Video Production",
+      "plain_purpose": "Organiza la producción de vídeos para Facebook.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-16",
+      "technical_name": "Video Postproduction",
+      "plain_purpose": "Prepara el montaje y acabado de los vídeos producidos.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-17",
+      "technical_name": "Audio Factory",
+      "plain_purpose": "Coordina materiales de voz, música y sonido con derechos verificados.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-18",
+      "technical_name": "Reels Factory",
+      "plain_purpose": "Diseña piezas verticales y cortas compatibles con Reels.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-19",
+      "technical_name": "Meme & Culture",
+      "plain_purpose": "Analiza tendencias culturales y formatos de humor relevantes.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-20",
+      "technical_name": "Facebook Page",
+      "plain_purpose": "Organiza el trabajo asociado a la página de Facebook.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-21",
+      "technical_name": "Facebook Groups",
+      "plain_purpose": "Prepara iniciativas para grupos de Facebook respetando sus normas.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-22",
+      "technical_name": "Marketplace",
+      "plain_purpose": "Estudia oportunidades comerciales en Facebook Marketplace.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-23",
+      "technical_name": "Live & Events",
+      "plain_purpose": "Planifica actividades en directo y eventos sociales.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-24",
+      "technical_name": "Creator & Influencer",
+      "plain_purpose": "Analiza colaboraciones con creadores e influencers.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-25",
+      "technical_name": "Community",
+      "plain_purpose": "Organiza la conversación pública y el cuidado de la comunidad.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-26",
+      "technical_name": "Social Lead",
+      "plain_purpose": "Detecta y cualifica oportunidades comerciales originadas en Facebook.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-27",
+      "technical_name": "Conversation & Messenger",
+      "plain_purpose": "Prepara respuestas y flujos de conversación en Messenger.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-28",
+      "technical_name": "Meta Ads",
+      "plain_purpose": "Diseña y supervisa propuestas de campañas publicitarias de Meta.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-29",
+      "technical_name": "Experimentation",
+      "plain_purpose": "Propone experimentos para aprender qué contenidos funcionan.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-30",
+      "technical_name": "Performance & Data",
+      "plain_purpose": "Mide resultados y transforma los datos en propuestas útiles.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-31",
+      "technical_name": "Tracking & Integration",
+      "plain_purpose": "Comprueba seguimiento, eventos e integraciones de las campañas.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-32",
+      "technical_name": "Learning",
+      "plain_purpose": "Propone mejoras basadas en los resultados observados.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-33",
+      "technical_name": "Brand & Compliance",
+      "plain_purpose": "Comprueba coherencia de marca, permisos y cumplimiento.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    },
+    {
+      "id": "FB-34",
+      "technical_name": "Multicompany Governance",
+      "plain_purpose": "Separa correctamente los datos, políticas y campañas de cada empresa.",
+      "type": "LOGICAL_AGENT_ROLE",
+      "role_state": "DEFINED_ONLY",
+      "department": "SOCIAL_FACEBOOK",
+      "engine_ids": [],
+      "engine_links_state": "UNRESOLVED",
+      "parent_id": null,
+      "subagents_state": "TEMPLATES_NOT_INSTANTIATED"
+    }
+  ],
+  "subagent_templates": [
+    {
+      "family_template_id": "FB-SUB-TPL-01",
+      "name": "investigación",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-02",
+      "name": "buyer personas",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-03",
+      "name": "tendencias",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-04",
+      "name": "hooks",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-05",
+      "name": "CTAs",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-06",
+      "name": "copy",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-07",
+      "name": "guion",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-08",
+      "name": "diseño",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-09",
+      "name": "fotografía",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-10",
+      "name": "iluminación",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-11",
+      "name": "locución",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-12",
+      "name": "audio",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-13",
+      "name": "edición",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-14",
+      "name": "Reels",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-15",
+      "name": "animación",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-16",
+      "name": "VFX",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-17",
+      "name": "memes",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-18",
+      "name": "grupos",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-19",
+      "name": "Marketplace",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-20",
+      "name": "creators",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-21",
+      "name": "community",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-22",
+      "name": "leads",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-23",
+      "name": "Messenger",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-24",
+      "name": "media buying",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-25",
+      "name": "analítica",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-26",
+      "name": "experimentación",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-27",
+      "name": "tracking",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-28",
+      "name": "compliance",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    },
+    {
+      "family_template_id": "FB-SUB-TPL-29",
+      "name": "aprendizaje",
+      "source_state": "TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE"
+    }
+  ],
+  "caution": "Neither 35 roles nor template categories are deployed agents or individual subagents. Do not expand into combinations counted as installed instances."
+}

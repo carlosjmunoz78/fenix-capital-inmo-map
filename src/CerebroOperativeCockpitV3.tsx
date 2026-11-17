@@ -2,17 +2,20 @@ import {useMemo,useState,type FormEvent,type KeyboardEvent,type ReactNode,type R
 import {
  Activity,AudioLines,BarChart3,Building2,CheckCircle2,ChevronLeft,ChevronRight,
  CircleAlert,Clock3,Cpu,Database,ExternalLink,FileCheck2,Layers3,Mic,Play,
- Search,Send,ShieldCheck,Square,Workflow,Volume2
+ Search,Send,ShieldCheck,Square,Users,Workflow,Volume2
 } from 'lucide-react';
 import type {CerebroActivityRun} from './cerebroActivityApi';
 import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
+import CerebroFleetControlPanel from './CerebroFleetControlPanel';
+import CerebroRoleAgentRosterLab from './CerebroRoleAgentRosterLab';
+import type {AgentEngineFilter} from './CerebroEngineCatalog';
 import CerebroAudioDiagnostics from './CerebroAudioDiagnostics';
 import './cerebro-operative-cockpit-v3.css';
 
 type VoiceSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
 type Company='all'|'fenix'|'aion'|'captacasa';
-type View='resumen'|'entidades'|'proyectos'|'motores'|'trabajos'|'evidencias'|'decisiones';
+type View='resumen'|'control'|'entidades'|'proyectos'|'motores'|'agentes'|'trabajos'|'evidencias'|'decisiones';
 type FeedStatus='LIVE'|'CACHED'|'UNAVAILABLE';
 type Props={
  snapshot:VoiceSnapshot;composer:string;onComposerChange:(value:string)=>void;
@@ -25,11 +28,14 @@ type Props={
  ownerUniverse:OwnerUniverseResult;
  scopeCanExecute:boolean;
  chatLines:{role:'user'|'cerebro';text:string}[];
+ operatorAnswer?:{question:string;text:string}|null;
+ labProposal?:{action:'PAUSE'|'RESUME'|'PRIORITIZE'|'TICK';revision:number;priority:number|null}|null;
+ onConfirmLabProposal?:()=>void;onCancelLabProposal?:()=>void;
  children:ReactNode;
 };
 const NAV:readonly [View,string,typeof Building2][]=[
- ['entidades','Entidades',Building2],['proyectos','Proyectos',Layers3],
- ['motores','Motores',Cpu],['trabajos','Trabajos',Workflow],
+ ['control','Control',ShieldCheck],['entidades','Entidades',Building2],['proyectos','Proyectos',Layers3],
+ ['motores','Motores',Cpu],['agentes','Agentes',Users],['trabajos','Trabajos',Workflow],
  ['evidencias','Evidencias',FileCheck2]
 ];
 const NAMES:Record<Company,string>={
@@ -64,13 +70,24 @@ function validLink(run:CerebroActivityRun){
  catch{return null}
 }
 function spanCount(n:number,one:string,many:string){return n===1?one:many}
+function initialOperativaPreviewPanel():View{
+ if(typeof window==='undefined')return 'resumen';
+ const query=new URLSearchParams(window.location.search);
+ if(!/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname))return 'resumen';
+ if(query.get('section')!=='operativa'||query.get('visual_lab')!=='cockpit-v3')return 'resumen';
+ // Preview-only deep link; user/role checks remain in the existing ConsoleHost.
+ const requested=query.get('op3_panel');
+ if(requested==='agentes')return 'agentes'; // Preview-only; owner and company guards remain server-side
+ return requested==='motores'||requested==='control'?requested:'resumen';
+}
 
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
  dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,onStopVoice,composerRef,source,observedAt,
- company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,children
+ company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,operatorAnswer,labProposal,onConfirmLabProposal,onCancelLabProposal,children
 }:Props){
- const[view,setView]=useState<View>('resumen');
+ const[view,setView]=useState<View>(initialOperativaPreviewPanel);
+ const[agentEngineFilter,setAgentEngineFilter]=useState<AgentEngineFilter|null>(null);
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
  const queued=useMemo(()=>runs.reduce((n,r)=>n+realPending(r),0),[runs]);
  const failed=useMemo(()=>runs.filter(isFailed),[runs]);
@@ -79,20 +96,21 @@ export default function CerebroOperativeCockpitV3({
   snapshot.voiceListening?'listening':
   (snapshot.sending?'responding':
   composer.trim()?'typing':
-  running>0?'working':'idle');
+  running>0&&source==='LIVE'?'working':'idle');
  const statusText={
   speaking:'Hablando contigo',listening:'Escuchando',
   responding:'Procesando tu petición',typing:'Preparado para recibir tu instrucción',
   working:'Hay trabajos en ejecución',idle:'En espera de instrucciones'
  }[status];
  const provenance=source==='LIVE'?'Datos observados':source==='CACHED'?'Última captura disponible':'Sin conexión verificable';
- const showLive=source!=='UNAVAILABLE';
+ const verifiedLive=source==='LIVE';
+ const hasSample=source!=='UNAVAILABLE';
  function handleSubmit(event:FormEvent){event.preventDefault();if(scopeCanExecute)onSubmit()}
  function keydown(event:KeyboardEvent<HTMLTextAreaElement>){
   if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();if(scopeCanExecute)onSubmit()}
  }
  const recentRuns=runs.slice(0,14);
- const selectPanel=(next:View)=>setView(next);
+ const selectPanel=(next:View)=>{if(next==='motores')setAgentEngineFilter(null);setView(next)};
  const modules=useMemo(()=>{
   const engines=new Map<string,{count:number;running:number}>();
   for(const run of runs){
@@ -103,7 +121,12 @@ export default function CerebroOperativeCockpitV3({
   }
   return [...engines.entries()].sort((a,b)=>b[1].count-a[1].count);
  },[runs]);
- const canSend=scopeCanExecute&&snapshot.ready&&!snapshot.sending;
+ const agentRosterPreview=typeof window!=='undefined'&&(
+  window.location.hostname==='app.fenixcapital.es'||
+  (/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)&&
+   new URLSearchParams(window.location.search).get('visual_lab')==='cockpit-v3'));
+ // The server still enforces OWNER session and Fénix tenant; this flag only reveals navigation.
+  const canSend=scopeCanExecute&&!snapshot.sending; // Inventory reads have an independent owner-authenticated Preview source.
  return <main className={`op3-root op3-${status}`} aria-label={typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?'Centro de mando operativo (acceso privado)':'Centro de mando operativo (ensayo)'}>
   <div className="op3-backplate" aria-hidden="true"/>
   <div className="op3-wrapper">
@@ -125,23 +148,28 @@ export default function CerebroOperativeCockpitV3({
     <div className="op3-glance">
      <button className="op3-status-tile" type="button" onClick={()=>selectPanel('decisiones')} aria-label="Consultar estado y revisiones">
       <span className="op3-overline"><ShieldCheck size={15}/> ESTADO OBSERVADO</span>
-      <span className={`op3-primary-state ${source==='UNAVAILABLE'?'is-unavailable':''}`}>
-       {showLive?<CheckCircle2 size={23}/>:<CircleAlert size={23}/>}
-       {showLive?source==='LIVE'?'Actividad GitHub disponible':'Actividad GitHub en caché':'Actividad sin verificar'}
+      <span className={`op3-primary-state ${!verifiedLive?'is-unavailable':''}`}>
+       {verifiedLive?<CheckCircle2 size={23}/>:<CircleAlert size={23}/>}
+       {source==='LIVE'?'Actividad GitHub disponible':source==='CACHED'?'Actividad GitHub en caché':'Actividad sin verificar'}
       </span>
       <span className="op3-indicators">
-       <span><b className="is-blue">{showLive?running:'—'}</b> En ejecución</span>
-       <span><b className="is-amber">{showLive?queued:'—'}</b> En cola</span>
-       <span><b className={failed.length?'is-red':'is-muted'}>{showLive?failed.length:'—'}</b> Revisiones</span>
+       <span><b className="is-blue">{verifiedLive?running:'—'}</b> En ejecución ahora</span>
+       <span><b className="is-amber">{verifiedLive?queued:'—'}</b> En cola ahora</span>
+       <span><b className={verifiedLive&&failed.length?'is-red':'is-muted'}>{verifiedLive?failed.length:'—'}</b> Revisiones actuales</span>
       </span>
+      {source==='CACHED'?<small className="op3-snapshot-warning">
+       Última captura (NO actual): {running} en curso, {queued} en cola y {failed.length} resultados fallidos; vigencia NO_VERIFICADA.
+      </small>:null}
       <span className="op3-link-label">Ver estado <ChevronRight size={14}/></span>
      </button>
      <button className="op3-decisions" type="button" onClick={()=>selectPanel('decisiones')}>
       <span className="op3-overline"><Clock3 size={15}/> ATENCIÓN</span>
-      <strong>{source==='UNAVAILABLE'?'Estado no comprobable':failed.length?
+      <strong>{source==='UNAVAILABLE'?'Estado no comprobable':
+       source==='CACHED'?'Estado actual desconocido · datos en caché':failed.length?
        `${failed.length} ${spanCount(failed.length,'resultado requiere','resultados requieren')} revisión`:
        'Sin fallos visibles'}</strong>
       <small>{source==='UNAVAILABLE'?'La última lectura no se ha podido verificar':
+       source==='CACHED'?'Última captura: '+failed.length+' fallos registrados, sin confirmar vigencia':
         failed[0]?runLabel(failed[0]):'Esta fuente no acredita decisiones humanas'}</small>
       <span className="op3-link-label">Ver detalle <ChevronRight size={14}/></span>
      </button>
@@ -166,7 +194,7 @@ export default function CerebroOperativeCockpitV3({
      <form className="op3-input-frame" onSubmit={handleSubmit}>
       <textarea ref={composerRef} aria-label="Pregunta u orden" placeholder={scopeCanExecute?'Escribe o habla aquí…':'Empresa sin acceso verificado · selecciona Fénix'}
        value={composer} onChange={e=>onComposerChange(e.target.value)}
-       onKeyDown={keydown} rows={1} disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending}/>
+       onKeyDown={keydown} rows={1} disabled={!scopeCanExecute||snapshot.sending}/>
       <button type="button" className={`op3-icon-button ${dictating?'is-active':''}`}
        title={dictating?'Detener dictado':dictationSupported?'Dictar':'Dictado con Windows + H'} aria-label={dictating?'Detener dictado':'Dictar'}
        disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||snapshot.voiceActive}
@@ -187,7 +215,16 @@ export default function CerebroOperativeCockpitV3({
       <button className="op3-submit" aria-label="Enviar instrucción" type="submit"
        disabled={!canSend||!composer.trim()}><Send size={18}/></button>
      </form>
-     {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
+     {operatorAnswer?<div className="op3-operator-answer" role="status" aria-live="polite">
+       <strong>Respuesta del control operativo</strong><small>{operatorAnswer.question}</small><p>{operatorAnswer.text}</p>
+      </div>:null}
+      {labProposal?<div className="op3-operator-confirm" aria-label="Confirmar orden real LAB">
+       <strong>Control LAB-DEMO-001 · confirmación obligatoria</strong>
+       <p>{labProposal.action} · Fénix LAB · revisión {labProposal.revision}{labProposal.priority!==null?' · prioridad '+labProposal.priority:''}. Sin efectos empresariales externos.</p>
+       <button type="button" onClick={onConfirmLabProposal}>Confirmar control LAB</button>
+       <button type="button" onClick={onCancelLabProposal}>Cancelar orden LAB</button>
+      </div>:null}
+      {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
       {dictationError?<small role="alert" className="op3-input-error">{dictationError}</small>:null}
      <CerebroAudioDiagnostics/>
     </div>
@@ -197,40 +234,49 @@ export default function CerebroOperativeCockpitV3({
       <span>{source==='LIVE'?'Captura reciente':source==='CACHED'?'Captura en caché':'Sin lectura disponible'}</span></div>
      <div className="op3-steps">
       {([['Investigar',Search],['Analizar',BarChart3],['Ejecutar',Play],['Verificar',ShieldCheck],['Aprender',Database]] as const)
-       .map(([name,Icon])=>{
-        const current=running>0&&name==='Ejecutar'&&showLive;
-        return <span key={name} className={current?'is-current':''}><Icon size={18}/><small>{name}</small></span>
-       })}
+       .map(([name,Icon])=><span key={name}><Icon size={18}/><small>{name}</small></span>)}
      </div>
-     <span className="op3-live-note">{running>0&&showLive?
-      `${running} ${spanCount(running,'ejecución observada','ejecuciones observadas')}; fases internas no verificadas`:
+     <span className="op3-live-note">{source==='CACHED'?
+      'Captura antigua: '+running+' workflows entonces en curso; actividad actual NO_VERIFICADA.':
+      verifiedLive&&running>0?
+      running+' workflows en curso en la muestra; fases internas NO_VERIFICADAS.':
       'Sin fases internas verificadas'}</span>
     </div>
    </section>:<section className="op3-detail" aria-live="polite">
     <div className="op3-detail-header">
      <button type="button" className="op3-back" onClick={()=>selectPanel('resumen')}><ChevronLeft size={18}/> Volver al centro</button>
      <span className="op3-overline">DATOS DE FUENTES EXISTENTES · SOLO LECTURA</span>
+     <button type="button" className="op3-back op3-chat-jump"
+      disabled={!scopeCanExecute} onClick={()=>selectPanel('resumen')} title="Ir al chat de OPERATIVA sin perder la sesión"
+      aria-label="Hablar con Operativa"><Send size={16}/> Hablar con Operativa</button>
     </div>
     <h2>{({
-     entidades:'Entidades y conexiones',proyectos:'Proyectos y dependencias',
-     motores:'Motores observados',trabajos:'Trabajos y ejecuciones',
+     control:'Control operativo e inventario vivo',entidades:'Entidades y conexiones',proyectos:'Proyectos y dependencias',
+     motores:'Motores observados',agentes:'Agentes, especialistas y subagentes',trabajos:'Trabajos y ejecuciones',
      evidencias:'Evidencias de ejecución',decisiones:'Estado y revisiones',
      resumen:'Resumen'
     } as Record<View,string>)[view]}</h2>
     <p className="op3-detail-lede">{({
-     entidades:'Empresas realmente devueltas por el Gateway de laboratorio; selector sin concesión de permisos.',
+     control:'Fuentes de agentes, subagentes, motores y ejecuciones. Controles disponibles solo cuando haya un ejecutor autorizado.',
+      entidades:'Empresas realmente devueltas por el Gateway de laboratorio; selector sin concesión de permisos.',
      proyectos:'Proyectos registrados y comprobados en el Gateway de laboratorio; fuente parcial, no inventario global.',
      motores:'Registros, catálogo de diseño FACT-001 y ejecuciones observadas, sin equipararlos.',
+      agentes:'Perfiles definidos en el registro canónico con identidad, jerarquía y actividad separadas; sin inventar agentes activos.',
      trabajos:'Actividad publicada por la fuente autenticada, con acceso a su evidencia.',
      evidencias:'Referencias originales de ejecución; no se generan informes ficticios.',
      decisiones:'Fallos observados; las aprobaciones humanas requieren su propia fuente.',
      resumen:''
     } as Record<View,string>)[view]}</p>
-    {(view==='entidades'||view==='proyectos'||view==='motores')?
+    {view==='control'?(company==='fenix'?<CerebroFleetControlPanel/>:<p className="op3-empty-proof">Control LAB disponible únicamente en Fénix con acceso verificado. Esta empresa o vista global no tiene derechos de control concedidos.</p>):null}
+     {(view==='entidades'||view==='proyectos'||view==='motores')?
       <CerebroOperativaUniverseViews section={view} scope={company} result={ownerUniverse}
-       onCompanyChange={onCompanyChange} onNavigate={selectPanel}
+       activitySource={source} onCompanyChange={onCompanyChange} onNavigate={selectPanel}
+       agentFilter={agentEngineFilter} onClearAgentFilter={()=>setAgentEngineFilter(null)}
        observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
       />:null}
+    {view==='agentes'?(agentRosterPreview&&company==='fenix'?<CerebroRoleAgentRosterLab onShowEngines={(item)=>{
+       setAgentEngineFilter({id:item.id,name:item.name,engine_ids:[...item.engine_ids]});setView('motores');
+      }}/>:<p className="op3-empty-proof">Registro de agentes disponible únicamente en el LAB autenticado de Fénix. Ningún otro contexto obtiene acceso por el selector.</p>):null}
     {(view==='trabajos'||view==='evidencias'||view==='decisiones')?
      <div className="op3-data-lines">
       {((view==='decisiones'?failed:view==='evidencias'?runs.filter(x=>validLink(x)):recentRuns)
@@ -243,7 +289,8 @@ export default function CerebroOperativeCockpitV3({
         GitHub <ExternalLink size={14}/></a>:
         <button type="button" onClick={()=>onOpenRun(run)}>Inspeccionar <ChevronRight size={15}/></button>}
       </div>)}
-      {!showLive?<div className="op3-empty-proof">La fuente no está disponible. No se puede certificar el estado actual.</div>:
+      {source==='CACHED'?<div className="op3-empty-proof">Datos GitHub EN CACHÉ: este listado es histórico, no confirma el estado actual de los trabajos.</div>:null}
+      {!hasSample?<div className="op3-empty-proof">La fuente no está disponible. No se puede certificar el estado actual.</div>:
        !(view==='decisiones'?failed:view==='evidencias'?runs.filter(x=>validLink(x)):recentRuns).length?
         <div className="op3-empty-proof">No hay registros de esta categoría en la última lectura. No es una certificación de ausencia global.</div>:null}
      </div>:null}
@@ -251,7 +298,7 @@ export default function CerebroOperativeCockpitV3({
 
    <nav className="op3-navigation" aria-label="Áreas de Operativa">
     <button className={view==='resumen'?'is-active':''} type="button" onClick={()=>selectPanel('resumen')}><Activity size={20}/><span>Resumen</span></button>
-    {NAV.map(([key,label,Icon])=><button type="button" key={key} className={view===key?'is-active':''}
+    {NAV.filter(([key])=>key!=='agentes'||agentRosterPreview).map(([key,label,Icon])=><button type="button" key={key} className={view===key?'is-active':''}
       onClick={()=>selectPanel(key)} aria-current={view===key?'page':undefined}>
       <Icon size={20}/><span>{label}</span></button>)}
    </nav>

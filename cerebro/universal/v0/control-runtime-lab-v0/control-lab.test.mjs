@@ -1,0 +1,41 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const edge=readFileSync(new URL('./edge.ts',import.meta.url),'utf8');
+const sql=readFileSync(new URL('./migration.sql',import.meta.url),'utf8');
+const proxy=readFileSync(new URL('../../../../api/cerebro-lab-worker-control.ts',import.meta.url),'utf8');
+const client=readFileSync(new URL('../../../../src/cerebroLabWorkerControlApi.ts',import.meta.url),'utf8');
+const ui=readFileSync(new URL('../../../../src/CerebroLabWorkerControlPanel.tsx',import.meta.url),'utf8');
+test('isolated migration creates only new LAB tables, new RPCs and manual paused worker',()=>{
+ assert.match(sql,/create table cerebro_lab_private\.console_worker_control_v0/);
+ assert.match(sql,/create table cerebro_lab_private\.console_worker_audit_v0/);
+ assert.match(sql,/insert into cerebro_lab_private\.console_worker_control_v0/);
+ assert.match(sql,/values\('fenix','LAB-DEMO-001','LAB','PAUSED',3,1,0\)/);
+ assert.match(sql,/enable row level security/);
+ assert.match(sql,/revoke all on function public\.cerebro_operativa_lab_control_rpc_v0/);
+ assert.match(sql,/grant execute on function public\.cerebro_operativa_lab_control_rpc_v0.*to service_role/);
+ assert.doesNotMatch(sql,/drop table|drop function|truncate|delete from|alter table (?!cerebro_lab_private\.console_worker_)/i);
+ assert.doesNotMatch(sql,/staging\.fenixcapital|app\.fenixcapital|fenix-capital-prod/i);
+});
+test('exact worker identity required across SQL, Edge and Preview',()=>{
+ for(const s of [sql,edge,proxy,client,ui])assert.match(s,/LAB-DEMO-001/);
+ assert.match(edge,/OWNER_DENIED/);assert.match(proxy,/OWNER_DENIED/);
+ assert.match(edge,/CARLOS-ADMIN/);assert.match(proxy,/CARLOS-ADMIN/);
+ assert.match(edge,/CONTROL_CONTRACT_DENIED/);assert.match(proxy,/CONTROL_CONTRACT_DENIED/);
+ assert.match(proxy,/VERCEL_ENV!=='preview'/);
+ assert.match(proxy,/CEREBRO_PREPROD_PUBLISHABLE_KEY/);
+ assert.doesNotMatch(proxy,/SUPABASE_SERVICE_ROLE_KEY|GITHUB_TOKEN|CLOUDFLARE_API_TOKEN/);
+});
+test('worker TICK cannot process while paused; mutation is guarded by revision and idempotency',()=>{
+ assert.match(sql,/if p_action='TICK' and next_state='RUNNING' then/);
+ assert.match(sql,/if s\.revision<>p_expected_revision then/);
+ assert.match(sql,/for update/);
+ assert.match(sql,/unique/);
+ assert.match(sql,/after_state/);
+ assert.match(sql,/return jsonb_build_object\('status','APPLIED'/);
+ assert.match(edge,/external_actions_executed:false/);
+ assert.match(edge,/autonomous_scheduling:false/);
+ assert.match(ui,/readLabWorkerState\(\)/);
+ assert.match(ui,/last_receipt_id===r\.data\.receipt_id/);
+ assert.match(ui,/Confirmar una vez/);
+});

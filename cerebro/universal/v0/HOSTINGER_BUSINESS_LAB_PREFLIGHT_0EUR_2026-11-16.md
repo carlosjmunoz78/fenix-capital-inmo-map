@@ -1,0 +1,93 @@
+# CEREBRO · Hostinger Business · Piloto aislado a 0 € adicionales
+
+Fecha: 2026-11-16. Empresa Fénix. Entorno LAB. **No equivale a lanzamiento OPERATIVA PROD**.
+
+## Evidencia existente y verificación
+- Business Web Hosting anual renovado marzo de 2026. Hosting ya pagado; no se autorizan compras, upgrades ni VPS.
+- WordPress real responde con PHP 8.5.12, MariaDB 11.8.9 y WP 7.1.4 mediante lectura; no demuestra acceso hPanel ni recursos libres.
+- Hostinger anuncia apps Node.js 22 y 24 en Business, máximo 5 apps por plan (sujeto a versión); upload ZIP, dominio temporal disponible, crons de hasta 30 min, sin workers siempre activos. Fuentes oficiales:
+  - https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/
+  - https://www.hostinger.com/support/hostinger-node-js-limits-for-web-and-cloud-plans/
+  - https://www.hostinger.com/support/how-to-run-cron-jobs-for-node-js-websites-at-hostinger/
+  - https://www.hostinger.com/support/6976044-parameters-and-limits-of-hosting-plans-in-hostinger/
+
+## Artefacto preparado y probado
+- Paquete `CEREBRO_HOSTINGER_LAB_PREFLIGHT_0EUR.zip`, **4.297 bytes**.
+- SHA256 `b3ac9552058e75a21d6f33b4655dda096c914cd1ca15d1ae4a787a02ce2bd66f`.
+- Contiene `package.json`, `server.mjs`, `test/server.test.mjs`, `LEEME_HOSTINGER.txt` (en raíz del ZIP).
+- Node v22 local: `node --check` PASS y `node --test` **4 PASS, 0 FAIL**; rutas de ejecución, archivos privados y POST rechazados; no hay dependencias ni API externa.
+- Solo endpoint público de prueba `/healthz` con `status=READY`, `environment=LAB`, `operation=READ_ONLY_PREFLIGHT`, `owner_auth_test=NOT_RUN`, `prod_execution=DISABLED`. No credenciales, no usuarios ni conexiones.
+
+## Paso de cuenta necesario
+Abrir https://hpanel.hostinger.com y comprobar en Sitios web → plan Business → recursos:
+1. Número de aplicaciones Node existentes; una plaza libre sin cargo.
+2. CPU y RAM disponibles, ausencia de facturación añadida.
+3. Crear solo sitio Web App temporal si es gratuito y sin tocar la web existente.
+4. Seleccionar Subir archivos → ZIP, Node 22 o 24, framework Other, build None, entry server.mjs, npm start; **NO introducir variables** ni programar cron.
+5. Visitar URL temporal `/healthz`; auditar WordPress y consumo; registrar URL y rollback antes de proceder.
+
+**Conector hPanel:** No disponible. Hostinger Mail accede a correo, no a recursos del hosting. Dos Opera no respondieron. No se ha ejecutado instalación remota.
+
+## Gates y rollback
+Hostinger desplegado: POR AUDITAR. Runner Auth LAB sin Actions: preparado en PR #66, sin ejecutarse live.
+P0-A logout/revocación real: BLOQUEADO; P0-B provider receipt: PARCIAL; P0-C...H pendientes. OPERATIVA PROD: HOLD.
+Rollback del piloto: desactivar/eliminar **solo** Web App temporal sin tocar WordPress, DNS, App, CRM ni planes.
+Coste de suscripción nueva: **0 €**. Consumo real incremental: NO_MEDIDO.
+
+
+## 17. Hostinger Node piloto · DNS de subdominio individual creado en Cloudflare · 16/11/2026
+
+**AUTORIZACIÓN/PROCEDENCIA:** usuario siguió hPanel, subió el ZIP aislado y mostró pantalla de app `cerebro-lab.fenixcapital.es` en Business Web Hosting, Node 22.x, `server.mjs`, `npm`, ninguna variable de entorno; después aportó panel `Detalles del plan` con **IP 92.113.19.11**, Frankfurt, 3072 MB RAM y 2 CPU de hosting. El usuario pidió conexión y permitió revisar los recursos. El panel indica nameservers Cloudflare `harlee.ns.cloudflare.com`, `rene.ns.cloudflare.com`; **NO deben cambiarse**, independientemente de la recomendación de Hostinger. La pantalla de aplicación mostraba `Dominio conectado`, pero esta es una etiqueta de hPanel, no prueba DNS pública ni HTTP.
+
+**INVENTARIO DNS ANTES:** consulta Cloudflare API a cuenta `e39a57e1ac42650ca5a6d5307cf0ac8e`, zona activa `fenixcapital.es` id `a00ec81375b4acb02f9bd6e0fd64942f`: `cerebro-lab.fenixcapital.es` sin registros DNS; wildcard `*.fenixcapital.es` sin A/CNAME. Apex `fenixcapital.es` A **92.113.19.11** ya existente (proxied=true, NO alterado). `app.fenixcapital.es` CNAME `cname.vercel-dns.com` (NO alterado). El dominio mostró `DNS_PROBE_FINISHED_NXDOMAIN` antes del cambio.
+
+**HECHO FÍSICO EN CLOUDFLARE (ÚNICA MUTACIÓN):** se creó exclusivamente el DNS `A cerebro-lab.fenixcapital.es → 92.113.19.11`, `proxied=false` (DNS-only, adecuado para permitir a Hostinger gestionar SSL de la app), TTL=300 s. **ID real del recurso nuevo `91942f6c1a703382f7c93ed969b09093`**. Relectura Cloudflare API posterior confirmó exactamente un registro A coincidente. Sin cambios de nameservers, apex, `www`, `app`, `staging`, MX, Mail, CRM, App, WordPress ni otros registros. Sin suscripción nueva.
+
+**VERIFICACIÓN DISTINTA:** éxito confirmado de escritura/lectura Cloudflare API. La prueba inmediata de resolución pública desde un contenedor auxiliar no resolvió aún y el navegador web tampoco pudo abrir `/healthz`; puede haber propagación o caché NXDOMAIN, y acceso externo de esa herramienta limitado. **NO afirmar que HTTPS, certificado SSL, app Node o endpoint READY funcionen aún.** No cambiar DNS over HTTPS de Opera como solución principal. Verificación pendiente: respuesta pública HTTPS `https://cerebro-lab.fenixcapital.es/healthz` con `status=READY`, sin redirección a WordPress; comprobar despliegues Hostinger/SSL si no responde y que WordPress original sigue normal.
+
+**ROLLBACK ACOTADO Y SEGURO:** si se comprueba error, eliminar únicamente Cloudflare DNS record ID `91942f6c1a703382f7c93ed969b09093` de la zona indicada, tras verificar que sigue teniendo nombre/tipo/valor originales; NO `DELETE` de ningún registro antiguo ni del apex. Hostinger app piloto puede retirarse por separado solo ante decisión; NO es necesario tocar WordPress ni comprar servicios.
+
+**ESTADOS:** `HOSTINGER_PILOT_ZIP_UPLOADED=USER_EVIDENCE`; `HOSTINGER_PLAN_RESOURCES=USER_SCREENSHOT`; `CF_DNS_LAB_A=HECHO_API_READBACK`; `PUBLIC_DNS_RESOLUTION=NO_VERIFICADO`; `HTTPS_HEALTHZ=NO_VERIFICADO`; `P0A_LIVE_AUTH_E2E=BLOCKED`; `OPERATIVA_PROD=HOLD`. Esta es una **app de diagnóstico LAB**, no un motor conectado ni la interfaz OPERATIVA. Coste adicional contratado 0 € en esta operación; coste real de recursos NO_MEDIDO.
+
+
+## V2 · 503 · Corrección preventiva de arranque después de 503 · 16/11/2026
+
+**EVIDENCIA USUARIO:** en `cerebro-lab.fenixcapital.es`, la vista Hostinger → Despliegues mostró `CEREBRO_HOSTINGER_LAB_PREFLIGHT_0EUR.zip`, `Se ha completado`, `Actual`, fecha local `2026-11-16 13:48:57`. Al abrir el host, usuario reportó HTTP **503 Service Unavailable**. Por tanto, **build/deploy figura SUCCESS, runtime HTTP=FAILED**; no inferir `READY`.
+
+**FALLO DE CÓDIGO REPRODUCIDO EN LOCAL:** ZIP original contenía `resolve(process.argv[1]) === fileURLToPath(import.meta.url)` para decidir si arrancar `app.listen`. Cuando Node.js inicia un archivo vía ruta simbólica `hbuilds/current/nodejs/server.mjs`, `process.argv[1]` puede conservar la ruta simbólica pero `import.meta.url` resolver al archivo físico, dando falso y finalizando el proceso sin escuchar, compatible con un HTTP 503. Reproducción exacta en Node v22 del original: al lanzar desde fuera del cwd usando symlink, stdout de arranque VACÍO y proceso termina sin escuchar. **HIPÓTESIS FUERTE, NO CAUSA 503 CONFIRMADA EN HOSTINGER SIN SUS LOGS.**
+
+**CORRECCIÓN V2 SIN ACTIONS:** se preparó ZIP `CEREBRO_HOSTINGER_LAB_PREFLIGHT_0EUR_V2.zip`, 5.593 bytes, SHA-256 `8484198830c537970df17b821f8de4ee2737fed4cb2863b6666823c00cbe594f`. Se reemplazó comparación del entry por `realpathSync(resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))`; scripts, rutas públicas, restricciones, ausencia de secretos y dependencias conservados. Incluye prueba adicional que lanza el archivo entry por symlink y exige HTTP 200 + `READY`. Ejecución local **Node 22 `node --check` PASS, `node --test` 5/5 PASS**; ZIP integrity PASS y archivos en raíz. El artefacto binario se generó y enlazó en conversación, NO está subido al servidor aún.
+
+**PASO HOSTINGER USUARIO:** en la misma Web App → `Despliegues` → `Redistribuir` → `Archivos de origen` → **`Subir nuevos archivos`** (NO `Usar archivos anteriores`) → ZIP V2 → conservar Node 22.x, npm, compilación ninguna, directorio salida vacío, entrada `server.mjs`, variables de entorno ninguna, sin costes → `Redistribuir`. No crear otra web ni alterar DNS. Documentación Hostinger: https://www.hostinger.com/support/how-to-redeploy-a-node-js-application/.
+
+**VERIFICAR:** tras redeploy comprobar `https://cerebro-lab.fenixcapital.es/healthz` devuelve `status=READY`. Si aún 503, ir a `Registros de tiempo de ejecución`, revisar las entradas del último despliegue y `domains/cerebro-lab.fenixcapital.es/hbuilds/current/nodejs/stderr.log` por File Manager. No dar por cierta esta causa mientras no haya logs reales. Hostinger indica que HTTP 503 también puede señalar límite compartido de procesos o memoria: **NUNCA pulsar `Detener procesos en ejecución` global**, pues afectaría a WordPress del mismo Business.
+
+**GATES:** `DNS_A_LAB=HECHO`; `LOCAL_V2_5/5=HECHO`; `HOSTINGER_V2_DEPLOYED=NO`; `HTTPS_READY=NO_VERIFICADO`; `OPERATIVA_PROD=HOLD`. Coste nueva suscripción 0 €; consumo NO_MEDIDO. Rollback V2 si fallara: `Redistribuir` usando ZIP anterior en **esta app aislada exclusivamente**; no borrar DNS/web principal ni registros antiguos. El viejo ZIP puede reproducir el fallo; rollback es de artefacto, no una solución del runtime.
+
+
+## Hostinger Node V3 · runtime no llama listen() en 3 s · 16/11/2026
+
+**ERROR REAL de los Runtime logs aportados por el usuario:** repetido `App did not call listen() within 3 seconds` a las 15:23–15:25 (hora local). Los logs de Hostinger advierten que el patrón `if (require.main === module)` no está soportado para el entry loader; el código V2 todavía protegía `server.listen()` con `process.argv[1]` y `realpathSync`. La causa concreta sigue sin confirmación por trazas internas, pero la **ausencia de llamada a listen() es verificada** y el código llevaba una guarda potencialmente incompatible con invocación por import.
+
+**REPARACIÓN AISLADA DE CÓDIGO (sin tocar PROD):** paquete ZIP `CEREBRO_HOSTINGER_LAB_PREFLIGHT_0EUR_V3.zip`, SHA256 `b073f6dc221648d55b0655ff3a857c357030209442e9a33237fb42f3ba4414f1`, 4.7 KB. `server.mjs` llama inmediatamente y sin condiciones a `server.listen(Number(process.env.PORT || 3000), '0.0.0.0', ...)`, sin guardas de archivo principal, sin espera async y sin dependencias externas. Rutas solo GET/HEAD `/` y `/healthz`, demás 404; ninguna credencial, Supabase, trabajos, cron, proxy, endpoints de ejecución ni APIs. Respuesta health incluye `status=READY` y `probe_version=V3`. Estado PROD siempre HOLD.
+
+**PRUEBA LOCAL REPRODUCIBLE:** `node --check server.mjs` correcto y `node --test test/server.test.mjs` en Node 22: **8 pruebas correctas, 0 fallidas**, incluidos inicio tradicional CLI, import desde cargador sin `process.argv[1]`, symlink y import desde symlink, con HTTP 200. `unzip -t` confirma archivos íntegros en raíz. No se afirma test de Hostinger físico.
+
+**PASO EXTERNO PENDIENTE:** usuario debe usar la Web App existente `cerebro-lab.fenixcapital.es` → Despliegues → Redistribuir → Subir nuevos archivos ZIP V3; mantener entry `server.mjs`, Node 22.x, npm, build None y sin variables; no crear sitio, no cambiar DNS. Validar después nuevos logs contienen `CEREBRO_LAB_V3_HTTP_READY` y `https://cerebro-lab.fenixcapital.es/healthz` devuelve HTTP 200 y V3. Si falla, recabar runtime logs nuevos; no inventar causas ni repetir despliegues sin evidencia. No ejecutar "Stop running processes" global (afecta a WordPress del plan compartido).
+
+**ESTADOS FINALES DE ESTE CORTE:** `HOSTINGER_DNS_A=HECHO_API`; `V2_HOSTINGER_RUNTIME=FAILED_503_WITH_EVIDENCE`; `V3_PACKAGE=HECHO_LOCAL_8_8`; `V3_HOSTINGER_DEPLOYMENT=NO_VERIFICADO`; `V3_HTTPS_READY=NO_VERIFICADO`; `LAB_AUTH_LIVE=BLOCKED`; `OPERATIVA_PROD=HOLD`. Coste adicional de nueva suscripción 0 €, recursos compartidos NO_MEDIDOS. Rollback limitado a `Redistribuir` paquete previo únicamente en app aislada; DNS `cerebro-lab` tiene id `91942f6c1a703382f7c93ed969b09093`, sin cambios en este corte.
+
+
+## Hostinger LAB V3 y frontera privada de Auth (evidencia 16/11/2026)
+
+**HECHO con evidencia del usuario:** el navegador devolvió desde `https://cerebro-lab.fenixcapital.es/healthz`: `{"status":"READY","environment":"LAB","operation":"READ_ONLY_PREFLIGHT","owner_auth_test":"NOT_RUN","prod_execution":"DISABLED","background_jobs":"DISABLED","probe_version":"V3"}`. HOSTINGER_V3_WEBAPP=CONFIRMADO_POR_RESPUESTA_USUARIO; la herramienta externa auxiliar no resuelve ese dominio, por lo que no se documenta como HTTP probe independiente de ChatGPT.
+
+**BACKUP REAL V3 EN GITOPS:** añadido el ZIP exacto bajo `cerebro/universal/v0/hostinger-lab/CEREBRO_HOSTINGER_LAB_PREFLIGHT_0EUR_V3.zip` en el PR #66 DRAFT, con SHA256 `b073f6dc221648d55b0655ff3a857c357030209442e9a33237fb42f3ba4414f1` y Git blob `ae50bedf1d7da674445059a36f1a69aaba6fac24`. El mismo ZIP fue inspeccionado sin credenciales/DB/cron/endpoint ejecutor, y sus fuentes de `server.mjs` y tests se validaron localmente con Node v22: `node --check` OK, `node --test` **8/8 PASS**, `/api/run`, `/.env` y mutaciones responden 404. Se puede extraer desde el ZIP y restaurar exclusivamente la Web App Hostinger LAB; sin necesidad de cambiar DNS o otros servicios.
+
+**HECHO EN SUPABASE LAB (MCP SOLO LECTURA):** proyecto `hnqlnvakzaywtafeiybt` estado `ACTIVE_HEALTHY` región `eu-north-1`. La función `public.cerebro_operativa_session_guard_lab_v0(uuid,uuid)` existe y tiene ACL `postgres,service_role` EXCLUSIVAMENTE; `has_function_privilege(anon)=false`, `has_function_privilege(authenticated)=false`, `has_function_privilege(service_role)=true`. `SECURITY DEFINER` con `search_path=''`, comprueba `auth.sessions` por pareja usuario/sesión y `not_after`. Consulta con dos UUID de prueba inexistentes devolvió `false`. No se ha creado ni borrado ninguna cuenta ni alterado esquema/datos.
+
+**FRONTERA DE SEGURIDAD:** Web App Hostinger = **SONDA PÚBLICA Y ESTÁTICA**, sin secretos ni mecanismo privado. **NO desplegar `security-lab/operativa-no-actions.mjs --live` ni `CEREBRO_LAB_SERVICE_ROLE_KEY` dentro de esa Web App**, ni crear rutas públicas de ejecución. El operador privado YA EXISTE en el PR, pero necesita un proceso aislado realmente privado, gestor seguro de secretos exclusivo LAB, `@supabase/supabase-js` y acceso a red para la prueba efímera. Hostinger Business no se ha acreditado como entorno privado CLI/secret-manager apto para este test. No inventar acceso SSH ni transporte seguro.
+
+**GATE SIGUIENTE P0-A:** en ejecutor PRIVADO autorizado, solo una ejecución controlada de `node cerebro/universal/v0/security-lab/operativa-no-actions.mjs --live`, con variables LAB mediante canal privado (nunca chat/ZIP/GitHub/Hostinger Web App pública). Requiere `PASS_LAB_ISSUER_ONLY`, `TEMP_USER_CLEANUP=SUCCESS`. No reintentar ante error sin comprobar limpieza. Después faltan tests emisor PROD aislado, P0-B recibos reales y P0-C...H según el contrato existente. **OPERATIVA_PROD=HOLD**.
+
+**ESTADOS:** `HOSTINGER_LAB_V3=READY_BY_USER`; `HOSTINGER_ZIP_BACKUP=HECHO_GIT_SHA_VERIFIED`; `LAB_GUARD_GRANTS=HECHO_READ_ONLY`; `LAB_GUARD_FAKE_SESSION=DENIED`; `PRIVATE_AUTH_E2E=NO_EJECUTADO`; `CEREBRO_PUBLIC_EXECUTION=DISABLED`; `PROD=HOLD`. Coste adicional contratado **0 €**; consumo incremental recursos NO_MEDIDO. No cambios PROD, CRM, app, WordPress, DNS, Cloudflare, claves ni main.

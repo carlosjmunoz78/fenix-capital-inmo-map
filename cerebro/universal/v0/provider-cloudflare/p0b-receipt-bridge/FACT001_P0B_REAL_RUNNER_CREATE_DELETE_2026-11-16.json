@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "FACT001_LAB_RUNNER_TWO_JOBS_PROVIDER_READBACK",
+  "observed_date_utc": "2026-11-16",
+  "company_id_literal": "fenix-capital",
+  "canonical_company_registry_mapping_verified": false,
+  "environment": "LAB",
+  "engine_id": "FACT-001",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "d1_database": "cerebro-fact001-recovery-lab-eu",
+  "d1_uuid": "1305f791-7c44-47f9-946b-f330a09c88aa",
+  "target": "cerebro-fact001-managed-lab-rproof261116",
+  "executor": "cerebro-fact001-headless-operator-lab-20261111",
+  "executor_cron": "*/5 * * * *",
+  "executed_by_existing_fact001_runtime": true,
+  "before": {
+    "worker_count": 39,
+    "target_exists": false,
+    "queued_jobs": 0
+  },
+  "create": {
+    "job_id": "FACT001-OPERATIVA-P0B-261116-CREATE-001",
+    "request_id": "FACT001-P0B-261116-CREATE-001",
+    "state": "COMPLETED",
+    "phase": "CREATED_V1_PRIVATE",
+    "attempts": 1,
+    "error_code": null,
+    "terminal_event": "JOB_FINISHED",
+    "recorded_at_ms": 1794855339509,
+    "provider": {
+      "worker_count": 40,
+      "version_id": "10801551-eb14-4ce1-b947-1032cdda565c",
+      "deployment_id": "bdd9dd42-02d2-4a50-b735-d98156838b81",
+      "worker_settings_readback": true,
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "bindings_count": 0,
+      "crons_count": 0
+    },
+    "d1_owned_state": "V1"
+  },
+  "delete": {
+    "job_id": "FACT001-OPERATIVA-P0B-261116-DELETE-001",
+    "request_id": "FACT001-P0B-261116-DELETE-001",
+    "state": "COMPLETED",
+    "phase": "OWNED_WORKER_REMOVED",
+    "attempts": 1,
+    "error_code": null,
+    "terminal_event": "JOB_FINISHED",
+    "recorded_at_ms": 1794855639509,
+    "provider": {
+      "worker_count": 39,
+      "target_absent": true
+    },
+    "d1_owned_state": "DELETED",
+    "d1_current_version_id": null
+  },
+  "after": {
+    "worker_count": 39,
+    "target_exists": false,
+    "remaining_test_worker_count": 0,
+    "total_fact001_completed_jobs": 8
+  },
+  "limitations": {
+    "provider_native_signature_verified": false,
+    "runner_hmac_signature_emitted": false,
+    "durable_new_receipt_table_deployed": false,
+    "company_mapping_verified": false,
+    "owner_gateway_policy_approval_verified": false,
+    "verified_business_outcome": false,
+    "operativa_ui_connected_to_provider_receipts": false,
+    "production_promotion_allowed": false,
+    "consumption_cost_eur_measured": false,
+    "new_subscriptions_eur": 0
+  },
+  "gates": {
+    "P0B_FACT_RUNNER_PROVIDER_LIFECYCLE": "PASS_PHYSICAL_LAB",
+    "P0B_SIGNED_DURABLE_RECEIPT": "NOT_CERTIFIED",
+    "OPERATIVA_PROD": "HOLD"
+  },
+  "rollback": {
+    "target_worker_deleted_by_runner": true,
+    "provider_absence_verified": true,
+    "existing_cloudflare_scripts_preserved": true,
+    "d1_rows_keep_append_only_audit": true
+  }
+}

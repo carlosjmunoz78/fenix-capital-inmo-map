@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "FACT001_P0B_LAB_SIGNED_RECEIPT_CANDIDATE_REAL_EXECUTION",
+  "observed_date_utc": "2026-11-16",
+  "result": "PARTIAL_FAIL_CLOSED_PROD_HOLD",
+  "scope": {
+    "company_id_literal": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "canonical_company_mapping_verified": false,
+    "cloudflare_account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "d1_name": "cerebro-fact001-recovery-lab-eu"
+  },
+  "baseline": {
+    "worker": "cerebro-fact001-headless-operator-lab-20261111",
+    "initial_deployed_version": "543b68e8-cd59-4960-9f17-d66276416389",
+    "original_cron": "*/5 * * * *",
+    "original_secret_values_retrieved": false,
+    "expected_worker_inventory": 39
+  },
+  "changes": {
+    "d1_receipt_table": "fact001_provider_receipts_lab_v0",
+    "d1_receipt_table_created_and_empty": true,
+    "new_diagnostic_table": "fact001_p0b_permission_probe_lab_v0",
+    "new_diagnostic_table_rows": 0,
+    "new_github_code_is_draft_unmerged": true,
+    "signed_runner_trial_version": "a9084da7-1430-4b86-b419-807e45360c3c",
+    "permissions_probe_version": "a8c9415d-8027-463b-b41b-e12446b6aae3",
+    "signer_key_in_cloudflare_secret_text": true,
+    "signer_key_exposed": false
+  },
+  "runtime_trial": {
+    "target": "cerebro-fact001-managed-lab-sig261116a",
+    "create_job_id": "FACT001-OPERATIVA-P0B-261116-SIGNED-CREATE-01",
+    "create_job_status": "COMPLETED",
+    "create_phase": "CREATED_V1_PRIVATE",
+    "delete_job_id": "FACT001-OPERATIVA-P0B-261116-SIGNED-DELETE-01",
+    "delete_job_status": "RECONCILE",
+    "delete_error_code": "EXTERNAL_CHANGE_DETECTED",
+    "created_worker_verified": true,
+    "worker_physically_absent_after_deletion": true,
+    "worker_get_http_404_verified": true,
+    "cloudflare_worker_inventory_trajectory": "39 -> 40 -> 39",
+    "d1_ownership_after_independent_reconciliation": "DELETED",
+    "d1_current_version_id_after_reconciliation": null,
+    "d1_reconciliation_event": "PROVIDER_ABSENCE_RECONCILED",
+    "d1_original_job_error_preserved": true,
+    "signed_durable_receipts_for_test": 0,
+    "signed_receipt_failure_root_cause_verified": false
+  },
+  "permissions_probe": {
+    "provider_actions_permitted": 0,
+    "get_endpoints_planned": 4,
+    "executed_and_durable_response_observed": false,
+    "d1_permission_probe_rows_observed": 0,
+    "token_permissions_verified": false,
+    "reason_for_missing_result": "UNVERIFIED",
+    "deployed_probe_restored_to_baseline": true
+  },
+  "release": {
+    "physical_rollback_to_baseline_verified": true,
+    "current_verified_deployed_version": "543b68e8-cd59-4960-9f17-d66276416389",
+    "deployment_after_probe_rollback_id": "ddcd9e40-fb52-42d1-82a6-f09b01a8fec0",
+    "worker_private": true,
+    "cron_preserved": true,
+    "extra_subscriptions_eur": 0,
+    "provider_resource_consumption_cost_eur_measured": null,
+    "prod_promotion_allowed": false,
+    "operativa_prod": "HOLD"
+  },
+  "next_required_gates": [
+    "Identify factual signed-receipt failure reason without exposing secrets",
+    "Prove private Cloudflare readback auth for the ACTUAL FACT001 Worker token",
+    "Implement and test bounded deletion/readback reconciliation for eventual consistency",
+    "Demonstrate a new signed HMAC receipt persisted and independently verified against original provider job",
+    "Connect authenticated owner Gateway and OPERATIVA UI to verified receipts",
+    "All other security/rollback/OLDvsNEW/PREPROD/finops/tribunal release gates"
+  ]
+}

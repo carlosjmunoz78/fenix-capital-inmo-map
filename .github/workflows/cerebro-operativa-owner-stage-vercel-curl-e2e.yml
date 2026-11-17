@@ -1,0 +1,60 @@
+name: CEREBRO OPERATIVA owner stage E2E via Vercel CLI (NO PROD)
+on:
+  push:
+    branches: [cerebro/universal-control-plane-lab-v0-20261113]
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-operativa-owner-stage-vercel-curl-e2e
+  cancel-in-progress: false
+jobs:
+  smoke:
+    if: contains(github.event.head_commit.message, '[VERIFY_OPERATIVA_STAGE_ONLY]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+    steps:
+      - name: Checkout reviewed DRAFT branch, no token persistence
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Configure Node 24 for read-only E2E
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Verify branch, project and owner-stage-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/cerebro/universal-control-plane-lab-v0-20261113"
+          test "$VERCEL_ORG_ID" = "team_qnh6u1Ofy2WPp0MGEKlyMA50"
+          test "$VERCEL_PROJECT_ID" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
+          node --check cerebro/universal/v0/operativa-ssoprotected-vercel-curl-e2e.mjs
+      - name: Install existing reviewed Vercel CLI only (no deployment)
+        run: npm install --global vercel@65.8.0
+      - name: Run protected stage-only identity/navigation/agent-directory E2E
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$VERCEL_TOKEN" ]; then echo 'BLOCKED: VERCEL_TOKEN reference missing'; exit 2; fi
+          export XDG_DATA_HOME="$RUNNER_TEMP/cerebro-op-stage-vercel-auth"
+          mkdir -p "$XDG_DATA_HOME/com.vercel.cli"
+          chmod 700 "$XDG_DATA_HOME" "$XDG_DATA_HOME/com.vercel.cli"
+          node -e 'const fs=require("node:fs"),p=require("node:path");fs.writeFileSync(p.join(process.env.XDG_DATA_HOME,"com.vercel.cli","auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600});'
+          # Link the exact existing project in this ephemeral runner, without a deploy.
+          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects >/dev/null
+          node -e 'const p=require("./.vercel/project.json");if(p.orgId!==process.env.VERCEL_ORG_ID||p.projectId!==process.env.VERCEL_PROJECT_ID)throw Error("BLOCKED: PROJECT_LINK_MISMATCH")'
+          node cerebro/universal/v0/operativa-ssoprotected-vercel-curl-e2e.mjs
+      - name: Destroy transient authentication on any outcome
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/cerebro-op-stage-vercel-auth" .vercel
+          echo 'TRANSIENT_AUTH_REMOVED; LOCAL_LINK_REMOVED; SSO_STILL_ENABLED; PROD_UNCHANGED'

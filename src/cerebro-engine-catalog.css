@@ -30,3 +30,8 @@
 .op3-engine-placeholder p{max-width:340px;font-size:12px;line-height:1.5}
 @media(max-width:900px){.op3-engine-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.op3-engine-content{grid-template-columns:1fr}.op3-engine-list{max-height:310px}}
 @media(max-width:540px){.op3-engine-summary{grid-template-columns:1fr 1fr}.op3-engine-row em{display:none}.op3-engine-tools select{min-width:100%;width:100%}}
+
+/* Owner-scoped navigation between a documented agent and its linked motors. */
+.op3-agent-engine-filter{display:flex;align-items:center;flex-wrap:wrap;gap:9px;border:1px solid #447991;background:#103747;border-radius:11px;padding:11px 14px;margin:14px 0;color:#e2f5ff}
+.op3-agent-engine-filter strong{font-size:13px}.op3-agent-engine-filter span{font-size:11px;color:#a5d0e4}
+.op3-agent-engine-filter button{border:1px solid #7ccbe7;background:#0c293b;border-radius:8px;color:#effbff;padding:8px 12px;min-height:38px;cursor:pointer}

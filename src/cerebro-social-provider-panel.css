@@ -1,0 +1,15 @@
+.op4-social{padding:15px;border:1px solid #466578;border-radius:12px;background:#0d2330;display:flex;flex-direction:column;gap:12px}
+.op4-social h4{font-size:15px;margin:0}.op4-social p{font-size:12px;color:#b9d5e3;margin:0;line-height:1.5}
+.op4-social-header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center}
+.op4-social-header span{display:flex;gap:5px;align-items:center;font-size:11px;color:#dabd94}
+.op4-social-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.op4-social-item{border:1px solid #345b6e;border-radius:10px;background:#102e3c;padding:11px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.op4-social-item>div:first-child{display:flex;flex-direction:column;gap:7px}
+.op4-social-item strong{color:#ecfaff;font-size:12px;overflow-wrap:anywhere}
+.op4-social-item small{display:flex;gap:7px;align-items:center;font-size:11px;color:#b2d0dc}
+.op4-social-item button{background:#19465b;color:#eefaff;border:1px solid #567d8e;border-radius:7px;min-height:44px;align-self:start;padding:7px 12px;cursor:pointer}
+.op4-social-details{display:flex;flex-direction:column;gap:8px;border-top:1px solid #446175;padding-top:10px}
+.op4-social-details code{overflow-wrap:anywhere;color:#f1dbba}
+.op4-social-details p:last-child{color:#ecd0a0}
+.op4-social-foot{color:#a4c4d0!important}
+@media(max-width:700px){.op4-social-list{grid-template-columns:1fr}}

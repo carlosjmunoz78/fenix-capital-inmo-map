@@ -1,0 +1,418 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "FACT-001",
+  "capability_id": "fact.registry.summary",
+  "environment": "LAB",
+  "version": "0.1.0-lab",
+  "company_id": "SERVER_AUTH_REQUIRED",
+  "sdk_targets": [
+    "Operativa",
+    "JARVIS",
+    "Neuronal",
+    "Browser",
+    "App",
+    "Mobile"
+  ],
+  "registry_source": "cerebro/registry/engine-registry.v1.json",
+  "security": {
+    "server_resolved_actor": true,
+    "deny_by_default": true,
+    "write_execution": false,
+    "trading_access": false,
+    "required_secrets": [],
+    "additional_cost_eur": 0
+  },
+  "jobs": {
+    "uses_existing_JOB001": true,
+    "second_queue": false,
+    "shadow_planner_only": true,
+    "live_adapter_connected": false,
+    "control_metadata_reader": {
+      "source": "EXISTING_SUPABASE_PREPROD",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "function_slug": "cerebro-operativa-job001-read-lab-v0",
+      "deployed_version": 3,
+      "deployment_status": "ACTIVE",
+      "gateway_action": "get_job001_controls",
+      "scope": {
+        "company_id": "fenix",
+        "environment": "LAB",
+        "source_environment": "PREPROD"
+      },
+      "read_only": true,
+      "method": "GET",
+      "authorizes_using": "PROD_OWNER_JWT_SERVER_CONTEXT",
+      "no_scheduler_secret": true,
+      "no_dml": true,
+      "no_dispatch": true,
+      "fields": "COUNTS_ONLY_SANITISED",
+      "latest_provenance": "PREPROD_JOB001_CONTROL_METADATA",
+      "evidence": {
+        "job_control_rows": 20,
+        "external_control_rows": 2,
+        "engine_state_records": 17,
+        "telemetry_rows": 0
+      },
+      "operational_execution_verified": false,
+      "preview_deployment": "dpl_4D9T2JdF2o7Z7EJiyuqzw1CqmXdh",
+      "physical_owner_e2e": "VERIFIED_IN_OPERA_EXISTING_TAB_1381967780",
+      "remote_unauthenticated_probe": "HTTP_401_VERIFIED_GITHUB_CI",
+      "physical_observed_status": "OK",
+      "physical_read_values": {
+        "job_controls": 20,
+        "enabled_controls": 20,
+        "external_controls": 2,
+        "engine_state_records": 17,
+        "telemetry_records": 0,
+        "stale_control_rows": 22
+      },
+      "runtime_execution_verified": false,
+      "auth_gate_fix": "CANONICAL_CONTEXT_SHAPE_WITH_STRICT_CARLOS_ADMIN_AND_EXPLICIT_DENIAL"
+    },
+    "engine_binding_summary": {
+      "state": "IMPLEMENTED_IN_LAB_DEPLOYMENT_AND_CI",
+      "source": "PREPROD_JOB001_CONTROL_METADATA",
+      "action": "get_job001_controls",
+      "per_engine_control_bindings": true,
+      "per_engine_declared_state_bindings": true,
+      "runtime_verified": false,
+      "expected_historical_control_count": 20,
+      "expected_historical_engine_state_records": 17,
+      "expected_telemetry_count": 0,
+      "note": "Historical GREEN in PREPROD is NOT evidence of a running engine."
+    },
+    "cron_observation": {
+      "state": "DEPLOYED_PREPROD_AND_OWNER_E2E_VERIFIED",
+      "source": "PREPROD_PG_CRON_OBSERVATION",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "migration": "cerebro_job001_preprod_pgcron_observation_lab_v0",
+      "public_service_role_rpc": "public.cerebro_job001_pgcron_observation_lab_v0()",
+      "private_definer": "cerebro_lab_private.job001_pgcron_observe_v0()",
+      "active_legacy_pgcron_job_ids": [
+        6,
+        22,
+        23,
+        25
+      ],
+      "active_count_verified": 4,
+      "recent_succeeded_count_verified": 4,
+      "last_e2e_in_opera": "2026-11-13_19:22_UTC",
+      "scope": "SERVICE_ROLE_ONLY_READ_ONLY",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "no_cron_schedule_changed": true,
+      "no_command_or_secret_exposure": true,
+      "master_hostinger_scheduler_verified": false,
+      "job001_runtime_verified": false,
+      "downstream_effect_verified": false
+    },
+    "hostinger_master_observation": {
+      "state": "EXTERNALLY_OBSERVED_NOT_FULL_END_TO_END_CERTIFIED",
+      "source": "SUPABASE_PREPROD_FUNCTION_EDGE_LOGS",
+      "user_agent": "CEREBRO-JOB-001-Hostinger-Master/0.1",
+      "method": "POST",
+      "path": "/functions/v1/cerebro-job001-gateway-preprod",
+      "window": "PREVIOUS_24H_2026-11-13_20:20_UTC",
+      "requests": 1725,
+      "http_200": 1723,
+      "http_500": 2,
+      "last_seen_at": "2026-11-13T20:20:04.661Z",
+      "last_two_hour_window": {
+        "http_200": 144,
+        "http_500": 0
+      },
+      "identity_by_user_agent_only": true,
+      "hostinger_admin_installation_verified": false,
+      "job_results_completed_verified": false
+    },
+    "rpc_observation": {
+      "state": "DEPLOYED_PREPROD_OWNER_E2E_VERIFIED",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "function": "public.cerebro_operativa_job001_rpc_observation_lab_v0()",
+      "edge_reader_version": 5,
+      "stats_reset_at": "2026-08-14T16:57:07.773309Z",
+      "last_owner_e2e_count": 80001,
+      "source": "PREPROD_JOB001_DISPATCH_RPC_STATS",
+      "interpretation": "CUMULATIVE_POSTGREST_SQL_RPC_CALLS_NOT_COMPLETED_JOBS",
+      "service_role_only": true,
+      "raw_sql_exposed": false
+    },
+    "seo_downstream_state": {
+      "state": "DEGRADED_PARTIAL_REAL_ACTIVITY",
+      "supervisor": "DEGRADED",
+      "supervisor_last_measured": "2026-11-02T06:00:09Z",
+      "expansion_jobs_done_total": 270,
+      "expansion_jobs_done_updated_in_last_day": 1,
+      "expansion_jobs_queued_historical": 1360,
+      "wordpress_staging_status": {
+        "endpoint": "https://staging.fenixcapital.es/wp-json/fenix-guard/v1/cerebro/status",
+        "plugin_version": "1.0.0-rc22",
+        "mode": "observer",
+        "operations_locked": true,
+        "pending_jobs": 0,
+        "checks_ok": true,
+        "verified_at": "2026-11-13T20:41:47Z"
+      },
+      "wordpress_bridge_last_24h": {
+        "not_ready_http200": 93,
+        "dispatched_without_http": 2
+      },
+      "automatic_publication_authorized": false
+    },
+    "seo_backlog_observation": {
+      "state": "PREPROD_READER_DEPLOYED_OWNER_E2E_PENDING",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "rpc": "public.cerebro_operativa_seo_backlog_summary_lab_v0()",
+      "preprod_edge_slug": "cerebro-operativa-job001-read-lab-v0",
+      "preprod_edge_version": 6,
+      "company_id": "fenix",
+      "source_company_id": "FENIX_CAPITAL",
+      "engine_id": "SEO-001",
+      "environment": "PREPROD",
+      "last_observed_counts": {
+        "total": 1666,
+        "queued": 1360,
+        "done": 270,
+        "waiting_prerequisites": 33,
+        "cancelled": 3
+      },
+      "last_supervisor_state": "DEGRADED",
+      "last_supervisor_measured_at": "2026-11-02T06:00:09Z",
+      "staging_probe_performed": false,
+      "seo_dispatch_authorized": false,
+      "downstream_publication_verified": false,
+      "note": "DONE rows not proof of external publication; queued jobs cannot be launched while staging suspended"
+    }
+  },
+  "backup": {
+    "method": "unchanged_git_parent",
+    "sha": "a51dd14eac11f02424dce5db426346b041c1824f"
+  },
+  "rollback": {
+    "method": "revert_isolated_branch_commit",
+    "production_changed": false
+  },
+  "promotion": {
+    "allowed": false,
+    "reason": "STAGING_JOB13_BLOCKED_BUT_OTHER_LEGACY_STAGING_CAPABLE_FUNCTIONS_NOT_AUDITED; PROD_CANARY_AND_GLOBAL_ROLLBACK_PENDING"
+  },
+  "work_activity": {
+    "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
+    "adapter": "cerebro/universal/v0/github-work-activity-reader.mjs",
+    "method": "list_work_activity",
+    "state": "IMPLEMENTED_LAB_CI_VERIFIED_OWNER_E2E_PENDING",
+    "statuses": [
+      "LIVE",
+      "CACHED",
+      "UNAVAILABLE"
+    ],
+    "not_JOB001": true,
+    "no_new_queue": true,
+    "public_fallback": {
+      "transport": "FIXED_PUBLIC_GITHUB_REST_GET_ONCE",
+      "endpoint": "https://api.github.com/repos/carlosjmunoz78/fenix-capital-inmo-map/actions/runs?per_page=30",
+      "auth": "NO_GITHUB_TOKEN",
+      "max_runs": 30,
+      "when": "EXISTING_AUTHENTICATED_ACTIVITY_SOURCE_UNAVAILABLE_OR_STALE",
+      "owner_authorized_by_gateway": true,
+      "result_provenance": "PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK",
+      "job_level_telemetry": "UNAVAILABLE",
+      "rate_limited_fail_closed": true,
+      "state": "LAB_CI_VERIFIED_REMOTE_OWNER_E2E_PENDING"
+    }
+  },
+  "interface_autoconnect": {
+    "adapter": "cerebro/universal/v0/interface-autoconnect.mjs",
+    "supported_contracts": [
+      "OPERATIVA",
+      "JARVIS",
+      "NEURONAL",
+      "NAVEGADOR",
+      "APP",
+      "MOBILE"
+    ],
+    "state": "CONTRACT_TESTED_NOT_ALL_PHYSICAL_UI_CONNECTED",
+    "role_authority": "SERVER_SESSION_RESOLVER",
+    "allowed_environment": "LAB",
+    "writes": false
+  },
+  "owner_universe": {
+    "capability": "list_owner_sources",
+    "adapter": "cerebro/universal/v0/owner-universe-reader.mjs",
+    "read_endpoint": "cerebro-console-gateway-v36-followups-lab/owner-universe?company_id=fenix",
+    "source": "EXISTING_OWNER_UNIVERSE_LAB",
+    "company_scope": "fenix",
+    "environment": "LAB",
+    "query_method": "GET",
+    "output": "BOUNDED_METADATA_COUNTS_ONLY",
+    "execution": false,
+    "prod_authorized": false,
+    "production_changes": false,
+    "tests": "33/33_CI_PASS_AT_2026_11_13_BEFORE_DOC_UPDATE",
+    "physical_owner_e2e": "PENDING",
+    "record_absence_note": "Existing JOB001 telemetry and company engine state tables in inspected Supabase project returned no rows at 2026-11-13; this does not certify runtime zero elsewhere."
+  },
+  "lab_command_preview": {
+    "action": "submit_command",
+    "feature": "FACT-001_DRY_RUN_ONLY",
+    "preview_endpoint": "/api/cerebro-universal-preview",
+    "operational_execution": false,
+    "no_write_executor": true,
+    "durable_audit": true,
+    "idempotency_persisted": true,
+    "physical_owner_e2e": "VERIFIED_SINGLE_TAB_UNIQUE_DB_ROW_NO_EXECUTION",
+    "cost_additional_eur": 0,
+    "promotion_authorized": false,
+    "human_exception_codes": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ],
+    "qa_auto_trigger_status": "OWNER_APPROVED_ONCE_ONLY_PREVIEW_FLAG_REMOVED_AFTER_RESPONSE"
+  },
+  "preview_stable_alias": {
+    "host": "fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app",
+    "environment": "preview",
+    "target_production": false,
+    "sso_anonymous_denial": "VERIFIED_GITHUB_ACTIONS_HTTP_302",
+    "owner_authenticated_latest_e2e": "PENDING_CURRENT_DEPLOYMENT_OWNER_VIEW",
+    "mapped_deployment": "dpl_4Vc2a2DNHNnt79x26VgiRofADq9V",
+    "mapped_source_sha": "5ffc05ffeb50f7a644197d914eff36c4f741a9b7",
+    "vercel_alias_assignment": "VERIFIED_LIST_DEPLOYMENT_ALIASES",
+    "no_new_tabs": true,
+    "project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc",
+    "visual_polish_verified": "SCREENSHOT_EXISTING_TAB_1381967780",
+    "opened_new_tabs": false,
+    "deployment_status": "READY"
+  },
+  "lab_durable_audit": {
+    "state": "DEPLOYED_PREPROD_AND_OWNER_E2E_VERIFIED",
+    "project_id": "hnqlnvakzaywtafeiybt",
+    "table": "public.cerebro_operativa_lab_audit_v0",
+    "migration": "cerebro_operativa_lab_durable_fact_dryrun_audit_v0",
+    "edge_function": "cerebro-operativa-lab-audit-v0",
+    "edge_version": 1,
+    "action": "FACT001_DRY_RUN_AUDIT",
+    "company_id": "fenix",
+    "environment": "LAB",
+    "engine_id": "FACT-001",
+    "executed": false,
+    "prod_authorized": false,
+    "rls_enabled": true,
+    "anon_read": false,
+    "authenticated_read": false,
+    "service_role_write": true,
+    "physical_proof": {
+      "owner_tab": 1381967780,
+      "at_utc": "2026-11-13 19:36:23",
+      "audit_rows": 1,
+      "replay_same_key_rows": 1,
+      "unsafe_rows": 0,
+      "policy_decision": "DRY_RUN_VALIDATED"
+    },
+    "source": "PREPROD_OWNER_VERIFIED_DURABLE_AUDIT",
+    "rollback_documented": true,
+    "full_physical_prod_rollback_verified": false,
+    "no_job_queue_or_runtime_execution": true,
+    "one_shot_query_cleaned_verified": true,
+    "repeated_navigation_db_rows": 1,
+    "visible_owner_success_message_verified": true
+  },
+  "external_dependencies": {
+    "wordpress_staging": {
+      "host": "staging.fenixcapital.es",
+      "status": "SUSPENDED_BY_OWNER_UNTIL_FURTHER_NOTICE",
+      "owner_notice_date": "2026-11-13",
+      "can_probe": false,
+      "can_publish": false,
+      "can_modify": false,
+      "can_reactivate_automatically": false,
+      "requires_explicit_owner_reactivation": true,
+      "impact": "WP_BRIDGE_PREPROD_AND_SEO_PUBLICATION_E2E_BLOCKED",
+      "scope": "No requests, browser navigation, changes, repairs, or gate bypass for staging until owner lifts suspension.",
+      "observation_prior_to_suspension": "Last known plugin status was observer/operations_locked; not current health proof.",
+      "gateway_policy": {
+        "state": "IMPLEMENTED_GATEWAY_LAB_TESTED",
+        "policy_version": "STAGING_SUSPENSION_2026_11_13",
+        "implementation": "cerebro/universal/v0/dependency-policy.mjs",
+        "action": "get_dependency_status",
+        "operation_assessment": "assess_operation",
+        "all_six_sdk_contract_types": true,
+        "no_staging_probes": true,
+        "dynamic_external_target_rejected": true,
+        "physical_preview_owner_e2e": "PENDING_DEPLOYMENT",
+        "legacy_hostinger_scheduler_enforcement": "NOT_VERIFIED",
+        "prod_mutation": false
+      },
+      "legacy_external_checks_after_suspension": {
+        "status": "OBSERVED_NOT_STOPPED",
+        "environment": "PREPROD",
+        "source": "seo_cerebro_wp_bridge_health_preprod",
+        "check_kind": "CORE_GUARD_CEREBRO_STATUS",
+        "reference_window_start_utc": "2026-11-13T21:00:00Z",
+        "recorded_not_ready_count": 4,
+        "timestamps_utc": [
+          "2026-11-13T21:05:03Z",
+          "2026-11-13T21:20:04Z",
+          "2026-11-13T21:35:03Z",
+          "2026-11-13T21:50:04Z"
+        ],
+        "has_dispatched_at": true,
+        "last_http_status": 200,
+        "external_actual_network_not_independently_proven": true,
+        "scheduler_origin": "UNIDENTIFIED",
+        "actions_taken": "READ_ONLY_INVENTORY_NO_CRON_MODIFICATION",
+        "gates": {
+          "staging_probes_authorized": false,
+          "legacy_execution_enforced": false,
+          "requires_targeted_dependency_audit": true
+        }
+      },
+      "legacy_job13_probe_guard": {
+        "status": "APPLIED_AND_PHYSICALLY_VERIFIED_PREPROD",
+        "project": "hnqlnvakzaywtafeiybt",
+        "target_function": "public.seo001_probe_wp_bridge_preprod()",
+        "original_snapshot_path": "cerebro/universal/v0/staging-suspension/original-probe-snapshot.sql",
+        "original_snapshot_md5": "078cdfaa118c036e9548ffb8b73d77c",
+        "parallel_candidate_path": "cerebro/universal/v0/staging-suspension/parallel-blocked-probe-lab.sql",
+        "parallel_function": "public.seo001_probe_wp_bridge_suspended_lab_v0()",
+        "protected_dispatch_branch": "public.cerebro_job001_dispatch_preprod(13)",
+        "preprod_migration": "seo001_owner_staging_suspension_guard_preprod_20261113",
+        "expected_response": "BLOCKED_DEPENDENCY",
+        "network_calls": false,
+        "db_write_calls": false,
+        "physical_test": {
+          "job13_returned": "BLOCKED_DEPENDENCY",
+          "request_id": null,
+          "target_url": null,
+          "side_effects": false,
+          "probe_rows_before": 5,
+          "probe_rows_after": 5,
+          "last_probe": "2026-11-13T22:05:03Z",
+          "sample_checked_at": "2026-11-13T22:12:22Z"
+        },
+        "other_dispatch_cases_changed": false,
+        "rollback_requires_owner_reactivation": true,
+        "rollback_original_runtime_tested": false,
+        "note": "A targeted job13 branch is blocked. Other legacy functions referring to staging must be individually inventoried; not a global staging network guarantee."
+      },
+      "legacy_other_footprint": {
+        "status": "INVENTORIED_NOT_ALL_BLOCKED",
+        "other_functions_with_literal_staging_target": 11,
+        "direct_http_capable_examples": [
+          "seo001_dispatch_page_quality_for_city_v2_preprod",
+          "seo001_dispatch_render_qa_preprod",
+          "seo001_wp_staging_http_preprod"
+        ],
+        "active_direct_pgcron_references_to_these_examples": 0,
+        "possible_indirect_callers": "NOT_FULLY_AUDITED",
+        "no_bulk_changes": true
+      }
+    }
+  }
+}
