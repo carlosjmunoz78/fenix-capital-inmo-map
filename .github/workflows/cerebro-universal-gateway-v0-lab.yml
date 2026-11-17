@@ -40,8 +40,10 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run build
-      - name: Verify actual server-side 1138-record federated directory and secure paging
+      - name: Verify source-backed 2506-record directory, tenant guard and paging
         run: node --experimental-strip-types cerebro/universal/v0/operativa-agent-source-runtime.acceptance.mjs
+      - name: Verify PROD owner-only GET and preview-only origin gates without real credentials
+        run: node --experimental-strip-types cerebro/universal/v0/operativa-owner-prod-readonly.acceptance.mjs
       - name: Browser test · owner fast reads in synthetic protected Preview (no real backend calls)
         env:
           VITE_FENIX_ENV: test
