@@ -15,7 +15,13 @@ import {materializeRoles,registrySummary} from '../cerebro/media-studio/v2/regis
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
 type Res={status:(n:number)=>Res;setHeader:(name:string,val:string)=>void;json:(body:unknown)=>void};
-const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const PREVIEW_HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const PROD_HOST='app.fenixcapital.es';
+export function verifiedReadOnlyMode(host:string,env:string|undefined){
+ if(env==='production'&&host===PROD_HOST)return 'OWNER_PROD_READONLY' as const;
+ if(env==='preview'&&PREVIEW_HOST.test(host))return 'PREVIEW_ONLY_SERVER_VERIFIED' as const;
+ return null;
+}
 const OWNER='https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context';
 const head=(h:H)=>Array.isArray(h)?h[0]||'':h||'';
 const fail=(res:Res,code:number,reason:string)=>res.status(code).json({status:'UNAVAILABLE',reason,executed:false});
@@ -216,7 +222,8 @@ export default async function handler(req:Req,res:Res){
  res.setHeader('X-Content-Type-Options','nosniff');
  res.setHeader('X-Frame-Options','DENY');
  const host=head(req.headers.host).toLowerCase();
- if(process.env.VERCEL_ENV!=='preview'||!HOST.test(host))return fail(res,403,'PREVIEW_ONLY');
+ const mode=verifiedReadOnlyMode(host,process.env.VERCEL_ENV);
+ if(mode===null)return fail(res,403,'HOST_ENV_SCOPE_DENIED');
  if(req.method!=='GET')return fail(res,405,'READ_ONLY');
  const origin=head(req.headers.origin);
  if(origin&&origin!=='https://'+host)return fail(res,403,'ORIGIN_DENIED');
@@ -234,6 +241,6 @@ export default async function handler(req:Req,res:Res){
   const ctx=body?.context&&typeof body.context==='object'?body.context:body;
   if(body?.ok===false||ctx?.actor_code!=='CARLOS-ADMIN')return fail(res,403,'OWNER_NOT_VERIFIED');
  }catch{return fail(res,503,'OWNER_RESOLVER_UNAVAILABLE')}
- try{return res.status(200).json(queryCerebroAgentDirectoryV0(query))}
+ try{return res.status(200).json({...queryCerebroAgentDirectoryV0(query),transport:mode})}
  catch{return fail(res,503,'REGISTRY_SOURCE_INVALID')}
 }

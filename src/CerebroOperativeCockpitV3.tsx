@@ -121,7 +121,11 @@ export default function CerebroOperativeCockpitV3({
   }
   return [...engines.entries()].sort((a,b)=>b[1].count-a[1].count);
  },[runs]);
- const agentRosterPreview=typeof window!=='undefined'&&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)&&new URLSearchParams(window.location.search).get('visual_lab')==='cockpit-v3';
+ const agentRosterPreview=typeof window!=='undefined'&&(
+  window.location.hostname==='app.fenixcapital.es'||
+  (/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)&&
+   new URLSearchParams(window.location.search).get('visual_lab')==='cockpit-v3'));
+ // The server still enforces OWNER session and Fénix tenant; this flag only reveals navigation.
   const canSend=scopeCanExecute&&!snapshot.sending; // Inventory reads have an independent owner-authenticated Preview source.
  return <main className={`op3-root op3-${status}`} aria-label={typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?'Centro de mando operativo (acceso privado)':'Centro de mando operativo (ensayo)'}>
   <div className="op3-backplate" aria-hidden="true"/>

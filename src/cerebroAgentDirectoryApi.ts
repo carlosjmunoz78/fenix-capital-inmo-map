@@ -7,7 +7,7 @@ export type AgentDirectoryRecord={
 };
 export type AgentDirectoryResponse={
  status:'OK';company_id:'fenix';coverage:'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS';
- transport:'PREVIEW_ONLY_SERVER_VERIFIED';read_only:true;executed:false;
+ transport:'PREVIEW_ONLY_SERVER_VERIFIED'|'OWNER_PROD_READONLY';read_only:true;executed:false;
  active_agents_verified:false;subagent_instances_verified:false;
  counts:{known_agent_roles:number;registered_logical_subagent_roles:number;media_studio_source_roles:number;facebook_source_components:number;seo_source_profiles:number;instagram_source_components:number;linkedin_source_components:number;instagram_department_roles:number;subagent_templates_not_instances:number;
  total_runtime_instances:null;unindexed_sources_possible:boolean};
@@ -17,11 +17,14 @@ export type AgentDirectoryResponse={
 export type AgentDirectoryResult={kind:'ready'|'denied'|'unavailable';data:AgentDirectoryResponse|null;reason:string};
 export type AgentDirectoryFilters={offset:number;limit:number;kind:'AGENT_ROLE'|'SUBAGENT_ROLE'|'SUBAGENT_TEMPLATE'|'ALL';
  family:'ALL'|'ENGINEERING'|'REVENUE_SALES'|'SOCIAL_FACEBOOK'|'MEDIA_STUDIO'|'SEO_ENTERPRISE'|'SOCIAL_INSTAGRAM'|'SOCIAL_LINKEDIN'|'INSTAGRAM_DEPARTMENTS';q:string};
-const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const PREVIEW_HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal?:AbortSignal):Promise<AgentDirectoryResult>{
  const unavailable=(kind:AgentDirectoryResult['kind'],reason:string):AgentDirectoryResult=>({kind,data:null,reason});
- if(typeof window==='undefined'||!HOST.test(window.location.hostname)||
-  new URLSearchParams(window.location.search).get('visual_lab')!=='cockpit-v3')return unavailable('denied','PREVIEW_ONLY');
+ if(typeof window==='undefined')return unavailable('denied','BROWSER_REQUIRED');
+ const host=window.location.hostname,prod=host==='app.fenixcapital.es';
+ if(!prod&&(!PREVIEW_HOST.test(host)||new URLSearchParams(window.location.search).get('visual_lab')!=='cockpit-v3'))
+  return unavailable('denied','OWNER_SCOPE_REQUIRED');
+ const transport=prod?'OWNER_PROD_READONLY':'PREVIEW_ONLY_SERVER_VERIFIED';
  try{
   const {data:{session}}=await supabase.auth.getSession();
   if(!session?.access_token)return unavailable('denied','OWNER_SESSION_REQUIRED');
@@ -33,7 +36,7 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
   if(r.status!==200)return unavailable('unavailable','DIRECTORY_SOURCE_UNAVAILABLE');
   const data=await r.json() as AgentDirectoryResponse;
   if(data.status!=='OK'||data.company_id!=='fenix'||data.coverage!=='PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS'||
-   data.transport!=='PREVIEW_ONLY_SERVER_VERIFIED'||data.read_only!==true||data.executed!==false||
+   data.transport!==transport||data.read_only!==true||data.executed!==false||
    data.active_agents_verified!==false||data.subagent_instances_verified!==false||
    data.counts?.total_runtime_instances!==null||
    !Array.isArray(data.records)||data.records.length>filters.limit||
