@@ -1,0 +1,1 @@
+# FACT-001 NIA parallel lab\n\nExact read-only snapshot of 4 original FACT modules (taken from Cloudflare 2026-11-17) with separate NIA-only patch to the main module. No secrets or edits to original Cloudflare Worker. New NIA private queue branch is additive; existing UMS queue logic remains verbatim. Before promotion: verify old/new parity and rollback.\n
