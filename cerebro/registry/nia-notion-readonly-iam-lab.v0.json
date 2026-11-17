@@ -1,18 +1,18 @@
 {
   "schema_version": "0.1.0",
   "document_type": "NIA_NOTION_READONLY_LAB_IAM_CANDIDATE",
-  "status": "PENDING_PROVIDER_SCOPE_AND_SECRET",
+  "status": "LAB_PAGE_AND_BLOCK_READ_PROOF_PASS",
   "alias_es": "NIA · Lectura exclusiva de documentación en LAB",
   "company_id": "fenix",
   "engine_id": "ACTGW-001",
   "environment": "PREPROD",
   "lab_environment": "CEREBRO-NIA-LAB",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "notion_integration": {
     "name": "CEREBRO NIA · Lectura LAB",
     "bot_id": "41b81b1a-756d-8132-b0d6-0027f800e898",
     "exists": true,
-    "capabilities": "USER_CONFIRMED_READ_ONLY_NOT_API_VERIFIED"
+    "capabilities": "USER_CONFIRMED_READ_ONLY_AND_GET_PASS_WRITE_DENIAL_NOT_TESTED"
   },
   "allowed_page_ids": [
     "41a81b1a756d815ab877f0d264a6a0d4"
@@ -20,9 +20,9 @@
   "capability": "notion.nia.discover.read",
   "credential_ref_id": "credref:nia-notion-readonly-lab",
   "secret_name": "CEREBRO_NIA_NOTION_READ_TOKEN",
-  "secret_store": "GITHUB_ACTIONS_ENVIRONMENT_SECRET",
+  "secret_store": "CLOUDFLARE_WORKER_SECRET",
   "secret_consumers": [
-    "nia-private-scope-proof-lab"
+    "cerebro-nia-notion-proof-lab"
   ],
   "rights": {
     "read_content": true,
@@ -51,14 +51,34 @@
   "state": {
     "bot_exists_verified": true,
     "page_shared_user_confirmed": true,
-    "secret_configured": "NOT_VERIFIED",
-    "bot_page_access_verified": false,
+    "secret_configured": "VERIFIED_ENCRYPTED_CLOUDFLARE_SECRET_NAME_AND_TYPE",
+    "bot_page_access_verified": true,
     "gateway_live_connected": false,
-    "notion_ai_invocation_supported": "NOT_EVIDENCED"
+    "notion_ai_invocation_supported": "NOT_EVIDENCED",
+    "bot_blocks_access_verified": true,
+    "provider_write_denial_verified": false,
+    "queue_trigger_cleaned": true
   },
   "rollback": "Remove only this LAB secret and optional binding; do not revoke or alter existing FACT-001 or Fénix Notion Bridge integrations.",
   "references": [
     "https://app.notion.com/p/41a81b1a756d815ab877f0d264a6a0d4",
-    "https://app.notion.com/p/41a81b1a756d81ba8a0ffafe84554824"
-  ]
+    "https://app.notion.com/p/41a81b1a756d81ba8a0ffafe84554824",
+    "https://developers.cloudflare.com/workers/runtime-apis/request/"
+  ],
+  "evidence": {
+    "date_utc": "2026-11-17",
+    "service": "cerebro-nia-notion-proof-lab",
+    "proof": [
+      "NIA_CLOUDFLARE_PAGE_READ=PASS",
+      "NIA_CLOUDFLARE_BLOCK_READ=PASS",
+      "NIA_PRIVATE_QUEUE_GATE=PASS_DEDICATED_NOTION_TOKEN_READONLY"
+    ],
+    "queue_temp_deleted": true,
+    "workers_dev": false,
+    "preview_urls": false,
+    "crons": 0,
+    "enabled": false,
+    "original_secret_value_exposed": false,
+    "notion_ai_invocation": false
+  }
 }

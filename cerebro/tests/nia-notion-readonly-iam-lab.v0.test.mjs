@@ -10,7 +10,7 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.notion_integration.bot_id,'41b81b1a-756d-8132-b0d6-0027f800e898');
  assert.deepEqual(candidate.allowed_page_ids,['41a81b1a756d815ab877f0d264a6a0d4']);
  assert.equal(candidate.secret_name,'CEREBRO_NIA_NOTION_READ_TOKEN');
- assert.equal(candidate.secret_store,'GITHUB_ACTIONS_ENVIRONMENT_SECRET');
+ assert.equal(candidate.secret_store,'CLOUDFLARE_WORKER_SECRET');
  assert.equal(candidate.credential_ref_id,'credref:nia-notion-readonly-lab');
  assert.equal(candidate.rights.read_content,true);
  for(const [key,value] of Object.entries(candidate.rights))if(key!=='read_content')assert.equal(value,false);
@@ -19,8 +19,11 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.execution_policy.automated_ai_sessions,false);
  assert.equal(candidate.execution_policy.prod_write,false);
  assert.equal(candidate.state.gateway_live_connected,false);
- assert.equal(candidate.state.bot_page_access_verified,false);
- assert.equal(candidate.state.secret_configured,'NOT_VERIFIED');
+ assert.equal(candidate.state.bot_page_access_verified,true);
+ assert.equal(candidate.state.bot_blocks_access_verified,true);
+ assert.equal(candidate.state.provider_write_denial_verified,false);
+ assert.equal(candidate.state.queue_trigger_cleaned,true);
+ assert.equal(candidate.state.secret_configured,'VERIFIED_ENCRYPTED_CLOUDFLARE_SECRET_NAME_AND_TYPE');
 });
 test('NIA IAM candidate cannot contain secret values',()=>{
  const text=JSON.stringify(candidate);
