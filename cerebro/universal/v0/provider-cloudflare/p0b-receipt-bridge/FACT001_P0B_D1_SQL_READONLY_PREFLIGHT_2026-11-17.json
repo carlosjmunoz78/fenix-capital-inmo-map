@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "FACT001_P0B_LIVE_CLOUDFLARE_D1_READ_ONLY_SQL_PREFLIGHT",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "performed_on": "2026-11-17",
+  "database": "cerebro-fact001-recovery-lab-eu",
+  "database_id": "1305f791-7c44-47f9-946b-f330a09c88aa",
+  "operations_performed": [
+    "EXPLAIN QUERY PLAN (INSERT SELECT ON CONFLICT DO NOTHING RETURNING)",
+    "EXPLAIN QUERY PLAN (receipt lookup by job_id)",
+    "EXPLAIN QUERY PLAN (FACT job lookup by id)",
+    "EXPLAIN QUERY PLAN (JOB_FINISHED event lookup)",
+    "SELECT sqlite_master object existence"
+  ],
+  "writes_executed": 0,
+  "read_results": {
+    "signed_ledger_insert_sql_parses": true,
+    "ledger_insert_query_plan": [
+      "SEARCH j USING INDEX sqlite_autoindex_fact001_cf_command_jobs_v1_3 (idempotency_key=?)",
+      "SCAN e EXISTS"
+    ],
+    "receipt_reader_sql_parses": true,
+    "receipt_lookup_index": "sqlite_autoindex_fact001_provider_receipts_lab_v0_2",
+    "job_reader_sql_parses": true,
+    "job_lookup_index": "sqlite_autoindex_fact001_cf_command_jobs_v1_1",
+    "terminal_event_reader_sql_parses": true,
+    "terminal_event_query_plan": "SCAN fact001_cf_command_events_v1",
+    "receipt_table": true,
+    "receipt_update_immutable_trigger": true,
+    "receipt_delete_immutable_trigger": true,
+    "receipt_observed_index": true
+  },
+  "caveats": [
+    "EXPLAIN QUERY PLAN proves D1 parses and plans the exact SQL shape, but does not insert a receipt, authenticate a signature, validate trigger behavior, or prove the provider completed a job.",
+    "No new provider routes read-only token exists; prior live probe of existing worker token returned GET routes HTTP 403.",
+    "Terminal event lookup is a table scan. Existing data small; possible performance optimization only after measuring impact and preserving change gates."
+  ],
+  "signed_receipt_count_at_start": 0,
+  "prod_promotion_allowed": false,
+  "additional_subscriptions_eur": 0,
+  "cloudflare_cost_measured": false
+}
