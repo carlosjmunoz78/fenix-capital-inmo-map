@@ -101,7 +101,7 @@
     "console_scoped_token_expiry": "2026-12-01T00:00:00Z",
     "console_prod_autonomous_enabled": false
   },
-  "rollback": "Remove only this LAB secret and optional binding; do not revoke or alter existing FACT-001 or Fénix Notion Bridge integrations.",
+  "rollback": "Console real: redeploy the four original v36 files saved under cerebro/backups/console-gateway-v36-20261117, verify_jwt=false; validate no-auth 401, then live owner smoke. FACT/NIA bindings/Secrets remain intact. This does not delete any existing integration.",
   "references": [
     "https://app.notion.com/p/41a81b1a756d815ab877f0d264a6a0d4",
     "https://app.notion.com/p/41a81b1a756d81ba8a0ffafe84554824",

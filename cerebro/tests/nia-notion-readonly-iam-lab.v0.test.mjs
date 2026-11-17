@@ -36,6 +36,15 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.evidence.console_lab.qa_queue_deleted,true);
  assert.equal(candidate.evidence.console_lab.main_worker_queue_handler_removed,true);
  assert.equal(candidate.evidence.console_lab.console_ui_frontend_unchanged,true);
+ assert.equal(candidate.state.console_backend_integration_deployed,true);
+ assert.equal(candidate.state.console_backend_actual_version,37);
+ assert.equal(candidate.state.console_backend_canary_rollback_verified,true);
+ assert.equal(candidate.state.console_backend_unauth_smoke_verified,true);
+ assert.equal(candidate.state.console_authenticated_owner_request_verified,false);
+ assert.equal(candidate.state.console_durable_actor_audit_verified,false);
+ assert.equal(candidate.state.console_frontend_modified,false);
+ assert.equal(candidate.evidence.console_backend_20261117.intent_parser_cases_passed,14);
+ assert.equal(candidate.evidence.console_backend_20261117.queue_http_authenticated_proof,'QUEUE_HTTP_AUTH_PASS');
 
  assert.equal(candidate.state.nia_ai_session_started,false);
  assert.equal(candidate.evidence.central_fact.legacy_bindings_preserved,16);
@@ -56,7 +65,7 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.atomic_replay_ledger_verified,true);
  assert.equal(candidate.state.atomic_ledger_binding_present,true);
  assert.equal(candidate.state.signed_dispatch_synthetic_lab_verified,true);
- assert.equal(candidate.state.central_issuer_real_signature_verified,false);
+ assert.equal(candidate.state.central_issuer_real_signature_verified,true);
  assert.equal(candidate.evidence.atomic_ledger.physical_gate,'NIA_NONCE_PHYSICAL_GATE=PASS');
  assert.equal(candidate.evidence.atomic_ledger.checks_passed,8);
  assert.equal(candidate.evidence.atomic_ledger.d1_database_added,false);
