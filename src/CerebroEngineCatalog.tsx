@@ -8,9 +8,14 @@ import './cerebro-engine-catalog.css';
 type Mode='all'|'observed'|'registered'|'factory';
 type Props={sourceReady:boolean;factoryReady:boolean;engines:UniverseEngine[];factoryCatalog:FactoryEngine[];
  scaffolded:FactoryDirectory[];observed:{id:string;count:number;running:number}[];scope:UniverseCompanyRequest;
- activitySource:'LIVE'|'CACHED'|'UNAVAILABLE'};
+ activitySource:'LIVE'|'CACHED'|'UNAVAILABLE';agentFilter?:AgentEngineFilter|null;onClearAgentFilter?:()=>void};
+export type AgentEngineFilter={id:string;name:string;engine_ids:string[]};
 const records=registry.engines;
-export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,factoryCatalog,scaffolded,observed,scope,activitySource}:Props){
+const plainMotor=(purpose:string)=>{
+ const text=purpose.replace(/^Consolidar /i,'Reúne y organiza ').replace(/^Crear /i,'Prepara ').replace(/^Implementar /i,'Pone en marcha ').replace(/^Adoptar /i,'Organiza ').trim();
+ return text.length>230?text.slice(0,227)+'…':text;
+};
+export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,factoryCatalog,scaffolded,observed,scope,activitySource,agentFilter,onClearAgentFilter}:Props){
  const[mode,setMode]=useState<Mode>('all');
  const[query,setQuery]=useState('');
  const[selected,setSelected]=useState<string|null>(null);
@@ -22,13 +27,14 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
  const list=useMemo(()=>{
   const q=query.trim().toLocaleLowerCase('es-ES');
   return records.filter(row=>{
+   if(agentFilter&&!agentFilter.engine_ids.includes(row.engine_id))return false;
    if(mode==='observed'&&!observedById.has(row.engine_id))return false;
    if(mode==='registered'&&!byId.has(row.engine_id))return false;
    if(mode==='factory'&&!designs.has(row.engine_id)&&!structures.has(row.engine_id))return false;
    return !q||[row.engine_id,row.name,row.purpose,row.tools,row.layer].some(value=>value.toLocaleLowerCase('es-ES').includes(q));
   });
- },[mode,query,observedById,byId,designs,structures]);
- const chosen=selected?records.find(row=>row.engine_id===selected):null;
+ },[mode,query,agentFilter,observedById,byId,designs,structures]);
+ const chosen=selected?records.find(row=>row.engine_id===selected):agentFilter?.engine_ids.length?records.find(row=>row.engine_id===agentFilter.engine_ids[0]):null;
  const active=chosen?byId.get(chosen.engine_id):undefined;
  const design=chosen?designs.get(chosen.engine_id):undefined;
  const run=chosen?observedById.get(chosen.engine_id):undefined;
@@ -47,6 +53,9 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
       'Sin muestra verificable; no implica cero motores'}</span></div>
   </div>
   <CerebroUniversalOperativaLabPanel company={scope}/>
+  {agentFilter?<div className="op3-agent-engine-filter" role="status"><strong>Motores vinculados a {agentFilter.name} · {agentFilter.id}</strong>
+   <span>{agentFilter.engine_ids.length} vínculos en el registro. La asociación no acredita ejecución ni permisos.</span>
+   <button type="button" onClick={onClearAgentFilter}>Ver los {records.length} motores del catálogo general</button></div>:null}
   <p className="op3-source-note">El diseño histórico de septiembre de 2026 NO certifica el estado actual. Los registros de producción, las dependencias y la capacidad de ejecutar requieren evidencias independientes.</p>
   <div className="op3-engine-tools">
    <label htmlFor="op3-engine-mode">Mostrar</label>
@@ -66,7 +75,8 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
        'Workflow GitHub observado · motor no certificado':'Workflow en caché · estado actual desconocido':
       structures.has(row.engine_id)?'Estructura GitOps · runtime sin verificar':'Definido · no certifica ejecución';
      return <button type="button" key={row.engine_id} className={'op3-engine-row '+(selected===row.engine_id?'is-selected':'')}
-      aria-pressed={selected===row.engine_id} onClick={()=>setSelected(row.engine_id)}>
+      aria-pressed={selected===row.engine_id} onClick={()=>setSelected(row.engine_id)}
+      title={'En palabras sencillas: '+plainMotor(row.purpose)} aria-label={row.engine_id+' · '+row.name+' · '+plainMotor(row.purpose)}>
       <Cpu size={17}/><span><strong>{row.engine_id}</strong><small>{row.name}</small></span>
       <em>{state}</em><ChevronRight size={15}/>
      </button>;
@@ -78,7 +88,9 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
    </div>
    <aside className="op3-engine-detail" aria-label="Ficha de motor">
     {chosen?<><div className="op3-engine-detail-title"><Cpu size={24}/><div><small>{chosen.layer} · {chosen.engine_id}</small><h3>{chosen.name}</h3></div></div>
-     <div className="op3-engine-fact"><strong>Función definida</strong><p>{chosen.purpose}</p></div>
+     <div className="op3-engine-fact"><strong>¿Para qué sirve? · explicado de forma clara</strong><p>{plainMotor(chosen.purpose)}</p>
+      <small>La descripción se deriva del propósito documentado; no confirma que el motor esté ejecutándose.</small></div>
+     <div className="op3-engine-fact"><strong>Propósito técnico registrado</strong><p>{chosen.purpose}</p></div>
      <div className="op3-engine-fact"><strong>Tecnología y herramientas previstas</strong><p>{chosen.tools}</p></div>
      <div className="op3-engine-fact"><strong>Situación histórica documentada</strong><p>{chosen.historical_description}</p><small>Septiembre de 2026 · NO es una lectura PROD actual</small></div>
      <div className="op3-engine-fact"><strong>Aspectos pendientes del diseño</strong><p>{chosen.missing}</p></div>

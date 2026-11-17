@@ -9,6 +9,7 @@ import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
 import CerebroFleetControlPanel from './CerebroFleetControlPanel';
 import CerebroRoleAgentRosterLab from './CerebroRoleAgentRosterLab';
+import type {AgentEngineFilter} from './CerebroEngineCatalog';
 import CerebroAudioDiagnostics from './CerebroAudioDiagnostics';
 import './cerebro-operative-cockpit-v3.css';
 
@@ -86,6 +87,7 @@ export default function CerebroOperativeCockpitV3({
  company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,operatorAnswer,labProposal,onConfirmLabProposal,onCancelLabProposal,children
 }:Props){
  const[view,setView]=useState<View>(initialOperativaPreviewPanel);
+ const[agentEngineFilter,setAgentEngineFilter]=useState<AgentEngineFilter|null>(null);
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
  const queued=useMemo(()=>runs.reduce((n,r)=>n+realPending(r),0),[runs]);
  const failed=useMemo(()=>runs.filter(isFailed),[runs]);
@@ -108,7 +110,7 @@ export default function CerebroOperativeCockpitV3({
   if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();if(scopeCanExecute)onSubmit()}
  }
  const recentRuns=runs.slice(0,14);
- const selectPanel=(next:View)=>setView(next);
+ const selectPanel=(next:View)=>{if(next==='motores')setAgentEngineFilter(null);setView(next)};
  const modules=useMemo(()=>{
   const engines=new Map<string,{count:number;running:number}>();
   for(const run of runs){
@@ -265,9 +267,12 @@ export default function CerebroOperativeCockpitV3({
      {(view==='entidades'||view==='proyectos'||view==='motores')?
       <CerebroOperativaUniverseViews section={view} scope={company} result={ownerUniverse}
        activitySource={source} onCompanyChange={onCompanyChange} onNavigate={selectPanel}
+       agentFilter={agentEngineFilter} onClearAgentFilter={()=>setAgentEngineFilter(null)}
        observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
       />:null}
-    {view==='agentes'?(agentRosterPreview&&company==='fenix'?<CerebroRoleAgentRosterLab/>:<p className="op3-empty-proof">Registro de agentes disponible únicamente en el LAB autenticado de Fénix. Ningún otro contexto obtiene acceso por el selector.</p>):null}
+    {view==='agentes'?(agentRosterPreview&&company==='fenix'?<CerebroRoleAgentRosterLab onShowEngines={(item)=>{
+       setAgentEngineFilter({id:item.id,name:item.name,engine_ids:[...item.engine_ids]});setView('motores');
+      }}/>:<p className="op3-empty-proof">Registro de agentes disponible únicamente en el LAB autenticado de Fénix. Ningún otro contexto obtiene acceso por el selector.</p>):null}
     {(view==='trabajos'||view==='evidencias'||view==='decisiones')?
      <div className="op3-data-lines">
       {((view==='decisiones'?failed:view==='evidencias'?runs.filter(x=>validLink(x)):recentRuns)
