@@ -1,0 +1,1941 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "SEO001_191_ROLE_TEMPLATES_SOURCED_V1",
+  "source_repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "source_branch": "cerebro/seo-enterprise-family-staging-contract-v1-20261105",
+  "source_head_sha": "b4bbe8a4043f45821d0825e3aab846370c4530f8",
+  "sources": [
+    {
+      "path": "cerebro/seo-enterprise/v2/seo-specialist-role-roster-v2.json",
+      "sha": "b6d44b99376609557e62c99e4231b9e8a7512b61"
+    },
+    {
+      "path": "cerebro/seo-enterprise/v2/organization.manifest.json",
+      "sha": "b7cefcabd71a18c541dcde2c82cbfffa2f784da7"
+    }
+  ],
+  "engine_id": "SEO-001",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "status": "SOURCE_ROSTER_ROLE_TEMPLATES_ONLY",
+  "counts": {
+    "families": 8,
+    "departments": 32,
+    "total_roles": 191,
+    "specialist_subagent_templates": 141,
+    "independently_iam_verified": 0
+  },
+  "entries": [
+    {
+      "id": "SEO-PF01:DIRECTOR",
+      "name": "Dirección · Dirección estratégica SEO",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia Dirección estratégica SEO.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF01:SUPERVISOR",
+      "name": "Supervisión · Dirección estratégica SEO",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia Dirección estratégica SEO.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF02:DIRECTOR",
+      "name": "Dirección · Investigación y posicionamiento",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia Investigación y posicionamiento.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF02:SUPERVISOR",
+      "name": "Supervisión · Investigación y posicionamiento",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia Investigación y posicionamiento.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF03:DIRECTOR",
+      "name": "Dirección · Ingeniería SEO avanzada",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia Ingeniería SEO avanzada.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF03:SUPERVISOR",
+      "name": "Supervisión · Ingeniería SEO avanzada",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia Ingeniería SEO avanzada.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF04:DIRECTOR",
+      "name": "Dirección · Copywriting y producción editorial",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia Copywriting y producción editorial.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF04:SUPERVISOR",
+      "name": "Supervisión · Copywriting y producción editorial",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia Copywriting y producción editorial.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF05:DIRECTOR",
+      "name": "Dirección · SEO local y autoridad",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia SEO local y autoridad.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF05:SUPERVISOR",
+      "name": "Supervisión · SEO local y autoridad",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia SEO local y autoridad.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF06:DIRECTOR",
+      "name": "Dirección · Experiencia web y conversión",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia Experiencia web y conversión.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF06:SUPERVISOR",
+      "name": "Supervisión · Experiencia web y conversión",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia Experiencia web y conversión.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF07:DIRECTOR",
+      "name": "Dirección · Nuevas superficies de búsqueda",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia Nuevas superficies de búsqueda.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF07:SUPERVISOR",
+      "name": "Supervisión · Nuevas superficies de búsqueda",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia Nuevas superficies de búsqueda.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF08:DIRECTOR",
+      "name": "Dirección · Datos, operaciones y mejora",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Coordina la estrategia y prioridades de la familia Datos, operaciones y mejora.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-PF08:SUPERVISOR",
+      "name": "Supervisión · Datos, operaciones y mejora",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": null,
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Revisa la calidad y cumplimiento del trabajo de la familia Datos, operaciones y mejora.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D01:DEPARTMENT_HEAD",
+      "name": "Responsable · Estrategia y dirección",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Organiza el departamento Estrategia y dirección dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D01:SPECIALIST:01",
+      "name": "estrategia y objetivos",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D01:DEPARTMENT_HEAD",
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de estrategia y objetivos para el departamento Estrategia y dirección.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D01:SPECIALIST:02",
+      "name": "forecast y escenarios",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D01:DEPARTMENT_HEAD",
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de forecast y escenarios para el departamento Estrategia y dirección.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D01:SPECIALIST:03",
+      "name": "presupuesto orgánico",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D01:DEPARTMENT_HEAD",
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de presupuesto orgánico para el departamento Estrategia y dirección.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D01:SPECIALIST:04",
+      "name": "gobierno multiempresa",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D01:DEPARTMENT_HEAD",
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de gobierno multiempresa para el departamento Estrategia y dirección.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D02:DEPARTMENT_HEAD",
+      "name": "Responsable · Inteligencia de mercado",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Organiza el departamento Inteligencia de mercado dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D02:SPECIALIST:01",
+      "name": "TAM/SAM/SOM",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D02:DEPARTMENT_HEAD",
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de TAM/SAM/SOM para el departamento Inteligencia de mercado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D02:SPECIALIST:02",
+      "name": "inteligencia territorial",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D02:DEPARTMENT_HEAD",
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de inteligencia territorial para el departamento Inteligencia de mercado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D02:SPECIALIST:03",
+      "name": "demanda y estacionalidad",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D02:DEPARTMENT_HEAD",
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de demanda y estacionalidad para el departamento Inteligencia de mercado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D02:SPECIALIST:04",
+      "name": "señales de mercado",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D02:DEPARTMENT_HEAD",
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de señales de mercado para el departamento Inteligencia de mercado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D03:DEPARTMENT_HEAD",
+      "name": "Responsable · Investigación de clientes y buyer personas",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Organiza el departamento Investigación de clientes y buyer personas dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D03:SPECIALIST:01",
+      "name": "buyer persona B2C",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D03:DEPARTMENT_HEAD",
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de buyer persona B2C para el departamento Investigación de clientes y buyer personas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D03:SPECIALIST:02",
+      "name": "buyer persona B2B",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D03:DEPARTMENT_HEAD",
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de buyer persona B2B para el departamento Investigación de clientes y buyer personas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D03:SPECIALIST:03",
+      "name": "jobs-to-be-done",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D03:DEPARTMENT_HEAD",
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de jobs-to-be-done para el departamento Investigación de clientes y buyer personas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D03:SPECIALIST:04",
+      "name": "entrevista y consentimiento",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D03:DEPARTMENT_HEAD",
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de entrevista y consentimiento para el departamento Investigación de clientes y buyer personas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D04:DEPARTMENT_HEAD",
+      "name": "Responsable · Crecimiento, priorización y rentabilidad",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Organiza el departamento Crecimiento, priorización y rentabilidad dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D04:SPECIALIST:01",
+      "name": "priorización RICE/ICE",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D04:DEPARTMENT_HEAD",
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de priorización RICE/ICE para el departamento Crecimiento, priorización y rentabilidad.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D04:SPECIALIST:02",
+      "name": "coste de oportunidad",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D04:DEPARTMENT_HEAD",
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de coste de oportunidad para el departamento Crecimiento, priorización y rentabilidad.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D04:SPECIALIST:03",
+      "name": "ROI SEO",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D04:DEPARTMENT_HEAD",
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de ROI SEO para el departamento Crecimiento, priorización y rentabilidad.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D04:SPECIALIST:04",
+      "name": "secuenciación",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D04:DEPARTMENT_HEAD",
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "purpose_plain": "Realiza la especialidad de secuenciación para el departamento Crecimiento, priorización y rentabilidad.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D05:DEPARTMENT_HEAD",
+      "name": "Responsable · Keyword research e intención",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Organiza el departamento Keyword research e intención dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D05:SPECIALIST:01",
+      "name": "keyword seeds",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D05:DEPARTMENT_HEAD",
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de keyword seeds para el departamento Keyword research e intención.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D05:SPECIALIST:02",
+      "name": "long-tail",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D05:DEPARTMENT_HEAD",
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de long-tail para el departamento Keyword research e intención.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D05:SPECIALIST:03",
+      "name": "búsqueda e intención",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D05:DEPARTMENT_HEAD",
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de búsqueda e intención para el departamento Keyword research e intención.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D05:SPECIALIST:04",
+      "name": "clustering por negocio",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D05:DEPARTMENT_HEAD",
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de clustering por negocio para el departamento Keyword research e intención.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D05:SPECIALIST:05",
+      "name": "búsqueda local",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D05:DEPARTMENT_HEAD",
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de búsqueda local para el departamento Keyword research e intención.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D06:DEPARTMENT_HEAD",
+      "name": "Responsable · Análisis SERP y formatos",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Organiza el departamento Análisis SERP y formatos dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D06:SPECIALIST:01",
+      "name": "features SERP",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D06:DEPARTMENT_HEAD",
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de features SERP para el departamento Análisis SERP y formatos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D06:SPECIALIST:02",
+      "name": "map pack",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D06:DEPARTMENT_HEAD",
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de map pack para el departamento Análisis SERP y formatos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D06:SPECIALIST:03",
+      "name": "AI Overviews",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D06:DEPARTMENT_HEAD",
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de AI Overviews para el departamento Análisis SERP y formatos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D06:SPECIALIST:04",
+      "name": "People Also Ask",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D06:DEPARTMENT_HEAD",
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de People Also Ask para el departamento Análisis SERP y formatos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D06:SPECIALIST:05",
+      "name": "SERP histórica",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D06:DEPARTMENT_HEAD",
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de SERP histórica para el departamento Análisis SERP y formatos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D07:DEPARTMENT_HEAD",
+      "name": "Responsable · Competencia, gaps y oportunidades",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Organiza el departamento Competencia, gaps y oportunidades dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D07:SPECIALIST:01",
+      "name": "gap keywords",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D07:DEPARTMENT_HEAD",
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de gap keywords para el departamento Competencia, gaps y oportunidades.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D07:SPECIALIST:02",
+      "name": "content gap",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D07:DEPARTMENT_HEAD",
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de content gap para el departamento Competencia, gaps y oportunidades.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D07:SPECIALIST:03",
+      "name": "competidores locales",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D07:DEPARTMENT_HEAD",
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de competidores locales para el departamento Competencia, gaps y oportunidades.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D07:SPECIALIST:04",
+      "name": "share of search",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D07:DEPARTMENT_HEAD",
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de share of search para el departamento Competencia, gaps y oportunidades.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D08:DEPARTMENT_HEAD",
+      "name": "Responsable · Arquitectura semántica, clusters y anticanibalización",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Organiza el departamento Arquitectura semántica, clusters y anticanibalización dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D08:SPECIALIST:01",
+      "name": "entity graph",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D08:DEPARTMENT_HEAD",
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de entity graph para el departamento Arquitectura semántica, clusters y anticanibalización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D08:SPECIALIST:02",
+      "name": "clusters",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D08:DEPARTMENT_HEAD",
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de clusters para el departamento Arquitectura semántica, clusters y anticanibalización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D08:SPECIALIST:03",
+      "name": "mapa keyword-URL",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D08:DEPARTMENT_HEAD",
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de mapa keyword-URL para el departamento Arquitectura semántica, clusters y anticanibalización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D08:SPECIALIST:04",
+      "name": "canibalización",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D08:DEPARTMENT_HEAD",
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de canibalización para el departamento Arquitectura semántica, clusters y anticanibalización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D08:SPECIALIST:05",
+      "name": "redirección sin pérdida de URL",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D08:DEPARTMENT_HEAD",
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "purpose_plain": "Realiza la especialidad de redirección sin pérdida de URL para el departamento Arquitectura semántica, clusters y anticanibalización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D09:DEPARTMENT_HEAD",
+      "name": "Responsable · Rastreo, indexación y canonicals",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Organiza el departamento Rastreo, indexación y canonicals dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D09:SPECIALIST:01",
+      "name": "robots y sitemap",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D09:DEPARTMENT_HEAD",
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de robots y sitemap para el departamento Rastreo, indexación y canonicals.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D09:SPECIALIST:02",
+      "name": "rastreo y logs",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D09:DEPARTMENT_HEAD",
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de rastreo y logs para el departamento Rastreo, indexación y canonicals.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D09:SPECIALIST:03",
+      "name": "canonical y noindex",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D09:DEPARTMENT_HEAD",
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de canonical y noindex para el departamento Rastreo, indexación y canonicals.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D09:SPECIALIST:04",
+      "name": "indexación GSC",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D09:DEPARTMENT_HEAD",
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de indexación GSC para el departamento Rastreo, indexación y canonicals.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D09:SPECIALIST:05",
+      "name": "redirecciones 301/410",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D09:DEPARTMENT_HEAD",
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de redirecciones 301/410 para el departamento Rastreo, indexación y canonicals.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D10:DEPARTMENT_HEAD",
+      "name": "Responsable · JavaScript, renderizado y SEO técnico avanzado",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Organiza el departamento JavaScript, renderizado y SEO técnico avanzado dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D10:SPECIALIST:01",
+      "name": "SSR/CSR/hidratación",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D10:DEPARTMENT_HEAD",
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de SSR/CSR/hidratación para el departamento JavaScript, renderizado y SEO técnico avanzado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D10:SPECIALIST:02",
+      "name": "renderizado Googlebot",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D10:DEPARTMENT_HEAD",
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de renderizado Googlebot para el departamento JavaScript, renderizado y SEO técnico avanzado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D10:SPECIALIST:03",
+      "name": "JS lazy loading",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D10:DEPARTMENT_HEAD",
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de JS lazy loading para el departamento JavaScript, renderizado y SEO técnico avanzado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D10:SPECIALIST:04",
+      "name": "crawl budget",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D10:DEPARTMENT_HEAD",
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de crawl budget para el departamento JavaScript, renderizado y SEO técnico avanzado.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D11:DEPARTMENT_HEAD",
+      "name": "Responsable · Arquitectura web, taxonomías y enlazado interno",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Organiza el departamento Arquitectura web, taxonomías y enlazado interno dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D11:SPECIALIST:01",
+      "name": "taxonomías",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D11:DEPARTMENT_HEAD",
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de taxonomías para el departamento Arquitectura web, taxonomías y enlazado interno.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D11:SPECIALIST:02",
+      "name": "IA web",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D11:DEPARTMENT_HEAD",
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de IA web para el departamento Arquitectura web, taxonomías y enlazado interno.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D11:SPECIALIST:03",
+      "name": "breadcrumbs",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D11:DEPARTMENT_HEAD",
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de breadcrumbs para el departamento Arquitectura web, taxonomías y enlazado interno.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D11:SPECIALIST:04",
+      "name": "enlaces internos",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D11:DEPARTMENT_HEAD",
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de enlaces internos para el departamento Arquitectura web, taxonomías y enlazado interno.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D11:SPECIALIST:05",
+      "name": "orphan pages",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D11:DEPARTMENT_HEAD",
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de orphan pages para el departamento Arquitectura web, taxonomías y enlazado interno.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D12:DEPARTMENT_HEAD",
+      "name": "Responsable · Datos estructurados, entidades y búsqueda enriquecida",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Organiza el departamento Datos estructurados, entidades y búsqueda enriquecida dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D12:SPECIALIST:01",
+      "name": "Schema.org JSON-LD",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D12:DEPARTMENT_HEAD",
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de Schema.org JSON-LD para el departamento Datos estructurados, entidades y búsqueda enriquecida.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D12:SPECIALIST:02",
+      "name": "validación rich results",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D12:DEPARTMENT_HEAD",
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de validación rich results para el departamento Datos estructurados, entidades y búsqueda enriquecida.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D12:SPECIALIST:03",
+      "name": "entidades sameAs",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D12:DEPARTMENT_HEAD",
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de entidades sameAs para el departamento Datos estructurados, entidades y búsqueda enriquecida.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D12:SPECIALIST:04",
+      "name": "datos financieros sin engaños",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D12:DEPARTMENT_HEAD",
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "purpose_plain": "Realiza la especialidad de datos financieros sin engaños para el departamento Datos estructurados, entidades y búsqueda enriquecida.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D13:DEPARTMENT_HEAD",
+      "name": "Responsable · SEO copywriting y contenido",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Organiza el departamento SEO copywriting y contenido dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D13:SPECIALIST:01",
+      "name": "copy SEO landing",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D13:DEPARTMENT_HEAD",
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de copy SEO landing para el departamento SEO copywriting y contenido.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D13:SPECIALIST:02",
+      "name": "artículos/pillar/FAQ",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D13:DEPARTMENT_HEAD",
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de artículos/pillar/FAQ para el departamento SEO copywriting y contenido.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D13:SPECIALIST:03",
+      "name": "guías y descargables",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D13:DEPARTMENT_HEAD",
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de guías y descargables para el departamento SEO copywriting y contenido.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D13:SPECIALIST:04",
+      "name": "metadatos y snippets",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D13:DEPARTMENT_HEAD",
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de metadatos y snippets para el departamento SEO copywriting y contenido.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D14:DEPARTMENT_HEAD",
+      "name": "Responsable · Copywriting persuasivo y de conversión",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Organiza el departamento Copywriting persuasivo y de conversión dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D14:SPECIALIST:01",
+      "name": "copy persuasivo B2B/B2C",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D14:DEPARTMENT_HEAD",
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de copy persuasivo B2B/B2C para el departamento Copywriting persuasivo y de conversión.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D14:SPECIALIST:02",
+      "name": "ofertas hipotecarias YMYL",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D14:DEPARTMENT_HEAD",
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de ofertas hipotecarias YMYL para el departamento Copywriting persuasivo y de conversión.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D14:SPECIALIST:03",
+      "name": "email captación",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D14:DEPARTMENT_HEAD",
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de email captación para el departamento Copywriting persuasivo y de conversión.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D14:SPECIALIST:04",
+      "name": "newsletter",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D14:DEPARTMENT_HEAD",
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de newsletter para el departamento Copywriting persuasivo y de conversión.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D14:SPECIALIST:05",
+      "name": "guiones",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D14:DEPARTMENT_HEAD",
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de guiones para el departamento Copywriting persuasivo y de conversión.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D14:SPECIALIST:06",
+      "name": "comparativas",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D14:DEPARTMENT_HEAD",
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de comparativas para el departamento Copywriting persuasivo y de conversión.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D15:DEPARTMENT_HEAD",
+      "name": "Responsable · UX writing y microcopy",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Organiza el departamento UX writing y microcopy dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D15:SPECIALIST:01",
+      "name": "microcopy formularios",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D15:DEPARTMENT_HEAD",
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de microcopy formularios para el departamento UX writing y microcopy.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D15:SPECIALIST:02",
+      "name": "consentimiento claro",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D15:DEPARTMENT_HEAD",
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de consentimiento claro para el departamento UX writing y microcopy.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D15:SPECIALIST:03",
+      "name": "mensajes de error",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D15:DEPARTMENT_HEAD",
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de mensajes de error para el departamento UX writing y microcopy.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D15:SPECIALIST:04",
+      "name": "CTA",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D15:DEPARTMENT_HEAD",
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de CTA para el departamento UX writing y microcopy.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D15:SPECIALIST:05",
+      "name": "copy accesible",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D15:DEPARTMENT_HEAD",
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de copy accesible para el departamento UX writing y microcopy.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D16:DEPARTMENT_HEAD",
+      "name": "Responsable · Investigación, edición, fact-checking y autoridad editorial",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Organiza el departamento Investigación, edición, fact-checking y autoridad editorial dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D16:SPECIALIST:01",
+      "name": "fact-checking hipotecario",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D16:DEPARTMENT_HEAD",
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de fact-checking hipotecario para el departamento Investigación, edición, fact-checking y autoridad editorial.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D16:SPECIALIST:02",
+      "name": "investigación editorial",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D16:DEPARTMENT_HEAD",
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de investigación editorial para el departamento Investigación, edición, fact-checking y autoridad editorial.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D16:SPECIALIST:03",
+      "name": "revisión por pares",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D16:DEPARTMENT_HEAD",
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de revisión por pares para el departamento Investigación, edición, fact-checking y autoridad editorial.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D16:SPECIALIST:04",
+      "name": "citas fuentes",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D16:DEPARTMENT_HEAD",
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de citas fuentes para el departamento Investigación, edición, fact-checking y autoridad editorial.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D16:SPECIALIST:05",
+      "name": "tono de marca",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D16:DEPARTMENT_HEAD",
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "purpose_plain": "Realiza la especialidad de tono de marca para el departamento Investigación, edición, fact-checking y autoridad editorial.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D17:DEPARTMENT_HEAD",
+      "name": "Responsable · Google Business Profile y SEO local",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Organiza el departamento Google Business Profile y SEO local dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D17:SPECIALIST:01",
+      "name": "GBP categorías/servicios",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D17:DEPARTMENT_HEAD",
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de GBP categorías/servicios para el departamento Google Business Profile y SEO local.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D17:SPECIALIST:02",
+      "name": "SEO local Córdoba",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D17:DEPARTMENT_HEAD",
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de SEO local Córdoba para el departamento Google Business Profile y SEO local.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D17:SPECIALIST:03",
+      "name": "map pack",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D17:DEPARTMENT_HEAD",
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de map pack para el departamento Google Business Profile y SEO local.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D17:SPECIALIST:04",
+      "name": "citaciones locales",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D17:DEPARTMENT_HEAD",
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de citaciones locales para el departamento Google Business Profile y SEO local.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D18:DEPARTMENT_HEAD",
+      "name": "Responsable · Reputación, reseñas y NAP",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Organiza el departamento Reputación, reseñas y NAP dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D18:SPECIALIST:01",
+      "name": "reseñas legítimas",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D18:DEPARTMENT_HEAD",
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de reseñas legítimas para el departamento Reputación, reseñas y NAP.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D18:SPECIALIST:02",
+      "name": "NAP",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D18:DEPARTMENT_HEAD",
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de NAP para el departamento Reputación, reseñas y NAP.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D18:SPECIALIST:03",
+      "name": "reputación",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D18:DEPARTMENT_HEAD",
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de reputación para el departamento Reputación, reseñas y NAP.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D18:SPECIALIST:04",
+      "name": "confianza y testimonios verificables",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D18:DEPARTMENT_HEAD",
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de confianza y testimonios verificables para el departamento Reputación, reseñas y NAP.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D19:DEPARTMENT_HEAD",
+      "name": "Responsable · Digital PR, relaciones y enlaces legítimos",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Organiza el departamento Digital PR, relaciones y enlaces legítimos dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D19:SPECIALIST:01",
+      "name": "PR digital ética",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D19:DEPARTMENT_HEAD",
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de PR digital ética para el departamento Digital PR, relaciones y enlaces legítimos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D19:SPECIALIST:02",
+      "name": "menciones de marca",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D19:DEPARTMENT_HEAD",
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de menciones de marca para el departamento Digital PR, relaciones y enlaces legítimos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D19:SPECIALIST:03",
+      "name": "enlaces editoriales legítimos",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D19:DEPARTMENT_HEAD",
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de enlaces editoriales legítimos para el departamento Digital PR, relaciones y enlaces legítimos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D19:SPECIALIST:04",
+      "name": "prohibición spam de enlaces",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D19:DEPARTMENT_HEAD",
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de prohibición spam de enlaces para el departamento Digital PR, relaciones y enlaces legítimos.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D20:DEPARTMENT_HEAD",
+      "name": "Responsable · SEO internacional, multilingüe y geográfico",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Organiza el departamento SEO internacional, multilingüe y geográfico dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D20:SPECIALIST:01",
+      "name": "hreflang",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D20:DEPARTMENT_HEAD",
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de hreflang para el departamento SEO internacional, multilingüe y geográfico.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D20:SPECIALIST:02",
+      "name": "español multirregional",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D20:DEPARTMENT_HEAD",
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de español multirregional para el departamento SEO internacional, multilingüe y geográfico.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D20:SPECIALIST:03",
+      "name": "expansión geográfica",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D20:DEPARTMENT_HEAD",
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de expansión geográfica para el departamento SEO internacional, multilingüe y geográfico.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D20:SPECIALIST:04",
+      "name": "localización y legalidad",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D20:DEPARTMENT_HEAD",
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "purpose_plain": "Realiza la especialidad de localización y legalidad para el departamento SEO internacional, multilingüe y geográfico.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D21:DEPARTMENT_HEAD",
+      "name": "Responsable · UX, diseño e información",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Organiza el departamento UX, diseño e información dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D21:SPECIALIST:01",
+      "name": "arquitectura información",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D21:DEPARTMENT_HEAD",
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de arquitectura información para el departamento UX, diseño e información.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D21:SPECIALIST:02",
+      "name": "wireframes",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D21:DEPARTMENT_HEAD",
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de wireframes para el departamento UX, diseño e información.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D21:SPECIALIST:03",
+      "name": "responsive UX",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D21:DEPARTMENT_HEAD",
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de responsive UX para el departamento UX, diseño e información.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D21:SPECIALIST:04",
+      "name": "accesibilidad de flujos",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D21:DEPARTMENT_HEAD",
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de accesibilidad de flujos para el departamento UX, diseño e información.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D22:DEPARTMENT_HEAD",
+      "name": "Responsable · Desarrollo web, CMS, WordPress y Elementor",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Organiza el departamento Desarrollo web, CMS, WordPress y Elementor dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D22:SPECIALIST:01",
+      "name": "WordPress REST/Abilities",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D22:DEPARTMENT_HEAD",
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de WordPress REST/Abilities para el departamento Desarrollo web, CMS, WordPress y Elementor.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D22:SPECIALIST:02",
+      "name": "Elementor y Gutenberg",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D22:DEPARTMENT_HEAD",
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de Elementor y Gutenberg para el departamento Desarrollo web, CMS, WordPress y Elementor.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D22:SPECIALIST:03",
+      "name": "plugin propio",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D22:DEPARTMENT_HEAD",
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de plugin propio para el departamento Desarrollo web, CMS, WordPress y Elementor.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D22:SPECIALIST:04",
+      "name": "staging y snapshots",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D22:DEPARTMENT_HEAD",
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de staging y snapshots para el departamento Desarrollo web, CMS, WordPress y Elementor.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D22:SPECIALIST:05",
+      "name": "releases reversibles",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D22:DEPARTMENT_HEAD",
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de releases reversibles para el departamento Desarrollo web, CMS, WordPress y Elementor.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D23:DEPARTMENT_HEAD",
+      "name": "Responsable · Core Web Vitals, accesibilidad y seguridad web",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Organiza el departamento Core Web Vitals, accesibilidad y seguridad web dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D23:SPECIALIST:01",
+      "name": "LCP/INP/CLS",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D23:DEPARTMENT_HEAD",
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de LCP/INP/CLS para el departamento Core Web Vitals, accesibilidad y seguridad web.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D23:SPECIALIST:02",
+      "name": "a11y WCAG",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D23:DEPARTMENT_HEAD",
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de a11y WCAG para el departamento Core Web Vitals, accesibilidad y seguridad web.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D23:SPECIALIST:03",
+      "name": "seguridad web",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D23:DEPARTMENT_HEAD",
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de seguridad web para el departamento Core Web Vitals, accesibilidad y seguridad web.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D23:SPECIALIST:04",
+      "name": "caché y Core Web Vitals",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D23:DEPARTMENT_HEAD",
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de caché y Core Web Vitals para el departamento Core Web Vitals, accesibilidad y seguridad web.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D24:DEPARTMENT_HEAD",
+      "name": "Responsable · CRO, experimentación, formularios, embudos y CRM",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Organiza el departamento CRO, experimentación, formularios, embudos y CRM dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D24:SPECIALIST:01",
+      "name": "CRO y formularios",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D24:DEPARTMENT_HEAD",
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de CRO y formularios para el departamento CRO, experimentación, formularios, embudos y CRM.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D24:SPECIALIST:02",
+      "name": "prueba de consentimiento",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D24:DEPARTMENT_HEAD",
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de prueba de consentimiento para el departamento CRO, experimentación, formularios, embudos y CRM.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D24:SPECIALIST:03",
+      "name": "lead magnets",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D24:DEPARTMENT_HEAD",
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de lead magnets para el departamento CRO, experimentación, formularios, embudos y CRM.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D24:SPECIALIST:04",
+      "name": "CRM E2E",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D24:DEPARTMENT_HEAD",
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de CRM E2E para el departamento CRO, experimentación, formularios, embudos y CRM.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D24:SPECIALIST:05",
+      "name": "funnel B2B/B2C",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D24:DEPARTMENT_HEAD",
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "purpose_plain": "Realiza la especialidad de funnel B2B/B2C para el departamento CRO, experimentación, formularios, embudos y CRM.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D25:DEPARTMENT_HEAD",
+      "name": "Responsable · AEO/GEO y visibilidad en IA",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Organiza el departamento AEO/GEO y visibilidad en IA dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D25:SPECIALIST:01",
+      "name": "AEO/GEO",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D25:DEPARTMENT_HEAD",
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de AEO/GEO para el departamento AEO/GEO y visibilidad en IA.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D25:SPECIALIST:02",
+      "name": "citaciones de IA",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D25:DEPARTMENT_HEAD",
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de citaciones de IA para el departamento AEO/GEO y visibilidad en IA.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D25:SPECIALIST:03",
+      "name": "entidades semánticas",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D25:DEPARTMENT_HEAD",
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de entidades semánticas para el departamento AEO/GEO y visibilidad en IA.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D25:SPECIALIST:04",
+      "name": "medición AI Search",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D25:DEPARTMENT_HEAD",
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de medición AI Search para el departamento AEO/GEO y visibilidad en IA.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D26:DEPARTMENT_HEAD",
+      "name": "Responsable · SEO de imágenes, vídeo y YouTube",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Organiza el departamento SEO de imágenes, vídeo y YouTube dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D26:SPECIALIST:01",
+      "name": "SEO imágenes/alt",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D26:DEPARTMENT_HEAD",
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de SEO imágenes/alt para el departamento SEO de imágenes, vídeo y YouTube.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D26:SPECIALIST:02",
+      "name": "video SEO",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D26:DEPARTMENT_HEAD",
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de video SEO para el departamento SEO de imágenes, vídeo y YouTube.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D26:SPECIALIST:03",
+      "name": "YouTube Discover",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D26:DEPARTMENT_HEAD",
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de YouTube Discover para el departamento SEO de imágenes, vídeo y YouTube.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D26:SPECIALIST:04",
+      "name": "licencias multimedia",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D26:DEPARTMENT_HEAD",
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de licencias multimedia para el departamento SEO de imágenes, vídeo y YouTube.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D27:DEPARTMENT_HEAD",
+      "name": "Responsable · Ecommerce SEO: categorías, productos, facetas y Merchant",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Organiza el departamento Ecommerce SEO: categorías, productos, facetas y Merchant dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D27:SPECIALIST:01",
+      "name": "SEO categorías/productos",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D27:DEPARTMENT_HEAD",
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de SEO categorías/productos para el departamento Ecommerce SEO: categorías, productos, facetas y Merchant.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D27:SPECIALIST:02",
+      "name": "facetas y filtros",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D27:DEPARTMENT_HEAD",
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de facetas y filtros para el departamento Ecommerce SEO: categorías, productos, facetas y Merchant.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D27:SPECIALIST:03",
+      "name": "merchant feeds",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D27:DEPARTMENT_HEAD",
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de merchant feeds para el departamento Ecommerce SEO: categorías, productos, facetas y Merchant.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D27:SPECIALIST:04",
+      "name": "variantes y stock",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D27:DEPARTMENT_HEAD",
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de variantes y stock para el departamento Ecommerce SEO: categorías, productos, facetas y Merchant.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D28:DEPARTMENT_HEAD",
+      "name": "Responsable · Búsqueda social, distribución orgánica y descubrimiento",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Organiza el departamento Búsqueda social, distribución orgánica y descubrimiento dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D28:SPECIALIST:01",
+      "name": "búsqueda social",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D28:DEPARTMENT_HEAD",
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de búsqueda social para el departamento Búsqueda social, distribución orgánica y descubrimiento.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D28:SPECIALIST:02",
+      "name": "distribución orgánica",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D28:DEPARTMENT_HEAD",
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de distribución orgánica para el departamento Búsqueda social, distribución orgánica y descubrimiento.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D28:SPECIALIST:03",
+      "name": "SEO redes",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D28:DEPARTMENT_HEAD",
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de SEO redes para el departamento Búsqueda social, distribución orgánica y descubrimiento.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D28:SPECIALIST:04",
+      "name": "medición social",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D28:DEPARTMENT_HEAD",
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "purpose_plain": "Realiza la especialidad de medición social para el departamento Búsqueda social, distribución orgánica y descubrimiento.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D29:DEPARTMENT_HEAD",
+      "name": "Responsable · Search Console, GA4, medición y fuentes",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Organiza el departamento Search Console, GA4, medición y fuentes dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D29:SPECIALIST:01",
+      "name": "GSC rendimiento/cobertura",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D29:DEPARTMENT_HEAD",
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de GSC rendimiento/cobertura para el departamento Search Console, GA4, medición y fuentes.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D29:SPECIALIST:02",
+      "name": "GA4 eventos",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D29:DEPARTMENT_HEAD",
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de GA4 eventos para el departamento Search Console, GA4, medición y fuentes.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D29:SPECIALIST:03",
+      "name": "calidad medición",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D29:DEPARTMENT_HEAD",
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de calidad medición para el departamento Search Console, GA4, medición y fuentes.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D29:SPECIALIST:04",
+      "name": "anomalías",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D29:DEPARTMENT_HEAD",
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de anomalías para el departamento Search Console, GA4, medición y fuentes.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D30:DEPARTMENT_HEAD",
+      "name": "Responsable · Atribución comercial, analítica avanzada y pruebas",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Organiza el departamento Atribución comercial, analítica avanzada y pruebas dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D30:SPECIALIST:01",
+      "name": "atribución lead a firma",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D30:DEPARTMENT_HEAD",
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de atribución lead a firma para el departamento Atribución comercial, analítica avanzada y pruebas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D30:SPECIALIST:02",
+      "name": "incrementalidad",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D30:DEPARTMENT_HEAD",
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de incrementalidad para el departamento Atribución comercial, analítica avanzada y pruebas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D30:SPECIALIST:03",
+      "name": "experimentación",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D30:DEPARTMENT_HEAD",
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de experimentación para el departamento Atribución comercial, analítica avanzada y pruebas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D30:SPECIALIST:04",
+      "name": "estadística y sesgo",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D30:DEPARTMENT_HEAD",
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de estadística y sesgo para el departamento Atribución comercial, analítica avanzada y pruebas.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D31:DEPARTMENT_HEAD",
+      "name": "Responsable · QA, auditoría SEO, publicación y releases",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Organiza el departamento QA, auditoría SEO, publicación y releases dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D31:SPECIALIST:01",
+      "name": "QA SEO multidisciplinar",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D31:DEPARTMENT_HEAD",
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de QA SEO multidisciplinar para el departamento QA, auditoría SEO, publicación y releases.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D31:SPECIALIST:02",
+      "name": "gates publicación",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D31:DEPARTMENT_HEAD",
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de gates publicación para el departamento QA, auditoría SEO, publicación y releases.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D31:SPECIALIST:03",
+      "name": "OLD vs NEW",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D31:DEPARTMENT_HEAD",
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de OLD vs NEW para el departamento QA, auditoría SEO, publicación y releases.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D31:SPECIALIST:04",
+      "name": "rollback y backup",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D31:DEPARTMENT_HEAD",
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de rollback y backup para el departamento QA, auditoría SEO, publicación y releases.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D31:SPECIALIST:05",
+      "name": "auditoría independiente",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D31:DEPARTMENT_HEAD",
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de auditoría independiente para el departamento QA, auditoría SEO, publicación y releases.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D32:DEPARTMENT_HEAD",
+      "name": "Responsable · Aprendizaje, benchmarks, training y optimización",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Organiza el departamento Aprendizaje, benchmarks, training y optimización dentro de SEO-001.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D32:SPECIALIST:01",
+      "name": "benchmarks",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D32:DEPARTMENT_HEAD",
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de benchmarks para el departamento Aprendizaje, benchmarks, training y optimización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D32:SPECIALIST:02",
+      "name": "training hooks",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D32:DEPARTMENT_HEAD",
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de training hooks para el departamento Aprendizaje, benchmarks, training y optimización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D32:SPECIALIST:03",
+      "name": "evaluación de evaluadores",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D32:DEPARTMENT_HEAD",
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de evaluación de evaluadores para el departamento Aprendizaje, benchmarks, training y optimización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D32:SPECIALIST:04",
+      "name": "meritocracia independiente",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D32:DEPARTMENT_HEAD",
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de meritocracia independiente para el departamento Aprendizaje, benchmarks, training y optimización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO-D32:SPECIALIST:05",
+      "name": "shadow y sustituciones",
+      "kind": "SUBAGENT_ROLE",
+      "parent_id": "SEO-D32:DEPARTMENT_HEAD",
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Realiza la especialidad de shadow y sustituciones para el departamento Aprendizaje, benchmarks, training y optimización.",
+      "status": "SUBAGENT_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO:GLOBAL:JUDGE",
+      "name": "Tribunal central SEO",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Valora evidencias y decide si los trabajos SEO pueden superar sus controles.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    },
+    {
+      "id": "SEO:GLOBAL:GUARDIAN",
+      "name": "Guardián central SEO",
+      "kind": "AGENT_ROLE",
+      "parent_id": null,
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "purpose_plain": "Protege permisos, riesgos y políticas durante la operativa SEO.",
+      "status": "ROLE_TEMPLATE_NOT_ACTIVE"
+    }
+  ],
+  "assurance": "role IDs, specialist names and heads are from source; parent links asserted only for department specialist to its department head; no live runtime identities, no prod permissions"
+}
