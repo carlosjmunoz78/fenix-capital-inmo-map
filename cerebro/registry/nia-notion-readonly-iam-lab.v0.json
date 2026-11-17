@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "document_type": "NIA_NOTION_READONLY_LAB_IAM_CANDIDATE",
-  "status": "CONSOLE_V0_OWNER_UI_E2E_TO_FACT_NIA_READ_LAB_VERIFIED",
+  "status": "CONSOLE_V38_SYNC_NOTION_SKILL_READ_DEPLOYED_OWNER_E2E_NOT_YET_RETESTED",
   "alias_es": "NIA · Lectura exclusiva de documentación en LAB",
   "company_id": "fenix",
   "engine_id": "ACTGW-001",
   "environment": "PREPROD",
   "lab_environment": "CEREBRO-NIA-LAB",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "notion_integration": {
     "name": "CEREBRO NIA · Lectura LAB",
     "bot_id": "41b81b1a-756d-8132-b0d6-0027f800e898",
@@ -54,7 +54,7 @@
     "secret_configured": "VERIFIED_ENCRYPTED_CLOUDFLARE_SECRET_NAME_AND_TYPE",
     "bot_page_access_verified": true,
     "gateway_live_connected": true,
-    "notion_ai_invocation_supported": "NOT_EVIDENCED",
+    "notion_ai_invocation_supported": "BLOCKED_NO_PUBLISHED_CUSTOM_AGENT",
     "bot_blocks_access_verified": true,
     "provider_write_denial_verified": false,
     "queue_trigger_cleaned": true,
@@ -89,7 +89,7 @@
     "console_test_queue_cleaned": true,
     "console_ui_prod_untouched": false,
     "console_backend_integration_deployed": true,
-    "console_backend_actual_version": 37,
+    "console_backend_actual_version": 38,
     "console_backend_previous_version": 36,
     "console_backend_source_parity_verified": true,
     "console_backend_canary_rollback_verified": true,
@@ -99,7 +99,10 @@
     "console_frontend_modified": false,
     "console_scoped_token_vault_verified": true,
     "console_scoped_token_expiry": "2026-12-01T00:00:00Z",
-    "console_prod_autonomous_enabled": false
+    "console_prod_autonomous_enabled": false,
+    "console_sync_skill_result_configured": true,
+    "console_sync_skill_result_owner_e2e_verified": false,
+    "notion_service_token_skill_page_and_blocks_verified": true
   },
   "rollback": "Console real: redeploy the four original v36 files saved under cerebro/backups/console-gateway-v36-20261117, verify_jwt=false; validate no-auth 401, then live owner smoke. FACT/NIA bindings/Secrets remain intact. This does not delete any existing integration.",
   "references": [
@@ -330,6 +333,48 @@
       "owner_ui_exact_command_scope": "consulta NIA (documentation), Console V0 only, not default JARVIS backend",
       "native_notion_ai_executed": false,
       "durable_actor_correlation_join_verified": false
+    },
+    "console_result_v38": {
+      "deployed_utc_date": "2026-11-17",
+      "edge_name": "cerebro-console-gateway-v0",
+      "previous_version": 37,
+      "current_version": 38,
+      "current_sha256": "15899b7f2a752ef1d577c0d13e02fbe553c99efd179edddb981a360a89556256",
+      "v37_rollback_sha256": "7642123e75ccd00249dc54cc53ae4b836037a48f3fed2fac79f0dac242d84b53",
+      "canary_old_restore_version": 5,
+      "canary_new_restore_version": 6,
+      "canary_rollback_sha_equal": true,
+      "original_files_unchanged_count": 5,
+      "modified_existing_file": "nia_console_transport.ts",
+      "already_existing_notion_service_vault_ref": "cerebro_notion_service_token_v1",
+      "notion_page_http_200_proof_request": 41103,
+      "notion_block_http_200_proof_request": 41105,
+      "page_fixed_id": "41a81b1a-756d-815a-b877-f0d264a6a0d4",
+      "notion_page_blocks": 36,
+      "notion_sections": [
+        "Identidad y límites",
+        "Decisión automática antes de cada operación",
+        "Enrutamiento práctico",
+        "Coste y seguridad",
+        "Prueba y salida",
+        "Referencias permanentes"
+      ],
+      "direct_notions_api_get_verified": true,
+      "owner_authenticated_readable_result_live_qa": false,
+      "post_deployment_unauth_smoke_requests": [
+        41114,
+        41115
+      ],
+      "post_deployment_unauth_smoke_statuses": [
+        401,
+        401
+      ],
+      "actual_nia_ai_agent_search": "NO_PUBLISHED_CUSTOM_AGENTS_VISIBLE",
+      "actual_notion_ai_session_started": false,
+      "queue_fact_nia_existing_route_preserved": true,
+      "frontend_code_changed": false,
+      "rollback_prod_executed": false,
+      "new_paid_service": false
     }
   }
 }
