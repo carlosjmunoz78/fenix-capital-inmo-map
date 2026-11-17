@@ -173,7 +173,9 @@ export async function fetchUserAdminApi<T>(path='',init?:RequestInit):Promise<{s
 export async function fetchAppApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init,6000);
   if(path==='/navigation'&&(result.status===0||result.status>=500))return{status:200,data:safeNavigationFallback() as T};
-  if(path==='/session/context'&&(result.status===0||result.status>=500)){
+  // Stage owner access must never be synthesized from mutable user_metadata.
+  // The live Gateway must certify CARLOS-ADMIN before any owner UI is shown.
+  if(!stagedOwnerHostname&&path==='/session/context'&&(result.status===0||result.status>=500)){
     const {data:{session}}=await supabase.auth.getSession();
     const fallback=authenticatedContextFallback(session);
     if(fallback)return{status:200,data:fallback as T};
