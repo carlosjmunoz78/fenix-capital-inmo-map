@@ -24,3 +24,28 @@ Inventario y snapshot FACT existentes en `cerebro/fact001-nia-parallel-lab/origi
 6. Conservar el binding privado para uso interno posterior, mantener el PR DRAFT; registrar rollback.
 
 No promover autónomamente a PROD; no usar el canal NIA para escribir Notion ni para ejecutar su IA.
+
+## Corte definitivo de esta integración LAB · 17/11/2026
+
+**HECHO (ACTGW + FACT original + Notion), E2E real en Cloudflare LAB:** tras validar copia paralela se desplegó el mismo parche aditivo en `cerebro-fact001-gateway-lab-eu-20261109`. Su ruta antigua UMS, cuatro módulos originales y **16 bindings** se conservaron. `GATEWAY_ENABLED=false` y `ALLOW_MUTATIONS=false`; la única nueva ruta lógica privada tiene `NIA_ISSUER_ENABLED=true` y binding RPC `NIA_RECEIVER` al entrypoint `NiaReadOnlyLab` del Worker `cerebro-nia-notion-proof-lab`, que tiene `NIA_DISPATCH_ENABLED=true`. Ambos sin URL pública, sin preview y sin cron.
+
+**Flujo ahora operativo solo en LAB privado:**
+`Cloudflare Queues` (`cerebro-fact001-nia-request-lab-eu`, ID `c6325451fce54fd6bf4b25095627ba66`, consumidor FACT id `889f1c08580147eaa7e1189b6a83be9b`) → FACT valida solicitud → FACT firma HMAC-SHA256 exclusivo → Cloudflare Service Binding RPC → NIA verifica firma + 60 s TTL + nonce SQLite atómico → ACTGW autoriza y lee página NIA con token cifrado → respuesta metadata-only, sin invocar Notion AI.
+
+**Evidencia en Cloudflare Workers Observability (FACT real):**
+- `FACT_NIA_PRIVATE_RESULT=PASS` tras enviar una orden válida `NIA_FACT_PRIVATE_DISCOVERY_V1` el 17/11/2026 a las 09:51:31.989 UTC.
+- `NIA_CENTRAL_RECEIVER_GATE=PASS` en el Worker NIA receptor.
+- Pruebas negativas: `already_handled=true` aceptado como NOOP; `company_id` ajeno y campo `authorized:true` no permitido — **dos rechazos** `FACT_NIA_PRIVATE_RESULT=BLOCKED`, sin llegada de esos mensajes al receptor.
+- 4/4 módulos originales coincidían **byte a byte** con la copia de seguridad antes de aplicar el parche. Solo se añadió nuevo método RPC, nueva rama de Queue y nuevos módulos de firmado/NIA; todos los bindings anteriores se conservaron por herencia estricta.
+
+**Rollback físico original FACT probado:** promoción versión OFF `b2fedc38-e0fd-426e-ac89-62166b4d231b` al 100 %, verificación de flag OFF y UMS sin cambios; recuperación versión ON `a7bfd49b-f0ee-448f-b7e2-75e5512feee8` al 100 % y flag NIA ON. El original anterior al cambio de código es `ed3d352b-aa51-400e-844d-4b6369b85350` (backup adicional).
+
+**Estado final:** clone `cerebro-fact001-nia-parallel-lab-eu` eliminado tras PASS y rollback; fuente del original guardada en `cerebro/fact001-nia-parallel-lab/original/`. Secretos HMAC y Notion cifrados; el Worker NIA conserva SQLite Durable Object exclusivo. D1 sigue 10/10, sin nueva DB, GitHub Actions ni suscripciones. PR DRAFT sin merge.
+
+**Contrato de solicitud permitida a la cola privada:**
+```json
+{"type":"NIA_FACT_PRIVATE_DISCOVERY_V1","company_id":"fenix","engine_id":"ACTGW-001","topic":"documentation"}
+```
+`topic` debe ser `documentation`, `knowledge`, `research`, `meeting-notes`, `notion-skills` o `notion-events`. Campo opcional `already_handled` booleano; no admitir tokens, autorizaciones, contenido del cliente ni otros campos. Solo productores autenticados en Cloudflare pueden publicar en la cola. El contrato está limitado a NIA Skill metadata, no a tareas de escritura en Notion.
+
+**LÍMITES AÚN PENDIENTES (NO declarar PROD):** No hay enrutamiento automático desde CEREBRO Console/App a esta Queue ni sesión de Notion AI ejecutada. Búsqueda de Custom Agents Notion por `NIA` no devolvió ningún agente publicado visible al conector. El GET de Skill es lectura de metadatos, **no ejecución del asistente nativo de Notion**. El coste incremental de suscripción es 0 €; no se han medido consumos futuros fuera de límites Free. App/CRM/Supabase/WordPress/PROD siguen sin cambios.

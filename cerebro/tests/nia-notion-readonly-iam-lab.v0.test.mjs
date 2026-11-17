@@ -18,7 +18,16 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.execution_policy.additional_cost_eur,0);
  assert.equal(candidate.execution_policy.automated_ai_sessions,false);
  assert.equal(candidate.execution_policy.prod_write,false);
- assert.equal(candidate.state.gateway_live_connected,false);
+ assert.equal(candidate.state.gateway_live_connected,true);
+ assert.equal(candidate.state.gateway_central_fact_lab_connected,true);
+ assert.equal(candidate.state.gateway_production_connected,false);
+ assert.equal(candidate.state.cerebro_console_automatic_dispatch_connected,false);
+ assert.equal(candidate.state.real_fact_issuer_hmac_verified,true);
+ assert.equal(candidate.state.gateway_real_rollback_tested,true);
+ assert.equal(candidate.state.nia_ai_session_started,false);
+ assert.equal(candidate.evidence.central_fact.legacy_bindings_preserved,16);
+ assert.equal(candidate.evidence.central_fact.physical_rollback_off_and_restore_on,true);
+ assert.equal(candidate.evidence.central_fact.parallel_test_worker_deleted,true);
  assert.equal(candidate.state.gateway_isolated_e2e_verified,true);
  assert.equal(candidate.state.gateway_lab_authorization_verified,true);
  assert.equal(candidate.state.gateway_lab_idempotency_verified,true);

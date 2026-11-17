@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "document_type": "NIA_NOTION_READONLY_LAB_IAM_CANDIDATE",
-  "status": "LAB_READ_ACTGW_SIGNED_PROTOCOL_ATOMIC_LEDGER_PASS_CENTRAL_ISSUER_PENDING",
+  "status": "HECHO_FACT001_CENTRAL_LAB_PRIVATE_SIGNED_READONLY_CONNECTED",
   "alias_es": "NIA · Lectura exclusiva de documentación en LAB",
   "company_id": "fenix",
   "engine_id": "ACTGW-001",
   "environment": "PREPROD",
   "lab_environment": "CEREBRO-NIA-LAB",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "notion_integration": {
     "name": "CEREBRO NIA · Lectura LAB",
     "bot_id": "41b81b1a-756d-8132-b0d6-0027f800e898",
@@ -53,7 +53,7 @@
     "page_shared_user_confirmed": true,
     "secret_configured": "VERIFIED_ENCRYPTED_CLOUDFLARE_SECRET_NAME_AND_TYPE",
     "bot_page_access_verified": true,
-    "gateway_live_connected": false,
+    "gateway_live_connected": true,
     "notion_ai_invocation_supported": "NOT_EVIDENCED",
     "bot_blocks_access_verified": true,
     "provider_write_denial_verified": false,
@@ -67,7 +67,16 @@
     "atomic_replay_ledger_verified": true,
     "atomic_ledger_binding_present": true,
     "signed_dispatch_synthetic_lab_verified": true,
-    "central_issuer_real_signature_verified": false
+    "central_issuer_real_signature_verified": false,
+    "gateway_central_fact_lab_connected": true,
+    "gateway_production_connected": false,
+    "cerebro_console_automatic_dispatch_connected": false,
+    "real_fact_issuer_hmac_verified": true,
+    "private_queue_producer_connected": true,
+    "private_queue_consumer_fact_verified": true,
+    "legacy_media_bindings_preserved": true,
+    "gateway_real_rollback_tested": true,
+    "nia_ai_session_started": false
   },
   "rollback": "Remove only this LAB secret and optional binding; do not revoke or alter existing FACT-001 or Fénix Notion Bridge integrations.",
   "references": [
@@ -158,6 +167,51 @@
       "public_routes_enabled": false,
       "worker_latest_version": "c91e07db-1b08-402b-b8ac-c36de97e2446",
       "shared_databases_modified": false
+    },
+    "central_fact": {
+      "verified_date_utc": "2026-11-17",
+      "original_worker": "cerebro-fact001-gateway-lab-eu-20261109",
+      "producer_worker": "cerebro-fact001-gateway-lab-eu-20261109",
+      "consumer_worker": "cerebro-nia-notion-proof-lab",
+      "private_service_binding": "NIA_RECEIVER",
+      "service_entrypoint": "NiaReadOnlyLab",
+      "command_queue_name": "cerebro-fact001-nia-request-lab-eu",
+      "command_queue_id": "c6325451fce54fd6bf4b25095627ba66",
+      "consumer_id": "889f1c08580147eaa7e1189b6a83be9b",
+      "signature": "HMAC-SHA256",
+      "signature_secret_ref": "CEREBRO_NIA_DISPATCH_HMAC_KEY",
+      "caller_secret_ref": "NIA_LAB_CALLER_TOKEN",
+      "secret_values_exposed": false,
+      "emitted_real_event_utc": "2026-11-17T09:51:31.989Z",
+      "observed_proofs": [
+        "FACT_NIA_PRIVATE_RESULT=PASS",
+        "NIA_CENTRAL_RECEIVER_GATE=PASS"
+      ],
+      "negative_tests": {
+        "already_handled_noop": true,
+        "foreign_company_rejected": true,
+        "client_authorized_field_rejected": true,
+        "blocked_requests_not_received_by_NIA": true
+      },
+      "legacy_modules_identical_before_patch": 4,
+      "legacy_bindings_preserved": 16,
+      "old_version_before_nia_patch": "ed3d352b-aa51-400e-844d-4b6369b85350",
+      "new_off_version": "b2fedc38-e0fd-426e-ac89-62166b4d231b",
+      "live_on_version": "a7bfd49b-f0ee-448f-b7e2-75e5512feee8",
+      "receiver_on_version": "dcdacd05-6ef8-45c2-9a04-580115add9cd",
+      "physical_rollback_off_and_restore_on": true,
+      "original_gateway_enabled": false,
+      "original_allow_mutations": false,
+      "original_ums_queue_enabled": true,
+      "frontdoor_public": false,
+      "preview_urls_public": false,
+      "cron_count": 0,
+      "queue_consumer_enabled": true,
+      "parallel_test_worker_deleted": true,
+      "d1_count_unchanged": 10,
+      "notion_ai_execution": false,
+      "subscription_added": false,
+      "runtime_usage_cost_measured": false
     }
   }
 }
