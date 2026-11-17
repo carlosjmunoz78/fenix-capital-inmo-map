@@ -60,6 +60,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: vercel build --prod --scope=carlosjmunozcabeza-2582s-projects
       - name: Stage compiled PROD artifact without assigning ANY production domains
+        id: stage_prod
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -67,6 +68,7 @@ jobs:
           set -euo pipefail
           url="$(vercel deploy --prebuilt --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects)"
           case "$url" in https://*.vercel.app) ;; *) echo "BLOCKED: unexpected staging URL format"; exit 4;; esac
+          echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "STAGED_PROD_URL=$url" >> "$GITHUB_STEP_SUMMARY"
           echo "STAGED_PROD_SHA=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "TARGET=prj_4ElVl8e2KzrHS7r5yvBGBban1DXV" >> "$GITHUB_STEP_SUMMARY"
@@ -74,6 +76,13 @@ jobs:
           echo "PRIOR_PROD_DEPLOYMENT=dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ" >> "$GITHUB_STEP_SUMMARY"
           echo "PRODUCTION_PROMOTION=HOLD_UNTIL_AUTHENTICATED_QA" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: HTTP accept stage with live owner JWT, other tenants and unsafe verbs denied
+        env:
+          STAGED_PROD_URL: ${{ steps.stage_prod.outputs.url }}
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: node cerebro/universal/v0/operativa-real-owner-staged-prod.acceptance.mjs
       - name: Purge ephemeral Vercel CLI authentication on all outcomes
         if: always()
         shell: bash
