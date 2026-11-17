@@ -25,14 +25,22 @@ function request(method,path,authenticated=false){
  const lines=['accept: application/json'];
  if(authenticated)lines.push('authorization: Bearer '+token,'apikey: '+apikey);
  writeFileSync(filename,lines.join('\n')+'\n',{mode:0o600});
- const args=['curl','--url',destination.toString(),'--scope=carlosjmunozcabeza-2582s-projects',
+ // Full URL is resolved by Vercel CLI; project/team are pinned in CI env.
+ // Avoid forwarding CLI-only --scope to the native system curl command.
+ const args=['curl',destination.toString(),
   '-X',method,'-H','@'+filename,'-s','-S','--max-time','16',
   '-w','\nCEREBRO_HTTP_STATUS:%{http_code}'];
  const output=spawnSync('vercel',args,{
   encoding:'utf8',env:process.env,timeout:28000,maxBuffer:1024*1024
  });
- if(output.error||output.status!==0)
-  throw Error('BLOCKED: VERCEL_CURL_TRANSPORT_'+String(output.status??'NO_EXIT'));
+ if(output.error||output.status!==0){
+  // Print an allowlisted error category, NEVER stderr/stdout or request headers.
+  const err=String(output.stderr||'');
+  const category=/unknown option|unrecognized option|is unknown/i.test(err)?'CLI_FLAG':
+   /project|deployment|scope|link/i.test(err)?'PROJECT_SCOPE':
+   /curl: \(\d+\)/i.test(err)?'CURL_TRANSPORT':'OTHER';
+  throw Error('BLOCKED: VERCEL_CURL_TRANSPORT_'+String(output.status??'NO_EXIT')+'_'+category);
+ }
  const match=output.stdout.match(/\nCEREBRO_HTTP_STATUS:(\d{3})\s*$/);
  if(!match)throw Error('BLOCKED: VERCEL_CURL_STATUS_UNAVAILABLE');
  const status=Number(match[1]);
