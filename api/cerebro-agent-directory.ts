@@ -8,6 +8,7 @@ import roles from '../cerebro/registry/role-agent-registry.v1.json' with {type:'
 import packs from '../cerebro/registry/role-knowledge-packs.v1.json' with {type:'json'};
 import facebook from '../cerebro/registry/social-facebook-agent-role-design.v1.json' with {type:'json'};
 import fbComponents from '../cerebro/registry/social-facebook-financial-real-estate-components.v1.json' with {type:'json'};
+import seoProfiles from '../cerebro/registry/seo001-role-templates-191.sourced.v1.json' with {type:'json'};
 import {materializeRoles,registrySummary} from '../cerebro/media-studio/v2/registry/role-registry.mjs';
 
 type H=string|string[]|undefined;
@@ -116,7 +117,28 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   };
  });
 
- const all=[...engineers,...fb,...media,...templates],keys=new Set(all.map(x=>x.kind+':'+x.id));
+ const seoSource=seoProfiles.entries;
+ if(seoProfiles.registry_id!=='SEO001_191_ROLE_TEMPLATES_SOURCED_V1'||
+  seoProfiles.engine_id!=='SEO-001'||seoProfiles.company_id!=='fenix'||
+  seoProfiles.source_head_sha!=='b4bbe8a4043f45821d0825e3aab846370c4530f8'||
+  seoSource.length!==191||seoSource.filter(x=>x.kind==='SUBAGENT_ROLE').length!==141)
+  throw Error('SEO001_SOURCE_ROSTER_DRIFT');
+ const seoIds=new Set(seoSource.map(x=>x.id));
+ if(seoIds.size!==191||seoSource.some(x=>x.parent_id&&!seoIds.has(x.parent_id)))
+  throw Error('SEO001_PARENT_CONTRACT_BROKEN');
+ const seo:AgentDirectoryEntry[]=seoSource.map(r=>({
+  id:r.id,name:r.name,kind:r.kind,family:'SEO_ENTERPRISE',
+  state:r.status,source:'SEO001_SOURCE_PINNED_SHA',
+  purpose_plain:r.purpose_plain,
+  purpose_technical:'SEO-001 / '+r.family_id+(r.department_id?' / '+r.department_id:'')+' / '+r.id,
+  engine_ids:['SEO-001'], // source: roster engine_id SEO-001; does NOT imply runtime certified
+  parent_id:r.parent_id,hierarchy_verified:r.parent_id!==null,
+  runtime_verified:false,company_scope:'fenix',
+  source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/'+
+   seoProfiles.source_head_sha+'/cerebro/seo-enterprise/v2/seo-specialist-role-roster-v2.json'
+ }));
+
+ const all=[...engineers,...fb,...media,...seo,...templates],keys=new Set(all.map(x=>x.kind+':'+x.id));
  if(keys.size!==all.length||all.some(x=>!x.id||!x.name||!x.purpose_plain||!x.source_url||
    !Array.isArray(x.engine_ids)||x.engine_ids.some(y=>!/^[A-Z0-9-]+$/.test(y))))
   throw Error('DIRECTORY_DUPLICATE_OR_INCOMPLETE');
@@ -136,7 +158,7 @@ export function validateCerebroAgentDirectoryQueryV0(q:URLSearchParams){
  const kind=q.get('kind')||'AGENT_ROLE';
  if(!['AGENT_ROLE','SUBAGENT_ROLE','SUBAGENT_TEMPLATE','ALL'].includes(kind))throw Error('INVALID_KIND');
  const family=q.get('family')||'ALL';
- if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK','MEDIA_STUDIO'].includes(family))throw Error('INVALID_FAMILY');
+ if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK','MEDIA_STUDIO','SEO_ENTERPRISE'].includes(family))throw Error('INVALID_FAMILY');
  const term=(q.get('q')||'').normalize('NFKC').trim().toLocaleLowerCase('es-ES');
  if(term.length>100||/[\u0000-\u001F]/.test(term))throw Error('INVALID_SEARCH');
  return {offset,limit,kind,family,term};
@@ -155,9 +177,10 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
    registered_logical_subagent_roles:all.filter(r=>r.kind==='SUBAGENT_ROLE').length,
    media_studio_source_roles:all.filter(r=>r.family==='MEDIA_STUDIO').length,
    facebook_source_components:all.filter(r=>r.family==='SOCIAL_FACEBOOK'&&r.kind!=='SUBAGENT_TEMPLATE').length,
+   seo_source_profiles:all.filter(r=>r.family==='SEO_ENTERPRISE').length,
    subagent_templates_not_instances:all.filter(r=>r.kind==='SUBAGENT_TEMPLATE').length,
    total_runtime_instances:null,unindexed_sources_possible:true},
-  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','FACEBOOK_FAMILY_SOURCE_PINNED_SHA','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT','UMS001_ROLE_REGISTRY_V2'],
+  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','FACEBOOK_FAMILY_SOURCE_PINNED_SHA','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT','UMS001_ROLE_REGISTRY_V2','SEO001_SOURCE_PINNED_SHA'],
   page:{offset,limit,total:records.length,next_offset:offset+limit<records.length?offset+limit:null},
   records:records.slice(offset,offset+limit)
  };

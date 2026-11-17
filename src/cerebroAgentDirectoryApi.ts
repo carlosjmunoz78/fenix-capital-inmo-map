@@ -9,14 +9,14 @@ export type AgentDirectoryResponse={
  status:'OK';company_id:'fenix';coverage:'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS';
  transport:'PREVIEW_ONLY_SERVER_VERIFIED';read_only:true;executed:false;
  active_agents_verified:false;subagent_instances_verified:false;
- counts:{known_agent_roles:number;registered_logical_subagent_roles:number;media_studio_source_roles:number;facebook_source_components:number;subagent_templates_not_instances:number;
+ counts:{known_agent_roles:number;registered_logical_subagent_roles:number;media_studio_source_roles:number;facebook_source_components:number;seo_source_profiles:number;subagent_templates_not_instances:number;
  total_runtime_instances:null;unindexed_sources_possible:boolean};
  page:{offset:number;limit:number;total:number;next_offset:number|null};
  sources:string[];records:AgentDirectoryRecord[]
 };
 export type AgentDirectoryResult={kind:'ready'|'denied'|'unavailable';data:AgentDirectoryResponse|null;reason:string};
 export type AgentDirectoryFilters={offset:number;limit:number;kind:'AGENT_ROLE'|'SUBAGENT_ROLE'|'SUBAGENT_TEMPLATE'|'ALL';
- family:'ALL'|'ENGINEERING'|'REVENUE_SALES'|'SOCIAL_FACEBOOK'|'MEDIA_STUDIO';q:string};
+ family:'ALL'|'ENGINEERING'|'REVENUE_SALES'|'SOCIAL_FACEBOOK'|'MEDIA_STUDIO'|'SEO_ENTERPRISE';q:string};
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal?:AbortSignal):Promise<AgentDirectoryResult>{
  const unavailable=(kind:AgentDirectoryResult['kind'],reason:string):AgentDirectoryResult=>({kind,data:null,reason});
