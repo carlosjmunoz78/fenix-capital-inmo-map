@@ -28,3 +28,11 @@ Este registro **NO es una promoción**. Desencadena exclusivamente el build prod
 - Stage ahora permite exclusivamente su host único firmado por Vercel (`VERCEL_URL`) cuando `VERCEL_ENV=production`, y sólo acepta GET con JWT real de propietario; alias PROD sigue en baseline.
 - La aceptación automatizada comprueba `GET` sin sesión 401, `POST` 405, tenant ajeno 400, y `GET` propietario real 200 con 2.506 entradas y `executed=false`.
 - Sólo utiliza secretos ya existentes en GitHub Actions; si el JWT falta/expira o el bypass de SSO no está autorizado, falla y prohíbe promover. No crea cuentas, tokens, permisos, dominios ni alias.
+
+## Evidencia actualizada · autenticación y condición de promoción
+- El staging Vercel de destino usa SSO: `ssoProtection.enabled=true`, `deploymentType=all_except_custom_domains`. Los dominios de etapa (sin dominio personalizado) deben permanecer protegidos. No desactivar esta política.
+- GitHub Actions tiene credenciales de Vercel y JWT E2E disponibles como referencias ocultas, pero **no** tiene `VERCEL_AUTOMATION_BYPASS_SECRET`. HTTP E2E desde CI devolvió `401 NON_JSON_RESPONSE` antes de la API: bloqueo de SSO de Vercel, **no** resultado de verificación del usuario. No afirmar login positivo ni producción.
+- Un navegador propietario con sesión SSO puede abrir el candidato, pero la app solicita inicio de sesión Fénix en ese hostname. Requiere autenticación humana o un canal E2E aprobado. Ninguna contraseña/token debe compartirse en el chat.
+- Tres comprobaciones de GitHub para el último código de directorio se mantienen como requisito; no aceptar anteriores como certificación del nuevo HEAD.
+- Pendiente antes de `request_promote`: evidencia owner real en pantalla y API, OLD vs NEW de rutas App/CRM, y rollback ejercitado sobre proyecto correcto. ID de recuperación `dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ`.
+- Hasta entonces: `PROD_PROMOTION=HOLD`; proyecto y dominio actuales intactos; DRAFT #66 sin merge.
