@@ -24,7 +24,17 @@ async function readNiaOnce(env) {
         return await globalThis.fetch(ROOT + path, {
           method: 'GET', headers, redirect: 'error', signal: AbortSignal.timeout(10000)
         });
-      } catch {
+      } catch (error) {
+        // No exception messages, payloads, URLs or secrets are logged.
+        const name = error?.name === 'TypeError' ? 'TYPE' :
+          error?.name === 'TimeoutError' ? 'TIMEOUT' :
+          error?.name === 'AbortError' ? 'ABORT' : 'OTHER';
+        const msg = typeof error?.message === 'string' ? error.message.toLowerCase() : '';
+        const category = /abort|timeout/.test(msg) ? 'TIME_LIMIT' :
+          /blocked|forbidden|not allowed|disallowed|prohibit/.test(msg) ? 'PLATFORM_RESTRICTED' :
+          /network|connection|failed|dns|host/.test(msg) ? 'NETWORK_CONNECTION' :
+          /not a function|unsupported|unimplemented/.test(msg) ? 'RUNTIME_API' : 'UNKNOWN';
+        console.log('NIA_FETCH_EXCEPTION=' + name + '_' + category);
         return null;
       }
     };
