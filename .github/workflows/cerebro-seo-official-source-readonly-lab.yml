@@ -1,0 +1,29 @@
+name: CEREBRO SEO Official Source Read Only LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-professional-source-registry-v0.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo001-official-feed-readonly-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo001-professional-source-registry-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-official-source-readonly-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-feed-observation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Offline contracts and negative controls
+        run: node --test cerebro/seo-enterprise/v2/tests/seo001-professional-source-registry-v0.test.mjs
+      - name: Public official RSS baseline (no customer data and no mutations)
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo001-official-feed-readonly-v0.mjs "$RUNNER_TEMP/seo001-gsc-rss-readonly.json"
+      - name: Publish evidence artifact for independent D31 review
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-official-rss-baseline-no-certification
+          path: ${{ runner.temp }}/seo001-gsc-rss-readonly.json
+          retention-days: 7
+          if-no-files-found: error
