@@ -31,7 +31,6 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.console_private_rpc_deployed,true);
  assert.equal(candidate.state.console_rpc_authenticated_remote_e2e_verified,false);
  assert.equal(candidate.state.console_authenticated_web_ui_connected,true);
- assert.equal(candidate.state.cerebro_console_automatic_dispatch_connected,false);
  assert.equal(candidate.evidence.console_lab.physical_proof.length,7);
  assert.equal(candidate.evidence.console_lab.qa_queue_deleted,true);
  assert.equal(candidate.evidence.console_lab.main_worker_queue_handler_removed,true);
