@@ -24,6 +24,19 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.cerebro_console_automatic_dispatch_connected,false);
  assert.equal(candidate.state.real_fact_issuer_hmac_verified,true);
  assert.equal(candidate.state.gateway_real_rollback_tested,true);
+ assert.equal(candidate.state.central_issuer_real_signature_verified,true);
+ assert.equal(candidate.state.console_lab_command_to_fact_verified,true);
+ assert.equal(candidate.state.console_lab_five_checks_verified,true);
+ assert.equal(candidate.state.console_lab_rollback_tested,true);
+ assert.equal(candidate.state.console_private_rpc_deployed,true);
+ assert.equal(candidate.state.console_rpc_authenticated_remote_e2e_verified,false);
+ assert.equal(candidate.state.console_authenticated_web_ui_connected,false);
+ assert.equal(candidate.state.cerebro_console_automatic_dispatch_connected,false);
+ assert.equal(candidate.evidence.console_lab.physical_proof.length,7);
+ assert.equal(candidate.evidence.console_lab.qa_queue_deleted,true);
+ assert.equal(candidate.evidence.console_lab.main_worker_queue_handler_removed,true);
+ assert.equal(candidate.evidence.console_lab.console_ui_frontend_unchanged,true);
+
  assert.equal(candidate.state.nia_ai_session_started,false);
  assert.equal(candidate.evidence.central_fact.legacy_bindings_preserved,16);
  assert.equal(candidate.evidence.central_fact.physical_rollback_off_and_restore_on,true);
