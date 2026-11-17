@@ -42,7 +42,7 @@ jobs:
       - name: Production-compatible typecheck and build in CI
         run: npm run build
       - name: Install exact existing Vercel CLI version
-        run: npm install --global vercel@48.0.0
+        run: npm install --global vercel@65.8.0
       - name: Pull scoped production config without updating domain
         shell: bash
         env:
