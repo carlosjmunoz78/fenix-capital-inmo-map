@@ -44,6 +44,9 @@ export default function CerebroRoleAgentRosterLab({
    <div><strong>{count?.media_studio_source_roles??'—'}</strong><small>Roles registrados en Productora UMS-001</small></div>
    <div><strong>{count?.facebook_source_components??'—'}</strong><small>Componentes Facebook · 42 agentes y 527 subagentes</small></div>
    <div><strong>{count?.seo_source_profiles??'—'}</strong><small>SEO-001 · 32 departamentos, 191 perfiles definidos, ninguno autónomo acreditado</small></div>
+   <div><strong>{count?.instagram_source_components??'—'}</strong><small>Instagram · agentes y subagentes lógicos</small></div>
+   <div><strong>{count?.linkedin_source_components??'—'}</strong><small>LinkedIn · definidos, no certificados</small></div>
+   <div><strong>{count?.instagram_department_roles??'—'}</strong><small>Instagram · dirección, agentes y tribunal aislados</small></div>
    <div><strong>{count?.subagent_templates_not_instances??'—'}</strong><small>Plantillas de especialidades no instanciadas</small></div>
    <div><strong>—</strong><small>Agentes y subagentes ejecutándose: NO VERIFICADO</small></div>
    <div><strong>PARCIAL</strong><small>Quedan fuentes de CEREBRO por incorporar · sin falso total global</small></div>
@@ -61,6 +64,9 @@ export default function CerebroRoleAgentRosterLab({
     <select aria-label="Filtrar por familia" value={family} onChange={e=>{setFamily(e.target.value as AgentDirectoryFilters['family']);setOffset(0)}}>
      <option value="ALL">Todas las áreas</option><option value="MEDIA_STUDIO">Productora UMS-001 · 529 roles</option>
      <option value="SEO_ENTERPRISE">SEO-001 · 191 perfiles</option>
+     <option value="SOCIAL_INSTAGRAM">Instagram · familia 569</option>
+     <option value="SOCIAL_LINKEDIN">LinkedIn · familia 569</option>
+     <option value="INSTAGRAM_DEPARTMENTS">Instagram · departamento 39</option>
      <option value="ENGINEERING">Ingeniería</option>
      <option value="REVENUE_SALES">Comercial</option><option value="SOCIAL_FACEBOOK">Facebook · Social Family</option>
     </select>
@@ -75,7 +81,7 @@ export default function CerebroRoleAgentRosterLab({
   {loading?<p role="status">Consultando registros autorizados…</p>:result.kind!=='ready'?
    <p className="op3-source-empty" role="alert">No se puede verificar el catálogo ahora: {result.reason}. No se mostrarán cifras inventadas.</p>:<>
    <p className="op3-source-note" role="status">Mostrando {rows.length?(page!.offset+1)+'–'+(page!.offset+rows.length):'0'} de {page!.total} coincidencias
-    · Fuentes: GitHub Registry + Facebook Factory (SHA fijado) + Productora UMS-001 + SEO-001
+    · Fuentes: GitHub Registry + Productora UMS-001 + SEO-001 + Facebook + Instagram + LinkedIn (SHA fijados)
     · Estado: <b>cobertura parcial, no inventario global completo</b>.</p>
    <div className="op3-universe-list op3-agent-list" aria-label="Listado paginado de agentes y subagentes">
     {rows.map(item=><article className="op3-universe-line op3-agent-entry" key={item.kind+item.id}>

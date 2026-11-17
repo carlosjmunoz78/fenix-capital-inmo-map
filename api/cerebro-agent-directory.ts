@@ -9,6 +9,7 @@ import packs from '../cerebro/registry/role-knowledge-packs.v1.json' with {type:
 import facebook from '../cerebro/registry/social-facebook-agent-role-design.v1.json' with {type:'json'};
 import fbComponents from '../cerebro/registry/social-facebook-financial-real-estate-components.v1.json' with {type:'json'};
 import seoProfiles from '../cerebro/registry/seo001-role-templates-191.sourced.v1.json' with {type:'json'};
+import moreSocial from '../cerebro/registry/social-ig-linkedin-1177-source-components.v1.json' with {type:'json'};
 import {materializeRoles,registrySummary} from '../cerebro/media-studio/v2/registry/role-registry.mjs';
 
 type H=string|string[]|undefined;
@@ -138,7 +139,28 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
    seoProfiles.source_head_sha+'/cerebro/seo-enterprise/v2/seo-specialist-role-roster-v2.json'
  }));
 
- const all=[...engineers,...fb,...media,...seo,...templates],keys=new Set(all.map(x=>x.kind+':'+x.id));
+
+ if(moreSocial.registry_id!=='CEREBRO_SOCIAL_IG_LI_1177_SOURCE_COMPONENTS_V1'||
+   moreSocial.families.SOCIAL_INSTAGRAM.entries.length!==569||
+   moreSocial.families.SOCIAL_LINKEDIN.entries.length!==569||
+   moreSocial.families.INSTAGRAM_DEPARTMENTS.entries.length!==39)
+  throw Error('SOCIAL_IG_LINKEDIN_SOURCE_CONTRACT_DRIFT');
+ const extraFamilies=['SOCIAL_INSTAGRAM','SOCIAL_LINKEDIN','INSTAGRAM_DEPARTMENTS'] as const;
+ const extras:AgentDirectoryEntry[]=extraFamilies.flatMap(family=>{
+  const entries=moreSocial.families[family].entries;
+  const keys=new Set(entries.map(x=>x.id));
+  if(keys.size!==entries.length||entries.some(x=>x.parent_id&&!keys.has(x.parent_id)))
+   throw Error('SOCIAL_EXTRA_PARENT_CONTRACT_BROKEN');
+  return entries.map(x=>({
+   id:x.id,name:x.name,kind:x.kind,family,state:x.source_state,
+   source:'PINNED_SOCIAL_REPO_'+family,purpose_plain:x.purpose_plain,
+   purpose_technical:x.purpose_technical,engine_ids:[],
+   parent_id:x.parent_id,hierarchy_verified:x.parent_id!==null,runtime_verified:false,
+   company_scope:'fenix-capital',source_url:x.source_url
+  }));
+ });
+
+ const all=[...engineers,...fb,...media,...seo,...extras,...templates],keys=new Set(all.map(x=>x.kind+':'+x.id));
  if(keys.size!==all.length||all.some(x=>!x.id||!x.name||!x.purpose_plain||!x.source_url||
    !Array.isArray(x.engine_ids)||x.engine_ids.some(y=>!/^[A-Z0-9-]+$/.test(y))))
   throw Error('DIRECTORY_DUPLICATE_OR_INCOMPLETE');
@@ -158,7 +180,7 @@ export function validateCerebroAgentDirectoryQueryV0(q:URLSearchParams){
  const kind=q.get('kind')||'AGENT_ROLE';
  if(!['AGENT_ROLE','SUBAGENT_ROLE','SUBAGENT_TEMPLATE','ALL'].includes(kind))throw Error('INVALID_KIND');
  const family=q.get('family')||'ALL';
- if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK','MEDIA_STUDIO','SEO_ENTERPRISE'].includes(family))throw Error('INVALID_FAMILY');
+ if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK','MEDIA_STUDIO','SEO_ENTERPRISE','SOCIAL_INSTAGRAM','SOCIAL_LINKEDIN','INSTAGRAM_DEPARTMENTS'].includes(family))throw Error('INVALID_FAMILY');
  const term=(q.get('q')||'').normalize('NFKC').trim().toLocaleLowerCase('es-ES');
  if(term.length>100||/[\u0000-\u001F]/.test(term))throw Error('INVALID_SEARCH');
  return {offset,limit,kind,family,term};
@@ -178,9 +200,12 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
    media_studio_source_roles:all.filter(r=>r.family==='MEDIA_STUDIO').length,
    facebook_source_components:all.filter(r=>r.family==='SOCIAL_FACEBOOK'&&r.kind!=='SUBAGENT_TEMPLATE').length,
    seo_source_profiles:all.filter(r=>r.family==='SEO_ENTERPRISE').length,
+   instagram_source_components:all.filter(r=>r.family==='SOCIAL_INSTAGRAM').length,
+   linkedin_source_components:all.filter(r=>r.family==='SOCIAL_LINKEDIN').length,
+   instagram_department_roles:all.filter(r=>r.family==='INSTAGRAM_DEPARTMENTS').length,
    subagent_templates_not_instances:all.filter(r=>r.kind==='SUBAGENT_TEMPLATE').length,
    total_runtime_instances:null,unindexed_sources_possible:true},
-  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','FACEBOOK_FAMILY_SOURCE_PINNED_SHA','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT','UMS001_ROLE_REGISTRY_V2','SEO001_SOURCE_PINNED_SHA'],
+  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','FACEBOOK_FAMILY_SOURCE_PINNED_SHA','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT','UMS001_ROLE_REGISTRY_V2','SEO001_SOURCE_PINNED_SHA','PINNED_SOCIAL_REPO_INSTAGRAM','PINNED_SOCIAL_REPO_LINKEDIN','PINNED_SOCIAL_REPO_INSTAGRAM_DEPARTMENTS'],
   page:{offset,limit,total:records.length,next_offset:offset+limit<records.length?offset+limit:null},
   records:records.slice(offset,offset+limit)
  };
