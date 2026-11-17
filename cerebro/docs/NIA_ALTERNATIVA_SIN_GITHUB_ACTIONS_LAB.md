@@ -1,31 +1,15 @@
-# NIA · Alternativa LAB sin GitHub Actions
+# NIA · Alternativa a GitHub Actions · LAB
 
-**Estado:** código en PR DRAFT; Cloudflare Worker LAB aislado; la prueba Notion desde la identidad dedicada **no se considera pasada** hasta registrar una ejecución manual del Scheduled handler.
+Prueba autenticada real **PASS** 17/11/2026 desde Cloudflare Worker privado.
 
-## Motivo
-GitHub Actions está bloqueado administrativamente. No se usará para NIA durante la restricción.
+Se creó un disparador privado de un solo uso mediante Cloudflare Queue Free (jurisdicción UE), sin crons ni URLs públicas. El trigger devolvió:
 
-## Alcance
-Worker nuevo: `cerebro-nia-notion-proof-lab`.
-- Solo handler `scheduled`, **sin cron**. Cualquier `fetch` HTTP devuelve 404.
-- `workers_dev=false`, `preview_urls=false`, cero rutas/DNS.
-- `NIA_ENABLED=false` por defecto, sin secret hasta provisión independiente.
-- Solo `GET /v1/pages/41a81b1a-756d-815a-b877-f0d264a6a0d4` y `GET /v1/blocks/{id}/children?page_size=1`, ambos con timeout, redirecciones prohibidas y salida sanitizada.
-- Nunca se guardan el token ni los datos de la página en logs. No se modifica FACT-001, Fénix Notion Bridge, App, CRM ni PROD.
+- `NIA_CLOUDFLARE_PAGE_READ=PASS`
+- `NIA_CLOUDFLARE_BLOCK_READ=PASS`
+- `NIA_PRIVATE_QUEUE_GATE=PASS_DEDICATED_NOTION_TOKEN_READONLY`
 
-## Siguiente gate físico
-1. En el dashboard Cloudflare del Worker LAB, **Settings / Variables and Secrets**, guardar un **Secret** llamado `CEREBRO_NIA_NOTION_READ_TOKEN` con el token de la integración exclusiva **CEREBRO NIA · Lectura LAB**. No copiar desde GitHub Actions: un secreto no se puede extraer en claro. No pegar en chat ni en repositorio.
-2. Una vez verificado que no existen rutas públicas, activar temporalmente `NIA_ENABLED=true` solo en este Worker para una prueba manual del `scheduled` handler desde interfaz administrativa de Cloudflare. Mantener cron vacío.
-3. Verificar salida `PASS_DEDICATED_NOTION_TOKEN_READONLY` sin cuerpos ni secretos. Si no pasa, volver a OFF, investigar error sanitizado.
-4. Restaurar `NIA_ENABLED=false` tras la prueba. Registrar evidencias, backup/rollback y deuda de integración al CEREBRO Gateway. La prueba documental **no** implica que NIA/Notion AI sea invocable como modelo.
+El disparador y la cola ya fueron retirados. El código del Worker queda sin handler queue tras la reversión. Se corrigió el parámetro Cloudflare `redirect:'error'` por `redirect:'manual'` (solo permite GET a páginas fijas y exige HTTP 200). La credencial sigue en Secret Cloudflare; no pasa por ChatGPT ni logs.
 
-## Rollback
-Eliminar exclusivamente el Worker nuevo o mantenerlo apagado, retirar su secreto Cloudflare. No tocar el secreto en GitHub ni integraciones existentes. Coste adicional 0 € mientras no se activen servicios de pago.
+**PENDIENTE PARA AUTONOMÍA:** integrar el proveedor NIA de solo lectura en CEREBRO Action Gateway bajo contrato IAM y tribunal; nunca promover el motor por el mero PASS del token. La IA de Notion no se invocó.
 
-## Aceptación
-- [x] Código no dependiente de GitHub Actions
-- [x] Pruebas de FAIL-CLOSED en Node test
-- [ ] Worker desplegado y subdominio, previews, crons verificados OFF
-- [ ] Secret Cloudflare configurado (NO incluir valor en documentos)
-- [ ] Prueba Scheduled con token dedicado PASS
-- [ ] Motor ACTGW desplegado y autorizado (separado)
+**SIN GitHub Actions** durante la suspensión; PR #70 continúa DRAFT. Sin cambios de producción ni nuevas suscripciones.
