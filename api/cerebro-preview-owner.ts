@@ -36,7 +36,7 @@ export default async function handler(req:Req,res:Res){
   const value:unknown=await response.json();
   const raw=value&&typeof value==='object'?value as Record<string,unknown>:{};
   const ctx=raw.context&&typeof raw.context==='object'?raw.context as Record<string,unknown>:raw;
-  if(ctx.actor_code!=='CARLOS-ADMIN')
+  if(raw.ok===false||ctx.actor_code!=='CARLOS-ADMIN')
    return res.status(403).json({allowed:false,reason:'OWNER_NOT_VERIFIED'});
   return res.status(200).json({allowed:true,source:'SERVER_VERIFIED_OWNER_CONTEXT'});
  }catch{return res.status(503).json({allowed:false,reason:'OWNER_CONTEXT_UNAVAILABLE'})}
