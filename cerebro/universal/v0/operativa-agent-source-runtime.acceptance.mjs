@@ -1,20 +1,8 @@
 /** Private, read-only CI acceptance for actual Vercel server source materialization.
- * Bundles the real API under Node after npm ci; no browser credentials.
+ * Imports the actual TypeScript API using Node 24 built-in type stripping, without dependencies or browser credentials.
  */
 import assert from 'node:assert/strict';
-import {mkdtemp,rm} from 'node:fs/promises';
-import {tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
-import {pathToFileURL} from 'node:url';
-import {build} from 'esbuild';
-const root=await mkdtemp(join(tmpdir(),'cerebro-agent-directory-lab-'));
-try{
- const outfile=join(root,'api.mjs');
- await build({entryPoints:[resolve('api/cerebro-agent-directory.ts')],
-  outfile,bundle:true,platform:'node',format:'esm',target:'node24',
-  logLevel:'warning',write:true});
- const {buildCerebroAgentDirectoryV0,queryCerebroAgentDirectoryV0,validateCerebroAgentDirectoryQueryV0}=
-  await import(pathToFileURL(outfile).href);
+import {buildCerebroAgentDirectoryV0,queryCerebroAgentDirectoryV0,validateCerebroAgentDirectoryQueryV0} from '../../../api/cerebro-agent-directory.ts';
  const roles=buildCerebroAgentDirectoryV0();
  assert.equal(roles.length,1138,'11 canonical roles + 569 FB source roles + 529 UMS roles + 29 legacy templates');
  assert.equal(new Set(roles.map(x=>x.kind+':'+x.id)).size,1138);
@@ -49,4 +37,3 @@ try{
   assert.throws(()=>validateCerebroAgentDirectoryQueryV0(new URLSearchParams(bad)));
  console.log('CEREBRO directory runtime GREEN:',{total:1138,media:529,facebook:569,subagent_roles:911,
   social_roles:42,templates:29,pagination:'validated',scope:'owner-only runtime separate',prod:false});
-}finally{await rm(root,{recursive:true,force:true})}
