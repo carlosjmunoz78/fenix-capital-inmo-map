@@ -35,9 +35,9 @@ export default function CerebroRoleAgentRosterLab({
    <span>DIRECTORIO FEDERADO · REGISTROS + DISEÑOS · SOLO LECTURA</span>
    <strong className={data?'is-ok':'is-amber'}>{data?'Fuentes consultadas · inventario parcial':result.kind==='denied'?'Acceso denegado':'Sin lectura verificable'}</strong>
   </div>
-  <p className="op3-source-note">Los ingenieros aparecen primero, pero <b>no son todos los agentes de CEREBRO</b>. La Productora UMS-001 incorpora 529 roles fuente, incluidos 384 especialistas.
-   Se consultan las fuentes indexadas (incluidos los subagentes de Facebook con su agente superior) sin inventar ejecutores. El total global de agentes y subagentes aún no está certificado.
-   Cada entrada distingue ficha técnica, explicación sencilla y actividad demostrada.</p>
+  <p className="op3-source-note">Los ingenieros aparecen primero por organización, <b>pero no son todo CEREBRO</b>. Este directorio reúne fuentes reales de Productora, SEO, Facebook, Instagram y LinkedIn, además de ingeniería y comercial.
+   Cada agente puede abrir los motores efectivamente asociados y cada subagente conserva el responsable documentado. Los perfiles definidos no equivalen a procesos activos; el censo completo de toda la plataforma sigue pendiente de verificar.
+   Pulsa sobre un registro para ver la ficha técnica o sitúa el cursor sobre su nombre para comprender claramente para qué sirve.</p>
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
    <div><strong>{count?.registered_logical_subagent_roles??'—'}</strong><small>Especialistas/subagentes lógicos · ejecución no verificada</small></div>

@@ -1,8 +1,9 @@
-/** Unified, paginated, owner-only CEREBRO AGENT DIRECTORY, PREVIEW.
- * Inventory coverage is PARTIAL, not a certification of all installed agents.
- * Immutable source files: 11 GitHub canonical roles + 35 documented social roles +
- * 29 proposed subagent templates; templates are NOT instantiated subagents.
- * No elevated privileges, mutations, runtime controls or credentials exposed.
+/** Unified, paginated, server-owner-verified CEREBRO AGENT DIRECTORY.
+ * 2506 source-pinned entries: 11 canonical + 529 UMS + 569 Facebook + 191 SEO +
+ * 569 Instagram family + 569 LinkedIn family + 39 Instagram departmental + 29 templates.
+ * SOURCE INVENTORY IS PARTIAL: logical roles != certified live workers.
+ * Production is GET only, Fénix owner-only and isolated from runtime mutations.
+ * No permissions, secrets, executions, transactions or new accounts are issued.
  */
 import roles from '../cerebro/registry/role-agent-registry.v1.json' with {type:'json'};
 import packs from '../cerebro/registry/role-knowledge-packs.v1.json' with {type:'json'};
