@@ -113,3 +113,13 @@ La interfaz OPERATIVA **no recibe aún datos de este bridge**. Este corte añade
 - `src/CerebroUniversalOperativaLabPanel.tsx` presenta, únicamente tras conexión LAB autenticada, un aviso explícito: *certificación desde este Gateway no verificada; promoción PROD bloqueada*. No consulta Cloudflare desde el navegador y no introduce secretos.
 - **NO OPERATIVO:** el Gateway no tiene todavía un lector Cloudflare D1 autenticado conectado ni un recibo real firmado que enseñar. La D1 se mantiene con 0 recibos y `FACT001_ROUTES_READ_TOKEN` sigue ausente. No crear un resultado verde sintético ni afirmar que este código está desplegado al usuario.
 - Orden de gate futuro: credencial zone Routes Read → emisión real de recibo vía FACT Runner → relectura HMAC desde servicio autenticado → verificación independiente del proveedor y mapeo multiempresa → conexión al Gateway propietario → QA de interfaz, rollback y tribunal → promoción gradual. Mantener PR #66 DRAFT.
+
+
+### 17/11/2026 · D1 EXPLAIN sin escrituras · cierre parcial P0-B
+La consulta física Cloudflare D1 LAB confirmó `EXPLAIN QUERY PLAN` válido para el `INSERT ... SELECT ... ON CONFLICT(job_id) DO NOTHING RETURNING` de `fact001-signed-ledger-writer-lab.mjs`, así como para los tres `SELECT` del lector del propietario. Sin ejecuciones de INSERT. Tabla, índice `idx_fact001_receipts_observed_lab_v0` y triggers de inmutabilidad `fact001_receipts_lab_no_update_v0` y `fact001_receipts_lab_no_delete_v0` confirmados en `sqlite_master`.
+
+Evidencia estructurada: `FACT001_P0B_D1_SQL_READONLY_PREFLIGHT_2026-11-17.json`. `EXPLAIN` solo acredita gramática y plan de SQL, **NO** verifica ejecución de D1 mutante, firma HMAC real, autenticación del proveedor ni compromiso duradero. El `SELECT` de evento terminal usa SCAN de tabla; solo optimizar tras medir y probar compatibilidad.
+
+El lector firmado de OWNER se endureció: regexp real de espacios `/\\s/` para rechazar tokens con espacio, tabulador, CR o LF **antes** de comprobación de sesión; suite de regresión con caracteres ASCII separados. El PR permanece en DRAFT con tests de GitHub CI, no se publicó ni fusionó.
+
+Control persistente: token nuevo `Workers Routes Read` continúa ausente, recibos D1=0, Factory estable y autónoma de PROD **HOLD**. No se modifica producción; Cloudflare D1 solo lectura.
