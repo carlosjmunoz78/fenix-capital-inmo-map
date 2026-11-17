@@ -22,7 +22,7 @@ async function readNiaOnce(env) {
     const get = async path => {
       try {
         return await globalThis.fetch(ROOT + path, {
-          method: 'GET', headers, redirect: 'error', signal: AbortSignal.timeout(10000)
+          method: 'GET', headers, redirect: 'manual', signal: AbortSignal.timeout(10000)
         });
       } catch (error) {
         // No exception messages, payloads, URLs or secrets are logged.
