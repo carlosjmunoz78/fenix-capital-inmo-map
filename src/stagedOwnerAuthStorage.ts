@@ -12,6 +12,8 @@ export function createStagedOwnerAuthStorage(local:Store, tab:Store, authKey:str
   getItem(key:string):string|null{
    if(key!==authKey)return local.getItem(key);
    if(remembered())return local.getItem(key);
+   // No tab authorization marker means the tab cannot resume this session.
+   if(!active())return null;
    const current=tab.getItem(key);
    if(current!==null)return current;
    // One-time migration ONLY for a tab that was authenticated before this fix.
