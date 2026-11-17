@@ -66,6 +66,13 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    {dryRun?<span role="status">{dryRun.message}</span>:null}
   </div>:null}
   {result?.kind==='ready'?<CerebroFactRegistryLab/>:null}
+  {result?.kind==='ready'?<div className="op-uni-lab-work" aria-label="FACT-001 · verificación de recibos firmados del proveedor">
+   <strong>FACT-001 · recibos de operaciones externas</strong>
+   <span>Certificación desde este Gateway: NO VERIFICADA · Promoción PROD: BLOQUEADA</span>
+   <small>Este panel todavía no recibe un recibo HMAC cotejado por el servidor con el trabajo de FACT-001, el evento terminal y la base D1. No debe interpretarse como acreditación del proveedor.</small>
+   <small>No se realizan consultas directas a Cloudflare desde el navegador ni se exponen credenciales. Cuando exista un lector autenticado, se mostrarán únicamente evidencias verificadas por el servidor.</small>
+  </div>:null}
+
   {result?.kind==='ready'?<div className="op-uni-lab-dependency" aria-label="Estado de dependencia WordPress staging">
    <strong>Staging suspendida hasta nuevo aviso</strong>
    <span>{result.dependencies?.state==='SUSPENDED_VERIFIED'
