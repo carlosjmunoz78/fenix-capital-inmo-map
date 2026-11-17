@@ -23,3 +23,8 @@ Este registro **NO es una promoción**. Desencadena exclusivamente el build prod
 6. Si el E2E propietario no es posible por sesión/login de Preview, o existe discrepancia/CI roja, `PROD_PROMOTION=HOLD`, no habilitar agentes, no tocar App/CRM/DNS ni main.
 
 **Estado del presente documento:** STAGE SOLICITADO; PROD alias protegido; no se certifican todavía QA autenticada, ejecución de subagentes, compatibilidad total, coste medido o rollback físico del despliegue.
+
+## Gate E2E privado de sesión real (adición 17/11)
+- Stage ahora permite exclusivamente su host único firmado por Vercel (`VERCEL_URL`) cuando `VERCEL_ENV=production`, y sólo acepta GET con JWT real de propietario; alias PROD sigue en baseline.
+- La aceptación automatizada comprueba `GET` sin sesión 401, `POST` 405, tenant ajeno 400, y `GET` propietario real 200 con 2.506 entradas y `executed=false`.
+- Sólo utiliza secretos ya existentes en GitHub Actions; si el JWT falta/expira o el bypass de SSO no está autorizado, falla y prohíbe promover. No crea cuentas, tokens, permisos, dominios ni alias.
