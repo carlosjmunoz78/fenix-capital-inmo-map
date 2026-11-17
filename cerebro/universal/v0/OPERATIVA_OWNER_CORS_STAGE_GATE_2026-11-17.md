@@ -32,3 +32,21 @@
 
 ## Estado
 CODE_READY; UNIT_AND_BUILD_PASS; STAGED_E2E_PENDING; PROD_UNCHANGED; NEXT=STAGE_NO_DOMAIN_THEN_OWNER_E2E.
+
+## 17/11/2026 · Autenticación física comprobada y reparación de sesiones multi-pestaña
+
+### Evidencia real del candidato inicial (SHA `cf808c40575b7d570290053d7afac5178f241d10`)
+- En Opera autorizada, `https://fenix-capital-preprod-k1d68fn2z.vercel.app/cerebro?section=operativa&visual_lab=cockpit-v3&op3_panel=agentes` presentó OPERATIVA/Agentes con listado `1–25 de 2506`, fichas, jerarquía y enlaces a motores asociados.
+- Supabase PROD, observación agregada SOLO LECTURA: `GET fenix-app-gateway/session/context` 31 respuestas `200` y `GET /navigation` 9 respuestas `200` durante la ventana consultada, con últimos registros a 22:06:40Z y 22:06:39Z. Confirma que el Gateway volvió a devolver identidad y navegación. No se copiaron JWT, identificadores personales ni claves.
+- Antes de ese acceso, CI del mismo SHA 3/3 GREEN, Vercel deployment `dpl_bZdX3vd2PUKa22h4ZPLVaJWJP8QS` READY sin alias. **No es certificación de PROD ni de los 2506 como procesos vivos.**
+
+### Segundo incidente real tras abrir otra pestaña del mismo hostname
+- Abriendo `/inicio` en pestaña independiente sin «Recordarme» apareció el login. Código anterior de `src/App.tsx` ejecutaba `supabase.auth.signOut()` GLOBAL cuando existía sesión local pero faltaba `fenix-session-active` de la pestaña. Esto puede revocar una sesión que sigue utilizándose en otra pestaña y explica un mecanismo reproducible para `session_not_found`; los registros de autenticación muestran errores de esa clase, pero no atribuir todas las trazas exclusivamente a este mecanismo.
+- Reparación **sólo para hostname staged**: `src/stagedOwnerAuthStorage.ts` separa por `sessionStorage` las sesiones no recordadas, mantiene las recordadas en `localStorage`, permite migración controlada sólo en pestaña ya activa; `src/App.tsx` no ejecuta `signOut` global por abrir una pestaña staged distinta y sincroniza marcador antes de `signInWithPassword`.
+- `src/supabase.ts` mantiene adaptador anterior para `app.fenixcapital.es` y no sintetiza identidad del propietario desde metadatos manipulables si falla el Gateway en staged. Se mantienen las negativas de permisos y la conexión owner-only de lectura.
+- Prueba independiente `operativa-staged-owner-tab-isolation.test.mjs` verifica separación entre pestañas, semántica de recordar, migración, ausencia de token persistente y fail-closed. Código en PR #66 DRAFT; no tocar producción.
+
+### Gates a mantener
+- Desplegar nuevo SHA candidato con `--prod --skip-domain` y SSO intacto; comprobar build, negativo anónimo, sesión real owner y logs sin secretos.
+- **Pendientes:** E2E propietario en NUEVO hostname staged, regresión App/CRM OLD vs NEW completa, observabilidad/coste medidos, ejercicio real de rollback en entorno seguro. Si falta cualquiera: `PROD_PROMOTION=HOLD`.
+- **No autorizada** ninguna modificación de usuarios/RBAC, Edge Functions Supabase PROD, CORS global, `main`, dominios ni alias de PROD. Coste marginal no auditado.
