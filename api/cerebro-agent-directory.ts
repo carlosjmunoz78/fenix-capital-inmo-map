@@ -1,0 +1,129 @@
+/** Unified, paginated, owner-only CEREBRO AGENT DIRECTORY, PREVIEW.
+ * Inventory coverage is PARTIAL, not a certification of all installed agents.
+ * Immutable source files: 11 GitHub canonical roles + 35 documented social roles +
+ * 29 proposed subagent templates; templates are NOT instantiated subagents.
+ * No elevated privileges, mutations, runtime controls or credentials exposed.
+ */
+import roles from '../cerebro/registry/role-agent-registry.v1.json' with {type:'json'};
+import packs from '../cerebro/registry/role-knowledge-packs.v1.json' with {type:'json'};
+import facebook from '../cerebro/registry/social-facebook-agent-role-design.v1.json' with {type:'json'};
+
+type H=string|string[]|undefined;
+type Req={method?:string;url?:string;headers:Record<string,H>};
+type Res={status:(n:number)=>Res;setHeader:(name:string,val:string)=>void;json:(body:unknown)=>void};
+const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const OWNER='https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context';
+const head=(h:H)=>Array.isArray(h)?h[0]||'':h||'';
+const fail=(res:Res,code:number,reason:string)=>res.status(code).json({status:'UNAVAILABLE',reason,executed:false});
+const simple:Record<string,string>={
+ 'ENG-ARCHITECT':'Diseña cómo encajan los componentes de CEREBRO y evita cambios incompatibles.',
+ 'ENG-CODE':'Escribe y corrige código de forma segura y reversible.',
+ 'ENG-SYSTEMS':'Mantiene servidores, colas, procesos y trabajos fiables.',
+ 'ENG-MATH':'Comprueba cálculos, estadísticas y reglas de decisión.',
+ 'ENG-DATA':'Organiza los datos y comprueba su calidad y trazabilidad.',
+ 'ENG-SECURITY':'Protege permisos, claves y sistemas contra accesos y cambios indebidos.',
+ 'ENG-QA':'Realiza pruebas para detectar fallos antes de publicar cambios.',
+ 'ENG-INTEGRATOR':'Conecta motores y servicios mediante contratos comprobables.',
+ 'ENG-TECH-SCOUT':'Busca tecnologías útiles y comprueba su coste y aplicabilidad.',
+ 'ENG-PERFORMANCE':'Mejora la velocidad y el coste a partir de métricas.',
+ 'AGT-SALES-EXECUTIVE':'Organiza oportunidades comerciales y prepara respuestas sujetas a aprobación.'
+};
+const packMap=new Map(packs.packs.map(p=>[p.role_id,p]));
+export type AgentDirectoryEntry={
+ id:string;name:string;kind:'AGENT_ROLE'|'SUBAGENT_TEMPLATE';family:string;
+ state:string;source:string;purpose_plain:string;purpose_technical:string;
+ engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
+ company_scope:string;source_url:string;
+};
+export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
+ if(roles.registry_id!=='CEREBRO_ROLE_AGENT_REGISTRY_V1'||!Array.isArray(roles.roles)||
+  !Array.isArray(packs.packs)||!Array.isArray(facebook.roles)||!Array.isArray(facebook.subagent_templates)||
+  facebook.registry_id!=='CEREBRO_SOCIAL_FACEBOOK_AGENT_ROLE_DESIGN_V1')throw Error('REGISTRY_SOURCE_CONTRACT_INVALID');
+ const engineers:AgentDirectoryEntry[]=roles.roles.map(r=>({
+  id:r.role_id,name:r.name,kind:'AGENT_ROLE',family:r.department==='ENGINEERING'?'ENGINEERING':'REVENUE_SALES',
+  state:r.state,source:'GITHUB_CANONICAL_ROLE_REGISTRY',purpose_plain:simple[r.role_id]||'Función pendiente de descripción verificada.',
+  purpose_technical:packMap.get(r.role_id)?.mission||'Misión técnica pendiente de verificar.',
+  engine_ids:[...r.engines],parent_id:r.reports_to,hierarchy_verified:r.reports_to_state!=='UNRESOLVED',
+  runtime_verified:false,company_scope:r.company_scope,
+  source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/registry/role-agent-registry.v1.json'
+ }));
+ const fb:AgentDirectoryEntry[]=facebook.roles.map(r=>({
+  id:r.id,name:r.technical_name,kind:'AGENT_ROLE',family:'SOCIAL_FACEBOOK',
+  state:'DEFINED_ONLY',source:'NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT',purpose_plain:r.plain_purpose,
+  purpose_technical:r.technical_name,engine_ids:[],parent_id:null,hierarchy_verified:false,
+  runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',source_url:facebook.source_url
+ }));
+ const templates:AgentDirectoryEntry[]=facebook.subagent_templates.map(r=>({
+  id:r.family_template_id,name:r.name,kind:'SUBAGENT_TEMPLATE',family:'SOCIAL_FACEBOOK',
+  state:'TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE',source:'NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT',
+  purpose_plain:'Especialidad prevista de subagentes para '+r.name+'. No hay instancia ni ejecución acreditadas.',
+  purpose_technical:'Subagent family template: '+r.name,engine_ids:[],parent_id:null,
+  hierarchy_verified:false,runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',
+  source_url:facebook.source_url
+ }));
+ const all=[...engineers,...fb,...templates],keys=new Set(all.map(x=>x.kind+':'+x.id));
+ if(keys.size!==all.length||all.some(x=>!x.id||!x.name||!x.purpose_plain||!x.source_url||
+   !Array.isArray(x.engine_ids)||x.engine_ids.some(y=>!/^[A-Z0-9-]+$/.test(y))))
+  throw Error('DIRECTORY_DUPLICATE_OR_INCOMPLETE');
+ return all;
+}
+export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
+ const valid=new Set(['company_id','offset','limit','kind','family','q']);
+ if([...q.keys()].some(k=>!valid.has(k)||q.getAll(k).length!==1)||q.get('company_id')!=='fenix')
+  throw Error('INVALID_QUERY_OR_SCOPE');
+ const pInt=(v:string|null,def:number,max:number)=>{
+  if(v===null)return def;
+  if(!/^(0|[1-9][0-9]*)$/.test(v))throw Error('INVALID_PAGINATION');
+  const n=Number(v);if(!Number.isSafeInteger(n)||n>max)throw Error('INVALID_PAGINATION');return n;
+ };
+ const offset=pInt(q.get('offset'),0,10000000),limit=pInt(q.get('limit'),30,100);
+ if(limit<1)throw Error('INVALID_PAGINATION');
+ const kind=q.get('kind')||'AGENT_ROLE';
+ if(!['AGENT_ROLE','SUBAGENT_TEMPLATE','ALL'].includes(kind))throw Error('INVALID_KIND');
+ const family=q.get('family')||'ALL';
+ if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK'].includes(family))throw Error('INVALID_FAMILY');
+ const term=(q.get('q')||'').normalize('NFKC').trim().toLocaleLowerCase('es-ES');
+ if(term.length>100||/[\u0000-\u001F]/.test(term))throw Error('INVALID_SEARCH');
+ const all=buildCerebroAgentDirectoryV0();
+ const records=all.filter(r=>(kind==='ALL'||r.kind===kind)&&(family==='ALL'||r.family===family)&&
+  (!term||[r.id,r.name,r.family,r.purpose_plain,r.purpose_technical,...r.engine_ids].join(' ').toLocaleLowerCase('es-ES').includes(term)));
+ return {
+  status:'OK' as const,company_id:'fenix' as const,
+  coverage:'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS' as const,
+  transport:'PREVIEW_ONLY_SERVER_VERIFIED' as const,read_only:true as const,executed:false as const,
+  active_agents_verified:false as const,subagent_instances_verified:false as const,
+  counts:{known_agent_roles:all.filter(r=>r.kind==='AGENT_ROLE').length,
+   subagent_templates_not_instances:all.filter(r=>r.kind==='SUBAGENT_TEMPLATE').length,
+   total_runtime_instances:null,unindexed_sources_possible:true},
+  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT'],
+  page:{offset,limit,total:records.length,next_offset:offset+limit<records.length?offset+limit:null},
+  records:records.slice(offset,offset+limit)
+ };
+}
+export default async function handler(req:Req,res:Res){
+ res.setHeader('Cache-Control','private, no-store, max-age=0');
+ res.setHeader('Vary','Authorization');
+ res.setHeader('X-Content-Type-Options','nosniff');
+ res.setHeader('X-Frame-Options','DENY');
+ const host=head(req.headers.host).toLowerCase();
+ if(process.env.VERCEL_ENV!=='preview'||!HOST.test(host))return fail(res,403,'PREVIEW_ONLY');
+ if(req.method!=='GET')return fail(res,405,'READ_ONLY');
+ const origin=head(req.headers.origin);
+ if(origin&&origin!=='https://'+host)return fail(res,403,'ORIGIN_DENIED');
+ let query:URLSearchParams;
+ try{query=new URL(req.url||'/','https://'+host).searchParams}catch{return fail(res,400,'INVALID_URL')}
+ try{queryCerebroAgentDirectoryV0(query)}catch{return fail(res,400,'INVALID_QUERY_OR_SCOPE')}
+ const bearer=head(req.headers.authorization),apikey=head(req.headers.apikey);
+ if(!/^Bearer\s+\S{20,8192}$/i.test(bearer)||apikey.length<12||apikey.length>256)
+  return fail(res,401,'OWNER_SESSION_REQUIRED');
+ try{
+  const response=await fetch(OWNER,{method:'GET',headers:{authorization:bearer,apikey,accept:'application/json'},
+   redirect:'error',cache:'no-store',signal:AbortSignal.timeout(6500)});
+  if(response.status!==200)return fail(res,403,'OWNER_NOT_VERIFIED');
+  const body=await response.json();
+  const ctx=body?.context&&typeof body.context==='object'?body.context:body;
+  if(body?.ok===false||ctx?.actor_code!=='CARLOS-ADMIN')return fail(res,403,'OWNER_NOT_VERIFIED');
+ }catch{return fail(res,503,'OWNER_RESOLVER_UNAVAILABLE')}
+ try{return res.status(200).json(queryCerebroAgentDirectoryV0(query))}
+ catch{return fail(res,503,'REGISTRY_SOURCE_INVALID')}
+}
