@@ -47,11 +47,14 @@ jobs:
           mkdir -p "$XDG_DATA_HOME/com.vercel.cli"
           chmod 700 "$XDG_DATA_HOME" "$XDG_DATA_HOME/com.vercel.cli"
           node -e 'const fs=require("node:fs"),p=require("node:path");fs.writeFileSync(p.join(process.env.XDG_DATA_HOME,"com.vercel.cli","auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600});'
+          # Link the exact existing project in this ephemeral runner, without a deploy.
+          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects >/dev/null
+          node -e 'const p=require("./.vercel/project.json");if(p.orgId!==process.env.VERCEL_ORG_ID||p.projectId!==process.env.VERCEL_PROJECT_ID)throw Error("BLOCKED: PROJECT_LINK_MISMATCH")'
           node cerebro/universal/v0/operativa-ssoprotected-vercel-curl-e2e.mjs
       - name: Destroy transient authentication on any outcome
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf "$RUNNER_TEMP/cerebro-op-stage-vercel-auth"
-          echo 'TRANSIENT_AUTH_REMOVED; SSO_STILL_ENABLED; PROD_UNCHANGED'
+          rm -rf "$RUNNER_TEMP/cerebro-op-stage-vercel-auth" .vercel
+          echo 'TRANSIENT_AUTH_REMOVED; LOCAL_LINK_REMOVED; SSO_STILL_ENABLED; PROD_UNCHANGED'
