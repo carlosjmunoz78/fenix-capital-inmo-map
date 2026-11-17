@@ -14,14 +14,7 @@ function stop(code) {
   return code;
 }
 
-export default {
-  async fetch() {
-    // Never expose any live HTTP endpoint even if accidentally routed.
-    return new Response('Not Found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
-  },
-  async scheduled(_controller, env) {
-    // Only an authenticated operator can run a manually triggered Scheduled handler.
-    if (env.NIA_ENABLED !== 'true') return stop('OFF');
+async function readNiaOnce(env) {
     const token = env.CEREBRO_NIA_NOTION_READ_TOKEN;
     if (typeof token !== 'string' || token.trim().length < 15)
       return stop('BLOCKED_CLOUDFLARE_SECRET_MISSING');
@@ -56,5 +49,36 @@ export default {
       return stop('BLOCKED_BLOCKS_NOT_READABLE');
     console.log('NIA_CLOUDFLARE_BLOCK_READ=PASS');
     return stop('PASS_DEDICATED_NOTION_TOKEN_READONLY');
+}
+
+export default {
+  async fetch() {
+    return new Response('Not Found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
+  },
+  async scheduled(_controller, env) {
+    if (env.NIA_ENABLED !== 'true') return stop('OFF');
+    return readNiaOnce(env);
+  },
+  async queue(batch, env) {
+    for (const message of batch.messages) {
+      const body = message.body;
+      const now = Date.now();
+      const permitted = batch.queue === 'cerebro-nia-one-shot-proof-lab' &&
+        body?.type === 'NIA_READONLY_CHECK_V1' &&
+        body?.page_id === PAGE_ID && body?.single_use === true &&
+        Number.isSafeInteger(body?.issued_at_ms) &&
+        Number.isSafeInteger(body?.expires_at_ms) &&
+        now >= body.issued_at_ms && now <= body.expires_at_ms &&
+        body.expires_at_ms - body.issued_at_ms > 0 &&
+        body.expires_at_ms - body.issued_at_ms <= 120000;
+      if (!permitted) {
+        console.log('NIA_PRIVATE_QUEUE_GATE=BLOCKED_INVALID_REQUEST');
+        message.ack();
+        continue;
+      }
+      const result = await readNiaOnce(env);
+      console.log('NIA_PRIVATE_QUEUE_GATE=' + result);
+      message.ack();
+    }
   }
 };

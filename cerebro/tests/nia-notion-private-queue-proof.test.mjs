@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import worker from '../nia-notion-cloudflare-lab/worker.mjs';
+const good=()=>({type:'NIA_READONLY_CHECK_V1',page_id:'41a81b1a-756d-815a-b877-f0d264a6a0d4',single_use:true,issued_at_ms:Date.now()-1000,expires_at_ms:Date.now()+20000});
+test('no HTTP route, no cron run when OFF',async()=>{assert.equal((await worker.fetch()).status,404);assert.equal(await worker.scheduled({}, {NIA_ENABLED:'false'}),'OFF')});
+test('private queue refuses wrong queue and invalid expiration',async()=>{const prior=globalThis.fetch;let network=0;globalThis.fetch=async()=>{network++;throw Error('unexpected network')};try{const payload=good();let ack=0;await worker.queue({queue:'other-queue',messages:[{body:payload,ack(){ack++}}]},{NIA_ENABLED:'false'});assert.equal(ack,1);payload.expires_at_ms=Date.now()-1;await worker.queue({queue:'cerebro-nia-one-shot-proof-lab',messages:[{body:payload,ack(){ack++}}]},{NIA_ENABLED:'false'});assert.equal(ack,2);assert.equal(network,0)}finally{globalThis.fetch=prior}});
+test('single authorized private message respects secret validation and acks',async()=>{const prior=globalThis.fetch;let network=0;globalThis.fetch=async()=>{network++;throw Error('unexpected network')};try{let ack=0;await worker.queue({queue:'cerebro-nia-one-shot-proof-lab',messages:[{body:good(),ack(){ack++}}]},{NIA_ENABLED:'false'});assert.equal(ack,1);assert.equal(network,0)}finally{globalThis.fetch=prior}});
