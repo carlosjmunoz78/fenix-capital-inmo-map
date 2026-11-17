@@ -12,6 +12,8 @@ on:
       - 'src/CerebroConsoleShell.tsx'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
+      - 'scripts/voice001-render-port-guard.mjs'
+      - 'tests/voice001-render-port-policy.test.mjs'
   push:
     branches: [main]
     paths:
@@ -23,6 +25,8 @@ on:
       - 'src/CerebroConsoleShell.tsx'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
+      - 'scripts/voice001-render-port-guard.mjs'
+      - 'tests/voice001-render-port-policy.test.mjs'
 
 permissions:
   contents: read
@@ -75,7 +79,12 @@ jobs:
           changed="$(git diff --name-only "$base" HEAD)"
           ! printf '%s\n' "$changed" | grep -Eq '^supabase/'
           ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
-          ! printf '%s\n' "$changed" | grep -q '^src/CerebroConsoleShell.tsx$'
+          # Allow only the byte-exact optional React port; never relax voice/auth checks.
+          # Neither this guard nor this workflow may change in the same PR as Console.
+          # Canonical fixture comes from Git, not the candidate's modified file.
+          export VOICE001_CANONICAL_BASE_SHA="$base"
+          node --test tests/voice001-render-port-policy.test.mjs
+          node scripts/voice001-render-port-guard.mjs "$base"
       - name: Install dependencies reproducibly
         run: npm ci
       - name: Build exact head
