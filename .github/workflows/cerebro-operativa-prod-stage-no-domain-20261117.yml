@@ -1,0 +1,72 @@
+name: CEREBRO OPERATIVA · staged production build NO DOMAIN
+on:
+  push:
+    branches: [cerebro/universal-control-plane-lab-v0-20261113]
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-operativa-prod-stage-no-domain-20261117
+  cancel-in-progress: false
+jobs:
+  stage:
+    if: contains(github.event.head_commit.message, '[STAGE_OPERATIVA_NO_DOMAIN]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+    steps:
+      - name: Checkout exact release source, without persisting credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9
+        with:
+          persist-credentials: false
+      - name: Configure pinned Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Validate precise branch and existing production project, no aliases
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/cerebro/universal-control-plane-lab-v0-20261113"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$VERCEL_ORG_ID" = "team_qnh6u1Ofy2WPp0MGEKlyMA50"
+          test "$VERCEL_PROJECT_ID" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
+      - name: Install reviewed lockfile
+        run: npm ci --no-audit --no-fund
+      - name: Verify all 2506 source records and tenant-bound owner authorization
+        run: |
+          node --experimental-strip-types cerebro/universal/v0/operativa-agent-source-runtime.acceptance.mjs
+          node --experimental-strip-types cerebro/universal/v0/operativa-owner-prod-readonly.acceptance.mjs
+      - name: Production-compatible typecheck and build in CI
+        run: npm run build
+      - name: Install exact existing Vercel CLI version
+        run: npm install --global vercel@48.0.0
+      - name: Pull scoped production config without updating domain
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$VERCEL_TOKEN" ]; then echo 'BLOCKED: protected VERCEL_TOKEN not configured in this repository'; exit 2; fi
+          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects
+          node -e "const x=require('./.vercel/project.json');if(x.projectId!=='prj_4ElVl8e2KzrHS7r5yvBGBban1DXV'||x.orgId!=='team_qnh6u1Ofy2WPp0MGEKlyMA50')process.exit(3)"
+      - name: Build actual production configuration for isolated target project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --scope=carlosjmunozcabeza-2582s-projects
+      - name: Stage compiled PROD artifact without assigning ANY production domains
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          url="$(vercel deploy --prebuilt --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects)"
+          case "$url" in https://*.vercel.app) ;; *) echo "BLOCKED: unexpected staging URL format"; exit 4;; esac
+          echo "STAGED_PROD_URL=$url" >> "$GITHUB_STEP_SUMMARY"
+          echo "STAGED_PROD_SHA=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "TARGET=prj_4ElVl8e2KzrHS7r5yvBGBban1DXV" >> "$GITHUB_STEP_SUMMARY"
+          echo "PRODUCTION_DOMAIN_ASSIGNMENT=NOT_PERFORMED" >> "$GITHUB_STEP_SUMMARY"
+          echo "PRIOR_PROD_DEPLOYMENT=dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ" >> "$GITHUB_STEP_SUMMARY"
+          echo "PRODUCTION_PROMOTION=HOLD_UNTIL_AUTHENTICATED_QA" >> "$GITHUB_STEP_SUMMARY"
