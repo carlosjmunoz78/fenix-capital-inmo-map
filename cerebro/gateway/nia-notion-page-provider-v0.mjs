@@ -34,7 +34,7 @@ export function createNiaPageReadProviderV0({
             'Notion-Version': '2022-06-28',
             Accept: 'application/json'
           },
-          redirect: 'error',
+          redirect: 'manual',
           signal: AbortSignal.timeout(timeout_ms)
         });
       } catch {

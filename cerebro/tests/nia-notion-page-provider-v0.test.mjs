@@ -12,7 +12,7 @@ test('provider uses one exact read-only endpoint and returns minimal Notion meta
     fetch_impl:async(url,options)=>{
       calls++;auth=options.headers.Authorization;
       assert.equal(url,'https://api.notion.com/v1/pages/'+NIA_NOTION_PAGE_ID);
-      assert.equal(options.method,'GET');assert.equal(options.redirect,'error');
+      assert.equal(options.method,'GET');assert.equal(options.redirect,'manual');
       assert.equal(options.headers['Notion-Version'],'2022-06-28');
       body=!!options.body;
       return {status:200,json:async()=>({...PAGE,secret:'must-never-echo',blocks:[{text:'sensitive'}]})};
