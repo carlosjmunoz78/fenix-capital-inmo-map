@@ -8,7 +8,7 @@ function mockRes(){
   setHeader(k,v){this.headers[k]=v},json(v){this.body=v;return this}};
  return obj;
 }
-async function run({hostname=host,env='production',method='GET',url='/api/cerebro-agent-directory?company_id=fenix&limit=2',headers=null}={}){
+async function run({hostname=host,env='production',method='GET',url='/api/cerebro-agent-directory?company_id=fenix&kind=ALL&limit=2',headers=null}={}){
  process.env.VERCEL_ENV=env;const res=mockRes();
  await handler({method,url,headers:headers||goodHeaders(hostname)},res);
  return res;
