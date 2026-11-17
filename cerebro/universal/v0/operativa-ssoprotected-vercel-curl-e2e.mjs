@@ -17,16 +17,6 @@ assert.match(host.hostname,/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/);
 const token=process.env.CEREBRO_E2E_USER_JWT||'';
 const apikey=process.env.PROD_SUPABASE_PUBLISHABLE_KEY||'';
 if(!process.env.VERCEL_TOKEN)throw Error('BLOCKED: EXISTING_VERCEL_TOKEN_ABSENT');
-if(!token||!apikey)throw Error('BLOCKED: OWNER_E2E_EXISTING_SECRET_ABSENT');
-const chunks=token.split('.');
-if(chunks.length!==3)throw Error('BLOCKED: OWNER_E2E_JWT_MALFORMED');
-let payload;
-try{payload=JSON.parse(Buffer.from(chunks[1],'base64url').toString('utf8'))}
-catch{throw Error('BLOCKED: OWNER_E2E_JWT_INVALID_CLAIMS')}
-if(!Number.isFinite(payload.exp)||payload.exp*1000<Date.now()+60_000)
- throw Error('BLOCKED: OWNER_E2E_JWT_EXPIRED');
-if(!/^sb_publishable_[A-Za-z0-9_-]{12,128}$/.test(apikey))
- throw Error('BLOCKED: PUBLISHABLE_KEY_FORMAT');
 const dir=mkdtempSync(join(tmpdir(),'cerebro-op-e2e-'));
 function request(method,path,authenticated=false){
  const destination=new URL(path,base);
@@ -63,6 +53,16 @@ try{
  expect('MUTATION_405',405,request('POST','/api/cerebro-agent-directory?company_id=fenix'),'READ_ONLY');
  expect('WRONG_TENANT_400',400,request('GET','/api/cerebro-agent-directory?company_id=other'),'INVALID_QUERY_OR_SCOPE');
 
+ // The negative SSO/authorization gates must run even if the owner test JWT expired.\n if(!token||!apikey)throw Error('BLOCKED: OWNER_E2E_EXISTING_SECRET_ABSENT');
+ const chunks=token.split('.');
+ if(chunks.length!==3)throw Error('BLOCKED: OWNER_E2E_JWT_MALFORMED');
+ let payload;
+ try{payload=JSON.parse(Buffer.from(chunks[1],'base64url').toString('utf8'))}
+ catch{throw Error('BLOCKED: OWNER_E2E_JWT_INVALID_CLAIMS')}
+ if(!Number.isFinite(payload.exp)||payload.exp*1000<Date.now()+60_000)
+  throw Error('BLOCKED: OWNER_E2E_JWT_EXPIRED');
+ if(!/^sb_publishable_[A-Za-z0-9_-]{12,128}$/.test(apikey))
+  throw Error('BLOCKED: PUBLISHABLE_KEY_FORMAT');
  const ctx=request('GET','/api/cerebro-owner-bootstrap?resource=context',true);
  if(ctx.status!==200||ctx.data?.ok===false||(ctx.data?.context||ctx.data)?.actor_code!=='CARLOS-ADMIN')
   throw Error('BLOCKED: OWNER_CONTEXT_NOT_CERTIFIED_STATUS_'+ctx.status);
