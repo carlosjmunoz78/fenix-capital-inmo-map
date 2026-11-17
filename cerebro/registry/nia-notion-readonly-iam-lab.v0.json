@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "document_type": "NIA_NOTION_READONLY_LAB_IAM_CANDIDATE",
-  "status": "CONSOLE_V38_SYNC_NOTION_SKILL_READ_DEPLOYED_OWNER_E2E_NOT_YET_RETESTED",
+  "status": "CONSOLE_V38_OWNER_SKILL_READ_AND_FACT_NIA_REAL_E2E_VERIFIED",
   "alias_es": "NIA · Lectura exclusiva de documentación en LAB",
   "company_id": "fenix",
   "engine_id": "ACTGW-001",
   "environment": "PREPROD",
   "lab_environment": "CEREBRO-NIA-LAB",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "notion_integration": {
     "name": "CEREBRO NIA · Lectura LAB",
     "bot_id": "41b81b1a-756d-8132-b0d6-0027f800e898",
@@ -101,7 +101,7 @@
     "console_scoped_token_expiry": "2026-12-01T00:00:00Z",
     "console_prod_autonomous_enabled": false,
     "console_sync_skill_result_configured": true,
-    "console_sync_skill_result_owner_e2e_verified": false,
+    "console_sync_skill_result_owner_e2e_verified": true,
     "notion_service_token_skill_page_and_blocks_verified": true
   },
   "rollback": "Console real: redeploy the four original v36 files saved under cerebro/backups/console-gateway-v36-20261117, verify_jwt=false; validate no-auth 401, then live owner smoke. FACT/NIA bindings/Secrets remain intact. This does not delete any existing integration.",
@@ -360,7 +360,7 @@
         "Referencias permanentes"
       ],
       "direct_notions_api_get_verified": true,
-      "owner_authenticated_readable_result_live_qa": false,
+      "owner_authenticated_readable_result_live_qa": true,
       "post_deployment_unauth_smoke_requests": [
         41114,
         41115
@@ -374,7 +374,16 @@
       "queue_fact_nia_existing_route_preserved": true,
       "frontend_code_changed": false,
       "rollback_prod_executed": false,
-      "new_paid_service": false
+      "new_paid_service": false,
+      "owner_reported_nia_text": "He comprobado la Skill NIA directamente en Notion: 36 bloques de contenido y 6 secciones principales; orden enviada a FACT-001/NIA en LAB",
+      "owner_event_utc": "2026-11-17T11:59:10.015Z",
+      "owner_event_edge": "CONSOLE_NIA_EDGE_QUEUE_ACCEPTED",
+      "owner_event_fact_utc": "2026-11-17T11:59:11.074Z",
+      "owner_event_fact": "FACT_NIA_PRIVATE_RESULT=PASS",
+      "owner_event_nia_utc": "2026-11-17T11:59:11.070Z",
+      "owner_event_nia": "NIA_CENTRAL_RECEIVER_GATE=PASS",
+      "native_notion_ai_invoked": false,
+      "durable_actor_correlation_join_verified": false
     }
   }
 }

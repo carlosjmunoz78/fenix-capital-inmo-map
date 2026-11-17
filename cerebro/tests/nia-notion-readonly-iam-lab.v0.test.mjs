@@ -40,13 +40,15 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.console_backend_canary_rollback_verified,true);
  assert.equal(candidate.state.console_backend_unauth_smoke_verified,true);
  assert.equal(candidate.state.console_sync_skill_result_configured,true);
- assert.equal(candidate.state.console_sync_skill_result_owner_e2e_verified,false);
+ assert.equal(candidate.state.console_sync_skill_result_owner_e2e_verified,true);
  assert.equal(candidate.state.notion_service_token_skill_page_and_blocks_verified,true);
  assert.equal(candidate.evidence.console_result_v38.notion_page_blocks,36);
  assert.equal(candidate.evidence.console_result_v38.notion_sections.length,6);
  assert.equal(candidate.evidence.console_result_v38.direct_notions_api_get_verified,true);
  assert.deepEqual(candidate.evidence.console_result_v38.post_deployment_unauth_smoke_statuses,[401,401]);
- assert.equal(candidate.evidence.console_result_v38.owner_authenticated_readable_result_live_qa,false);
+ assert.equal(candidate.evidence.console_result_v38.owner_authenticated_readable_result_live_qa,true);
+ assert.equal(candidate.evidence.console_result_v38.owner_event_fact,'FACT_NIA_PRIVATE_RESULT=PASS');
+ assert.equal(candidate.evidence.console_result_v38.owner_event_nia,'NIA_CENTRAL_RECEIVER_GATE=PASS');
  assert.equal(candidate.state.console_authenticated_owner_request_verified,true);
  assert.equal(candidate.state.console_durable_actor_audit_verified,false);
  assert.equal(candidate.state.console_frontend_modified,false);

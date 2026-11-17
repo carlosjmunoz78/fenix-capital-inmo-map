@@ -31,3 +31,16 @@ La respuesta de `consulta NIA` puede ahora mostrar verificación directa en Noti
 **IA nativa Notion no conectada:** Notion connector tiene herramienta `notion_spawn_session` para sesiones de Custom Agent **publicado**. La consulta de agentes workspace y favoritos devuelve listas vacías; no hay agente al que dirigir una sesión, y no hay evidencia de una API general para invocar Notion AI. Las Skills disponibles son distintas de un Custom Agent invocable. No se ha sustituido por otra IA ni creado nada de pago.
 
 **Rollback del endpoint real preparado, no ejecutado:** volver a desplegar los seis archivos originales v37 (copia exacta del Edge v37) o los cuatro archivos v36 guardados en `cerebro/backups/console-gateway-v36-20261117/`; verificar 401/401 y conversación real. Mantener PR #70 DRAFT y documentar costes reales antes de autonomía.
+
+## Corte final: V38 · prueba autenticada con propietario · 17/11/2026
+
+**HECHO — último gate de lectura E2E VERDE.** El usuario mostró la respuesta en la Console: «He comprobado la Skill NIA directamente en Notion: 36 bloques de contenido y 6 secciones principales (Identidad y límites; Decisión automática antes de cada operación; Enrutamiento práctico; Coste y seguridad; Prueba y salida; Referencias permanentes). También he enviado la orden a FACT-001/NIA en LAB. Su procesamiento es asíncrono; no he iniciado la IA nativa de Notion».
+
+**Verificación física independiente, mismo intento temporal:**
+- **11:59:10.015 UTC**: Supabase Edge v38 registra `CONSOLE_NIA_EDGE_QUEUE_ACCEPTED` (topic `documentation`).
+- **11:59:11.070 UTC**: Cloudflare NIA receptor `NIA_CENTRAL_RECEIVER_GATE=PASS`.
+- **11:59:11.074 UTC**: Cloudflare FACT-001 `FACT_NIA_PRIVATE_RESULT=PASS`.
+
+La Console muestra la lectura Notion real de la Skill y la Queue termina su despacho con PASS. Los registros son de etapas distintas y se han correlacionado por secuencia temporal y evento, **no se ha demostrado todavía un identificador end-to-end persistente compartido**. Un acuse `QUEUED` no equivale por sí solo a ejecución: el PASS procede del registro posterior de NIA.
+
+**ESTADO:** lectura CEREBRO Console V0 v38 → FACT original → NIA Notion Skill **HECHO y verificado**. No ejecutar más smoke de esta conexión salvo regresión. **No está demostrada la invocación de la IA nativa de Notion** ni la autonomía PROD. Token Cloudflare Queues Write expira el 01/12/2026 y debe rotarse antes. Mantener PR #70 DRAFT, sin GitHub Actions ni suscripciones nuevas.
