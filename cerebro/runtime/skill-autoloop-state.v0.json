@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-17T21:17:15.215Z",
+  "updated_at": "2026-11-17T22:21:05.485Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -562,7 +562,8 @@
     "github-wide-skills:cab5fe47aaf159f031c0",
     "github-wide-skills:bff64d376d0bb76233e3",
     "github-wide-skills:1adae03328979f8ba511",
-    "github-wide-skills:6283eb4df406f401228b"
+    "github-wide-skills:6283eb4df406f401228b",
+    "github-wide-skills:7bd914a2fc50e39c38bc"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2417,6 +2418,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44108410957,
       "checkpointed_at": "2026-11-17T14:55:54.367Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:7bd914a2fc50e39c38bc": {
+      "candidate_id": "github-wide-skills:7bd914a2fc50e39c38bc",
+      "name": "reclaiming-docker-disk-space",
+      "human_alias": "Reclaiming Docker Disk Space",
+      "wrapper_id": "skillwrap:10a1ec9c0cca7f6c1c5b",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 80.33,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "theultimate-dev/skills",
+        "upstream_head_commit": "74a0a63ebc93dbdfcd2962e2f84bb615a006fc49",
+        "manifest_sha256": "9dc9d2b5e065a7a25098e2edc6f6c42aa91a75a9c27297a46e5c0525c0684d16",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 44189065419,
+      "checkpointed_at": "2026-11-17T22:21:05.485Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -33715,7 +33752,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -33728,7 +33765,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 44093692573,
+  "last_discovery_run_id": 44189065419,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
