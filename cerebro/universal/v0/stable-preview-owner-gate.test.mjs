@@ -31,7 +31,8 @@ test('same stable Preview hostname is recognized by UI, owner API, gateway, chat
   assert.equal(content.includes(OLD.slice(0,-11)),false,'old stale hostname still authorized in '+path);
  }
  const host=fs.readFileSync(new URL(ROOT+'src/CerebroConsoleHost.tsx',import.meta.url),'utf8');
- assert.ok(host.includes("const previewOwnerGate=Boolean(isCerebroPath&&previewHost&&visualPreview)"));
+ assert.ok(host.includes("const previewOwnerGate=Boolean(isCerebroPath&&previewHost&&visualPreview&&"));
+ assert.ok(host.includes("import.meta.env.VITE_FENIX_ENV!==\'prod\'"));
  assert.ok(host.includes("fetch('/api/cerebro-preview-owner'"));
  const consoleAccess=fs.readFileSync(new URL(ROOT+'src/cerebroConsoleAccess.ts',import.meta.url),'utf8');
  assert.ok(consoleAccess.includes("'/api/cerebro-preview-gateway?resource='"));

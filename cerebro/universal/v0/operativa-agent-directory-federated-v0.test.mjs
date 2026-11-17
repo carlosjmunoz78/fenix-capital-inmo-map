@@ -37,7 +37,8 @@ test('directory allows paging/filtering without hardcoded 11 limit or claiming s
  assert.match(api,/OWNER_SESSION_REQUIRED/);
  assert.match(api,/ctx\?\.actor_code!=='CARLOS-ADMIN'/);
  assert.match(api,/verifiedReadOnlyMode\(host,process\.env\.VERCEL_ENV\)/);
- assert.match(api,/env==='production'&&host===PROD_HOST/);
+ assert.match(api,/env==='production'&&\(host===PROD_HOST\|\|/);
+ assert.match(api,/host===uniqueDeploymentHost/);
  assert.match(api,/env==='preview'&&PREVIEW_HOST\.test\(host\)/);
  assert.match(api,/req\.method!=='GET'/);
  assert.match(api,/FENIX_OWNER_ONLY|INVALID_QUERY_OR_SCOPE/);
