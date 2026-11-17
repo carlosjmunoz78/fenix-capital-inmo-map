@@ -23,3 +23,14 @@
 
 ## Rollback
 Remove optional binding registration from host if ever added; do not modify the original gateway file. This PR contains only new files and can be closed without impact.
+
+## Actualización de evidencia · 2026-11-17
+
+El V0 anterior describía un adaptador no ejecutado. **Esta limitación se levantó solo para LAB aislado**: existe evidencia de ejecución E2E real (`NIA_ACTGW_PHYSICAL_GATE=PASS`, 17/17) con los mismos módulos `ActionGatewayV1`, `bindNiaDiscoveryToActionGatewayV0` y `createNiaPageReadProviderV0`. Véase `cerebro/docs/NIA_ACTGW_E2E_CLOUDFLARE_LAB_V1.md`.
+
+La prueba utilizó el Worker privado de NIA y una cola UE temporal sin usar GitHub Actions. **Después se eliminó cola/consumidor y se restauró el Worker inerte**. No hay vinculación persistente con el Gateway central, ni acceso de escritura/IA autónoma; el PREPROD/LAB físico PASS no es permiso de promoción PROD.
+
+Para replicación de código, usar el mapa `cerebro/nia-notion-cloudflare-lab/actgw-module-map.v1.json` y el contrato `cerebro/registry/nia-notion-readonly-iam-lab.v0.json`. Un montaje permanente requiere contrato de autentificación de servicio, inspección del Gateway central y actualización autorizada, no reutilizar un token de FACT-001 o Bridge.
+
+GitHub Actions permanece bloqueado, así que los tests de Node del PR deben ejecutarse en un entorno alternativo sin disparar workflows de GitHub. No se afirman tests CI de este último commit.
+
