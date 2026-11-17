@@ -1,0 +1,192 @@
+{
+  "schema_version": "0.1.0",
+  "document_type": "NOTION_CAPABILITY_ROUTE_MATRIX_ADDITIVE_DRAFT",
+  "version": "0.1.0",
+  "date": "2026-11-17",
+  "company_id": "fenix",
+  "environment": "LAB_PREPROD_ONLY",
+  "registry_owner": "GOV-001",
+  "router_engine_id": "ROUTE-001",
+  "action_gateway_engine_id": "ACTGW-001",
+  "factory_engine_id": "FACT-001",
+  "registry_target": "cerebro/registry/engine-registry.v1.json",
+  "registry_mutation": false,
+  "existing_engine_count_untouched": 179,
+  "policy": {
+    "default": "DENY",
+    "new_ai_credit_spend": false,
+    "notion_writes": false,
+    "prod_autonomy": false,
+    "money_limit_eur": 0,
+    "no_new_broker": true,
+    "no_new_inventory": true,
+    "github_actions_disabled": true,
+    "tenant_isolation": true
+  },
+  "evidence": {
+    "source_plan": "cerebro/docs/CEREBRO_NOTION_PENDIENTES_Y_PLAN_DE_CIERRE_20261117.md",
+    "iam": "cerebro/registry/nia-notion-readonly-iam-lab.v0.json",
+    "notion_contract": "https://app.notion.com/p/41a81b1a756d81ba8a0ffafe84554824",
+    "notion_policy_module": "https://app.notion.com/p/3be81b1a756d81ffa0a9f9444009b7df",
+    "index_manifest": "cerebro/connectors/universal/docs/FACT001_NOTION_ENCRYPTED_FULL_SEARCH_INDEX_MANIFEST_AND_CHUNK_PLAN_2026-11-10.md",
+    "console_e2e": "cerebro/docs/NIA_CONSOLE_READABLE_RESULT_V1.md"
+  },
+  "capabilities": [
+    {
+      "capability_id": "notion.nia.discover.read",
+      "engine_id": "ACTGW-001",
+      "origin": "existing ACTGW + Cloudflare FACT/NIA + Notion API",
+      "executor": "cerebro-console-gateway-v0 v38 -> Queues -> FACT-001 -> NIA ACTGW",
+      "permissions": [
+        "CARLOS-ADMIN owner",
+        "fenix",
+        "PREPROD",
+        "Notion Skill GET"
+      ],
+      "state": "HECHO_RESTRICTED_OWNER_E2E",
+      "evidence": "36 blocks / 6 headings + cloudflare FACT_NIA_PRIVATE_RESULT PASS 2026-11-17T11:59:11Z",
+      "next_gate": "persistent shared correlation_id and terminal status",
+      "ai_native_executed": false,
+      "cost_eur_additional": 0
+    },
+    {
+      "capability_id": "notion.documentation.read",
+      "engine_id": "DOC-001",
+      "origin": "Notion MCP connected",
+      "executor": "Notion.fetch (ChatGPT direct), NOT CEREBRO Router",
+      "permissions": [
+        "notion integration visible page only"
+      ],
+      "state": "HECHO_CONNECTOR_READ_ONLY_NOT_ROUTED",
+      "evidence": "NIA Notion capabilities contract and MOD-9 known pages fetched 2026-11-17",
+      "next_gate": "bind existing ACTGW provider with company-scoped doc read",
+      "cost_eur_additional": 0
+    },
+    {
+      "capability_id": "notion.search.index.read",
+      "engine_id": "FACT-001",
+      "origin": "existing encrypted index + FACT-001 batch",
+      "executor": "existing Notion Bridge/batch (not currently routed via Console)",
+      "permissions": [
+        "existing Vault key + bounded authorised index"
+      ],
+      "state": "EXISTENTE_INDEX_NOT_CONSOLE_E2E",
+      "evidence": "6632 IDs, 6446 pages + 186 data sources, 58 roots; encrypted checkpoint",
+      "next_gate": "single READ using EXISTING encrypted index + ACTGW, NO re-inventory",
+      "cost_eur_additional": 0
+    },
+    {
+      "capability_id": "notion.database.query.read",
+      "engine_id": "DATA-001",
+      "origin": "Notion MCP query_data_sources",
+      "executor": "available Notion connector, CEREBRO route missing",
+      "permissions": [
+        "data-source grant, read only, row-level scope policy"
+      ],
+      "state": "AVAILABLE_NOT_CEREBRO_E2E",
+      "evidence": "connector tool exposed; physical query not repeated",
+      "next_gate": "select previously approved indexed data source and test read with boundaries",
+      "cost_eur_additional": 0
+    },
+    {
+      "capability_id": "notion.skills.enabled.list",
+      "engine_id": "KNW-001",
+      "origin": "Notion MCP notion_get_enabled_skills",
+      "executor": "Notion connector direct, no CEREBRO route",
+      "permissions": [
+        "user's enabled skills only"
+      ],
+      "state": "HECHO_CONNECTOR_READ_ONLY_NOT_ROUTED",
+      "evidence": "NIA plus Improve writing, Correct, Explain, Reformat verified 2026-11-17",
+      "next_gate": "add skill metadata route to existing ACTGW; no AI execution",
+      "cost_eur_additional": 0
+    },
+    {
+      "capability_id": "notion.documentation.write",
+      "engine_id": "DOC-001",
+      "origin": "Notion MCP write tools",
+      "executor": "DENIED for NIA ACTGW IAM 0.7.1",
+      "permissions": [
+        "write_content:false"
+      ],
+      "state": "BLOQUEADO_IAM",
+      "evidence": "nia-notion-readonly-iam-lab.v0.json rights.write_content=false",
+      "next_gate": "separate authorization, preview, QA, rollback only if needed",
+      "cost_eur_additional": 0
+    },
+    {
+      "capability_id": "notion.automations.native",
+      "engine_id": "JOB-001",
+      "origin": "existing Notion workflows, MOD-9 policy",
+      "executor": "Notion native UI only pending exact source-to-consumer mapping",
+      "permissions": [
+        "existing approved automations only"
+      ],
+      "state": "POR_AUDITAR_NO_MUTATIONS",
+      "evidence": "MOD-9 existing governance; no live workflow activation verified in current gate",
+      "next_gate": "OLD vs NEW compare with Cloudflare before any change",
+      "cost_eur_additional": "UNKNOWN_CONSUMPTION"
+    },
+    {
+      "capability_id": "notion.webhook.outbound",
+      "engine_id": "EVT-001",
+      "origin": "Notion automation webhook capability",
+      "executor": "NO active CEREBRO receptor asserted",
+      "permissions": [
+        "signed gateway/replay protection required"
+      ],
+      "state": "DEFINIDO_NOT_ROUTED",
+      "evidence": "Notion 2026 historical assessment, no live E2E",
+      "next_gate": "verify accepted source and signed receiver in LAB",
+      "cost_eur_additional": "POR_AUDITAR"
+    },
+    {
+      "capability_id": "notion.autofill.basic",
+      "engine_id": "DATA-001",
+      "origin": "Notion Business native Basic Autofill",
+      "executor": "Notion internal UI; no programmatic route evidenced",
+      "permissions": [
+        "page/database access"
+      ],
+      "state": "AVAILABLE_UI_ONLY_NOT_INVOKABLE_BY_CEREBRO",
+      "evidence": "Notion capability contract, current Notion docs Basic Autofill included",
+      "next_gate": "evaluate manual UX no autonomous activation",
+      "cost_eur_additional": 0
+    },
+    {
+      "capability_id": "notion.custom_agent.invoke",
+      "engine_id": "ROUTE-001",
+      "origin": "Notion AI Custom Agent",
+      "executor": "notion_spawn_session ONLY with published agent",
+      "permissions": [
+        "published agent + credit policy"
+      ],
+      "state": "BLOQUEADO_NO_PUBLISHED_AGENT",
+      "evidence": "notion_search_agents workspace/favorites both results empty 2026-11-17",
+      "next_gate": "published agent permission + hard credit cap; no auto charge; connector has no create/publish agent action",
+      "cost_eur_additional": "CREDIT_CONSUMPTION_NOT_APPROVED"
+    },
+    {
+      "capability_id": "notion.backup.incremental",
+      "engine_id": "FACT-001",
+      "origin": "existing FACT batch engine + Cloudflare D1 CAS + Drive",
+      "executor": "existing batch engine; NOT restarted",
+      "permissions": [
+        "encrypted Vault key; approved backup reads"
+      ],
+      "state": "PARCIAL_CHECKPOINT_75_V3",
+      "evidence": "75 bodies (72 pages +3 data sources), encrypted ZIP verified in Drive",
+      "next_gate": "batch 75→100, attachments, comments, restore LAB with SHA",
+      "cost_eur_additional": "UNMEASURED_PROVIDER_USAGE"
+    }
+  ],
+  "acceptance": {
+    "notion_skill_e2e": true,
+    "second_index_read_via_cerebro": false,
+    "agent_native_invoked": false,
+    "cloudflare_rotation_complete": false,
+    "router_writes_enabled": false,
+    "prod_autonomy": false
+  },
+  "rollback": "Delete this additive manifest / revert its commit. Existing Router, ACTGW, Factory, Console, App/CRM and Notion untouched."
+}
