@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "document_type": "NIA_NOTION_READONLY_LAB_IAM_CANDIDATE",
-  "status": "LAB_PAGE_AND_BLOCK_READ_PROOF_PASS",
+  "status": "LAB_ACTGW_V1_NIA_LIVE_E2E_PASS_NO_CENTRAL_DISPATCH",
   "alias_es": "NIA · Lectura exclusiva de documentación en LAB",
   "company_id": "fenix",
   "engine_id": "ACTGW-001",
   "environment": "PREPROD",
   "lab_environment": "CEREBRO-NIA-LAB",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "notion_integration": {
     "name": "CEREBRO NIA · Lectura LAB",
     "bot_id": "41b81b1a-756d-8132-b0d6-0027f800e898",
@@ -57,7 +57,13 @@
     "notion_ai_invocation_supported": "NOT_EVIDENCED",
     "bot_blocks_access_verified": true,
     "provider_write_denial_verified": false,
-    "queue_trigger_cleaned": true
+    "queue_trigger_cleaned": true,
+    "gateway_isolated_e2e_verified": true,
+    "gateway_lab_authorization_verified": true,
+    "gateway_lab_idempotency_verified": true,
+    "gateway_lab_audit_verified": true,
+    "gateway_lab_tenant_isolation_verified": true,
+    "gateway_lab_cost_policy_verified": true
   },
   "rollback": "Remove only this LAB secret and optional binding; do not revoke or alter existing FACT-001 or Fénix Notion Bridge integrations.",
   "references": [
@@ -79,6 +85,47 @@
     "crons": 0,
     "enabled": false,
     "original_secret_value_exposed": false,
-    "notion_ai_invocation": false
+    "notion_ai_invocation": false,
+    "actgw": {
+      "date_utc": "2026-11-17",
+      "timestamp_utc": "2026-11-17T09:10:37.595Z",
+      "worker": "cerebro-nia-notion-proof-lab",
+      "implementation": "actual ActionGatewayV1 + actual bindNiaDiscoveryToActionGatewayV0 + actual Notion page provider (module imports)",
+      "private_trigger": "Cloudflare Queue one-shot",
+      "result": "NIA_ACTGW_PHYSICAL_GATE=PASS",
+      "pass_count": 17,
+      "fail_count": 0,
+      "tests": [
+        "BINDING",
+        "GATEWAY_CONTRACT",
+        "LIVE_NOTION",
+        "IDEMPOTENCY",
+        "UNAUTHORIZED",
+        "PAID",
+        "PROD_WRITE",
+        "TRADING",
+        "SIGNATURE",
+        "TENANT_ISOLATION",
+        "TOPIC_SCOPE",
+        "NO_DUPLICATION",
+        "PAYLOAD_SCOPE",
+        "PROD_ENV_DENIED",
+        "AUDIT",
+        "NO_SECRET_OR_CONTENT_IN_RESULTS",
+        "PHYSICAL_GATE"
+      ],
+      "cleanup": {
+        "queue_id": "4794a11a309043dd920e25e5331437dc",
+        "consumer_id": "bb720dc6f49c477e9134382c7885155c",
+        "queue_and_consumer_deleted": true,
+        "proof_worker_restored": true,
+        "secret_preserved": true,
+        "off": true,
+        "urls_disabled": true,
+        "crons_zero": true
+      },
+      "central_gateway_deployed": false,
+      "notion_ai_executed": false
+    }
   }
 }

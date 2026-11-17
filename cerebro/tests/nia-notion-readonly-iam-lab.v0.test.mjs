@@ -19,6 +19,14 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.execution_policy.automated_ai_sessions,false);
  assert.equal(candidate.execution_policy.prod_write,false);
  assert.equal(candidate.state.gateway_live_connected,false);
+ assert.equal(candidate.state.gateway_isolated_e2e_verified,true);
+ assert.equal(candidate.state.gateway_lab_authorization_verified,true);
+ assert.equal(candidate.state.gateway_lab_idempotency_verified,true);
+ assert.equal(candidate.state.gateway_lab_audit_verified,true);
+ assert.equal(candidate.evidence.actgw.result,'NIA_ACTGW_PHYSICAL_GATE=PASS');
+ assert.equal(candidate.evidence.actgw.pass_count,17);
+ assert.equal(candidate.evidence.actgw.fail_count,0);
+ assert.equal(candidate.evidence.actgw.cleanup.queue_and_consumer_deleted,true);
  assert.equal(candidate.state.bot_page_access_verified,true);
  assert.equal(candidate.state.bot_blocks_access_verified,true);
  assert.equal(candidate.state.provider_write_denial_verified,false);
