@@ -70,3 +70,11 @@
 
 ## 5. Arranque recomendado del próximo chat
 **No otra auditoría.** 1) Recuperar estas fuentes exactas; 2) resolver el token próximo a caducar; 3) sacar mapa diferencial de capacidades Notion ya construidas y rutas de ejecución; 4) atacar exclusivamente un gate funcional P0, con resultados físicos y costes. Enviar progreso y continuar sin pedir al usuario que repita información.
+
+
+## 6. Corte operativo adicional · 17/11/2026 · Chat normal
+- Token Queues Write **sigue activo y caduca 01/12/2026**. Rotación NO HECHA; despliegue de bootstrap temporal bloqueado por control de seguridad del conector. **No hay nuevo token ni cambios en Console v38**.
+- Procedimiento seguro preparado en `cerebro/ops/nia-queues-credential-rotation-one-shot-20261117.ts` (no desplegado).
+- Matriz diferencial de **11 capacidades** en `cerebro/registry/notion-capability-route-matrix-lab.v0.json`, comprobaciones estáticas PASS, sin conexión nueva al Router.
+- Notion: cinco Skills habilitadas verificadas; **0 Custom Agents publicados accesibles** en workspace/favorites; Notion AI no invocada ni autorizada por defecto para consumir créditos.
+- Evidencia detallada y next_block: `cerebro/docs/NOTION_P0_GATE_CURRENT_RESULT_20261117.md`. Se conserva backup **75/v3**, PR DRAFT y coste de suscripciones nuevas **0 €**.
