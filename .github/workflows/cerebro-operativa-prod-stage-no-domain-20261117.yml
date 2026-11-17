@@ -17,7 +17,7 @@ jobs:
       VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
     steps:
       - name: Checkout exact release source, without persisting credentials
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
       - name: Configure pinned Node 24
