@@ -2,6 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 
 const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'').toLowerCase();
 const productionHostname=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
+// Only immutable/staged Vercel candidate hosts use same-origin owner bootstrap.
+// app.fenixcapital.es keeps its unchanged direct Supabase Gateway contract.
+const stagedOwnerHostname=typeof window!=='undefined'&&/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(window.location.hostname);
 export const IS_PRODUCTION=productionHostname||runtimeEnv==='production'||runtimeEnv==='prod';
 
 const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co';
@@ -97,7 +100,12 @@ async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ini
   const timeoutId=controller?globalThis.setTimeout(()=>controller.abort(),timeoutMs):null;
   let response:Response;
   try{
-    response=await fetch(`${SUPABASE_URL}/functions/v1/${functionName(baseFunctionName)}${path}`,{
+    const stagedResource=baseFunctionName==='fenix-app-gateway'&&IS_PRODUCTION&&stagedOwnerHostname
+      ?(path==='/session/context'?'context':path==='/navigation'?'navigation':null):null;
+    const target=stagedResource
+      ?`/api/cerebro-owner-bootstrap?resource=${stagedResource}`
+      :`${SUPABASE_URL}/functions/v1/${functionName(baseFunctionName)}${path}`;
+    response=await fetch(target,{
       ...init,
       signal:controller?.signal??upstreamSignal,
       headers:{
