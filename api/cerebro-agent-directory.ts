@@ -99,7 +99,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   throw Error('DIRECTORY_DUPLICATE_OR_INCOMPLETE');
  return all;
 }
-export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
+export function validateCerebroAgentDirectoryQueryV0(q:URLSearchParams){
  const valid=new Set(['company_id','offset','limit','kind','family','q']);
  if([...q.keys()].some(k=>!valid.has(k)||q.getAll(k).length!==1)||q.get('company_id')!=='fenix')
   throw Error('INVALID_QUERY_OR_SCOPE');
@@ -116,6 +116,10 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
  if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK','MEDIA_STUDIO'].includes(family))throw Error('INVALID_FAMILY');
  const term=(q.get('q')||'').normalize('NFKC').trim().toLocaleLowerCase('es-ES');
  if(term.length>100||/[\u0000-\u001F]/.test(term))throw Error('INVALID_SEARCH');
+ return {offset,limit,kind,family,term};
+}
+export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
+ const {offset,limit,kind,family,term}=validateCerebroAgentDirectoryQueryV0(q);
  const all=buildCerebroAgentDirectoryV0();
  const records=all.filter(r=>(kind==='ALL'||r.kind===kind)&&(family==='ALL'||r.family===family)&&
   (!term||[r.id,r.name,r.family,r.purpose_plain,r.purpose_technical,...r.engine_ids].join(' ').toLocaleLowerCase('es-ES').includes(term)));
@@ -146,7 +150,7 @@ export default async function handler(req:Req,res:Res){
  if(origin&&origin!=='https://'+host)return fail(res,403,'ORIGIN_DENIED');
  let query:URLSearchParams;
  try{query=new URL(req.url||'/','https://'+host).searchParams}catch{return fail(res,400,'INVALID_URL')}
- try{queryCerebroAgentDirectoryV0(query)}catch{return fail(res,400,'INVALID_QUERY_OR_SCOPE')}
+ try{validateCerebroAgentDirectoryQueryV0(query)}catch{return fail(res,400,'INVALID_QUERY_OR_SCOPE')}
  const bearer=head(req.headers.authorization),apikey=head(req.headers.apikey);
  if(!/^Bearer\s+\S{20,8192}$/i.test(bearer)||apikey.length<12||apikey.length>256)
   return fail(res,401,'OWNER_SESSION_REQUIRED');
