@@ -51,6 +51,8 @@ try{
  globalThis.fetch=async()=>({status:200,json:async()=>({context:{actor_code:'CARLOS-ADMIN'}})});
  const owner=await previewRequest('GET');
  assert.equal(owner.code,200);assert.equal(owner.body.allowed,true);
+ globalThis.fetch=async()=>({status:200,json:async()=>({ok:false,context:{actor_code:'CARLOS-ADMIN'}})});
+ assert.equal((await previewRequest('GET')).code,403);
  globalThis.fetch=async()=>({status:200,json:async()=>({context:{actor_code:'OTHER-ACTOR'}})});
  assert.equal((await previewRequest('GET')).code,403);
  globalThis.fetch=async()=>({status:401,json:async()=>({ok:false})});
