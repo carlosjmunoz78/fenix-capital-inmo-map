@@ -1,5 +1,7 @@
 import {useEffect,useRef} from 'react';
 import CerebroConsoleShell from './CerebroConsoleShell';
+import JarvisResponseView from './jarvis-deepseek-lab/JarvisResponseView';
+import {fromCanonicalConsoleLine} from './jarvis-deepseek-lab/JarvisResponseContract';
 import JarvisOperativaComposerPortal from './JarvisOperativaComposerPortal';
 import './jarvis-work-premium-final.css';
 
@@ -11,6 +13,13 @@ const VISIBLE_REPLACEMENTS:[RegExp,string][]=[
 ];
 
 type Props={workspaceKey?:string};
+// LAB feature disabled in normal builds, never changes canonical Console chat or voice.
+const JARVIS_DEEPSEEK_MARKDOWN_LAB=import.meta.env.MODE==='lab'&&import.meta.env.VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB==='1';
+
+function renderRichAssistantMessage(text:string){
+ const model=fromCanonicalConsoleLine(text);
+ return model?<JarvisResponseView message={model}/>:text;
+}
 
 function rewriteVisibleText(root:HTMLElement){
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
@@ -52,5 +61,7 @@ export default function JarvisEmbeddedConsole({workspaceKey}:Props){
     observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
     return()=>{observer.disconnect();if(scheduled)window.cancelAnimationFrame(scheduled)};
   },[]);
-  return <><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell key={workspaceKey||'jarvis-default'}/></div><JarvisOperativaComposerPortal/></>;
+  return <><div ref={rootRef} className="jarvis-console-presentation">{JARVIS_DEEPSEEK_MARKDOWN_LAB
+  ?<CerebroConsoleShell key={workspaceKey||'jarvis-default'} renderAssistantMessage={renderRichAssistantMessage}/>
+  :<CerebroConsoleShell key={workspaceKey||'jarvis-default'}/>}</div><JarvisOperativaComposerPortal/></>;
 }
