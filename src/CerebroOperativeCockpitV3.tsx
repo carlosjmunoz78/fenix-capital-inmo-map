@@ -76,7 +76,7 @@ function initialOperativaPreviewPanel():View{
  if(query.get('section')!=='operativa'||query.get('visual_lab')!=='cockpit-v3')return 'resumen';
  // Preview-only deep link; user/role checks remain in the existing ConsoleHost.
  const requested=query.get('op3_panel');
- return requested==='motores'||requested==='control'||requested==='agentes'?requested:'resumen';
+ return requested==='motores'||requested==='control'?requested:'resumen';
 }
 
 export default function CerebroOperativeCockpitV3({
