@@ -1,0 +1,122 @@
+name: VOICE-001 · main+PR71/72 exact shadow lab
+on:
+  push:
+    branches:
+      - cerebro/voice001-jarvis-postmerge-shadow-20261117
+    paths:
+      - '.github/workflows/voice001-jarvis-postmerge-shadow-20261117.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voice001-postmerge-main-pr71-pr72-20261117
+  cancel-in-progress: false
+
+jobs:
+  main-plus-candidate:
+    name: main + PR #${{ matrix.pr }} (local only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pr: 71
+            sha: '77852fbc21f3735e81710a645ee6831dcfe255b6'
+            expected_changes: 18
+          - pr: 72
+            sha: 'ca45040b04052c1c1ea9edec45bf783f85885be6'
+            expected_changes: 22
+    env:
+      EXACT_MAIN: '45cf35c954dc5a2d3ae6d4e2a2fb767126ba3dcf'
+      CANDIDATE_SHA: ${{ matrix.sha }}
+      CANDIDATE_PR: ${{ matrix.pr }}
+      EXPECTED_CHANGES: ${{ matrix.expected_changes }}
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: jarvis-lab-fixture-not-real-key
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - name: Checkout candidate at reviewed SHA (never update original branch)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.sha }}
+          fetch-depth: 128
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Compose on latest approved main locally only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$CEREBRO_PROD_WRITE" = 'false'
+          test "$CEREBRO_TRADING_ACCESS" = 'false'
+          git fetch --no-tags origin main --depth=128
+          base="$(git rev-parse FETCH_HEAD)"
+          test "$base" = "$EXACT_MAIN" || { echo "MAIN_DRIFT: fail closed"; exit 1; }
+          git -c user.name='CEREBRO LAB Reviewer' -c user.email='lab@example.invalid' \
+            merge --no-ff --no-edit -m "local ephemeral main+PR${{ matrix.pr }} shadow, never pushed" "$base"
+          test -z "$(git status --porcelain)"
+          changed="$(git diff --name-only "$base" HEAD)"
+          printf '%s\n' "$changed"
+          count="$(printf '%s\n' "$changed" | grep -c .)"
+          test "$count" -eq "$EXPECTED_CHANGES"
+          ! printf '%s\n' "$changed" | grep -Eq '^supabase/|^src/cerebroVoice.ts$|^src/cerebroConsoleApi.ts$|^src/AnaVoiceQueryBlock.tsx$|^src/AnaChatBlock.tsx$'
+          echo "VOICE001_CANONICAL_BASE_SHA=$base" >> "$GITHUB_ENV"
+          echo 'LOCAL_MERGE_ONLY=true' >> "$GITHUB_ENV"
+      - name: Run approved VOICE-001 regression tests under local merged tree
+        run: |
+          node --test tests/voice001-render-port-policy.test.mjs
+          node scripts/voice001-render-port-guard.mjs "$VOICE001_CANONICAL_BASE_SHA"
+          node --test cerebro/tests/owned-voice-v0.test.mjs
+      - name: Additional protected Console diff contract for React PR72
+        if: matrix.pr == 72
+        run: node --test tests/jarvis-deepseek-core-immutable-diff.test.mjs
+      - name: Markdown security and rendering contracts
+        run: |
+          node --experimental-strip-types --test \
+            tests/jarvis-deepseek-chat-demo-lab.test.mjs \
+            tests/jarvis-deepseek-chat-renderer-lab.test.mjs \
+            tests/jarvis-deepseek-direct-react-contract.test.mjs
+      - name: Existing dependencies only
+        run: npm ci --ignore-scripts
+      - name: Build OFF (canonical PROD behavior)
+        env:
+          VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB: '0'
+        run: npm run build
+      - name: Install test browser on ephemeral runner
+        run: npx playwright install --with-deps chromium
+      - name: Legacy voice and OLD OFF simulated E2E
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: |
+          npx playwright test tests/voice-ui-ana-console.spec.ts --project=desktop-chromium
+          npx playwright test tests/jarvis-deepseek-default-off.spec.ts --project=desktop-chromium
+      - name: Build ON exclusively in local Vite LAB mode
+        env:
+          VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB: '1'
+        run: npm run build -- --mode lab
+      - name: Markdown LAB desktop/mobile simulated E2E
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/jarvis-deepseek-lab-ui.spec.ts --project=desktop-chromium
+      - name: Publish truthful, nonproduction evidence
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## CEREBRO OS · VOICE-001 post-merge shadow'
+            echo "- PR: #$CANDIDATE_PR"
+            echo "- Candidate SHA: $CANDIDATE_SHA"
+            echo "- Policy main SHA: $EXACT_MAIN"
+            echo "- LOCAL_MERGE_ONLY: ${LOCAL_MERGE_ONLY:-false}"
+            echo '- Production writes/deployments: not authorized'
+            echo '- Real owner session/physical device: NOT TESTED'
+            echo '- Real rollback: NOT TESTED'
+            echo '- No push/merge to source branches or main'
+          } >> "$GITHUB_STEP_SUMMARY"
