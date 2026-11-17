@@ -18,7 +18,10 @@ function expectResponse(label,r,status,reason){
  if(r.status!==status||r.reason!==reason)
   throw Error(label+':EXPECTED_'+status+'_'+reason+'_GOT_'+r.status+'_'+r.reason);
 }
-expectResponse('MUTATION_BLOCKED',await req('POST','/api/cerebro-agent-directory?company_id=fenix'),405,'READ_ONLY');
+const protectedCheck=await req('POST','/api/cerebro-agent-directory?company_id=fenix');
+if(protectedCheck.status===401&&protectedCheck.reason==='NON_JSON_RESPONSE'&&!bypass)
+ throw Error('HUMAN_REQUIRED_VERCEL_SSO_PROTECTED_PRIVATE_DEPLOYMENT');
+expectResponse('MUTATION_BLOCKED',protectedCheck,405,'READ_ONLY');
 expectResponse('TENANT_BLOCKED',await req('GET','/api/cerebro-agent-directory?company_id=other'),400,'INVALID_QUERY_OR_SCOPE');
 expectResponse('NO_SESSION',await req('GET','/api/cerebro-agent-directory?company_id=fenix'),401,'OWNER_SESSION_REQUIRED');
 if(!token||!publishableKey)throw Error('OWNER_REAL_E2E_BLOCKED_EXISTING_JWT_OR_PUBLISHABLE_KEY_ABSENT');
