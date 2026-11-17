@@ -1,7 +1,7 @@
 name: OPERATIVA minimal owner directory CI
 on:
   pull_request:
-    branches: [main]
+    branches: [cerebro/operativa-prod-baseline-20261117]
 permissions:
   contents: read
 jobs:
