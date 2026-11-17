@@ -1,0 +1,14 @@
+/* Directory offers server-side pagination. Avoid rendering thousands of rows simultaneously. */
+.op3-agent-counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.op3-agent-counts>div{background:#0b2d40;border:1px solid #325d77;border-radius:10px;padding:11px;display:flex;flex-direction:column;gap:5px}
+.op3-agent-counts strong{color:#e4f7ff;font-size:20px}.op3-agent-counts small{color:#a0c9d9;font-size:11px}
+.op3-agent-search{display:flex;flex:1;min-width:220px;gap:6px}.op3-agent-search input{flex:1;min-width:100px;border:1px solid #417082;background:#071d2a;color:#f0faff;border-radius:8px;padding:9px}
+.op3-agent-search button,.op3-agent-pages button,.op3-agent-controls button{color:#ecfaff;background:#0d364a;border:1px solid #67a6c2;border-radius:8px;padding:8px 11px;cursor:pointer;min-height:36px}
+.op3-agent-pages{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:13px 0;font-size:12px;color:#cce6f1}
+.op3-agent-pages button:disabled,.op3-agent-controls button:disabled{opacity:.5;cursor:not-allowed}
+.op3-agent-content{display:flex;flex:1;min-width:0;flex-direction:column;gap:8px}.op3-agent-entry{align-items:flex-start;gap:15px}
+.op3-agent-entry code{font-size:11px;color:#95cddd}.op3-agent-entry details{font-size:12px;line-height:1.6;color:#b9d8e7;max-width:720px}
+.op3-agent-entry details summary{cursor:pointer;color:#95ddf9}.op3-agent-entry details p{margin:5px 0}.op3-agent-entry details a{color:#9bdef4}
+.op3-agent-human{font-size:12px;line-height:1.5;color:#d2edfa;margin:3px 0}.op3-agent-human span{color:#f0f9ff}
+.op3-agent-controls{display:flex;flex-direction:column;gap:8px;align-items:flex-end}.op3-agent-controls small{max-width:190px;text-align:right;font-size:11px;color:#a8cad8}
+@media(max-width:780px){.op3-agent-counts{grid-template-columns:repeat(2,minmax(0,1fr))}.op3-agent-entry{flex-wrap:wrap}.op3-agent-controls{align-items:flex-start;width:100%}.op3-agent-pages{flex-wrap:wrap}}

@@ -2,17 +2,18 @@ import {useMemo,useState,type FormEvent,type KeyboardEvent,type ReactNode,type R
 import {
  Activity,AudioLines,BarChart3,Building2,CheckCircle2,ChevronLeft,ChevronRight,
  CircleAlert,Clock3,Cpu,Database,ExternalLink,FileCheck2,Layers3,Mic,Play,
- Search,Send,ShieldCheck,Square,Workflow,Volume2
+ Search,Send,ShieldCheck,Square,Users,Workflow,Volume2
 } from 'lucide-react';
 import type {CerebroActivityRun} from './cerebroActivityApi';
 import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
 import CerebroAudioDiagnostics from './CerebroAudioDiagnostics';
+import CerebroRoleAgentRosterReadonly from './CerebroRoleAgentRosterReadonly';
 import './cerebro-operative-cockpit-v3.css';
 
 type VoiceSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
 type Company='all'|'fenix'|'aion'|'captacasa';
-type View='resumen'|'entidades'|'proyectos'|'motores'|'trabajos'|'evidencias'|'decisiones';
+type View='resumen'|'entidades'|'proyectos'|'motores'|'agentes'|'trabajos'|'evidencias'|'decisiones';
 type FeedStatus='LIVE'|'CACHED'|'UNAVAILABLE';
 type Props={
  snapshot:VoiceSnapshot;composer:string;onComposerChange:(value:string)=>void;
@@ -29,7 +30,7 @@ type Props={
 };
 const NAV:readonly [View,string,typeof Building2][]=[
  ['entidades','Entidades',Building2],['proyectos','Proyectos',Layers3],
- ['motores','Motores',Cpu],['trabajos','Trabajos',Workflow],
+ ['motores','Motores',Cpu],['agentes','Agentes',Users],['trabajos','Trabajos',Workflow],
  ['evidencias','Evidencias',FileCheck2]
 ];
 const NAMES:Record<Company,string>={
@@ -70,7 +71,11 @@ export default function CerebroOperativeCockpitV3({
  dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,onStopVoice,composerRef,source,observedAt,
  company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,children
 }:Props){
- const[view,setView]=useState<View>('resumen');
+ const[view,setView]=useState<View>(()=>{
+  if(typeof window==='undefined')return 'resumen';
+  const p=new URLSearchParams(window.location.search);
+  return p.get('section')==='operativa'&&p.get('op3_panel')==='agentes'?'agentes':'resumen';
+ });
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
  const queued=useMemo(()=>runs.reduce((n,r)=>n+realPending(r),0),[runs]);
  const failed=useMemo(()=>runs.filter(isFailed),[runs]);
@@ -213,7 +218,7 @@ export default function CerebroOperativeCockpitV3({
     </div>
     <h2>{({
      entidades:'Entidades y conexiones',proyectos:'Proyectos y dependencias',
-     motores:'Motores observados',trabajos:'Trabajos y ejecuciones',
+     motores:'Motores observados',agentes:'Agentes, especialistas y subagentes',trabajos:'Trabajos y ejecuciones',
      evidencias:'Evidencias de ejecución',decisiones:'Estado y revisiones',
      resumen:'Resumen'
     } as Record<View,string>)[view]}</h2>
@@ -221,6 +226,7 @@ export default function CerebroOperativeCockpitV3({
      entidades:'Empresas realmente devueltas por el Gateway de laboratorio; selector sin concesión de permisos.',
      proyectos:'Proyectos registrados y comprobados en el Gateway de laboratorio; fuente parcial, no inventario global.',
      motores:'Registros, catálogo de diseño FACT-001 y ejecuciones observadas, sin equipararlos.',
+      agentes:'Perfiles registrados de solo lectura; no acredita motores activos.',
      trabajos:'Actividad publicada por la fuente autenticada, con acceso a su evidencia.',
      evidencias:'Referencias originales de ejecución; no se generan informes ficticios.',
      decisiones:'Fallos observados; las aprobaciones humanas requieren su propia fuente.',
@@ -231,6 +237,8 @@ export default function CerebroOperativeCockpitV3({
        onCompanyChange={onCompanyChange} onNavigate={selectPanel}
        observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
       />:null}
+    {view==='agentes'?(company==='fenix'?<CerebroRoleAgentRosterReadonly/>:
+      <p className="op3-source-empty">Directorio limitado a Fénix. Seleccionar otra empresa no concede permisos.</p>):null}
     {(view==='trabajos'||view==='evidencias'||view==='decisiones')?
      <div className="op3-data-lines">
       {((view==='decisiones'?failed:view==='evidencias'?runs.filter(x=>validLink(x)):recentRuns)

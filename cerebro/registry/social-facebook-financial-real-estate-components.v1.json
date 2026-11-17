@@ -1,0 +1,5156 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CEREBRO_FB_FINANCIAL_REAL_ESTATE_COMPONENTS_SOURCED_V1",
+  "source_repo": "carlosjmunoz78/fenix-capital-cerebro-social",
+  "source_commit_sha": "07b40c571e3d58879fdda56b833417cc5c7aed9c",
+  "source_contracts": [
+    {
+      "path": "families/facebook/financial-real-estate/roles.v1.json",
+      "blob_sha": "a7cb99247b7c270de431ed4c99cb45b7cf8160f7"
+    },
+    {
+      "path": "families/facebook/financial-real-estate/surface-coverage.v1.json",
+      "blob_sha": "9dd06c2dd73eaf3ef2834b5b2e32f26c4937510e"
+    },
+    {
+      "path": "families/facebook/financial-real-estate/enterprise-operations.v1.json",
+      "blob_sha": "bacbc853488a61b17bb5a94e12f0bbf6905aba1d"
+    },
+    {
+      "path": "families/facebook/financial-real-estate/component-materialization.v1.json",
+      "blob_sha": "72ecfc0b3fa872e7f98c70a88b13380c03926da4"
+    }
+  ],
+  "family_id": "SOC-FB-FINANCIAL-REAL-ESTATE-V1",
+  "engine_id": "SOC-001",
+  "environment": "PREPROD",
+  "production_active_verified": false,
+  "component_type": "LOGICAL_SHARED_RUNTIME",
+  "source_total_parents": 42,
+  "source_total_subagents": 527,
+  "source_scope": "FACEBOOK_FINANCIAL_REAL_ESTATE_NOT_ALL_SOCIAL",
+  "components": [
+    {
+      "id": "FB-00",
+      "name": "Family Facebook Orchestrator",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-001",
+      "name": "Company Selector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-002",
+      "name": "Brand Selector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-003",
+      "name": "Territory Selector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-004",
+      "name": "Business-Line Selector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-005",
+      "name": "Campaign Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-006",
+      "name": "Workload Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-007",
+      "name": "Priority Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-008",
+      "name": "Dependency Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-009",
+      "name": "Human-Exception Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-00.SA-010",
+      "name": "Cross-Company Learning Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-00",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-00",
+      "source_role_name": "Family Facebook Orchestrator"
+    },
+    {
+      "id": "FB-01",
+      "name": "Market Intelligence",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-001",
+      "name": "Market Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-002",
+      "name": "Competitor Intelligence",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-003",
+      "name": "Meta Ads Library Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-004",
+      "name": "Trend Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-005",
+      "name": "Social Listening",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-006",
+      "name": "Local Market Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-007",
+      "name": "Industry News Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-008",
+      "name": "Opportunity Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-009",
+      "name": "Threat Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-010",
+      "name": "Benchmark Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-011",
+      "name": "Competitor Creative Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-012",
+      "name": "Competitor Offer Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-013",
+      "name": "Competitor Funnel Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-01.SA-014",
+      "name": "Competitor Growth Tracker",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-01",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-01",
+      "source_role_name": "Market Intelligence"
+    },
+    {
+      "id": "FB-02",
+      "name": "Territorial Intelligence",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-001",
+      "name": "Andalucia Intelligence",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-002",
+      "name": "Provincial Intelligence",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-003",
+      "name": "City Intelligence",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-004",
+      "name": "Municipality Intelligence",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-005",
+      "name": "Neighborhood Intelligence",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-006",
+      "name": "Local Events Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-007",
+      "name": "Local Culture Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-008",
+      "name": "Local Language Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-009",
+      "name": "Local Demand Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-010",
+      "name": "Local Competitor Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-011",
+      "name": "Local Property Market Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-012",
+      "name": "Local Financial Demand Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-02.SA-013",
+      "name": "Spain Expansion Intelligence",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-02",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-02",
+      "source_role_name": "Territorial Intelligence"
+    },
+    {
+      "id": "FB-03",
+      "name": "Audience & Buyer Persona",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-001",
+      "name": "Buyer Persona Architect",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-002",
+      "name": "JTBD Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-003",
+      "name": "Pain Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-004",
+      "name": "Desire Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-005",
+      "name": "Fear Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-006",
+      "name": "Objection Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-007",
+      "name": "Motivation Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-008",
+      "name": "Trigger Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-009",
+      "name": "Decision Journey Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-010",
+      "name": "Behavioral Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-011",
+      "name": "Psychographic Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-012",
+      "name": "Life-Stage Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-013",
+      "name": "Customer Language Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-014",
+      "name": "Persona Evolution Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-03.SA-015",
+      "name": "Segment Opportunity Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-03",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-03",
+      "source_role_name": "Audience & Buyer Persona"
+    },
+    {
+      "id": "FB-04",
+      "name": "Financial Audience Specialists",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-001",
+      "name": "First-Home Buyer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-002",
+      "name": "Low-Savings Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-003",
+      "name": "Young Buyer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-004",
+      "name": "Family Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-005",
+      "name": "Single-Parent Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-006",
+      "name": "Divorced Buyer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-007",
+      "name": "Civil Servant Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-008",
+      "name": "Self-Employed Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-009",
+      "name": "Investor Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-010",
+      "name": "Mortgage Switching Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-011",
+      "name": "Refinancing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-012",
+      "name": "Inheritance Finance Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-013",
+      "name": "Developer New-Build Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-014",
+      "name": "Real-Estate-Agency B2B Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-04.SA-015",
+      "name": "Financial Professional B2B Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-04",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-04",
+      "source_role_name": "Financial Audience Specialists"
+    },
+    {
+      "id": "FB-05",
+      "name": "Real-Estate Audience Specialists",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-001",
+      "name": "Home Seller Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-002",
+      "name": "Home Buyer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-003",
+      "name": "Urgent Seller Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-004",
+      "name": "Maximum-Price Seller Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-005",
+      "name": "FSBO Seller Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-006",
+      "name": "Inheritance Property Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-007",
+      "name": "Divorce Property Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-008",
+      "name": "Investor Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-009",
+      "name": "Landlord Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-010",
+      "name": "New-Build Buyer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-011",
+      "name": "Luxury Property Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-012",
+      "name": "First-Time Buyer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-013",
+      "name": "Relocation Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-014",
+      "name": "Neighborhood Buyer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-015",
+      "name": "Agency Partnership Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-05.SA-016",
+      "name": "Developer Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-05",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-05",
+      "source_role_name": "Real-Estate Audience Specialists"
+    },
+    {
+      "id": "FB-06",
+      "name": "Strategy",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-001",
+      "name": "Facebook Strategy Lead",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-002",
+      "name": "Growth Strategist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-003",
+      "name": "Organic Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-004",
+      "name": "Paid Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-005",
+      "name": "Brand Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-006",
+      "name": "Content Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-007",
+      "name": "Acquisition Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-008",
+      "name": "Retention Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-009",
+      "name": "Remarketing Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-010",
+      "name": "Local Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-011",
+      "name": "B2B Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-012",
+      "name": "B2C Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-013",
+      "name": "Community Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-014",
+      "name": "Expansion Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-015",
+      "name": "Cross-Company Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-016",
+      "name": "Seasonal Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-06.SA-017",
+      "name": "Campaign Architect",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-06",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-06",
+      "source_role_name": "Strategy"
+    },
+    {
+      "id": "FB-07",
+      "name": "Offer & Funnel",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-001",
+      "name": "Offer Architect",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-002",
+      "name": "Value Proposition Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-003",
+      "name": "Lead Magnet Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-004",
+      "name": "Funnel Architect",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-005",
+      "name": "Conversion Path Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-006",
+      "name": "Landing Journey Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-007",
+      "name": "Messenger Funnel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-008",
+      "name": "Lead Form Funnel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-009",
+      "name": "Remarketing Funnel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-010",
+      "name": "B2B Funnel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-011",
+      "name": "B2C Funnel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-012",
+      "name": "Cross-Sell Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-013",
+      "name": "Upsell Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-014",
+      "name": "Referral Funnel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-07.SA-015",
+      "name": "Reactivation Funnel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-07",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-07",
+      "source_role_name": "Offer & Funnel"
+    },
+    {
+      "id": "FB-08",
+      "name": "Content Planning",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-001",
+      "name": "Editorial Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-002",
+      "name": "Content Calendar Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-003",
+      "name": "Topic Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-004",
+      "name": "Content Pillar Architect",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-005",
+      "name": "Format Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-006",
+      "name": "Campaign Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-007",
+      "name": "Evergreen Content Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-008",
+      "name": "Reactive Content Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-009",
+      "name": "Seasonal Content Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-010",
+      "name": "Local Content Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-011",
+      "name": "Educational Content Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-012",
+      "name": "Commercial Content Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-013",
+      "name": "Trust Content Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-014",
+      "name": "Testimonial Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-08.SA-015",
+      "name": "Case-Study Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-08",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-08",
+      "source_role_name": "Content Planning"
+    },
+    {
+      "id": "FB-09",
+      "name": "Copy & Persuasion",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-001",
+      "name": "Direct Response Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-002",
+      "name": "Social Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-003",
+      "name": "Long-Form Facebook Writer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-004",
+      "name": "Short-Form Writer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-005",
+      "name": "Advertising Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-006",
+      "name": "Storytelling Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-007",
+      "name": "Educational Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-008",
+      "name": "Conversational Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-009",
+      "name": "B2B Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-010",
+      "name": "Financial Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-011",
+      "name": "Real-Estate Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-012",
+      "name": "Local Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-013",
+      "name": "Retargeting Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-09.SA-014",
+      "name": "Messenger Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-09",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-09",
+      "source_role_name": "Copy & Persuasion"
+    },
+    {
+      "id": "FB-10",
+      "name": "Hook Lab",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-001",
+      "name": "Hook Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-002",
+      "name": "Verbal Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-003",
+      "name": "Visual Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-004",
+      "name": "Curiosity Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-005",
+      "name": "Problem Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-006",
+      "name": "Benefit Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-007",
+      "name": "Question Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-008",
+      "name": "Contrarian Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-009",
+      "name": "Data Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-010",
+      "name": "Story Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-011",
+      "name": "Local Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-012",
+      "name": "Emotional Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-013",
+      "name": "Pattern-Interrupt Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-10.SA-014",
+      "name": "Hook Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-10",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-10",
+      "source_role_name": "Hook Lab"
+    },
+    {
+      "id": "FB-11",
+      "name": "CTA Lab",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-001",
+      "name": "CTA Writer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-002",
+      "name": "Lead CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-003",
+      "name": "Messenger CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-004",
+      "name": "Comment CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-005",
+      "name": "Save Share CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-006",
+      "name": "Appointment CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-007",
+      "name": "Download CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-008",
+      "name": "Valuation CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-009",
+      "name": "Mortgage Study CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-010",
+      "name": "B2B CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-11.SA-011",
+      "name": "CTA Testing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-11",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-11",
+      "source_role_name": "CTA Lab"
+    },
+    {
+      "id": "FB-12",
+      "name": "Script Factory",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-001",
+      "name": "Reel Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-002",
+      "name": "Short Video Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-003",
+      "name": "Long Video Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-004",
+      "name": "Interview Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-005",
+      "name": "Testimonial Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-006",
+      "name": "UGC Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-007",
+      "name": "Expert Video Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-008",
+      "name": "Educational Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-009",
+      "name": "Sales Video Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-010",
+      "name": "Live Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-011",
+      "name": "Webinar Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-012",
+      "name": "Voiceover Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-013",
+      "name": "Storyboard Writer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-12.SA-014",
+      "name": "Shot-List Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-12",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-12",
+      "source_role_name": "Script Factory"
+    },
+    {
+      "id": "FB-13",
+      "name": "Creative Direction",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-001",
+      "name": "Creative Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-002",
+      "name": "Art Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-003",
+      "name": "Visual Concept Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-004",
+      "name": "Campaign Concept Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-005",
+      "name": "Brand Visual Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-006",
+      "name": "Creative Angle Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-007",
+      "name": "Visual Storytelling Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-008",
+      "name": "Creative Variant Generator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-13.SA-009",
+      "name": "Creative Consistency Reviewer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-13",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-13",
+      "source_role_name": "Creative Direction"
+    },
+    {
+      "id": "FB-14",
+      "name": "Image Factory",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-001",
+      "name": "Graphic Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-002",
+      "name": "Social Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-003",
+      "name": "Ad Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-004",
+      "name": "AI Image Creator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-005",
+      "name": "Photographer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-006",
+      "name": "Photo Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-007",
+      "name": "Retoucher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-008",
+      "name": "Infographic Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-009",
+      "name": "Carousel Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-010",
+      "name": "Thumbnail Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-011",
+      "name": "Property Image Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-012",
+      "name": "Financial Graphic Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-013",
+      "name": "Meme Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-14.SA-014",
+      "name": "Visual Variation Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-14",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-14",
+      "source_role_name": "Image Factory"
+    },
+    {
+      "id": "FB-15",
+      "name": "Video Production",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-001",
+      "name": "Video Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-002",
+      "name": "Director of Photography",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-003",
+      "name": "Camera Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-004",
+      "name": "Lighting Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-005",
+      "name": "Gaffer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-006",
+      "name": "Set Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-007",
+      "name": "Location Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-008",
+      "name": "Presenter Coach",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-009",
+      "name": "Casting Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-010",
+      "name": "Property Video Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-011",
+      "name": "Interview Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-15.SA-012",
+      "name": "UGC Production Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-15",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-15",
+      "source_role_name": "Video Production"
+    },
+    {
+      "id": "FB-16",
+      "name": "Video Postproduction",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-001",
+      "name": "Video Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-002",
+      "name": "Reels Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-003",
+      "name": "Short-Form Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-004",
+      "name": "Retention Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-005",
+      "name": "Pacing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-006",
+      "name": "Pattern Interrupt Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-007",
+      "name": "Motion Graphics Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-008",
+      "name": "2D Animator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-009",
+      "name": "3D Animator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-010",
+      "name": "VFX Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-011",
+      "name": "Compositor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-012",
+      "name": "Colorist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-013",
+      "name": "Caption Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-16.SA-014",
+      "name": "Video Repurposing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-16",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-16",
+      "source_role_name": "Video Postproduction"
+    },
+    {
+      "id": "FB-17",
+      "name": "Audio Factory",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-001",
+      "name": "Audio Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-002",
+      "name": "Sound Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-003",
+      "name": "Audio Engineer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-004",
+      "name": "Voiceover Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-005",
+      "name": "Male Voice Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-006",
+      "name": "Female Voice Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-007",
+      "name": "Voice Casting",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-008",
+      "name": "Music Supervisor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-009",
+      "name": "Trend Audio Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-010",
+      "name": "Foley Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-011",
+      "name": "SFX Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-012",
+      "name": "Audio Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-013",
+      "name": "Dubbing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-17.SA-014",
+      "name": "Audio Cleanup Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-17",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-17",
+      "source_role_name": "Audio Factory"
+    },
+    {
+      "id": "FB-18",
+      "name": "Reels Factory",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-001",
+      "name": "Reels Strategist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-002",
+      "name": "Reels Trend Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-003",
+      "name": "Reels Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-004",
+      "name": "Reels Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-005",
+      "name": "Reels Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-006",
+      "name": "Reels Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-007",
+      "name": "Reels Audio Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-008",
+      "name": "Reels Caption Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-009",
+      "name": "Reels CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-010",
+      "name": "Reels Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-18.SA-011",
+      "name": "Reels Repurposing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-18",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-18",
+      "source_role_name": "Reels Factory"
+    },
+    {
+      "id": "FB-19",
+      "name": "Meme & Culture",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-19.SA-001",
+      "name": "Meme Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-19",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-19.SA-002",
+      "name": "Meme Creator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-19",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-19.SA-003",
+      "name": "Cultural Trends Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-19",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-19.SA-004",
+      "name": "Reactive Content Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-19",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-19.SA-005",
+      "name": "Newsjacking Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-19",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-19.SA-006",
+      "name": "Local Humor Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-19",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-19.SA-007",
+      "name": "Brand-Safe Humor Reviewer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-19",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-19",
+      "source_role_name": "Meme & Culture"
+    },
+    {
+      "id": "FB-20",
+      "name": "Facebook Page",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-001",
+      "name": "Page Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-002",
+      "name": "Page Optimization Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-003",
+      "name": "Facebook SEO Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-004",
+      "name": "Publishing Operator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-005",
+      "name": "Scheduler",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-006",
+      "name": "Metadata Optimizer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-007",
+      "name": "Featured Content Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-008",
+      "name": "Page Conversion Optimizer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-20.SA-009",
+      "name": "Profile Consistency Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-20",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-20",
+      "source_role_name": "Facebook Page"
+    },
+    {
+      "id": "FB-21",
+      "name": "Facebook Groups",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-001",
+      "name": "Group Discovery Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-002",
+      "name": "Group Strategy Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-003",
+      "name": "Group Publishing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-004",
+      "name": "Group Community Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-005",
+      "name": "Group Engagement Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-006",
+      "name": "Group Relationship Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-007",
+      "name": "Group Lead Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-008",
+      "name": "Group Moderator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-009",
+      "name": "Group Opportunity Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-21.SA-010",
+      "name": "Group Partnership Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-21",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-21",
+      "source_role_name": "Facebook Groups"
+    },
+    {
+      "id": "FB-22",
+      "name": "Marketplace",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-001",
+      "name": "Marketplace Strategy",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-002",
+      "name": "Listing Creator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-003",
+      "name": "Listing Copywriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-004",
+      "name": "Property Listing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-005",
+      "name": "Marketplace Image Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-006",
+      "name": "Listing Optimizer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-007",
+      "name": "Marketplace Response Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-008",
+      "name": "Lead Qualification Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-22.SA-009",
+      "name": "Marketplace Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-22",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-22",
+      "source_role_name": "Marketplace"
+    },
+    {
+      "id": "FB-23",
+      "name": "Live & Events",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-001",
+      "name": "Live Producer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-002",
+      "name": "Live Presenter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-003",
+      "name": "Technical Director",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-004",
+      "name": "Live Moderator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-005",
+      "name": "Live Scriptwriter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-006",
+      "name": "Interview Producer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-007",
+      "name": "AMA Producer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-008",
+      "name": "Webinar Producer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-009",
+      "name": "Facebook Event Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-010",
+      "name": "Event Promotion Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-23.SA-011",
+      "name": "Post-Event Repurposing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-23",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-23",
+      "source_role_name": "Live & Events"
+    },
+    {
+      "id": "FB-24",
+      "name": "Creator & Influencer",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-001",
+      "name": "Creator Discovery",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-002",
+      "name": "Influencer Researcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-003",
+      "name": "Creator Fit Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-004",
+      "name": "Outreach Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-005",
+      "name": "Partnership Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-006",
+      "name": "UGC Creator Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-007",
+      "name": "Briefing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-008",
+      "name": "Creator Campaign Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-009",
+      "name": "Partnership Ads Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-24.SA-010",
+      "name": "Creator Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-24",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-24",
+      "source_role_name": "Creator & Influencer"
+    },
+    {
+      "id": "FB-25",
+      "name": "Community",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-001",
+      "name": "Community Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-002",
+      "name": "Comment Responder",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-003",
+      "name": "Comment Strategist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-004",
+      "name": "Moderator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-005",
+      "name": "Sentiment Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-006",
+      "name": "Reputation Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-007",
+      "name": "Complaint Handler",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-008",
+      "name": "Crisis Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-009",
+      "name": "Superfan Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-010",
+      "name": "Advocate Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-011",
+      "name": "UGC Collector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-012",
+      "name": "Testimonial Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-25.SA-013",
+      "name": "Community Question Miner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-25",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-25",
+      "source_role_name": "Community"
+    },
+    {
+      "id": "FB-26",
+      "name": "Social Lead",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-001",
+      "name": "Lead Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-002",
+      "name": "Lead Response Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-003",
+      "name": "Intent Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-004",
+      "name": "Lead Qualifier",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-005",
+      "name": "Lead Scorer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-006",
+      "name": "Duplicate Lead Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-007",
+      "name": "Territory Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-008",
+      "name": "Company Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-009",
+      "name": "Business-Line Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-26.SA-010",
+      "name": "CRM Handoff Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-26",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-26",
+      "source_role_name": "Social Lead"
+    },
+    {
+      "id": "FB-27",
+      "name": "Conversation & Messenger",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-001",
+      "name": "Messenger Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-002",
+      "name": "Conversation Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-003",
+      "name": "FAQ Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-004",
+      "name": "Qualification Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-005",
+      "name": "Objection Handler",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-006",
+      "name": "Follow-Up Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-007",
+      "name": "Nurture Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-008",
+      "name": "Reactivation Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-009",
+      "name": "Lost-Lead Recovery",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-010",
+      "name": "Appointment Setter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-27.SA-011",
+      "name": "Human Handoff Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-27",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-27",
+      "source_role_name": "Conversation & Messenger"
+    },
+    {
+      "id": "FB-28",
+      "name": "Meta Ads",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-001",
+      "name": "Meta Ads Architect",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-002",
+      "name": "Media Buyer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-003",
+      "name": "Campaign Builder",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-004",
+      "name": "Ad Set Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-005",
+      "name": "Audience Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-006",
+      "name": "Retargeting Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-007",
+      "name": "Creative Testing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-008",
+      "name": "Lead Ads Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-009",
+      "name": "Message Ads Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-010",
+      "name": "Reels Ads Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-011",
+      "name": "Partnership Ads Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-012",
+      "name": "Budget Allocator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-013",
+      "name": "Bid Optimizer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-014",
+      "name": "Scaling Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-28.SA-015",
+      "name": "Campaign Recovery Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-28",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-28",
+      "source_role_name": "Meta Ads"
+    },
+    {
+      "id": "FB-29",
+      "name": "Experimentation",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-001",
+      "name": "Experiment Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-002",
+      "name": "A-B Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-003",
+      "name": "Multivariate Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-004",
+      "name": "Hook Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-005",
+      "name": "CTA Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-006",
+      "name": "Creative Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-007",
+      "name": "Audience Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-008",
+      "name": "Offer Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-009",
+      "name": "Funnel Testing Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-010",
+      "name": "Statistical Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-29.SA-011",
+      "name": "Experiment Quality Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-29",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-29",
+      "source_role_name": "Experimentation"
+    },
+    {
+      "id": "FB-30",
+      "name": "Performance & Data",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-001",
+      "name": "Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-002",
+      "name": "Funnel Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-003",
+      "name": "Conversion Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-004",
+      "name": "Creative Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-005",
+      "name": "Hook Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-006",
+      "name": "CTA Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-007",
+      "name": "Audience Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-008",
+      "name": "Attribution Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-009",
+      "name": "Cohort Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-010",
+      "name": "Territory Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-011",
+      "name": "Company Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-012",
+      "name": "Campaign Profitability Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-013",
+      "name": "Forecasting Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-30.SA-014",
+      "name": "Anomaly Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-30",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-30",
+      "source_role_name": "Performance & Data"
+    },
+    {
+      "id": "FB-31",
+      "name": "Tracking & Integration",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-001",
+      "name": "Meta Pixel Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-002",
+      "name": "Conversions API Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-003",
+      "name": "Event Taxonomy Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-004",
+      "name": "CRM Integration Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-005",
+      "name": "Lead Integration Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-006",
+      "name": "Data Quality Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-007",
+      "name": "Attribution Integration Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-008",
+      "name": "Marketing API Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-009",
+      "name": "Identity Resolution Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-31.SA-010",
+      "name": "Tracking Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-31",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-31",
+      "source_role_name": "Tracking & Integration"
+    },
+    {
+      "id": "FB-32",
+      "name": "Learning",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-001",
+      "name": "Winner Pattern Miner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-002",
+      "name": "Failure Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-003",
+      "name": "Creative Fatigue Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-004",
+      "name": "Hook Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-005",
+      "name": "CTA Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-006",
+      "name": "Persona Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-007",
+      "name": "Audience Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-008",
+      "name": "Territory Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-009",
+      "name": "Company Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-010",
+      "name": "Offer Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-011",
+      "name": "Format Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-012",
+      "name": "Funnel Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-013",
+      "name": "Competitor Change Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-014",
+      "name": "Meta Change Learner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-015",
+      "name": "Postmortem Agent",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-016",
+      "name": "Playbook Builder",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-32.SA-017",
+      "name": "Knowledge Curator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-32",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-32",
+      "source_role_name": "Learning"
+    },
+    {
+      "id": "FB-33",
+      "name": "Brand & Compliance",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-001",
+      "name": "Brand Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-002",
+      "name": "Claims Verifier",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-003",
+      "name": "Meta Policy Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-004",
+      "name": "Financial Advertising Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-005",
+      "name": "Housing Advertising Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-006",
+      "name": "GDPR Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-007",
+      "name": "PII Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-008",
+      "name": "Copyright Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-009",
+      "name": "Image Rights Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-010",
+      "name": "Accessibility Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-011",
+      "name": "Discrimination Risk Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-012",
+      "name": "Legal Risk Classifier",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-33.SA-013",
+      "name": "High-Risk Content Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-33",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-33",
+      "source_role_name": "Brand & Compliance"
+    },
+    {
+      "id": "FB-34",
+      "name": "Multicompany Governance",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-001",
+      "name": "Company Registry Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-002",
+      "name": "Brand Registry Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-003",
+      "name": "Territory Registry Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-004",
+      "name": "Permission Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-005",
+      "name": "Company Data Isolation Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-006",
+      "name": "Shared Knowledge Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-007",
+      "name": "Private Knowledge Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-008",
+      "name": "Cross-Company Learning Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-009",
+      "name": "Conflict Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-010",
+      "name": "Policy Resolver",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-011",
+      "name": "Environment Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-34.SA-012",
+      "name": "Version Manager",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-34",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-34",
+      "source_role_name": "Multicompany Governance"
+    },
+    {
+      "id": "FB-35_EXT",
+      "name": "Partnerships & Business Development",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-001",
+      "name": "Group Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-002",
+      "name": "Strategic Alliance Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-003",
+      "name": "Referral Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-004",
+      "name": "B2B Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-005",
+      "name": "Developer Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-006",
+      "name": "Real-Estate Agency Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-007",
+      "name": "Financial Professional Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-008",
+      "name": "Local Business Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-009",
+      "name": "Creator Partnership Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-010",
+      "name": "Co-Marketing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-011",
+      "name": "Co-Branded Content Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-012",
+      "name": "Event Partnership Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-013",
+      "name": "Sponsorship Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-014",
+      "name": "Distribution Opportunity Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-015",
+      "name": "Affiliate Referral Model Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-016",
+      "name": "White-Label Bundle Scout",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-017",
+      "name": "Partner Fit Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-018",
+      "name": "Partner Outreach Drafter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-019",
+      "name": "Partnership Pipeline Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-35_EXT.SA-020",
+      "name": "Partnership Learning Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-35_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-35_EXT",
+      "source_role_name": "Partnerships & Business Development"
+    },
+    {
+      "id": "FB-36_EXT",
+      "name": "Stories & Ephemeral Content",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-001",
+      "name": "Stories Strategist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-002",
+      "name": "Stories Hook Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-003",
+      "name": "Stories Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-004",
+      "name": "Stories Video Editor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-005",
+      "name": "Stories CTA Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-006",
+      "name": "Stories Sequence Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-007",
+      "name": "Stories Lead Path Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-008",
+      "name": "Stories Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-36_EXT.SA-009",
+      "name": "Stories Repurposing Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-36_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-36_EXT",
+      "source_role_name": "Stories & Ephemeral Content"
+    },
+    {
+      "id": "FB-37_EXT",
+      "name": "Customer Care & Social Support",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-001",
+      "name": "Social Support Intake",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-002",
+      "name": "Customer Identity Context Resolver",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-003",
+      "name": "FAQ Support Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-004",
+      "name": "Case Triage Specialist",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-005",
+      "name": "Service Incident Classifier",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-006",
+      "name": "SLA Watcher",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-007",
+      "name": "Follow-Up Coordinator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-008",
+      "name": "Resolution Verifier",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-009",
+      "name": "Customer Satisfaction Signal Miner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-010",
+      "name": "Support-to-CRM Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-011",
+      "name": "Human Escalation Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-37_EXT.SA-012",
+      "name": "Support Learning Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-37_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-37_EXT",
+      "source_role_name": "Customer Care & Social Support"
+    },
+    {
+      "id": "FB-38_EXT",
+      "name": "Reputation & Reviews",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-001",
+      "name": "Review Monitor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-002",
+      "name": "Recommendation Monitor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-003",
+      "name": "Review Request Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-004",
+      "name": "Review Response Writer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-005",
+      "name": "Reputation Sentiment Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-006",
+      "name": "Reputation Risk Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-007",
+      "name": "Complaint Pattern Miner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-008",
+      "name": "Testimonial Consent Verifier",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-009",
+      "name": "Review Authenticity Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-010",
+      "name": "Reputation Recovery Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-38_EXT.SA-011",
+      "name": "Reputation Learning Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-38_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-38_EXT",
+      "source_role_name": "Reputation & Reviews"
+    },
+    {
+      "id": "FB-39_EXT",
+      "name": "Account Security & Access Operations",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-001",
+      "name": "Page Ownership Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-002",
+      "name": "Business Asset Access Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-003",
+      "name": "Role Permission Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-004",
+      "name": "Integration Inventory Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-005",
+      "name": "Token Exposure Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-006",
+      "name": "Compromise Signal Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-007",
+      "name": "Impersonation Signal Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-008",
+      "name": "Access Drift Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-009",
+      "name": "Recovery Readiness Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-010",
+      "name": "Kill-Switch Readiness Auditor",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-011",
+      "name": "Security Incident Router",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-39_EXT.SA-012",
+      "name": "Security Learning Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-39_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-39_EXT",
+      "source_role_name": "Account Security & Access Operations"
+    },
+    {
+      "id": "FB-40_EXT",
+      "name": "Crisis Communications",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-001",
+      "name": "Crisis Signal Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-002",
+      "name": "Crisis Severity Classifier",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-003",
+      "name": "Facts & Timeline Builder",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-004",
+      "name": "Stakeholder Mapper",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-005",
+      "name": "Response Option Designer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-006",
+      "name": "Holding Statement Drafter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-007",
+      "name": "Correction Drafter",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-008",
+      "name": "Silence-vs-Response Evaluator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-009",
+      "name": "Channel Coordination Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-010",
+      "name": "Crisis Monitoring Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-011",
+      "name": "Crisis Closure Reviewer",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-40_EXT.SA-012",
+      "name": "Crisis Postmortem Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-40_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-40_EXT",
+      "source_role_name": "Crisis Communications"
+    },
+    {
+      "id": "FB-41_EXT",
+      "name": "Employee Expert Advocacy & Social Selling",
+      "component_kind": "AGENT_ROLE",
+      "parent_id": null,
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-001",
+      "name": "Expert Profile Mapper",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-002",
+      "name": "Advocacy Candidate Selector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-003",
+      "name": "Thought Leadership Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-004",
+      "name": "Expert Content Briefing",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-005",
+      "name": "Employee Sharing Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-006",
+      "name": "Commercial Social Selling Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-007",
+      "name": "Expert Commenting Planner",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-008",
+      "name": "Warm Introduction Opportunity Detector",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-009",
+      "name": "Partner Advocacy Coordinator",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-010",
+      "name": "Disclosure & Compliance Guard",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-011",
+      "name": "Advocacy Performance Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    },
+    {
+      "id": "FB-41_EXT.SA-012",
+      "name": "Advocacy Learning Analyst",
+      "component_kind": "SUBAGENT_ROLE",
+      "parent_id": "FB-41_EXT",
+      "status": "SCAFFOLDED_PREPROD_ADDITIVE",
+      "source_role_id": "FB-41_EXT",
+      "source_role_name": "Employee Expert Advocacy & Social Selling"
+    }
+  ],
+  "caution": "Represents source-declared logical agents and subagents with stable parent-child IDs; not independently-running live processes, private customer instances, or every network/company."
+}
