@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "status": "STAGED_UNDEPLOYED",
+  "worker_name": "cerebro-nia-notion-proof-lab",
+  "target_environment": "LAB",
+  "base_deployed_version_id": "632cdb90-2c92-4f17-9050-f8889ae8d0c6",
+  "base_wire_sha256": "9424327cd24c224869ea5fdee534e5553d761465965c9a81fb565b1890601202",
+  "migration": {
+    "new_tag": "nia-nonce-ledger-v1",
+    "new_sqlite_classes": [
+      "NiaNonceLedger"
+    ]
+  },
+  "main_module": "worker.mjs",
+  "modules": [
+    {
+      "name": "worker.mjs",
+      "source": "cerebro/nia-notion-cloudflare-lab/worker-with-nonce-ledger-stage.mjs"
+    },
+    {
+      "name": "nia-sqlite-nonce-ledger-v1.mjs",
+      "source": "cerebro/gateway/nia-sqlite-nonce-ledger-v1.mjs"
+    }
+  ],
+  "binding": {
+    "name": "NIA_NONCE_LEDGER",
+    "type": "durable_object_namespace",
+    "class_name": "NiaNonceLedger"
+  },
+  "inherit_existing_bindings": [
+    "CEREBRO_NIA_NOTION_READ_TOKEN",
+    "COMPANY_ID",
+    "ENGINE_ID",
+    "ENVIRONMENT",
+    "NIA_ENABLED",
+    "VERSION"
+  ],
+  "activation_requires": "verification_and_explicit_central_issuer_gate",
+  "rollback": {
+    "strategy": "deploy_previous_version_100_percent",
+    "version_id": "632cdb90-2c92-4f17-9050-f8889ae8d0c6"
+  },
+  "no_public_url": true,
+  "no_cron": true,
+  "no_github_actions": true,
+  "cost_additional_eur": 0,
+  "note": "Cloudflare D1 Free 10/10; use dedicated SQLite Durable Object instead"
+}
