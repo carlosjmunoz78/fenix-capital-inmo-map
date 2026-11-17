@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "status": "PROOF_ONLY_ROLLBACK_COMPLETED",
+  "cloudflare_worker_name": "cerebro-nia-notion-proof-lab",
+  "target_environment": "CEREBRO-NIA-LAB",
+  "main_module": "worker.mjs",
+  "modules": [
+    {
+      "cloudflare_module": "worker.mjs",
+      "git_source": "cerebro/nia-notion-cloudflare-lab/actgw-one-shot-worker.mjs"
+    },
+    {
+      "cloudflare_module": "action-gateway-v1.mjs",
+      "git_source": "cerebro/gateway/action-gateway-v1.mjs"
+    },
+    {
+      "cloudflare_module": "nia-action-gateway-binding-v0.mjs",
+      "git_source": "cerebro/gateway/nia-action-gateway-binding-v0.mjs"
+    },
+    {
+      "cloudflare_module": "nia-notion-page-provider-v0.mjs",
+      "git_source": "cerebro/gateway/nia-notion-page-provider-v0.mjs"
+    }
+  ],
+  "no_production_promotion": true,
+  "no_github_actions": true,
+  "no_public_routes": true,
+  "rollback_source": "cerebro/nia-notion-cloudflare-lab/worker.mjs",
+  "evidence_document": "cerebro/docs/NIA_ACTGW_E2E_CLOUDFLARE_LAB_V1.md"
+}

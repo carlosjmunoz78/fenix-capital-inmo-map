@@ -1,0 +1,18 @@
+{
+  "name": "cerebro-nia-notion-proof-lab",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-17",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {
+    "crons": []
+  },
+  "vars": {
+    "NIA_ENABLED": "false",
+    "COMPANY_ID": "fenix",
+    "ENGINE_ID": "ACTGW-001",
+    "ENVIRONMENT": "LAB",
+    "VERSION": "0.1.0"
+  }
+}
