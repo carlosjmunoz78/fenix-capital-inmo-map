@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {signFact001LabReceiptV0} from './fact001-receipt-signature-lab.mjs';
-import {readFact001SignedReceiptOwnerLabV0 as read} from './fact001-signed-receipt-owner-reader-lab.mjs';
+import {readFact001SignedReceiptOwnerLabV0 as baseRead} from './fact001-signed-receipt-owner-reader-lab.mjs';
+const ownerContext=Object.freeze({actor_id:'CARLOS-ADMIN',
+ auth_source:'SERVER_VERIFIED_FENIX_CONTEXT',company_ids:['fenix'],
+ scopes:['cerebro:audit:read']});
+const read=(opts)=>baseRead({ownerContext,...opts});
 
 const key=Uint8Array.from({length:32},(_,i)=>i+1); // FIXTURE ONLY: never a deployment key
 const clock=1794855339509;
@@ -136,4 +140,23 @@ test('query errors cannot become false certified receipts or disclose error body
  const result=await read({db,jobId,signingKey:key});
  assert.equal(result.status,'NOT_CERTIFIED');
  assert.equal(JSON.stringify(result).includes('BEARER_SUPERSECRET'),false);
+});
+
+test('server-verified Fenix owner context is compulsory before any D1 read',async()=>{
+ const f=await fixture();
+ let calls=0;
+ const db={prepare(){calls++;throw Error('UNEXPECTED_IO')}};
+ for(const c of [
+  undefined,
+  {actor_id:'CARLOS-ADMIN',auth_source:'CLIENT_ASSERTED',company_ids:['fenix'],scopes:['cerebro:audit:read']},
+  {...ownerContext,company_ids:['aion']},
+  {...ownerContext,scopes:['cerebro:jobs:read']},
+  {...ownerContext,actor_id:'OTHER'}
+ ]){
+  const out=await baseRead({db,jobId,signingKey:key,ownerContext:c});
+  assert.equal(out.status,'NOT_CERTIFIED');
+  assert.equal(out.reason,'OWNER_SERVER_CONTEXT_NOT_VERIFIED');
+  assert.equal(out.prod_promotion_allowed,false);
+ }
+ assert.equal(calls,0);
 });
