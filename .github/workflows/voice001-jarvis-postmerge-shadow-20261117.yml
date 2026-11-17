@@ -68,6 +68,7 @@ jobs:
           test "$count" -eq "$EXPECTED_CHANGES"
           ! printf '%s\n' "$changed" | grep -Eq '^supabase/|^src/cerebroVoice.ts$|^src/cerebroConsoleApi.ts$|^src/AnaVoiceQueryBlock.tsx$|^src/AnaChatBlock.tsx$'
           echo "VOICE001_CANONICAL_BASE_SHA=$base" >> "$GITHUB_ENV"
+          echo "CEREBRO_CANONICAL_BASE_SHA=$base" >> "$GITHUB_ENV"
           echo 'LOCAL_MERGE_ONLY=true' >> "$GITHUB_ENV"
       - name: Run approved VOICE-001 regression tests under local merged tree
         run: |
