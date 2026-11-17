@@ -5,7 +5,7 @@ import {readFact001SignedReceiptOwnerLabV0 as baseRead} from './fact001-signed-r
 const ownerContext=Object.freeze({actor_id:'CARLOS-ADMIN',
  auth_source:'SERVER_VERIFIED_FENIX_CONTEXT',company_ids:['fenix'],
  scopes:['cerebro:audit:read']});
-const read=(opts)=>baseRead({ownerContext,...opts});
+const read=(opts)=>baseRead({verifyOwnerSession:async()=>ownerContext,sessionToken:'x'.repeat(32),...opts});
 
 const key=Uint8Array.from({length:32},(_,i)=>i+1); // FIXTURE ONLY: never a deployment key
 const clock=1794855339509;
@@ -153,10 +153,25 @@ test('server-verified Fenix owner context is compulsory before any D1 read',asyn
   {...ownerContext,scopes:['cerebro:jobs:read']},
   {...ownerContext,actor_id:'OTHER'}
  ]){
-  const out=await baseRead({db,jobId,signingKey:key,ownerContext:c});
+  const out=await baseRead({db,jobId,signingKey:key,verifyOwnerSession:async()=>c,sessionToken:'x'.repeat(32)});
   assert.equal(out.status,'NOT_CERTIFIED');
   assert.equal(out.reason,'OWNER_SERVER_CONTEXT_NOT_VERIFIED');
   assert.equal(out.prod_promotion_allowed,false);
  }
  assert.equal(calls,0);
+});
+
+test('client-supplied context is not accepted; server must authenticate session before D1',async()=>{
+ let reads=0,verifies=0;
+ const db={prepare(){reads++;throw Error('SHOULD_NOT_QUERY')}};
+ const missing=await baseRead({db,jobId,signingKey:key,ownerContext,sessionToken:'x'.repeat(32)});
+ assert.equal(missing.reason,'OWNER_SESSION_VERIFIER_MISSING');
+ const malformed=await baseRead({db,jobId,signingKey:key,sessionToken:'bad',verifyOwnerSession:async()=>{verifies++;return ownerContext}});
+ assert.equal(malformed.reason,'OWNER_SESSION_VERIFIER_MISSING');
+ const rejected=await baseRead({db,jobId,signingKey:key,sessionToken:'x'.repeat(32),
+  verifyOwnerSession:async()=>{verifies++;throw Error('private upstream details')}});
+ assert.equal(rejected.reason,'OWNER_SESSION_VERIFICATION_FAILED');
+ assert.equal(JSON.stringify(rejected).includes('private upstream'),false);
+ assert.equal(reads,0);
+ assert.equal(verifies,1);
 });
