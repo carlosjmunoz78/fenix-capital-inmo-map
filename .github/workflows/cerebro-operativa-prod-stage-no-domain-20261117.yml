@@ -50,6 +50,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "$VERCEL_TOKEN" ]; then echo 'BLOCKED: protected VERCEL_TOKEN not configured in this repository'; exit 2; fi
+          export XDG_DATA_HOME="$RUNNER_TEMP/cerebro-operativa-vercel-auth"
+          echo "XDG_DATA_HOME=$XDG_DATA_HOME" >> "$GITHUB_ENV"
+          node -e 'const fs=require("node:fs"),p=require("node:path");const dir=p.join(process.env.XDG_DATA_HOME,"com.vercel.cli");fs.mkdirSync(dir,{recursive:true,mode:0o700});fs.writeFileSync(p.join(dir,"auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600});'
           vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects
           node -e "const x=require('./.vercel/project.json');if(x.projectId!=='prj_4ElVl8e2KzrHS7r5yvBGBban1DXV'||x.orgId!=='team_qnh6u1Ofy2WPp0MGEKlyMA50')process.exit(3)"
       - name: Build actual production configuration for isolated target project
@@ -70,3 +73,11 @@ jobs:
           echo "PRODUCTION_DOMAIN_ASSIGNMENT=NOT_PERFORMED" >> "$GITHUB_STEP_SUMMARY"
           echo "PRIOR_PROD_DEPLOYMENT=dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ" >> "$GITHUB_STEP_SUMMARY"
           echo "PRODUCTION_PROMOTION=HOLD_UNTIL_AUTHENTICATED_QA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Purge ephemeral Vercel CLI authentication on all outcomes
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/cerebro-operativa-vercel-auth"
+          echo 'EPHEMERAL_AUTH_REMOVED'
