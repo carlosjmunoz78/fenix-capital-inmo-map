@@ -175,3 +175,16 @@ test('client-supplied context is not accepted; server must authenticate session 
  assert.equal(reads,0);
  assert.equal(verifies,1);
 });
+
+test('whitespace-bearing session token is rejected before remote owner session verification',async()=>{
+ let verifierCalled=0,dbCalled=0;
+ const db={prepare(){dbCalled++;throw Error('NOT_ALLOWED')}};
+ for(const token of ['x'.repeat(21)+' '+'x'.repeat(8), 'x'.repeat(21)+'\\n'+'x'.repeat(8), 'x'.repeat(21)+'\\t'+'x'.repeat(8)]){
+  const actual=token.replace('\\n','\n').replace('\\t','\t');
+  const out=await baseRead({db,jobId,signingKey:key,sessionToken:actual,
+   verifyOwnerSession:async()=>{verifierCalled++;return ownerContext;}});
+  assert.equal(out.reason,'OWNER_SESSION_VERIFIER_MISSING');
+ }
+ assert.equal(verifierCalled,0);
+ assert.equal(dbCalled,0);
+});
