@@ -30,3 +30,13 @@ Se actualizó **únicamente** la Supabase Edge Function `cerebro-console-gateway
 - GitHub Actions no utilizado; mantener PR #70 **DRAFT** sin merge.
 
 **Siguiente verificación concreta:** desde la sesión ya abierta del propietario en `https://app.fenixcapital.es/cerebro`, escribir o dictar únicamente **`consulta NIA`**, observar respuesta `QUEUED` y después comprobar `FACT_NIA_PRIVATE_RESULT=PASS` y `NIA_CENTRAL_RECEIVER_GATE=PASS` con la marca temporal. Sin esa prueba, el gate de usuario real sigue pendiente.
+
+## Ruta exacta del smoke del propietario · UI ya existente (sin editar App)
+
+Comprobado en `main`: `src/CerebroConsoleHost.tsx` selecciona **JARVIS** por defecto, y selecciona `CerebroConsoleShell` de **Console V0** cuando `?section=legacy-v0`. Ese componente usa `src/cerebroConsoleApi.ts`, cuyo endpoint `src/cerebroConsoleAccess.ts` apunta por defecto a `cerebro-console-gateway-v0` (salvo override de entorno).
+
+**URL precisa de la prueba:** https://app.fenixcapital.es/cerebro?section=legacy-v0
+
+Dentro de esa pantalla, con sesión propia del propietario, escribir o dictar exactamente `consulta NIA`. Esperado: `status:QUEUED`, sin publicación ni modificación Notion. Confirmar después los logs de FACT y NIA. Si la prueba falla, restaurar el snapshot original v36 desde GitHub; no enviar tokens de usuario al chat.
+
+La vista JARVIS por defecto no está acreditada como cliente de este endpoint y **no debe confundirse** con la Console V0. La integración de JARVIS con NIA sigue pendiente; este parche cubre la Console V0 existente.
