@@ -102,3 +102,14 @@ La interfaz OPERATIVA **no recibe aún datos de este bridge**. Este corte añade
 - CI propia `CEREBRO Universal Gateway V0 LAB contract CI`: SUCCESS en último HEAD de documentación antes de este corte. Suite de aceleración independiente registró un fallo de carga `PROD_MAX 50 jobs` (6 frente a 50) pendiente de evaluación. No se declara el conjunto entero verde.
 - Permisos mínimos pendientes: crear el token READ por flujo administrativo autorizado y asociarlo como secret `FACT001_ROUTES_READ_TOKEN` a una versión aislada, nunca copiar valores a chat/GitHub/D1. Después, prueba física CREATE/readback/firma/D1/DELETE/readback/rollback y validación del Gateway propietario a OPERATIVA.
 - **Conservar:** GitHub main, PROD App/CRM, Supabase PROD, DNS, WordPress, JARVIS, Social, Trading intactos. No nuevas suscripciones, consumo de infraestructura en euros NO MEDIDO.
+
+
+### Lectura de recibos para OPERATIVA · 17/11/2026
+**PARCIAL · Código de lector autenticado preparado; fuente física NO conectada.**
+
+- `fact001-signed-receipt-owner-reader-lab.mjs` realiza exclusivamente SELECT sobre el recibo HMAC LAB, el trabajo FACT-001 y su evento terminal único; comprueba integridad de firma y digest con la clave que permanece **solo en servidor**. No expone HMAC, digest ni secreto en su resultado.
+- Antes de acceder a D1 exige `ownerContext` obtenido del adaptador de sesión Fénix existente: `auth_source=SERVER_VERIFIED_FENIX_CONTEXT`, `actor_id=CARLOS-ADMIN`, empresa `fenix` y scope `cerebro:audit:read`. No aceptar jamás ese contexto directamente de parámetros del cliente. Incluye tests de suplantación, firma falsificada, tenant/engine/environment, evento terminal inválido, consulta fallida y contexto ausente.
+- Una firma HMAC válida produce **`HMAC_VALID_LAB_ONLY`**, nunca certificación nativa del proveedor ni permiso PROD. Los registros pueden ser históricos, y el mapeo `fenix` (Gateway) ↔ `fenix-capital` (D1 FACT-001) sigue sin resolverse en Company Registry.
+- `src/CerebroUniversalOperativaLabPanel.tsx` presenta, únicamente tras conexión LAB autenticada, un aviso explícito: *certificación desde este Gateway no verificada; promoción PROD bloqueada*. No consulta Cloudflare desde el navegador y no introduce secretos.
+- **NO OPERATIVO:** el Gateway no tiene todavía un lector Cloudflare D1 autenticado conectado ni un recibo real firmado que enseñar. La D1 se mantiene con 0 recibos y `FACT001_ROUTES_READ_TOKEN` sigue ausente. No crear un resultado verde sintético ni afirmar que este código está desplegado al usuario.
+- Orden de gate futuro: credencial zone Routes Read → emisión real de recibo vía FACT Runner → relectura HMAC desde servicio autenticado → verificación independiente del proveedor y mapeo multiempresa → conexión al Gateway propietario → QA de interfaz, rollback y tribunal → promoción gradual. Mantener PR #66 DRAFT.
