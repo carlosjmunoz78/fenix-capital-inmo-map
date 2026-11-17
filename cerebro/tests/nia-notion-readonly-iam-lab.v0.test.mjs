@@ -31,6 +31,18 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.bot_blocks_access_verified,true);
  assert.equal(candidate.state.provider_write_denial_verified,false);
  assert.equal(candidate.state.queue_trigger_cleaned,true);
+ assert.equal(candidate.state.atomic_replay_ledger_verified,true);
+ assert.equal(candidate.state.atomic_ledger_binding_present,true);
+ assert.equal(candidate.state.signed_dispatch_synthetic_lab_verified,true);
+ assert.equal(candidate.state.central_issuer_real_signature_verified,false);
+ assert.equal(candidate.evidence.atomic_ledger.physical_gate,'NIA_NONCE_PHYSICAL_GATE=PASS');
+ assert.equal(candidate.evidence.atomic_ledger.checks_passed,8);
+ assert.equal(candidate.evidence.atomic_ledger.d1_database_added,false);
+ assert.equal(candidate.evidence.atomic_ledger.temp_queue_and_consumer_deleted,true);
+ assert.equal(candidate.evidence.signed_dispatch.physical_gate,'NIA_SIGNED_PHYSICAL_GATE=PASS');
+ assert.equal(candidate.evidence.signed_dispatch.checks_passed,12);
+ assert.equal(candidate.evidence.signed_dispatch.fixture_key_only,true);
+
  assert.equal(candidate.state.secret_configured,'VERIFIED_ENCRYPTED_CLOUDFLARE_SECRET_NAME_AND_TYPE');
 });
 test('NIA IAM candidate cannot contain secret values',()=>{
