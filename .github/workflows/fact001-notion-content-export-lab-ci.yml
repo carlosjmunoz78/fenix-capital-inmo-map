@@ -1,0 +1,34 @@
+name: FACT001 Notion content isolated LAB candidate tests
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/notion-content-export-lab/page-export.mjs
+      - cerebro/connectors/universal/services/notion-content-export-lab/policy.mjs
+      - cerebro/connectors/universal/services/notion-content-export-lab/index.ts
+      - cerebro/connectors/universal/services/notion-content-export-lab/tests/**
+      - .github/workflows/fact001-notion-content-export-lab-ci.yml
+permissions:
+  contents: read
+jobs:
+  candidate-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: node --test cerebro/connectors/universal/services/notion-content-export-lab/tests/*.test.mjs
+      - name: Verify contract is isolated and fail closed
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const root='cerebro/connectors/universal/services/notion-content-export-lab/';
+          const policy=readFileSync(root+'policy.mjs','utf8');
+          const edge=readFileSync(root+'index.ts','utf8');
+          const page=readFileSync(root+'page-export.mjs','utf8');
+          if(!policy.includes('fact001-notion-content-export-once-lab.yml')||!edge.includes('verifyGitHubOidc')||!edge.includes('await verifyGitHubOidc(bearer.slice(7))'))throw Error('OIDC_ISOLATION_MISSING');
+          if(edge.includes('Deno.env.get(\'NOTION_TOKEN\'')||page.includes("method:'POST'")||page.includes("method:'PATCH'")||page.includes("method:'DELETE'"))throw Error('PROVIDER_WRITE_DENIED');
+          if(!edge.includes('vault.decrypted_secrets')||!edge.includes('ORDER_DENIED')||!edge.includes('x.plan_artifact')||!page.includes('SOURCE_CHANGED_DURING_EXPORT'))throw Error('VAULT_OR_SCOPE_GATE_MISSING');
+          console.log('FACT001_NOTION_CONTENT_CANDIDATE_READONLY=PASS');
+          console.log('FACT001_EXISTING_BROKER_UNMODIFIED=true');
+          NODE

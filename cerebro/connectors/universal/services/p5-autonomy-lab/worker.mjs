@@ -1,0 +1,47 @@
+// FACT-001 P5 LAB · scheduled CEREBRO read-only, no public fetch route or API credentials.
+const SCOPE={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0'};
+const AUTOMATION='FACT001_P5_DAILY_READ_V1';
+const ENDPOINT='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-p5-dispatch-lab/dispatch';
+const PROVIDER_SET='cloudflare,vercel,supabase,notion,github';
+async function sha(str){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(h),x=>x.toString(16).padStart(2,'0')).join('');}
+function ticket(){const b=new Uint8Array(32);crypto.getRandomValues(b);return Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');}
+export async function scheduledP5(env,now=Date.now(),http=fetch){
+ if(env?.P5_ENABLED!=='true'||!env.RECOVERY_DB)return {status:'DISABLED'};
+ const config=await env.RECOVERY_DB.prepare("SELECT enabled,max_daily_jobs,company_id,engine_id,environment,version FROM fact001_p5_automation_registry_v1 WHERE automation_id=?1 LIMIT 1").bind(AUTOMATION).first();
+ if(!config||config.enabled!==1||config.max_daily_jobs!==1||Object.entries(SCOPE).some(([k,v])=>config[k]!==v))return {status:'NOT_REGISTERED'};
+ // Single owner-approved physical acceptance, never a replay of the expired daily job.
+ const acceptance=env.P5_ACCEPTANCE_ONCE==='true';
+ const today=new Date(now).toISOString().slice(0,10).replaceAll('-','');
+ if(acceptance&&today!=='20261112')return {status:'ACCEPTANCE_DATE_EXPIRED'};
+ const day=acceptance?'ACCEPT01':today;
+ const requestId=acceptance?'FACT001-P5-20261112-A1':'FACT001-P5-'+today;
+ const secret=ticket(),digest=await sha(secret);
+ const expires=now+10*60*1000;
+ const row=await env.RECOVERY_DB.prepare(
+  "INSERT INTO fact001_p5_jobs_v1(request_id,day_key,automation_id,company_id,engine_id,environment,version,provider_set,operation,max_cost_eur,state,attempts,ticket_sha256,created_at_ms,expires_at_ms) VALUES(?1,?2,?3,'fenix-capital','FACT-001','LAB','1.0.0',?4,'providers.five.inventory.read',0,'QUEUED',0,?5,?6,?7) ON CONFLICT(day_key) DO NOTHING RETURNING request_id")
+  .bind(requestId,day,AUTOMATION,PROVIDER_SET,digest,now,expires).first();
+ if(!row)return {status:'ALREADY_SCHEDULED',day};
+ if(row.request_id!==requestId)throw Error('P5_D1_INSERT_DRIFT');
+ const cmd={...SCOPE,request_id:requestId,operation:'providers.five.inventory.read',provider_set:PROVIDER_SET,max_cost_eur:0,source:'registered_automation'};
+ // The original requester must never leave an expired ticket in QUEUED after a failed
+ // outbound call. We only reconcile a still-QUEUED job: never overwrite a dispatcher
+ // that may have atomically claimed RUNNING/COMPLETED. No automatic retry.
+ async function reconcile(reason){
+  const code=/^DISPATCH_(UNVERIFIED|HTTP_[0-9]{3}|NOT_JSON|RESULT_UNVERIFIED)$/.test(reason)?reason:'DISPATCH_UNVERIFIED';
+  try{
+   await env.RECOVERY_DB.prepare("UPDATE fact001_p5_jobs_v1 SET state='RECONCILE',error_code=?2,completed_at_ms=?3 WHERE request_id=?1 AND state='QUEUED' AND attempts=0 RETURNING request_id")
+      .bind(requestId,code,Date.now()).first();
+  }catch{ /* Fail closed; ticket expiry prevents replay even if audit write fails */ }
+  return {status:'RECONCILE',reason:code,request_id:requestId};
+ }
+ let response;try{response=await http(ENDPOINT,{method:'POST',headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(cmd),redirect:'manual',signal:AbortSignal.timeout(105000)});}
+ catch{return await reconcile('DISPATCH_UNVERIFIED');}
+ if(response.status!==200)return await reconcile('DISPATCH_HTTP_'+response.status);
+ let result;try{result=await response.json()}catch{return await reconcile('DISPATCH_NOT_JSON');}
+ if(result?.status!=='COMPLETED'||result?.provider_count!==5||result?.request_id!==requestId)return await reconcile('DISPATCH_RESULT_UNVERIFIED');
+ return {status:'COMPLETED',request_id:requestId,provider_count:5};
+}
+export default {
+ async fetch(){return new Response(null,{status:404,headers:{'cache-control':'no-store'}});},
+ async scheduled(event,env,ctx){ctx.waitUntil(scheduledP5(env).then(r=>{console.log('FACT001_P5_SCHEDULED='+r.status);}).catch(()=>{console.log('FACT001_P5_SCHEDULED=RECONCILE');}));}
+};

@@ -1,0 +1,64 @@
+{
+  "format": "FACT001-NOTION-MIXED-CONTENT-OFFSITE-CHECKPOINT-V1",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "status": "SECOND_25_MIXED_CONTENT_ENCRYPTED_OFFSITE_READBACK_VERIFIED",
+  "previous_checkpoint_path": "cerebro/connectors/universal/services/notion-content-export-lab/checkpoints/first-25-content-readback.v1.json",
+  "previous_content_next_offset": 25,
+  "previous_zip_sha256": "e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65",
+  "content_start_offset": 25,
+  "content_next_offset": 50,
+  "source_index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+  "batch_ref": "f84ce878daf73f1a8567779b50d720937bd0876474861f71d40041af7ddfe787",
+  "items_expected": 25,
+  "items_sealed": 25,
+  "failed_items": 0,
+  "pages": 24,
+  "data_sources": 1,
+  "data_source_row_count": 68,
+  "block_count": 949,
+  "media_binaries_included": false,
+  "comments_included": false,
+  "permissions_included": false,
+  "notion_physical_restore_tested": false,
+  "escrow_independent": false,
+  "github": {
+    "workflow_run_id": 42926660411,
+    "artifact_id": 13814845995,
+    "archive_bytes": 1170629,
+    "sha256": "d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026"
+  },
+  "drive": {
+    "file_id": "12UJyaeYukgOlFIHrLlebxLOgLTsdalcq",
+    "parent_folder_id": "1xQe5jd-AIQLDUlfZDktVod2qSJkS4M1E",
+    "readback_bytes": 1170629,
+    "readback_sha256": "d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026",
+    "private": true,
+    "crc_ok": true,
+    "exact_match": true
+  },
+  "plan": {
+    "artifact_id": 13812694087,
+    "drive_id": "1TNFhb9wTG9RTJEWxWXgK50MpeAn2r8_U",
+    "zip_sha256": "bdc1fc75b32608d48d92f6bf44e9648c392b8a386c8ffdc1f1858e26cb918a22"
+  },
+  "verification": {
+    "github_run_conclusion": "success",
+    "oidc_anon_401": true,
+    "oidc_forged_401": true,
+    "prod_403": true,
+    "authentic_envelopes": 25,
+    "memory_roundtrips": 25,
+    "drive_readback_exact_sha256": true,
+    "original_notion_provider_writes": 0,
+    "github_checkpoint_committed_after_readback": true
+  },
+  "checkpoint_durability": "GIT_COMMIT_SHA_GUARDED",
+  "d1_cas_checkpoint_committed": false,
+  "content_full_workspace_backup": false,
+  "next_required": "D1 CAS preflight+independent SQL download, missing source/page contents, binary assets, comments, Notion physical restore, key escrow; do not promote."
+}

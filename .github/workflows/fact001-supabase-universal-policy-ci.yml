@@ -1,0 +1,29 @@
+name: FACT001 Supabase Universal LAB security policy CI
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/universal-lab/**
+      - .github/workflows/fact001-supabase-universal-policy-ci.yml
+permissions:
+  contents: read
+jobs:
+  immutable-supabase-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: node --test cerebro/connectors/universal/supabase/universal-lab/tests/*.test.mjs
+      - name: Verify no mutation and high-risk gate
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const p=readFileSync('cerebro/connectors/universal/supabase/universal-lab/policy.mjs','utf8');
+          const m=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/universal-lab/manifest.v1.json','utf8'));
+          if(!p.includes('SUPABASE_HUMAN_REQUIRED_HIGH_RISK_GATES_RED')||!p.includes('assertMutationReady')||
+             !p.includes("throw Error('SUPABASE_HUMAN_REQUIRED_HIGH_RISK_GATES_RED')")||
+             m.status!=='PARTIAL_HIGH_RISK_GATE'||m.backup.current_backup_physically_verified!==false||
+             m.security.human_required!=='HIGH_RISK')throw Error('HIGH_RISK_GATE_BYPASS');
+          console.log('FACT001_SUPABASE_POLICY_BLOCKS_UNVERIFIED_WRITES=PASS');
+          NODE

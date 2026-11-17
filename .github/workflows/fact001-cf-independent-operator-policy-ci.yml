@@ -1,0 +1,16 @@
+name: FACT001 CF independent private headless operator LAB policy CI
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/cloudflare/headless-operator-lab/**
+permissions:
+  contents: read
+jobs:
+  cf-autonomous-operator-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: node --test cerebro/connectors/universal/cloudflare/headless-operator-lab/tests/*.test.mjs

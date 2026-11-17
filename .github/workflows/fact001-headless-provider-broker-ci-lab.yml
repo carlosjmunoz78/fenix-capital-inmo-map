@@ -1,0 +1,49 @@
+name: FACT001 Headless Broker LAB Security CI
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - .github/workflows/fact001-headless-provider-broker-ci-lab.yml
+      - cerebro/connectors/universal/services/provider-headless-lab/**
+      - cerebro/connectors/universal/supabase/cf-token-issuer-lab/**
+      - cerebro/connectors/universal/supabase/fact001-console-owner-canary-lab/**
+      - cerebro/connectors/universal/registry/headless-gates.v1.json
+      - cerebro/connectors/universal/tests/headless-registry.test.mjs
+permissions:
+  contents: read
+jobs:
+  headless-lab-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Signed OIDC and safe upstream API tests, no credentials
+        run: |
+          node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
+          python3 cerebro/connectors/universal/services/provider-headless-lab/tests/supabase-mgmt-d1-sqlite-acceptance.py
+          node --test cerebro/connectors/universal/supabase/cf-token-issuer-lab/tests/*.test.mjs
+          node --test cerebro/connectors/universal/supabase/fact001-console-owner-canary-lab/tests/*.test.mjs
+          node --test cerebro/connectors/universal/tests/headless-registry.test.mjs
+          node --test cerebro/connectors/universal/tests/cloudflare-onboarding.test.mjs
+          node --test cerebro/connectors/universal/tests/cloudflare-scaffold.test.mjs
+      - name: Strict read-only contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='cerebro/connectors/universal/services/provider-headless-lab/';
+          const source=fs.readFileSync(root+'index.ts','utf8');
+          const provider=fs.readFileSync(root+'provider.mjs','utf8');
+          const policy=fs.readFileSync(root+'policy.mjs','utf8');
+          const pages=fs.readFileSync(root+'pages-lifecycle.mjs','utf8');
+          if(!source.includes('verifyGitHubOidc(getBearer(request))')||!source.includes('assertReadOrder(await request.json())')||!source.includes('assertPlanOrder(await request.json())'))throw Error('NO_TRUSTED_IDENTITY');
+          if(!provider.includes("method:'GET'")||provider.includes("method:'DELETE'")||provider.includes("method:'POST'"))throw Error('UPSTREAM_WRITE_FORBIDDEN');
+          if(!source.includes('vault.decrypted_secrets')||!policy.includes('payload.actor!==OWNER'))throw Error('VAULT_OR_OWNER_GATE_MISSING');
+          if(source.includes('pages-lifecycle')||source.includes('verifyPagesLifecycle'))throw Error('TEMPORARY_PAGES_WRITE_ROUTE_STILL_ACTIVE');
+          if(source.includes('notion-governed-operator')||source.includes('notion.lab.child.'))throw Error('NOTION_CANDIDATE_MUST_NOT_BE_ROUTED');
+          if(!pages.includes('CLOUDFLARE_PAGES_ALREADY_EXISTS')||!pages.includes('CLOUDFLARE_PAGES_RESIDUAL_PROJECT')||!pages.includes('assertOwned(last)'))throw Error('PAGES_TEST_CONTRACT_MISSING');
+          console.log('FACT001_BROKER_PROVIDER_WRITE_COUNT=0');
+          console.log('FACT001_BROKER_CLOUDFLARE_PAGES_LIFECYCLE=RETIRED_FROM_ACTIVE_SERVICE');
+          console.log('FACT001_BROKER_PROD_RESOURCES_CHANGED=0');
+          NODE

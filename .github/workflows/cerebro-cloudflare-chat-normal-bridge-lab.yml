@@ -1,0 +1,40 @@
+name: FACT-001 Cloudflare ChatGPT Normal Bridge - READ ONLY LAB
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - .github/workflows/cerebro-cloudflare-chat-normal-bridge-lab.yml
+      - cerebro/connectors/universal/requests/cloudflare-chat-normal-lab.v1.json
+      - cerebro/connectors/universal/transport/cloudflare-chat-normal-runner.mjs
+      - cerebro/connectors/universal/tests/cloudflare-chat-normal-runner.test.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-cloudflare-chat-normal-readonly-lab
+  cancel-in-progress: false
+jobs:
+  strict-readonly:
+    if: github.ref == 'refs/heads/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout branch only, no persisted GitHub credential
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate strict JSON contract, tenant boundary, anti-mutation gates
+        run: node --test cerebro/connectors/universal/tests/cloudflare-chat-normal-runner.test.mjs
+      - name: Execute allowlisted account read-only physical audit
+        env:
+          CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: node cerebro/connectors/universal/transport/cloudflare-chat-normal-runner.mjs
+      - name: Upload redacted receipt, no credentials or full Cloudflare responses
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fact001-cloudflare-chat-normal-readonly-receipt
+          path: cerebro/connectors/universal/receipts/cloudflare-chat-normal-lab.v1.json
+          retention-days: 3
+          if-no-files-found: error

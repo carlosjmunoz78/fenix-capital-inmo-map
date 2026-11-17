@@ -1,0 +1,9 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "cerebro",
+  "operation": "github.file.crud.smoke",
+  "request_id": "FACT001-GITHUB-LAB-CRUD-20261110"
+}

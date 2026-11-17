@@ -1,0 +1,49 @@
+name: FACT-001 Cloudflare Access Worker account read-only inventory LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths: [.github/workflows/fact001-access-identity-readonly-inventory-lab.yml]
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CF_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: GET exact Worker immutable ID, Zero Trust organization, existing Access apps
+        run: |
+          node --input-type=module <<'NODE'
+          const aid='e39a57e1ac42650ca5a6d5307cf0ac8e', worker='cerebro-fact001-gateway-lab-eu-20261109', token=process.env.CF_TOKEN;
+          if(!token)throw Error('SECRET_MISSING');
+          const cf='https://api.cloudflare.com/client/v4';
+          async function read(label,path){
+            try{
+              const r=await fetch(cf+path,{method:'GET',headers:{Authorization:'Bearer '+token,Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(14000)});
+              let b=null;try{b=await r.json()}catch{}
+              console.log('FACT001_'+label+'_HTTP='+r.status);
+              const errors=Array.isArray(b?.errors)?b.errors.map(e=>e.code).filter(Number.isSafeInteger).slice(0,3):[];
+              if(errors.length)console.log('FACT001_'+label+'_ERROR_CODES='+errors.join(','));
+              return b?.success===true?b.result:null;
+            }catch{console.log('FACT001_'+label+'_HTTP=NETWORK');return null;}
+          }
+          const active=await read('TOKEN','/user/tokens/verify');if(active?.status!=='active')throw Error('TOKEN_INACTIVE');
+          const scripts=await read('SCRIPTS','/accounts/'+aid+'/workers/scripts');
+          if(!Array.isArray(scripts)||scripts.filter(s=>s.id===worker).length!==1)throw Error('TARGET_NOT_EXACT');
+          console.log('FACT001_WORKER_COUNT='+scripts.length);
+          const objects=await read('WORKER_OBJECTS','/accounts/'+aid+'/workers/workers?per_page=100');
+          const found=Array.isArray(objects)?objects.filter(w=>w.name===worker):[];
+          const id=found.length===1&&/^[a-f0-9]{32}$/i.test(found[0].id||'')?found[0].id:null;
+          console.log('FACT001_IMMUTABLE_WORKER_ID='+(id||'UNAVAILABLE'));
+          const org=await read('ZERO_TRUST_ORG','/accounts/'+aid+'/access/organizations');
+          console.log('FACT001_ZERO_TRUST_FOUND='+Boolean(org));
+          const apps=await read('ACCESS_APPS','/accounts/'+aid+'/access/apps?per_page=100');
+          if(Array.isArray(apps)){
+            console.log('FACT001_ACCESS_APP_COUNT='+apps.length);
+            console.log('FACT001_WORKER_ACCESS_MATCHES='+apps.filter(a=>(a.destinations||[]).some(d=>d.type==='worker'&&d.worker_id===id)).length);
+          }
+          const tokens=await read('ACCESS_SERVICE_TOKENS','/accounts/'+aid+'/access/service_tokens');
+          if(Array.isArray(tokens))console.log('FACT001_ACCESS_SERVICE_TOKENS_COUNT='+tokens.length);
+          console.log('FACT001_MUTATIONS=0');
+          NODE

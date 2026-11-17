@@ -1,0 +1,31 @@
+name: FACT001 Notion Encrypted Batch2 Planner LAB CI
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/notion-batch-planner-lab/**
+      - .github/workflows/fact001-notion-batch2-plan-lab-ci.yml
+permissions:
+  contents: read
+jobs:
+  planner-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Run isolated planner tests (no provider writes)
+        run: |
+          node --test cerebro/connectors/universal/services/notion-batch-planner-lab/tests/*.test.mjs
+          node --check cerebro/connectors/universal/services/notion-batch-planner-lab/run-once.mjs
+      - name: Strict static policy
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='cerebro/connectors/universal/services/notion-batch-planner-lab/';
+          const s=fs.readFileSync(root+'index.ts','utf8');
+          const p=fs.readFileSync(root+'policy.mjs','utf8');
+          if(!s.includes('await verifyGitHubOidc(auth.slice(7))')||!s.includes('assertBatch2Order')||!p.includes('fact001-notion-batch2-plan-once-lab.yml'))throw Error('FACT001_AUTH_GATE_MISSING');
+          if(/method:\s*['"](PUT|PATCH|DELETE)['"]/.test(s))throw Error('FACT001_PROVIDER_WRITES_DENIED');
+          console.log('FACT001_BATCH2_CI_READ_ONLY=PASS');
+          NODE

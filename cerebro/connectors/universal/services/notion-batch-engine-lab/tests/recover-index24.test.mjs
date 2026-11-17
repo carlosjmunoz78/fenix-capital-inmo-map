@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+const base=new URL('../',import.meta.url);const src=fs.readFileSync(new URL('run-recover-index24.mjs',base),'utf8');const order=JSON.parse(fs.readFileSync(new URL('request-template-index24.v1.json',base),'utf8'));
+test('recovery only index 24 and verified previous 23, no writes',()=>{assert.equal(order.item_index,24);assert.equal(order.offset,75);assert.equal(order.checkpoint_version,3);assert.ok(src.includes('item_index:24'));assert.ok(src.includes('x.global_offset!==99'));assert.ok(src.includes('partial.items_sealed!==23'));assert.ok(src.includes('CHECKPOINT_MOVED=false'));assert.ok(!/method:\s*['"](?:PUT|PATCH|DELETE)['"]/.test(src));});

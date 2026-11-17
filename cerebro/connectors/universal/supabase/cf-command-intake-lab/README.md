@@ -1,0 +1,3 @@
+# FACT001 Cloudflare sealed signed order intake LAB
+
+Private command intake via exact GitHub Actions OIDC repo+branch+workflow+actor, with Cloudflare D1 Write token already stored in Supabase Vault. It cannot manipulate Workers directly, only enqueue four allowlisted zero-cost LAB operations in existing Recovery D1, with D1 parameter binding and idempotency. No App/CRM modification. Separate Edge function, `verify_jwt=false` because it validates RS256 GitHub OIDC itself. Signer workflow triggers only on pushing the exact fixed order file, after function deploy. Does not provide arbitrary ChatGPT or CEREBRO natural-language ingress; those await Gateway policy integration.

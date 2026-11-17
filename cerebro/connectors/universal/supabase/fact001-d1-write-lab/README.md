@@ -1,0 +1,3 @@
+# FACT-001 CEREBRO D1 EU LAB OIDC
+
+CANDIDATE, not PROD. New isolated service cerebro-fact001-cloudflare-d1-write-lab. Trusted signed GitHub OIDC exact branch/repo/workflow; Vault encrypted token stored previously. Guard: eight existing D1 UUIDs unchanged, count=8, no name collision. Only creates new EU D1 named from `CD1-YYYYMMDD-NNN`; fixed SQL CREATE TABLE/INSERT/SELECT; finally deletes only matching new UUID/name/EU and verifies original eight. No arbitrary SQL, DB ID, or PROD action. 0 € new subscriptions. Must pass CI tests, isolated deploy, physical E2E; no changes to main CEREBRO Gateway v33. Failed delete requires manual inspect of exact created LAB DB and no retry/duplicate deletion without verification.

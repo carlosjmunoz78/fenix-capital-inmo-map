@@ -1,0 +1,27 @@
+name: FACT001 D1 Full Data Ephemeral Recovery LAB
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - .github/workflows/fact001-d1-full-data-recovery-lab.yml
+      - cerebro/connectors/universal/services/provider-headless-lab/tests/d1-full-data-inmemory-restore-lab.py
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-d1-full-data-ephemeral-recovery-lab
+  cancel-in-progress: false
+jobs:
+  readonly-restore:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Recover full D1 data into temporary memory only, check live parity
+        env:
+          CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: python3 cerebro/connectors/universal/services/provider-headless-lab/tests/d1-full-data-inmemory-restore-lab.py

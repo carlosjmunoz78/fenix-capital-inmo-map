@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+import {ROOT,OLD_SHA,OLD_NAME,NEW_NAME,blobSha,candidate,rollback} from './owner-canary-v2-scoped-token-switch.mjs';
+const old=readFileSync(ROOT+'/logic.mjs','utf8');const after=candidate(old);
+test('source matches deployed canary v2 verified Git blob',()=>assert.equal(blobSha(old),OLD_SHA));
+test('precisely one secret name changes',()=>assert.equal(after,old.replace(OLD_NAME,NEW_NAME)));
+test('only scoped readonly secret selected',()=>assert.ok(after.includes(NEW_NAME)&&!after.includes(OLD_NAME)));
+test('no fallback to existing broad credential',()=>assert.ok(!after.includes('cerebro_fact001_cf_readonly_lab_20261109')));
+test('owner JWT and server RPC logic untouched',()=>{const s=readFileSync(ROOT+'/index.ts','utf8');assert.ok(s.includes("ctx.actor_code==='CARLOS-ADMIN'"));});
+test('owner canary still only Cloudflare fixed GETs',()=>{const s=readFileSync(ROOT+'/index.ts','utf8');assert.ok(s.includes('async function cfRead'));assert.ok(!s.includes("route==='provision'"));});
+test('no changes in main Console source',()=>assert.notEqual(ROOT,'supabase/functions/cerebro-console-gateway-v0'));
+test('restore original byte-for-byte',()=>assert.equal(rollback(after),old));
+test('reject repeat patch',()=>assert.throws(()=>candidate(after)));
+test('reject source drift',()=>assert.throws(()=>candidate(old+'\n')));

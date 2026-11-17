@@ -1,0 +1,15 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "provider": "vercel",
+  "team_id": "team_qnh6u1Ofy2WPp0MGEKlyMA50",
+  "project_id": "prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu",
+  "project_name": "cerebro-fact001-vercel-lab-20261111",
+  "max_cost_eur": 0,
+  "operation": "vercel.deployment.list_lab",
+  "job_id": "FACT001-VERCEL-CMD-20261111-DEPLOY-LIST-01",
+  "request_id": "FACT001-VERCEL-20261111-DEPLOY-LIST-01",
+  "idempotency_key": "fact001-vercel-oidc-20261111-deploy-list-01"
+}

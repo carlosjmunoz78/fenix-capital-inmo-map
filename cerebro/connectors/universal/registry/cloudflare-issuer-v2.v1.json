@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "provider": "cloudflare",
+  "module": "CF-TOKEN-ISSUER-001",
+  "state": "LAB_VERIFIED_TOKEN_BROKER_GATEWAY_PENDING",
+  "owner_signed_identity": "GitHub OIDC RS256 actor carlosjmunoz78",
+  "cloudflare_account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "vault_token_name": "cerebro_cf_account_token_issuer_v2",
+  "effective_permissions": [
+    "Account API Tokens Write"
+  ],
+  "service_slug": "cerebro-fact001-cf-issuer-lab",
+  "service_version": 10,
+  "service_sha256": "2e7dc0a823b353022fbb426c2a24e1a718d0351e38c6202a1c2389b3d95a81c8",
+  "active_mutation_routes": 0,
+  "active_read_routes": [
+    "GET /health",
+    "POST /verify-scoped-issuer-v2"
+  ],
+  "tests": {
+    "read_identity": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42993618913",
+    "child_lifecycle": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42994346869",
+    "post_cutover": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42995197342",
+    "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42995006897"
+  },
+  "child_revoked": true,
+  "child_secret_cleanup": true,
+  "existing_d1_count": 10,
+  "additional_subscriptions_eur": 0,
+  "legacy_issuer_status": "DISABLED_REDUCED_TO_ACCOUNT_TOKENS_WRITE_AND_READ",
+  "gateway_signed_owner_real": "PENDING",
+  "automation_durable_queue": "PENDING",
+  "production_autonomy": "OFF",
+  "opera": "P6_ONLY",
+  "dependencies": [
+    "Supabase Vault cluhljgonannaafpmblx",
+    "GitHub owner OIDC exact workflow",
+    "Cloudflare Account API Tokens Write group"
+  ],
+  "rollback": {
+    "baseline_before": "V9 E2E available in PR history",
+    "current": "V10 read-only verified",
+    "restoration_to_mutating_bundle": "NOT_AUTHORIZED_WITHOUT_GATES"
+  },
+  "gateway_signed_queue": "LAB_HEARTBEAT_COMPLETED_SINGLE_ATTEMPT",
+  "gateway_owner_user_session": "NOT_VERIFIED",
+  "gateway_real_console_binding": "NOT_VERIFIED",
+  "full_cloudflare_autonomy": "NOT_VERIFIED",
+  "p0_token_broker": "VERIFIED_LAB",
+  "signed_queue_physical_e2e_latest": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005213602",
+  "security_ci_latest": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005472015"
+}

@@ -1,0 +1,30 @@
+name: FACT001 D1 Schema Export Signed Download Diagnostic LAB
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - .github/workflows/fact001-d1-export-network-diagnostic.yml
+      - cerebro/connectors/universal/services/provider-headless-lab/tests/d1-export-network-diagnostic.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-d1-schema-diagnostic-lab
+  cancel-in-progress: false
+jobs:
+  schema-export:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Probe existing shared D1 schema export without retaining data
+        env:
+          CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: node cerebro/connectors/universal/services/provider-headless-lab/tests/d1-export-network-diagnostic.mjs

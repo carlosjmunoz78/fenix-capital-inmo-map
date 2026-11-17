@@ -1,0 +1,43 @@
+name: FACT001 GitHub OIDC ephemeral identity and Cloudflare token-management GET preflight
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths: [.github/workflows/fact001-cerebro-oidc-and-token-scope-preflight-lab.yml]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  identity-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CF_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Verify ephemeral GitHub-signed OIDC identity and token scopes, zero writes
+        run: |
+          node --input-type=module <<'NODE'
+          const audience='cerebro-fact001-cloudflare-lab-20261109';
+          const base=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,requestToken=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!base||!requestToken)throw Error('OIDC_RUNNER_NOT_AVAILABLE');
+          const sep=base.includes('?')?'&':'?';
+          const r=await fetch(base+sep+'audience='+encodeURIComponent(audience),{headers:{Authorization:'Bearer '+requestToken},signal:AbortSignal.timeout(12000)});
+          if(!r.ok)throw Error('OIDC_ISSUER_DENIED_'+r.status);
+          const j=await r.json(),jwt=j.value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_JWT_NOT_FOUND');
+          const payload=JSON.parse(Buffer.from(jwt.split('.')[1],'base64url').toString('utf8'));
+          console.log('FACT001_OIDC_ISSUER_CORRECT='+(payload.iss==='https://token.actions.githubusercontent.com'));
+          console.log('FACT001_OIDC_AUDIENCE_CORRECT='+(payload.aud===audience));
+          console.log('FACT001_OIDC_REPOSITORY_CORRECT='+(payload.repository==='carlosjmunoz78/fenix-capital-inmo-map'));
+          console.log('FACT001_OIDC_BRANCH_CORRECT='+(payload.ref==='refs/heads/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109'));
+          console.log('FACT001_OIDC_WORKFLOW_REF_AVAILABLE='+Boolean(payload.workflow_ref));
+          console.log('FACT001_OIDC_EVENT_PUSH='+(payload.event_name==='push'));
+          console.log('FACT001_OIDC_EXPIRY_VALID='+(Number(payload.exp)>Date.now()/1000));
+          console.log('FACT001_OIDC_TOKEN_LOGGED=false');
+          for(const [name,path] of [['USER_TOKEN_GROUPS','/user/tokens/permission_groups'],['ACCOUNT_TOKEN_GROUPS','/accounts/e39a57e1ac42650ca5a6d5307cf0ac8e/tokens/permission_groups']]){
+            try{
+              const res=await fetch('https://api.cloudflare.com/client/v4'+path,{headers:{Authorization:'Bearer '+process.env.CF_TOKEN},redirect:'error',signal:AbortSignal.timeout(12000)});
+              console.log('FACT001_'+name+'_HTTP='+res.status);
+            }catch{console.log('FACT001_'+name+'_HTTP=NETWORK');}
+          }
+          console.log('FACT001_MUTATIONS=0');
+          NODE

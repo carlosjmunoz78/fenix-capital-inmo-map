@@ -1,0 +1,30 @@
+name: FACT001 Notion Mixed Content Exporter LAB CI
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/notion-content-export-v2-lab/**
+      - .github/workflows/fact001-notion-content-mixed-lab-ci.yml
+permissions:
+  contents: read
+jobs:
+  mixed-content-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Verify encrypted content, rows, tamper and safety
+        run: |
+          node --test cerebro/connectors/universal/services/notion-content-export-v2-lab/tests/*.test.mjs
+          node --check cerebro/connectors/universal/services/notion-content-export-v2-lab/run-once.mjs
+      - name: Contract isolation
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='cerebro/connectors/universal/services/notion-content-export-v2-lab/';
+          const idx=fs.readFileSync(root+'index.ts','utf8'),p=fs.readFileSync(root+'policy.mjs','utf8'),c=fs.readFileSync(root+'content.mjs','utf8');
+          if(!idx.includes('await verifyGitHubOidc(auth.slice(7))')||!p.includes('fact001-notion-content-second-batch-once-lab.yml')||!c.includes('SOURCE_CHANGED_DURING_EXPORT'))throw Error('SAFETY_GATES_MISSING');
+          if(/method:\s*['"](DELETE|PUT|PATCH)['"]/.test(idx)||/method:\s*['"](DELETE|PUT|PATCH)['"]/.test(c))throw Error('NOTION_WRITES_DENIED');
+          console.log('FACT001_MIXED_READONLY_CI=PASS');
+          NODE

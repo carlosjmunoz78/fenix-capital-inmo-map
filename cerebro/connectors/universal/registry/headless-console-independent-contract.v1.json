@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0.0",
+  "decision": "CONSOLE_INDEPENDENT_CONNECTOR_FIRST",
+  "decided_on": "2026-11-11",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "status": "DEFINED_NOT_FULLY_IMPLEMENTED",
+  "priority": [
+    "cloudflare",
+    "github",
+    "supabase",
+    "vercel",
+    "notion",
+    "gateway",
+    "opera_last"
+  ],
+  "invocation_modes": [
+    {
+      "id": "cerebro_autonomous",
+      "auth": "verified_headless_service_identity",
+      "policy": "preauthorized fixed scope, least privilege, risk tribunal, durable idempotency, budget 0 EUR, audit and tested rollback",
+      "status": "PROVIDER_DEPENDENT"
+    },
+    {
+      "id": "chatgpt_owner_order",
+      "auth": "connected ChatGPT/provider OAuth with actual tool permissions",
+      "policy": "only authorized safe operations, no share of raw tokens, explicit evidence of physical result",
+      "status": "PROVIDER_DEPENDENT"
+    },
+    {
+      "id": "console_later",
+      "auth": "owner_session_to_cerebro_gateway",
+      "policy": "UI calls the same contract and engine without direct provider secrets",
+      "status": "NOT_IMPLEMENTED"
+    }
+  ],
+  "command_contract_required": [
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "provider",
+    "operation",
+    "request_id",
+    "client_id",
+    "identity_ref",
+    "authorization_context",
+    "risk_level",
+    "idempotency_key",
+    "max_cost_eur",
+    "audit_ref",
+    "result_status"
+  ],
+  "execution_contract": "owner_or_service_identity_verified_then_policy_then_permission_then_durable_queue_then_executor_then_effect_readback_then_audit_then_result",
+  "status_contract": [
+    "PLANNED",
+    "DEFINED",
+    "PARTIAL",
+    "VERIFIED_LAB",
+    "VERIFIED_FULL",
+    "HUMAN_REQUIRED",
+    "BLOCKED"
+  ],
+  "human_exception_only": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "safety": "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR",
+  "prerequisites_to_full": [
+    "inventory_dependents",
+    "backup_snapshot",
+    "old_behavior_tests",
+    "isolated_new_implementation",
+    "preprod_lab_qa",
+    "old_vs_new_comparison",
+    "physical_rollback",
+    "observability_budget_audit",
+    "staged_promotion",
+    "confirmed_physical_provider_result"
+  ],
+  "existing_systems_guard": [
+    "app",
+    "crm",
+    "supabase_prod",
+    "wordpress",
+    "seo",
+    "notion",
+    "trading",
+    "dns",
+    "automations"
+  ],
+  "no_new_subscriptions_eur": 0,
+  "owner_session_e2e_without_console": "DO_NOT_REQUIRE_AS_CONNECTOR_BACKEND_GATE; reserve for UI integration",
+  "individual_connector_gates": "KEEP_EXISTING registry green_requires and do not convert heartbeat into full autonomous queue",
+  "control_plane_scope": {
+    "target": "CEREBRO_OS_SINGLE_MULTI_COMPANY_OPERATIONS_CONTROL_PLANE",
+    "systems": [
+      "jarvis",
+      "app_fenix",
+      "crm_fenix",
+      "wordPress",
+      "seo",
+      "social_media",
+      "automations",
+      "training",
+      "trading_lab_strictly_isolated",
+      "supabase",
+      "github",
+      "cloudflare",
+      "vercel",
+      "notion",
+      "gpt_agents",
+      "future_companies"
+    ],
+    "access": [
+      "user_authorized_chatgpt_plugins_today",
+      "cerebro_gateway_verified_service_identity",
+      "cerebro_console_ui_later"
+    ],
+    "relationship": "CEREBRO orchestrates and audits existing systems through versioned wrappers/adapters; it does not replace them",
+    "irreversible_operations": "ONLY_UNDER_SPECIFIC_POLICY_AND_HUMAN_REQUIRED_GATES",
+    "protect_existing_prod": true,
+    "stated_status": "ARCHITECTURE_DEFINED_TARGET_NOT_YET_END_TO_END_IMPLEMENTED"
+  },
+  "cloudflare_evidence": {
+    "oauth_worker_lifecycle": "VERIFIED_LAB_RESOURCE_CREATED_MODIFIED_ROLLED_BACK_DELETED_REBUILT_AND_CLEANED",
+    "oauth_pages_project_lifecycle": "VERIFIED_LAB_PROJECT_SETTINGS_ONLY_NO_DEPLOYMENT",
+    "headless_worker_pages_lifecycle": "PENDING",
+    "console_gate": "DEFERRED",
+    "cloudflare_full": "PARTIAL"
+  },
+  "owner_sequence_latest_20261111": [
+    "cloudflare",
+    "vercel",
+    "supabase",
+    "github",
+    "opera"
+  ],
+  "notion_status": "Still a separate tracked connector; no removal or migration implied by this narrower priority list"
+}

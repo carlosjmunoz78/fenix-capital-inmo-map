@@ -1,0 +1,12 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "cerebro",
+  "source": "owner_order",
+  "operation": "providers.five.inventory.read",
+  "provider_set": "cloudflare,vercel,supabase,notion,github",
+  "max_cost_eur": 0,
+  "request_id": "FACT001-FIVE-READ-20261112-V001"
+}
