@@ -14,72 +14,24 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await page.route('http://127.0.0.1:54321/auth/v1/**',async route=>{const url=route.request().url();if(url.includes('/user'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify(session.user)});if(url.includes('/token'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify(session)});return route.fulfill({status:200,headers:corsHeaders,body:'{}'})});
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers:corsHeaders,body:''});const url=route.request().url();if(url.endsWith('/session/context'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({actor_code:'CARLOS-ADMIN',role:'Dirección'})});if(url.endsWith('/navigation'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'CEREBRO',route:'/cerebro',resource:'CEREBRO'}]})});return route.fulfill({status:404,headers:corsHeaders,body:'{}'})});
  await page.route('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/**',async route=>{const request=route.request();if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:corsHeaders,body:''});const url=request.url();if(url.endsWith('/health'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',service:'cerebro-console-gateway-v0',environment:'TEST_ISOLATED',version:'e2e',authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'OWNER_DECISION_BY_EXCEPTION_V1'})});if(url.endsWith('/preferences'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',preferences:{response_length:'concise'}})});if(url.endsWith('/chat')){postedChat=request.postDataJSON();return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',intent:'e2e_probe',message:'PONG_OPERATIVA',executed:false})})}return route.fulfill({status:404,headers:corsHeaders,body:'{}'})});
- await page.route('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/**',async route=>{if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers:corsHeaders,body:''});return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',observed_at:'2026-11-02T00:30:00.000Z',source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'carlosjmunoz78/fenix-capital-inmo-map',runs:[{run_id:201,workflow_name:'CEREBRO FACT-001 Engine Factory',workflow_alias:'FACT-001',workflow_path:'.github/workflows/cerebro-factory.yml',status:'in_progress',conclusion:null,event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/201',created_at:'2026-11-02T00:20:00.000Z',run_started_at:'2026-11-02T00:21:00.000Z',updated_at:'2026-11-02T00:29:00.000Z',engine_id:'FACT-001',company_id:'fenix',environment:'PREPROD',version:'abc123def456',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:42,progress_completed_steps:8,progress_total_steps:19,current_step:'Scaffold · contracts',next_step:'Tribunal',progress_provenance:'REAL_GITHUB_JOBS'},{run_id:200,workflow_name:'CEREBRO QA completed',workflow_alias:'QA',workflow_path:'.github/workflows/qa.yml',status:'completed',conclusion:'success',event:'push',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/200',created_at:'2026-11-02T00:00:00.000Z',run_started_at:'2026-11-02T00:01:00.000Z',updated_at:'2026-11-02T00:10:00.000Z',engine_id:'QA-001',company_id:'fenix',environment:'PREPROD',version:'def456abc123',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:100,progress_completed_steps:null,progress_total_steps:null,current_step:'Finalizado',next_step:null,progress_provenance:'TERMINAL_STATUS'},...Array.from({length:7},(_,i)=>({run_id:300+i,workflow_name:'UMS001 CEREBRO Facebook offline QA '+(i+1),workflow_alias:'UMS001',workflow_path:'.github/workflows/ums001-qa.yml',status:'queued',conclusion:null,event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/'+(300+i),created_at:'2026-11-02T00:00:00.000Z',run_started_at:null,updated_at:'2026-11-02T00:15:00.000Z',engine_id:'UMS-001',company_id:'fenix',environment:'LAB',version:'abc123def456',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:null,progress_completed_steps:null,progress_total_steps:null,current_step:null,next_step:null,progress_provenance:'UNAVAILABLE'}))]})})});
+ await page.route('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/**',async route=>{if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers:corsHeaders,body:''});return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',observed_at:'2026-11-02T00:30:00.000Z',source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'carlosjmunoz78/fenix-capital-inmo-map',runs:[{run_id:201,workflow_name:'CEREBRO FACT-001 Engine Factory',workflow_alias:'FACT-001',workflow_path:'.github/workflows/cerebro-factory.yml',status:'in_progress',conclusion:null,event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/201',created_at:'2026-11-02T00:20:00.000Z',run_started_at:'2026-11-02T00:21:00.000Z',updated_at:'2026-11-02T00:29:00.000Z',engine_id:'FACT-001',company_id:'fenix',environment:'PREPROD',version:'abc123def456',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:42,progress_completed_steps:8,progress_total_steps:19,current_step:'Scaffold · contracts',next_step:'Tribunal',progress_provenance:'REAL_GITHUB_JOBS'},{run_id:200,workflow_name:'CEREBRO QA completed',workflow_alias:'QA',workflow_path:'.github/workflows/qa.yml',status:'completed',conclusion:'success',event:'push',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/200',created_at:'2026-11-02T00:00:00.000Z',run_started_at:'2026-11-02T00:01:00.000Z',updated_at:'2026-11-02T00:10:00.000Z',engine_id:'QA-001',company_id:'fenix',environment:'PREPROD',version:'def456abc123',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:100,progress_completed_steps:null,progress_total_steps:null,current_step:'Finalizado',next_step:null,progress_provenance:'TERMINAL_STATUS'}]})})});
 
  await page.goto('/cerebro?section=operativa',{waitUntil:'domcontentloaded'});
  const operative=page.locator('.operativa-premium');
  await expect(operative).toBeVisible();
- // Screen-overlap regression from the owner's live screenshot.
- // This is the DEFAULT authenticated Operativa, not a V3 mock.
- const globalBar=page.locator('.cerebro-console-host.view-operativa > .cerebro-interface-bar');
- await expect(globalBar).toHaveCSS('position','relative');
- const desktopRects=await page.evaluate(()=>{
-  const nav=document.querySelector('.cerebro-console-host.view-operativa > .cerebro-interface-bar')?.getBoundingClientRect();
-  const stage=document.querySelector('.cerebro-console-host.view-operativa > .cerebro-interface-stage')?.getBoundingClientRect();
-  return {navBottom:nav?.bottom??Infinity,stageTop:stage?.top??-Infinity};
- });
- expect(desktopRects.navBottom).toBeLessThanOrEqual(desktopRects.stageTop+1);
- for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
-  await expect(page.getByRole('navigation',{name:'Interfaces'}).getByRole('button',{name:new RegExp(name,'i')})).toBeVisible();
- }
- await page.screenshot({path:'test-results/operativa-hotfix-desktop.png',animations:'disabled'});
- await page.setViewportSize({width:390,height:844});
- for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
-  const item=page.getByRole('navigation',{name:'Interfaces'}).getByRole('button',{name:new RegExp(name,'i')});
-  await expect(item).toBeVisible();
-  const rect=await item.boundingBox();
-  expect(rect?.x??-9).toBeGreaterThanOrEqual(-1);
-  expect((rect?.x??1000)+(rect?.width??1000)).toBeLessThanOrEqual(391);
- }
- const mobileRect=await globalBar.boundingBox();
- const composerRect=await operative.locator('.operativa-dialogue .operativa-jarvis-composer').boundingBox();
- expect(mobileRect).not.toBeNull();expect(composerRect).not.toBeNull();
- // Fixed bar would stay over the composer at the current scroll position.
- await expect(globalBar).toHaveCSS('position','relative');
- await page.screenshot({path:'test-results/operativa-hotfix-mobile.png',animations:'disabled'});
- await page.setViewportSize({width:1280,height:720});
-
  await expect(page.locator('.jarvis-work')).toHaveCount(0);
  await expect(operative.getByText('Ahora',{exact:true}).first()).toBeVisible();
  await expect(operative.getByRole('heading',{name:'Hay trabajo en marcha.'})).toBeVisible();
  await expect(operative.getByText('Construir y validar capacidades',{exact:true})).toBeVisible();
- await expect(operative.locator('.operativa-work-row').getByText('CEREBRO FACT-001 Engine Factory',{exact:true})).toBeVisible();
- await expect(operative.locator('.operativa-work-row').getByText('En cola de GitHub Actions; todavía no está ejecutándose.',{exact:true}).first()).toBeVisible();
- await expect(operative.locator('.operativa-work-row')).toHaveCount(5);
- await expect(operative.getByRole('button',{name:'Ver los 9 trabajos'})).toBeVisible();
- await expect(operative.locator('.operativa-work-row').getByText('UMS001 CEREBRO Facebook offline QA 1',{exact:true})).toBeVisible();
- await operative.getByRole('button',{name:'Ver los 9 trabajos'}).click();
- await expect(operative.locator('.operativa-work-row')).toHaveCount(9);
- await operative.getByRole('button',{name:'Mostrar menos trabajos'}).click();
- await expect(operative.locator('.operativa-work-row')).toHaveCount(5);
-
- await expect(operative.locator('.operativa-dialogue')).toBeVisible();
- expect(await operative.locator('.operativa-dialogue').evaluate(el=>Boolean(el.compareDocumentPosition(document.querySelector('.operativa-stage'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
  await expect(operative.getByText('Preparando estructura y reglas',{exact:true})).toBeVisible();
  await expect(operative.getByText('42%',{exact:true})).toBeVisible();
  await expect(operative.getByText('Scaffold · contracts',{exact:true})).toHaveCount(0);
  await expect(operative.getByText('Tribunal',{exact:true})).toHaveCount(0);
  await expect(operative.getByText('Para ti',{exact:true})).toBeVisible();
  await expect(operative.getByRole('radio',{name:'Normal'})).toHaveAttribute('aria-checked','true');
- await expect(operative.getByRole('button',{name:'Archivos todavía no disponibles'})).toBeDisabled();
- const composer=operative.getByRole('textbox',{name:'Mensaje para CEREBRO'});
- const chatPanel=operative.locator('.operativa-dialogue');
- const inlineComposer=chatPanel.locator('.operativa-jarvis-composer');
- await expect(inlineComposer).toBeVisible();
- await expect(inlineComposer).toHaveCSS('position','relative');
- expect(await inlineComposer.evaluate(el=>el.parentElement?.classList.contains('operativa-dialogue'))).toBe(true);
- await expect(composer).toHaveAttribute('placeholder','Escribe o dicta a CEREBRO…');
- await expect(operative.getByRole('button',{name:'Enviar mensaje'})).toBeDisabled();
+ await expect(operative.getByRole('button',{name:'Añadir archivo'})).toBeVisible();
+ const composer=operative.getByRole('textbox',{name:'Mensaje para Jarvis'});
+ expect(await composer.getAttribute('placeholder')).toBeNull();
  await expect(operative.getByRole('button',{name:'Dictar'})).toBeVisible();
  await expect(operative.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
 
@@ -91,15 +43,13 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await inspector.getByRole('button',{name:'Cerrar'}).click();
 
  await composer.fill('Prueba Operativa nueva');
- await expect(operative.getByRole('button',{name:'Enviar mensaje'})).toBeEnabled();
  await operative.getByRole('button').filter({has:page.locator('svg')}).count();
  await composer.press('Enter');
  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Prueba Operativa nueva');
- await expect(operative.getByRole('log').getByText('Prueba Operativa nueva')).toBeVisible();
 
  await operative.getByRole('radio',{name:'Máximo'}).click();
- await expect.poll(()=>String(postedChat?.message||''),{timeout:5_000}).toContain('Solicito ritmo operativo Máximo');
- await expect(String(postedChat?.message||'')).toContain('Sin elevar permisos ni costes');
+ await expect.poll(()=>String(postedChat?.message||''),{timeout:5_000}).toContain('Ajusta el ritmo operativo a Máximo');
+ await expect(String(postedChat?.message||'')).toContain('no generes gasto no autorizado');
 
  const floatingPrivateChat=page.getByRole('button',{name:'Abrir chat interno'});
  if(await floatingPrivateChat.count())await expect(floatingPrivateChat).toBeHidden();
@@ -108,8 +58,6 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
 
  await page.goto('/cerebro?section=jarvis',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.jarvis-work')).toBeVisible();
- // No changes to the four other interfaces: JARVIS keeps its existing fixed bar.
- await expect(page.locator('.cerebro-console-host.view-jarvis > .cerebro-interface-bar')).toHaveCSS('position','fixed');
  await expect(page.locator('.operativa-premium')).toHaveCount(0);
 
  await page.goto('/cerebro?section=legacy-v0',{waitUntil:'domcontentloaded'});

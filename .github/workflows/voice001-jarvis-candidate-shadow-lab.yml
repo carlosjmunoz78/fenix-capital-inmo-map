@@ -1,0 +1,131 @@
+name: VOICE-001 LAB · policy × JARVIS candidate shadow gate
+on:
+  push:
+    branches:
+      - cerebro/voice001-react-port-policy-review-20261116
+    paths:
+      - '.github/workflows/voice001-jarvis-candidate-shadow-lab.yml'
+      - 'scripts/voice001-render-port-guard.mjs'
+      - 'tests/voice001-render-port-policy.test.mjs'
+      - '.github/workflows/cerebro-owned-voice-preprod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voice001-jarvis-candidate-shadow-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Exact known review heads. No mutable branch ref or external secrets.
+  JARVIS_CANDIDATE_SHA: ca45040b04052c1c1ea9edec45bf783f85885be6
+  VITE_FENIX_ENV: preprod
+  VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: jarvis-lab-fixture-not-real-key
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+
+jobs:
+  voice001-cross-branch-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - name: Checkout proposed policy (not main)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Checkout exact PR 72 candidate separately
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.JARVIS_CANDIDATE_SHA }}
+          path: candidate
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Assert immutable policy and candidate HEADs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate rev-parse HEAD)" = "$JARVIS_CANDIDATE_SHA"
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+      - name: Original policy guard unit and rejection tests (canonical policy checkout)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          export VOICE001_CANONICAL_BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          node --test tests/voice001-render-port-policy.test.mjs
+      - name: Cross-check proposed policy against real PR 72 candidate code
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          base="$(git rev-parse FETCH_HEAD)"
+          test -n "$base"
+          # Reproduce the normal VOICE-001 test suite on the REAL modified candidate.
+          export VOICE001_CANONICAL_BASE_SHA="$base"
+          node --test ../tests/voice001-render-port-policy.test.mjs
+          node ../scripts/voice001-render-port-guard.mjs "$base"
+          echo "POLICY_CANDIDATE_CROSS_SHA=$JARVIS_CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "POLICY_SHADOW_ONLY=true" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve canonical VOICE-001 runtime tests
+        working-directory: candidate
+        run: node --test cerebro/tests/owned-voice-v0.test.mjs
+      - name: Install only preexisting dependencies without lifecycle scripts
+        working-directory: candidate
+        run: npm ci --ignore-scripts
+      - name: Parser and response contract tests
+        working-directory: candidate
+        run: node --experimental-strip-types --test tests/jarvis-deepseek-chat-demo-lab.test.mjs tests/jarvis-deepseek-chat-renderer-lab.test.mjs tests/jarvis-deepseek-direct-react-contract.test.mjs
+      - name: Default OFF candidate build and canonical voice flow
+        working-directory: candidate
+        env:
+          VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB: '0'
+        run: npm run build
+      - name: Install isolated Chromium
+        working-directory: candidate
+        run: npx playwright install --with-deps chromium
+      - name: Voice contracts (synthetic owner/Gateway, no production writes)
+        working-directory: candidate
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/voice-ui-ana-console.spec.ts --project=desktop-chromium
+      - name: Prove rollback in candidate with feature OFF
+        working-directory: candidate
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/jarvis-deepseek-default-off.spec.ts --project=desktop-chromium
+      - name: LAB ON candidate build with no production credentials
+        working-directory: candidate
+        env:
+          VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB: '1'
+        run: npm run build -- --mode lab
+      - name: LAB ON Markdown browser E2E, desktop and 390px simulated viewport
+        working-directory: candidate
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/jarvis-deepseek-lab-ui.spec.ts --project=desktop-chromium
+      - name: Final independent safety record
+        run: |
+          echo 'VOICE001_SHADOW=CODE_CHECK_ONLY' >> "$GITHUB_STEP_SUMMARY"
+          echo 'VOICE001_POLICY_NOT_MERGED=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'JARVIS_PROD_NO_GO=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'REAL_OWNER_E2E=NOT_TESTED' >> "$GITHUB_STEP_SUMMARY"
+          echo 'REMOTE_ROLLBACK=NOT_TESTED' >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload isolated failed-test evidence only
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-jarvis-candidate-shadow-failure
+          path: |
+            candidate/test-results/
+            candidate/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 3
