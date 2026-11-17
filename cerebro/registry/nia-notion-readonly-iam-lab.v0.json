@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "document_type": "NIA_NOTION_READONLY_LAB_IAM_CANDIDATE",
-  "status": "LAB_ACTGW_V1_NIA_LIVE_E2E_PASS_NO_CENTRAL_DISPATCH",
+  "status": "LAB_READ_ACTGW_SIGNED_PROTOCOL_ATOMIC_LEDGER_PASS_CENTRAL_ISSUER_PENDING",
   "alias_es": "NIA · Lectura exclusiva de documentación en LAB",
   "company_id": "fenix",
   "engine_id": "ACTGW-001",
   "environment": "PREPROD",
   "lab_environment": "CEREBRO-NIA-LAB",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "notion_integration": {
     "name": "CEREBRO NIA · Lectura LAB",
     "bot_id": "41b81b1a-756d-8132-b0d6-0027f800e898",
@@ -63,7 +63,11 @@
     "gateway_lab_idempotency_verified": true,
     "gateway_lab_audit_verified": true,
     "gateway_lab_tenant_isolation_verified": true,
-    "gateway_lab_cost_policy_verified": true
+    "gateway_lab_cost_policy_verified": true,
+    "atomic_replay_ledger_verified": true,
+    "atomic_ledger_binding_present": true,
+    "signed_dispatch_synthetic_lab_verified": true,
+    "central_issuer_real_signature_verified": false
   },
   "rollback": "Remove only this LAB secret and optional binding; do not revoke or alter existing FACT-001 or Fénix Notion Bridge integrations.",
   "references": [
@@ -126,6 +130,34 @@
       },
       "central_gateway_deployed": false,
       "notion_ai_executed": false
+    },
+    "signed_dispatch": {
+      "date_utc": "2026-11-17",
+      "physical_gate": "NIA_SIGNED_PHYSICAL_GATE=PASS",
+      "checks_passed": 12,
+      "fixture_key_only": true,
+      "secret_issuer_provisioned": false,
+      "center_gateway_unchanged": true,
+      "temporary_queue_and_consumer_deleted": true
+    },
+    "atomic_ledger": {
+      "date_utc": "2026-11-17",
+      "physical_gate": "NIA_NONCE_PHYSICAL_GATE=PASS",
+      "checks_passed": 8,
+      "backend": "CLOUDFLARE_SQLITE_DURABLE_OBJECT",
+      "class": "NiaNonceLedger",
+      "worker": "cerebro-nia-notion-proof-lab",
+      "binding": "NIA_NONCE_LEDGER",
+      "migration_tag": "nia-nonce-ledger-v1",
+      "d1_database_added": false,
+      "d1_free_limit_reached": "10/10",
+      "temporary_queue_id": "96f4983f6f2c421aaa46b7240146b112",
+      "temporary_consumer_id": "bd044be6873448dab226c7dfeaa598d9",
+      "temp_queue_and_consumer_deleted": true,
+      "live_worker_off": true,
+      "public_routes_enabled": false,
+      "worker_latest_version": "c91e07db-1b08-402b-b8ac-c36de97e2446",
+      "shared_databases_modified": false
     }
   }
 }
