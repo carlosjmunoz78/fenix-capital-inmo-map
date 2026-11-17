@@ -30,3 +30,28 @@ test('unknown evidence or non-boolean truthy values never bypass proof',()=>{
  assert.equal(x.checks_passed,0);
  assert.ok(x.pending_evidence.includes('full_private_restore_attested'));
 });
+
+test('latest WordPress, Elementor and deduplication gaps remain HOLD as one bounded P0 release',()=>{
+ const receipt=Object.fromEntries(requirements.map(k=>[k,true]));
+ receipt.wordpress_privacy_value_e2e=false;
+ receipt.elementor_real_privacy_value_e2e=false;
+ receipt.idempotency_and_rate_limit_old_new=false;
+ const x=evaluateSeo001LeadPrivacyRelease(receipt);
+ assert.equal(x.release_decision,'HOLD');
+ assert.equal(x.checks_passed,8);
+ assert.deepEqual(x.pending_evidence,[
+  'wordpress_privacy_value_e2e',
+  'elementor_real_privacy_value_e2e',
+  'idempotency_and_rate_limit_old_new'
+ ]);
+ assert.equal(x.wordpress_prod_writes_allowed,false);
+ assert.equal(x.customer_contact_allowed,false);
+});
+test('no marketing certification merely from valid lead transport or privacy acknowledgement',()=>{
+ const receipt=Object.fromEntries(requirements.map(k=>[k,true]));
+ receipt.marketing_separate_consent_qa='true';
+ const x=evaluateSeo001LeadPrivacyRelease(receipt);
+ assert.equal(x.release_decision,'HOLD');
+ assert.deepEqual(x.pending_evidence,['marketing_separate_consent_qa']);
+ assert.equal(x.independently_certified,false);
+});
