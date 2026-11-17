@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "2.1.0",
+  "state": "THREE_GITHUB_OIDC_HOST_JOBS_VERIFIED_141_CORPUS_ROLE_WORK_UNITS_NO_PROD",
+  "source_of_truth": "EXISTING_CURRENT_OWNER_ACCEPTED_WP_INVENTORY_NO_REAUDIT",
+  "corpus_index": "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+  "corpus_chunks": "cerebro/seo-enterprise/v2/data/live-copy-chunk-{01..10}.json",
+  "workflow_path": ".github/workflows/cerebro-seo-corpus-workload-v1.yml",
+  "code_gateway": "cerebro/seo-enterprise/v2/runtime/seo-corpus-job001-work-v1.mjs",
+  "existing_runtime_dependencies": [
+    "ACTGW-001",
+    "JOB-001",
+    "FACT-001",
+    "IAM-001",
+    "QA-001",
+    "LRN-001"
+  ],
+  "work_actor_identity_provider": "github-actions",
+  "existing_iam_reference": "iam:github-actions-job",
+  "workflow_token_permissions": [
+    "contents:read",
+    "actions:read",
+    "id-token:write"
+  ],
+  "accepted_workload_identity": {
+    "issuer": "https://token.actions.githubusercontent.com",
+    "verify_asymmetric_jwks": true,
+    "claims": [
+      "repository",
+      "repository_owner",
+      "event_name",
+      "workflow",
+      "ref",
+      "sha",
+      "run_id",
+      "run_attempt"
+    ],
+    "custom_subject_hashed_not_logged": true,
+    "token_not_persisted": true
+  },
+  "roles": [
+    {
+      "role": "SEO_CORPUS_WORKER",
+      "github_job_name": "seo-corpus-worker",
+      "github_job_id": 127522579964,
+      "allowed_capability": "SEO_FROZEN_CORPUS_EVIDENCE_READONLY",
+      "scope": [
+        "READ_PINNED_REPOSITORY_CORPUS",
+        "JOB001_PREPROD"
+      ],
+      "individual_cerebro_iam_principal_id": null
+    },
+    {
+      "role": "SEO_CORPUS_INDEPENDENT_QA",
+      "github_job_name": "seo-corpus-qa",
+      "github_job_id": 127522680612,
+      "scope": [
+        "READ_PINNED_REPOSITORY_CORPUS",
+        "VERIFY_AGGREGATES"
+      ],
+      "individual_cerebro_iam_principal_id": null
+    },
+    {
+      "role": "SEO_CORPUS_TRIBUNAL",
+      "github_job_name": "seo-corpus-tribunal",
+      "github_job_id": 127522788681,
+      "scope": [
+        "READ_PINNED_REPOSITORY_CORPUS",
+        "VALIDATE_PRIOR_GITHUB_JOBS",
+        "NO_RELEASE_DECISION"
+      ],
+      "individual_cerebro_iam_principal_id": null
+    }
+  ],
+  "evidence": {
+    "github_actions_run_id": 42106497539,
+    "github_actions_run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42106497539",
+    "inspected_run_head_sha": "473371bef2480335c84bfe117189d6c350e01598",
+    "run_status": "completed",
+    "run_conclusion": "success",
+    "artifacts": [
+      {
+        "name": "seo-corpus-worker-v1",
+        "artifact_id": 13451502710
+      },
+      {
+        "name": "seo-corpus-qa-v1",
+        "artifact_id": 13451927273
+      },
+      {
+        "name": "seo-corpus-tribunal-v1",
+        "artifact_id": 13453020382
+      }
+    ],
+    "independent_host_jobs_physically_verified": 3,
+    "full_oidc_jwks_and_github_api_attestation_verified": 3,
+    "frozen_documents_read": 200,
+    "logical_specialist_work_units_completed": 141,
+    "logical_departments_with_corpus_evidence": 32,
+    "scopes_distinct": true,
+    "external_wordpress_requests": 0,
+    "external_wordpress_mutations": 0,
+    "app_crm_supabase_mutations": 0,
+    "newly_purchased_services_eur": 0,
+    "job001_durable_journal_replay_and_idempotency_tested": true,
+    "gateway_action_routed_and_audited": true,
+    "qa_recomputed_against_corpus": true,
+    "tribunal_accepted_readonly_evidence": true
+  },
+  "limitations": {
+    "real_individual_seo_agent_iam_accounts_created": 0,
+    "real_individual_subagent_iam_accounts_created": 0,
+    "independent_topic_expert_training_certifications": 0,
+    "full_seo_prod_departments_certified": 0,
+    "wordpress_auto_publishing_authorized": false,
+    "gateway_production_host_mounted": false,
+    "github_actions_job_provenance_is_not_an_agent_person_identity": true,
+    "quality_testing_scope": "DETERMINISTIC_EVIDENCE_OVER_SAVED_CORPUS_NOT_LIVE_SITE",
+    "no_current_gsc_or_ga4_metrics_claimed": true,
+    "cost_additional_subscription_eur": 0
+  },
+  "next_unfulfilled_gates": [
+    "REAL_AGENT_IAM_BINDING_AND_SCOPED_LEAST_PRIVILEGE",
+    "SPECIALIST_EXECUTION_WITH_TRUSTED_EXTERNAL_SOURCE_WHEN_APPLICABLE",
+    "REAL_TRAINING_EVIDENCE_INDEPENDENT_EXAM_FOR_EACH_SPECIALTY",
+    "PERSISTENT_HOST_GATEWAY_WITH_READONLY_TOOLS",
+    "SHADOW_AND_OLD_VS_NEW",
+    "PHYSICAL_BACKUP_ROLLBACK_ON_ANY_FUTURE_MUTATION",
+    "OWNER_POLICY_APPROVAL_FOR_PROD_AUTONOMY"
+  ],
+  "preserved": "MAIN_UNTOUCHED_PR22_DRAFT"
+}

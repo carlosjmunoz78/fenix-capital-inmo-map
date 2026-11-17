@@ -1,0 +1,79 @@
+name: CEREBRO SEO V6 Offline Agency Repair LAB Zero Provider
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-surgical-deterministic-v6-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-surgical-v6-offline-lab.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-surgical-v6-offline-lab.test.mjs'
+      - '.github/workflows/cerebro-seo-surgical-v6-offline-lab.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: seo001-surgical-v6-offline
+  cancel-in-progress: false
+jobs:
+  offline-b2b-surgical:
+    if: github.event.pull_request.number == 22 && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline regression and zero-cost tests
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-surgical-v6-offline-lab.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-surgical-v6-offline-lab.test.mjs
+          # Historical V5 launch test expects a PREPARED nonce; V5 is sealed now.
+          # V6's own tests verify the immutable V5 COMPLETED manifest instead.
+          node --test cerebro/seo-enterprise/v2/tests/seo-v3-real-score-replay.test.mjs
+      - name: Check sealed V5 source availability (keep physical HOLD when expired)
+        id: v5_source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          source_json="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/42446075036/artifacts?per_page=100")"
+          if jq -e '.artifacts[]? | select(.id == 13603278337 and .name == "seo001-surgical-v5-20261108-LAB-UNAPPROVED" and .expired == false)' >/dev/null <<< "$source_json"; then
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+            echo 'V5_ARTIFACT_AVAILABLE: exact pinned source found'
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+            echo 'V6_HOLD: exact V5 source artifact missing/expired; repair not executed; no publication'
+          fi
+      - name: Validate immutable V5 record and report HOLD if source unavailable
+        if: steps.v5_source.outputs.available != 'true'
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const base='cerebro/seo-enterprise/v2/registry/';
+          const v5=JSON.parse(fs.readFileSync(base+'seo001-surgical-v5-real-result-2026-11-08.json','utf8'));
+          const v6=JSON.parse(fs.readFileSync(base+'seo001-surgical-deterministic-v6-2026-11-08.json','utf8'));
+          if(v5.run_id!==42446075036||v5.artifact_id!==13603278337||v5.status!=='INCOMPLETE_HOLD'||v5.safety?.published!==0||v5.safety?.wordpress_writes!==0||v6.source?.artifact_id!==v5.artifact_id||v6.status!=='PREPARED_OFFLINE_HARD_HOLD'||v6.limits?.max_model_calls!==0||v6.limits?.allow_publication!==false)throw Error('HISTORICAL_V5_IMMUTABLE_GATE_DRIFT');
+          console.log(JSON.stringify({state:'V6_HOLD_SOURCE_ARTIFACT_MISSING',v5_run:42446075036,v5_artifact_id:13603278337,repair_attempted:false,model_calls:0,wp_writes:0,publication:false,editorial_certification:false,action:'SOURCE_REACQUISITION_WITH_PROVENANCE_REQUIRED'}));
+          NODE
+      - name: Download exact sealed V5 evidence only when available
+        if: steps.v5_source.outputs.available == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-surgical-v5-20261108-LAB-UNAPPROVED
+          run-id: 42446075036
+          github-token: ${{ github.token }}
+          path: /tmp/seo001-v5-readonly
+      - name: Repair B2B two paragraphs exactly (source-proven only)
+        if: steps.v5_source.outputs.available == 'true'
+        run: node cerebro/seo-enterprise/v2/runtime/seo-surgical-v6-offline-lab.mjs /tmp/seo001-v5-readonly /tmp/seo001-v6-unapproved
+      - name: Archive zero-provider unapproved output
+        if: steps.v5_source.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-surgical-v6-offline-LAB-UNAPPROVED
+          path: /tmp/seo001-v6-unapproved/*
+          retention-days: 7
+          if-no-files-found: error
+      - name: Permanent publication block
+        if: always()
+        run: echo 'ZERO MODEL CALLS / ZERO PAID / NO WORDPRESS CRM SUPABASE MEDIA / NO PUBLICATION'

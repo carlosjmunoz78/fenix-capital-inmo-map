@@ -1,0 +1,74 @@
+{
+  "schema_version": "2.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "2026-11-06-v2",
+  "owner_policy_ref": "cerebro/seo-enterprise/v2/seo-owner-copy-visual-standard-v2-2026-11-06.json",
+  "source": "OWNER_LIVE_FEEDBACK_2026-11-06",
+  "old_reviews_superseded": true,
+  "old_github_html_preserved": true,
+  "old_qa_evidence_archived": true,
+  "wordpress_published_modified": false,
+  "wordpress_drafts_written": 0,
+  "owner_editorial_approval_for_v2": false,
+  "publish_authorized": false,
+  "producer_api_dispatch_authorized": false,
+  "visual_asset_generated": false,
+  "producer": "UMS-001",
+  "underlying_creative_capability": "CREATIVE-PROGRAMMATIC-RENDER-V1",
+  "wordpress_plugin": "COWBOY_MCP_WEB_FENIX_CORE_GUARD_ONLY",
+  "new_drafts": [
+    {
+      "id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "persona": "PARTICULARES",
+      "draft_git_blob_sha": "54f4a8d08607a4b193f47e67581f853e4c1b20c1",
+      "draft_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba-v2.draft.html",
+      "target_slug": "comparar-dos-pisos-despues-visita-cordoba",
+      "title": "¿Dos pisos en Córdoba y no sabes cuál elegir?",
+      "source_wp_ids": [
+        52656,
+        46982
+      ],
+      "status": "OWNER_REWRITE_REQUIRES_INDEPENDENT_QA_AND_OWNER_APPROVAL",
+      "image": {
+        "subject": "Salón luminoso y realista de una vivienda en Córdoba con grandes ventanas, luz de mañana, mobiliario actual y detalles cálidos propios de un hogar habitado, sin carteles ni papeles legibles",
+        "visual_intent": "Fotografía que transmita la emoción de elegir casa con calma, punto de vista ligeramente amplio desde el umbral, atmósfera acogedora y natural con textura auténtica, ninguna persona reconocible",
+        "title": "Vivienda luminosa en Córdoba para comparar dos opciones",
+        "alt": "Salón luminoso de una vivienda en Córdoba con ventanales y mobiliario acogedor",
+        "caption": "La luz y la distribución cuentan tanto como el precio al comparar viviendas",
+        "description": "Imagen editorial de una vivienda luminosa que acompaña una guía para comparar pisos antes de decidir la compra en Córdoba",
+        "filename": "fenix-comparar-pisos-cordoba-salon-luminoso.webp"
+      },
+      "content_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba-v2.draft.html",
+      "consent_marketing_auto_enroll": false
+    },
+    {
+      "id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "persona": "INMOBILIARIAS",
+      "draft_git_blob_sha": "eeb98eb62a80c5aa75b63ffa3fd1abbc2a596d6d",
+      "draft_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2b-derivacion-comprador-cordoba-v2.draft.html",
+      "target_slug": "derivacion-hipotecaria-comprador-inmobiliaria-cordoba",
+      "title": "Que la financiación no te frene una venta",
+      "source_wp_ids": [
+        49079,
+        49071,
+        49073,
+        49128
+      ],
+      "status": "OWNER_REWRITE_REQUIRES_INDEPENDENT_QA_AND_OWNER_APPROVAL",
+      "image": {
+        "subject": "Agente de inmobiliaria profesional conversando con una pareja compradora en una oficina inmobiliaria de Córdoba bañada por luz natural, mesa despejada, manos y miradas espontáneas, sin pantallas legibles ni cartelería",
+        "visual_intent": "Fotografía humana y creíble con enfoque cercano en la conversación y coordinación de la operación, composición horizontal totalmente distinta de la vivienda vacía del artículo para particulares, colores naturales luminosos, sin aspecto corporativo de banco",
+        "title": "Inmobiliaria asesorando a compradores en Córdoba",
+        "alt": "Profesional inmobiliaria conversando con compradores durante una reunión en Córdoba",
+        "caption": "Una buena coordinación financiera ayuda a trabajar con expectativas claras",
+        "description": "Imagen editorial de una conversación entre una inmobiliaria y compradores para ilustrar la coordinación de una operación con financiación hipotecaria en Córdoba",
+        "filename": "fenix-inmobiliaria-cordoba-reunion-compradores.webp"
+      },
+      "content_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2b-derivacion-comprador-cordoba-v2.draft.html",
+      "consent_marketing_auto_enroll": false
+    }
+  ],
+  "live_wp_writes": 0
+}

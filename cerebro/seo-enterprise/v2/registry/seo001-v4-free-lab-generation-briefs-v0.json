@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "V4-CANDIDATE",
+  "status": "SOURCE_VERIFIED_BRIEFS_NO_PUBLICATION",
+  "owner_policy": "seo-owner-content-depth-policy-v1-2026-11-06.json",
+  "max_provider_calls_per_work_id": 1,
+  "allow_retries": false,
+  "allow_paid_fallback": false,
+  "allow_wordpress_writes": false,
+  "model": "gemini-3.5-flash-lite",
+  "briefs": [
+    {
+      "company_id": "fenix",
+      "engine_id": "SEO-001",
+      "environment": "LAB",
+      "version": "V4-CANDIDATE",
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "persona": "PARTICULARES",
+      "content_type": "ARTICLE",
+      "topic": "Cómo comparar dos pisos en Córdoba después de visitarlos sin decidir por impulso",
+      "buyer_problem": "Persona que ya ha visitado dos inmuebles y no sabe cómo comparar el presupuesto real, costes, comunidad, estado, necesidades y posibilidades de financiación",
+      "focus_keyword": "cómo comparar dos pisos en Córdoba",
+      "search_intent": "comparación de inmuebles después de las visitas, no un checklist antes de visitarlos",
+      "unique_angle": "Matriz práctica de decisión sin presentar datos falsos, coste total, rutina, documentos y conversación posterior con quien vende",
+      "avoid_cannibalization": "No duplicar checklist-visitar-piso-cordoba-antes-hipoteca ni que-piso-te-puedes-permitir. Enlazar como recursos cuando proceda.",
+      "cta_url": "https://fenixcapital.es/contacto/",
+      "source_readonly": true,
+      "customer_data_present": false,
+      "publish_authorized": false,
+      "wordpress_write_authorized": false,
+      "paid_provider_requested": false,
+      "sources": [
+        {
+          "id": "fenix_presupuesto",
+          "url": "https://fenixcapital.es/que-piso-te-puedes-permitir/",
+          "evidence_note": "Artículo publicado en WordPress (ID 46982). Explica la necesidad de estimar la cuota y el presupuesto antes de enamorarse de una vivienda. No atribuir porcentajes ni criterios de bancos no verificados."
+        },
+        {
+          "id": "fenix_contacto",
+          "url": "https://fenixcapital.es/contacto/",
+          "evidence_note": "Canal oficial de contacto para consultas de Fénix Capital, sin prometer concesiones de financiación."
+        }
+      ]
+    },
+    {
+      "company_id": "fenix",
+      "engine_id": "SEO-001",
+      "environment": "LAB",
+      "version": "V4-CANDIDATE",
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "persona": "INMOBILIARIAS",
+      "content_type": "ARTICLE",
+      "topic": "Cómo coordinar la derivación hipotecaria de compradores desde una inmobiliaria de Córdoba",
+      "buyer_problem": "Agencia inmobiliaria que necesita coordinar con un asesor hipotecario a compradores interesados, evitar reservas desordenadas, respetar consentimiento y aclarar plazos sin prometer aprobaciones",
+      "focus_keyword": "derivación hipotecaria inmobiliarias Córdoba",
+      "search_intent": "protocolo operativo B2B para colaborar con asesor hipotecario, no venta directa a particular",
+      "unique_angle": "Proceso por hitos, información mínima consentida, coordinación con la agencia, incidencias y comunicaciones responsables para compradores",
+      "avoid_cannibalization": "No repetir la guía cómo presentar financiación ni seguimiento hipotecario por fases, sino sintetizar protocolo de derivación con roles y momentos de decisión.",
+      "cta_url": "https://fenixcapital.es/contacto/",
+      "source_readonly": true,
+      "customer_data_present": false,
+      "publish_authorized": false,
+      "wordpress_write_authorized": false,
+      "paid_provider_requested": false,
+      "sources": [
+        {
+          "id": "fenix_colaboracion",
+          "url": "https://fenixcapital.es/financiacion-servicio-valor-inmobiliaria/",
+          "evidence_note": "Artículo publicado en WordPress (ID 49079). Recomienda revisar las operaciones y comunicar límites sin prometer resultados bancarios."
+        },
+        {
+          "id": "fenix_seguimiento",
+          "url": "https://fenixcapital.es/seguimiento-hipotecario-por-fases-inmobiliaria/",
+          "evidence_note": "Artículo publicado en WordPress (ID 49071) sobre coordinación por fases. No afirmar que haya acuerdos contractuales ni autorizaciones de tratamiento de datos concretas."
+        }
+      ]
+    }
+  ]
+}

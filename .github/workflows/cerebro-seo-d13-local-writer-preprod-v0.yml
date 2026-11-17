@@ -1,0 +1,44 @@
+name: CEREBRO SEO · LEGACY local writer DISABLED cloud-only policy
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-local-autonomous-writer-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-local-autonomous-writer-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-d13-local-writer-preprod-v0.yml'
+permissions:
+  contents: read
+jobs:
+  local-writer:
+    if: ${{ false }} # Historical runner disabled; owner confirmed all CEREBRO executes in the cloud via registered providers
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate the actual executable writer and routing contract
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-local-autonomous-writer-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-local-autonomous-writer-v0.test.mjs
+      - name: Require real local model before recording LIVE_WRITER_READY
+        run: |
+          node --input-type=module <<'NODE'
+          import {generateSeoDraftWithLocalModel} from './cerebro/seo-enterprise/v2/runtime/seo-d13-local-autonomous-writer-v0.mjs';
+          const brief={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
+           version:'0.1.0',work_id:'SEO001-FENIX-D13-PROBE-001',content_type:'ARTICLE',
+           persona:'PARTICULARES',topic:'Prueba de conectividad',
+           buyer_problem:'Comprobar proveedor local existente',
+           conversion_goal:'Sin publicar resultados',focus_keyword:'modelo local disponible',
+           cta_url:'https://fenixcapital.es/contacto/',source_readonly:true,
+           customer_data_present:false,financial_claims_preverified:false,
+           paid_provider_requested:false,wordpress_write_authorized:false,publish_authorized:false,
+           sources:[{id:'source_1',url:'https://fenixcapital.es/gastos-compra/',
+            corpus_evidence_verified:true,quote_or_paraphrase:'La calculadora de gastos de compra explica que hay costes distintos del precio de vivienda.'},
+            {id:'source_2',url:'https://fenixcapital.es/contacto/',
+            corpus_evidence_verified:true,quote_or_paraphrase:'La página de contacto permite localizar los canales de atención disponibles para nuevos interesados.'}]};
+          const result=await generateSeoDraftWithLocalModel({brief,model:'qwen2.5:7b'});
+          console.log(JSON.stringify({provider_status:result.status,reason:result.reason||null,
+           paid_calls:0,wordpress_writes:0,release_authorized:false,
+           real_production_ready:result.status==='SEO_D13_LOCAL_MODEL_DRAFT_CREATED_REVIEW_ONLY'}));
+          if(result.status!=='HOLD')throw Error('UNEXPECTED_LOCAL_PROVIDER_ACTIVE_WITHOUT_ADMIN_GATE');
+          NODE
+      - name: Safety posture
+        run: echo 'EXISTING_ROUTER=USED LOCAL_MODEL_PROBE=FAIL_CLOSED EXTERNAL_API_SPEND=0 WORDPRESS_WRITES=0'

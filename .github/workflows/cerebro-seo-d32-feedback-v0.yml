@@ -1,0 +1,22 @@
+name: CEREBRO SEO · D32 real-provider feedback and editorial decision PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d32-cloud-editorial-result-router-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d32-cloud-editorial-result-router-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-d32-feedback-v0.yml'
+permissions:
+  contents: read
+jobs:
+  d32-feedback:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate provider status vs D31 editorial gate without model calls
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d32-cloud-editorial-result-router-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d32-cloud-editorial-result-router-v0.test.mjs
+      - name: Safety contract
+        run: echo 'EXTERNAL_MODEL_CALLS=0 EDITORIAL_TRAINING_LOOPS=LOCAL_TEST_ONLY PAID_FALLBACK=NO WP_WRITES=0'

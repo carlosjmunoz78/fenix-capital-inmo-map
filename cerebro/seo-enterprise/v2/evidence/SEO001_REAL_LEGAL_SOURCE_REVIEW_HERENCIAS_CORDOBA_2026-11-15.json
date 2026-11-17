@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "id": "SEO001_REAL_LEGAL_SOURCE_REVIEW_HERENCIAS_CORDOBA_2026_11_15",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB_REVIEW_ONLY",
+  "source_page": "https://fenixcapital.es/gestionar-herencia-cordoba/",
+  "source_post_id": 46467,
+  "source_post_status": "publish",
+  "observed_on": "2026-11-15",
+  "source_modified_at": "2026-10-22",
+  "http_status": 200,
+  "canonical": "https://fenixcapital.es/gestionar-herencia-cordoba/",
+  "observed_seo_title": "Herencias en Córdoba: trámites e impuestos | Fénix",
+  "body_claim_review": {
+    "andalusia_succession_tax_bonus_99pct_for_groups_I_II_and_qualifying_equivalents": {
+      "present_in_article": true,
+      "independent_source": "https://www.juntadeandalucia.es/organismos/economiahaciendayfondoseuropeos/areas/tributos-juego/tributos/paginas/impuestos-cedidos-sucesiones.html",
+      "verdict": "SUPPORTED_WITH_ELIGIBILITY_NOT_UNIVERSAL"
+    },
+    "general_declaration_period_6_months_from_death": {
+      "present_in_article": false,
+      "independent_source": "https://www.juntadeandalucia.es/organismos/atrian/areas/informacion-tributaria/impuestos/preguntas-frecuentes/impuestos-sucesiones/presentar-pagar.html",
+      "verdict": "MISSING_RELEVANT_USER_INFORMATION"
+    },
+    "extension_request_within_first_5_months": {
+      "present_in_article": false,
+      "independent_source": "https://www.juntadeandalucia.es/organismos/atrian/areas/informacion-tributaria/otras-actuaciones/prorroga.html",
+      "verdict": "MISSING_RELEVANT_USER_INFORMATION"
+    }
+  },
+  "suggested_section": {
+    "heading": "¿Qué plazo hay para presentar el Impuesto sobre Sucesiones en Andalucía?",
+    "copy": "Como regla general, la autoliquidación del Impuesto sobre Sucesiones debe presentarse en los seis meses siguientes al fallecimiento. Cuando exista causa justificada, los interesados pueden solicitar una prórroga de seis meses adicionales dentro de los primeros cinco meses del plazo inicial. La ampliación puede implicar intereses de demora. Conviene comprobar las circunstancias concretas y los plazos del expediente antes de firmar o aceptar una operación inmobiliaria.",
+    "format": "EDITORIAL_PROPOSAL_NOT_PUBLICATION"
+  },
+  "required_reviews": [
+    "SEO-D13_EDITORIAL_OLD_NEW",
+    "SEO-D31_INDEPENDENT_LEGAL_YMYL_REVIEW",
+    "SITE_BACKUP_ISOLATED_RESTORE",
+    "OWNER_RELEASE_GATE",
+    "MOBILE_DESKTOP_VISUAL_QA"
+  ],
+  "cannot_claim": [
+    "GSC_QUERY_263_IMPRESSIONS_BELONGS_TO_THIS_URL",
+    "CTR_GAIN_FORECAST",
+    "LAW_APPLIES_IDENTICALLY_TO_EVERY_HEIR",
+    "ARTICLE_HAS_BEEN_CHANGED",
+    "PRODUCTION_APPROVED"
+  ],
+  "editorial_status": "PROPOSED_NO_RELEASE",
+  "security": {
+    "contains_unpublished_content": false,
+    "personal_data": false,
+    "secrets": false,
+    "wordpress_mutations": 0,
+    "model_paid_calls": 0
+  },
+  "next_action": "Confirm query-to-page mapping in authentic GSC first, then QA copy and verify legal claims; never publish automatically."
+}

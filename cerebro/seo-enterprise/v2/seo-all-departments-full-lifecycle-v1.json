@@ -1,0 +1,956 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "SEO_ALL_32_DEPARTMENTS_FULL_LIFECYCLE_V1",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB_CONTRACT",
+  "version": "1.0.0",
+  "lifecycle": "DEFINED_WITH_REAL_READONLY_SITE_BASELINE_NOT_ACTIVE_DEPARTMENTS",
+  "purpose": "Run the whole SEO function continuously, not just create drafts; drafts are a temporary onboarding approval mechanism",
+  "inherited_organization": "cerebro/seo-enterprise/v2/organization.manifest.json",
+  "inherited_excellence": "cerebro/governance/universal-excellence-owner-authority.v0.json",
+  "current_operating_model": {
+    "website": "https://fenixcapital.es",
+    "source_of_truth": "WORDPRESS_OFFICIAL",
+    "human_review_for_new_urls": "TEMPORARY_TRAINING_PHASE",
+    "learning_evidence": "OWNER_CORRECTIONS_REAL_MISSION_QA",
+    "natural_growth": "EVERY_DEPARTMENT_PERFORMS_AUDIT_REPAIR_CONTENT_LOCAL_SEO_DISTRIBUTION_MEASUREMENT",
+    "authority_model": "OWNER_ONLY_STRATEGY_DEPARTMENT_AUTONOMY_WITH_SCOPED_PERMISSIONS",
+    "practical_approval_graduation": "THREE_REAL_APPROVED_SAME_SCOPE_OUTPUTS_PLUS_INDEPENDENT_QA_MERIT_IAM_ROLLBACK_OWNER_GRANT",
+    "existing_published_pages": "MAY_BE_IMPROVED_ONLY_THROUGH_SEPARATE_GOVERNED_BACKUP_TEST_SHADOW_ROLLBACK_PROCEDURE",
+    "no_unilateral_sitewide_changes": true,
+    "treat_drafts_as_permanent_department_focus": false,
+    "no_new_subscriptions": true,
+    "wordpress_prod_coreguard_remains_locked": true,
+    "real_prod_iam_or_autopublish_granted": false
+  },
+  "autonomy_ladder": [
+    {
+      "level": "L0",
+      "scope": "READ_ONLY_SITEWIDE_DIAGNOSTICS",
+      "human_review": "EXCEPTION_ONLY",
+      "state": "PARTIAL_CONNECTOR_REAL_READ_AVAILABLE"
+    },
+    {
+      "level": "L1",
+      "scope": "GENERATE_NEW_CONTENT_IN_WORDPRESS_DRAFT",
+      "human_review": "OWNER_APPROVES_NEW_URL",
+      "state": "ONE_REAL_DRAFT_MANUAL_TOOL_EXECUTION"
+    },
+    {
+      "level": "L2",
+      "scope": "AUTO_PUBLISH_NEW_URLS_MATCHING_CERTIFIED_CONTENT_CLASS",
+      "human_review": "EXCEPTION_ONLY_ONCE_OWNER_SCOPE_GRANT_CERTIFIED",
+      "state": "NOT_ACTIVE"
+    },
+    {
+      "level": "L3",
+      "scope": "AUTO_CORRECT_EXISTING_PUBLISHED_PAGE_LOW_RISK",
+      "human_review": "EXCEPTION_AND_OWNER_DEFINED_CHANGE_SCOPE",
+      "state": "NOT_ACTIVE"
+    },
+    {
+      "level": "L4",
+      "scope": "MULTI_CITY_FULL_SEO_ALL_FAMILIES",
+      "human_review": "EXCEPTION_ONLY_WITH_REAL_PER_DEPARTMENT_CERTIFICATION",
+      "state": "NOT_ACTIVE"
+    }
+  ],
+  "mandatory_release_gates": [
+    "EXISTING_ASSET_INVENTORY",
+    "SOURCE_PROVENANCE",
+    "SCOPED_IAM",
+    "OWNER_POLICY",
+    "BACKUP_RESTORE",
+    "ROLLBACK_TEST",
+    "QA_INDEPENDENT",
+    "TRIBUNAL",
+    "OLD_VS_NEW",
+    "COST_MEASURED",
+    "TRUSTED_MONITORING",
+    "CONTROLLED_PROMOTION"
+  ],
+  "no_goals": [
+    "BULK_PUBLISH_WITHOUT_CERTIFICATION",
+    "DELETE_VALID_URLS",
+    "PURCHASE_SEO_SUBSCRIPTIONS",
+    "MIGRATE_OR_CHANGE_APP_CRM",
+    "FAKE_GSC_RANKING_OR_ROI",
+    "RANKING_MANIPULATION_OR_SPAM"
+  ],
+  "family_count": 8,
+  "department_count": 32,
+  "departments": [
+    {
+      "department_id": "SEO-D01",
+      "mission": "Definir estrategia SEO y prioridades por negocio",
+      "evidence_sources": [
+        "WP_READ",
+        "PERFORMANCE",
+        "OWNER_GOALS"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D02",
+      "mission": "Vigilar demanda, zonas y tendencias del mercado",
+      "evidence_sources": [
+        "PUBLIC_SEARCH",
+        "OFFICIAL_MARKET_DATA"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D03",
+      "mission": "Auditar perfiles de comprador B2C/B2B y lenguaje de búsqueda",
+      "evidence_sources": [
+        "WP_READ",
+        "CONSENTED_RESEARCH"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D04",
+      "mission": "Priorizar mejoras por impacto y coste medido",
+      "evidence_sources": [
+        "WP_READ",
+        "MEASURED_ANALYTICS"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D05",
+      "mission": "Investigar keywords e intenciones de búsqueda",
+      "evidence_sources": [
+        "PUBLIC_SEARCH",
+        "GSC_FREE_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D06",
+      "mission": "Comparar resultados de búsqueda, SERP y formatos",
+      "evidence_sources": [
+        "PUBLIC_SEARCH"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D07",
+      "mission": "Analizar webs competidoras, brechas y oportunidades",
+      "evidence_sources": [
+        "PUBLIC_COMPETITOR_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D08",
+      "mission": "Detectar canibalización, clusters y consolidación sin borrar URLs",
+      "evidence_sources": [
+        "WP_READ",
+        "GSC_FREE_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D09",
+      "mission": "Auditar robots, sitemaps, indexabilidad y canónicos",
+      "evidence_sources": [
+        "WP_READ",
+        "PUBLIC_HTTP",
+        "GSC_FREE_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D10",
+      "mission": "Auditar renderizado JS y compatibilidad de indexación",
+      "evidence_sources": [
+        "PUBLIC_HTTP",
+        "BROWSER_QA"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D11",
+      "mission": "Auditar arquitectura web y enlazado interno",
+      "evidence_sources": [
+        "WP_READ",
+        "PUBLIC_HTTP"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D12",
+      "mission": "Validar Schema Service, FAQ y entidades",
+      "evidence_sources": [
+        "PUBLIC_HTTP",
+        "WP_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D13",
+      "mission": "Planificar y crear contenido útil de alta calidad",
+      "evidence_sources": [
+        "WP_READ",
+        "EDITORIAL_FACTS"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D14",
+      "mission": "Optimizar copy persuasivo sin falsas promesas",
+      "evidence_sources": [
+        "WP_READ",
+        "LEGAL_FACTS"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D15",
+      "mission": "Mejorar microcopy, accesibilidad y claridad",
+      "evidence_sources": [
+        "WP_READ",
+        "BROWSER_QA"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D16",
+      "mission": "Verificar hechos, fuentes y afirmaciones hipotecarias",
+      "evidence_sources": [
+        "OFFICIAL_LEGAL_SOURCES",
+        "EDITORIAL_FACTS"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D17",
+      "mission": "Auditar Google Business Profile y visibilidad local",
+      "evidence_sources": [
+        "GBP_OWNER_FREE_READ",
+        "PUBLIC_LOCAL_SEARCH"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D18",
+      "mission": "Auditar reseñas, datos NAP y reputación",
+      "evidence_sources": [
+        "PUBLIC_LOCAL_SEARCH",
+        "GBP_OWNER_FREE_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D19",
+      "mission": "Prospectar enlaces editoriales legítimos y digital PR",
+      "evidence_sources": [
+        "PUBLIC_LINK_RESEARCH"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D20",
+      "mission": "Verificar ciudades, provincias, contenido y fichas geográficas",
+      "evidence_sources": [
+        "WP_READ",
+        "PUBLIC_LOCAL_SEARCH"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D21",
+      "mission": "Auditar experiencia de usuario y arquitectura de información",
+      "evidence_sources": [
+        "BROWSER_QA",
+        "WP_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D22",
+      "mission": "Diagnosticar WordPress, Elementor y módulos existentes sin modificar",
+      "evidence_sources": [
+        "WP_READ",
+        "EXISTING_PLUGIN_STATUS"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D23",
+      "mission": "Medir CWV, accesibilidad y seguridad",
+      "evidence_sources": [
+        "FREE_PERFORMANCE_READ",
+        "PUBLIC_HTTP"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D24",
+      "mission": "Auditar CTAs, formularios, embudos y captación",
+      "evidence_sources": [
+        "BROWSER_QA",
+        "CONSENTED_AGGREGATE_FUNNEL"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D25",
+      "mission": "Auditar citabilidad, estructura AEO y presencia IA",
+      "evidence_sources": [
+        "PUBLIC_SEARCH",
+        "WP_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D26",
+      "mission": "Auditar imágenes, alt, vídeos y YouTube",
+      "evidence_sources": [
+        "WP_READ",
+        "PUBLIC_MEDIA_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D27",
+      "mission": "Auditar productos, categorías y facetas si existe ecommerce",
+      "evidence_sources": [
+        "PUBLIC_HTTP",
+        "ACTIVATION_GATE"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D28",
+      "mission": "Auditar búsqueda social y distribución orgánica",
+      "evidence_sources": [
+        "PUBLIC_SOCIAL_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D29",
+      "mission": "Medir indexación, clics, posición y GA4 con cuentas gratuitas oficiales",
+      "evidence_sources": [
+        "GSC_FREE_READ",
+        "GA4_FREE_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D30",
+      "mission": "Atribuir captación y experimentos con datos agregados",
+      "evidence_sources": [
+        "CONSENTED_AGGREGATE_FUNNEL",
+        "GA4_FREE_READ"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D31",
+      "mission": "Ejecutar QA independiente, tribunal, versiones y rollback",
+      "evidence_sources": [
+        "WP_READ",
+        "QA_LEDGER",
+        "BACKUP"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    },
+    {
+      "department_id": "SEO-D32",
+      "mission": "Aprender de resultados, corregir y certificar competencias",
+      "evidence_sources": [
+        "MERIT_LEDGER",
+        "TRAINING_EVIDENCE"
+      ],
+      "execution_status": "MISSION_DEFINED_NOT_AGENT_PROVISIONED",
+      "active_agent_id": null,
+      "verified_prod_write_scope": false,
+      "planned_shared_runtime": [
+        "FACT-001",
+        "SEO-001",
+        "JOB-001",
+        "ACTGW-001",
+        "IAM-001",
+        "POL-001",
+        "QA-001",
+        "LRN-001"
+      ],
+      "audit_before_mutation": true,
+      "owner_only_strategy": true
+    }
+  ],
+  "specific_priorities": [
+    {
+      "id": "SEO-P0-JAEN",
+      "departments": [
+        "SEO-D09",
+        "SEO-D12",
+        "SEO-D20",
+        "SEO-D31"
+      ],
+      "severity": "P0",
+      "reason": "Core Guard pilot certified status invalidated 2026-10-06 after live revalidation failure",
+      "action": "DIAGNOSE_LIVE_READONLY_THEN_REPAIR_THROUGH_GATES",
+      "state": "OPEN_NOT_RECERTIFIED",
+      "mass_rollout_allowed": false,
+      "live_2026_11_05": {
+        "landing_id": 52200,
+        "landing_http_status": 200,
+        "canonical_verified": true,
+        "live_verify_ok": false,
+        "missing_expected": [
+          "data-fenix-guard-schema=\"seo001\"",
+          "\"@type\":\"FAQPage\""
+        ],
+        "service_schema_present_in_page_content": true,
+        "faq_visible_questions": 5,
+        "support_posts": [
+          {
+            "id": 52247,
+            "status": "draft",
+            "public_http_status": 404,
+            "seo_meta_present": true
+          },
+          {
+            "id": 52248,
+            "status": "draft",
+            "public_http_status": 404,
+            "seo_meta_present": true
+          }
+        ],
+        "pdf_public_http_status": 200,
+        "logical_snapshots": {
+          "landing_52200": 175,
+          "support_52247": 176,
+          "support_52248": 177
+        },
+        "production_repair_applied": false,
+        "manual_url_publication_completed": false,
+        "rollback_physical_tested": false,
+        "certification_restored": false
+      },
+      "next_controlled_action": "OWNER_QA_SUPPORT_DRAFTS_PLUS_QA_SURGICAL_SCHEMA_PATCH_IN_LAB_THEN_WP_PROTECTED_RELEASE",
+      "evidence_ref": "cerebro/seo-enterprise/v2/jaen-p0-live-recovery-evidence-2026-11-05.json"
+    },
+    {
+      "id": "SEO-P0-DATA",
+      "departments": [
+        "SEO-D05",
+        "SEO-D08",
+        "SEO-D29",
+        "SEO-D30"
+      ],
+      "severity": "P0",
+      "reason": "Real Google Search Console metrics unavailable via current GSC Wizard account paywall",
+      "action": "FIND_EXISTING_FREE_GOOGLE_OFFICIAL_READ_PATH_WITHOUT_NEW_SUBSCRIPTIONS",
+      "state": "BLOCKED_NO_NEW_COST"
+    },
+    {
+      "id": "SEO-P1-URLS",
+      "departments": [
+        "SEO-D09",
+        "SEO-D11",
+        "SEO-D31"
+      ],
+      "severity": "P1",
+      "reason": "200 published WordPress objects (166 pages, 34 posts) require canonical/sitemap/link audit",
+      "action": "INVENTORY_AND_CLASSIFY_BEFORE_EDITING",
+      "state": "PARTIAL_OFFICIAL_READ"
+    },
+    {
+      "id": "SEO-P1-CRO",
+      "departments": [
+        "SEO-D14",
+        "SEO-D21",
+        "SEO-D24",
+        "SEO-D30"
+      ],
+      "severity": "P1",
+      "reason": "Real conversions, forms and attribution have not been end-to-end verified",
+      "action": "VERIFY_EXISTING_CTA_FORMS_AND_EVENT_TRACING_READONLY",
+      "state": "TO_AUDIT"
+    },
+    {
+      "id": "SEO-P1-LOCAL",
+      "departments": [
+        "SEO-D17",
+        "SEO-D18",
+        "SEO-D20"
+      ],
+      "severity": "P1",
+      "reason": "GBP and geographic quality across cities require independent live audit",
+      "action": "VERIFY_OFFICIAL_LISTINGS_AND_CITY_CONTENT",
+      "state": "TO_AUDIT"
+    }
+  ],
+  "official_readonly_baseline": {
+    "observed_date": "2026-11-05",
+    "wordpress_published_pages": 166,
+    "wordpress_published_posts": 34,
+    "wordpress_draft_posts": 11,
+    "wordpress_draft_pages": 14,
+    "robots_txt_http": 200,
+    "sitemap_index_http": 200,
+    "page_sitemap_http": 200,
+    "page_sitemap_response_truncated": true,
+    "post_sitemap_http": 200,
+    "post_sitemap_xml_loc_count": 34,
+    "sitemap_index_links": [
+      "post-sitemap.xml",
+      "page-sitemap.xml",
+      "category-sitemap.xml",
+      "llms-sitemap.xml"
+    ],
+    "wordpress_home_candidate_redirected_to_canonical_home": true,
+    "city_pilot_jaen_certified": false,
+    "city_mass_rollout_allowed": false,
+    "google_search_console_data_connected": false,
+    "independent_real_agents_verified": 0,
+    "autonomy_publication_verified": false,
+    "current_real_draft_wp_id": 52656,
+    "real_draft_published": false,
+    "notes": "Sampled public pages and WP read-only connectors; cannot infer Google indexation or traffic; no claim of a complete 200-URL crawl",
+    "jaen_p0_landing_live_verify_missing_two_markers": true,
+    "jaen_p0_support_urls_currently_404": true,
+    "jaen_p0_support_articles_wp_drafts": 2,
+    "jaen_p0_backup_snapshots_created": 3
+  }
+}

@@ -1,0 +1,43 @@
+name: CEREBRO SEO · Isolated MariaDB WordPress fixture physical restore V0
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-wordpress-isolated-restore-drill-v0.sh'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-wordpress-isolated-restore-receipt-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-wordpress-isolated-restore-receipt-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-wordpress-isolated-restore-v0.yml'
+permissions:
+  contents: read
+jobs:
+  backup-restore-drill:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GITHUB_ACTIONS: 'true'
+      SEO_ISOLATED_RESTORE_AUTH: 'FIXTURE_ONLY_NO_PROD'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Validate fail-closed receipt schema before physical drill
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-wordpress-isolated-restore-receipt-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-wordpress-isolated-restore-receipt-v0.test.mjs
+          bash -n cerebro/seo-enterprise/v2/runtime/seo-wordpress-isolated-restore-drill-v0.sh
+      - name: Real SQL dump, intentional corruption and restore TWICE on networkless disposable DB
+        run: bash cerebro/seo-enterprise/v2/runtime/seo-wordpress-isolated-restore-drill-v0.sh
+      - name: Verify SHA256 of physical synthetic SQL backup and restore receipt
+        env:
+          OUTPUT: ${{ runner.temp }}/seo001-restore-drill-${{ github.run_id }}
+        run: node cerebro/seo-enterprise/v2/runtime/seo-wordpress-isolated-restore-receipt-v0.mjs "$OUTPUT"
+      - name: Archive fixture-only receipt and synthetic database dump
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-isolated-wordpress-fixture-restore-no-prod-snapshot
+          path: ${{ runner.temp }}/seo001-restore-drill-${{ github.run_id }}/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Prevent any false PROD gate report
+        run: echo 'SYNTHETIC_MARIADB_RESTORE_ONLY=YES REAL_PROD_SNAPSHOT_RESTORE_TESTED=NO WORDPRESS_PROD_WRITES=0'

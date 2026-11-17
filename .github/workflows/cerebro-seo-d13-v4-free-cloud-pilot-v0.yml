@@ -1,0 +1,59 @@
+name: CEREBRO SEO · V4 Free cloud B2C B2B one-pass LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v4-free-lab-generation-briefs-v0.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-v4-cloud-batch-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-v4-cloud-batch-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-d13-v4-free-cloud-pilot-v0.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-v4-free-cloud-pilot-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  free-v4-b2c-b2b:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Test free cloud writer, semantic depth, D32 and hard limits
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-v4-cloud-batch-v0.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-v4-cloud-batch-v0.test.mjs
+      - name: Explicit content-generation commit gate
+        id: permit
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          subject="$(git log -1 --format=%s)"
+          if [ "$subject" = "seo(d13): V4_B2C_B2B_FREE_ONESHOT_20261106" ]; then
+            echo "generate=true" >> "$GITHUB_OUTPUT"
+            echo 'OWNER_ONE_SHOT_V4_LAB=PERMITTED'
+          else
+            echo "generate=false" >> "$GITHUB_OUTPUT"
+            echo 'OWNER_ONE_SHOT_V4_LAB=HOLD_NO_REQUEST'
+          fi
+      - name: Generate B2C and B2B once each on verified Gemini Free project
+        if: ${{ steps.permit.outputs.generate == 'true' }}
+        env:
+          CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
+          OUTPUT_DIR: ${{ runner.temp }}/seo001-v4-free-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-d13-v4-cloud-batch-v0.mjs "$OUTPUT_DIR"
+      - name: Archive review candidates only
+        if: ${{ always() && steps.permit.outputs.generate == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v4-b2c-b2b-free-cloud-candidates-unapproved
+          path: ${{ runner.temp }}/seo001-v4-free-${{ github.run_id }}/*
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Confirm no side effects
+        if: ${{ always() }}
+        run: echo 'MAX_2_REAL_MODEL_POSTS=TRUE MAX_1_EACH=TRUE AUTO_RETRIES=0 NO_PAID_FALLBACK=TRUE WP_WRITES=0 UMS_CALLS=0 PUBLISH=NO'

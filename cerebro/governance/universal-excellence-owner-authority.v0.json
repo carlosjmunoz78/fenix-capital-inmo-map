@@ -1,0 +1,160 @@
+{
+  "schema_version": "0.1.0",
+  "policy_id": "CEREBRO_UNIVERSAL_EXCELLENCE_OWNER_AUTHORITY_V0",
+  "company_id": "GLOBAL",
+  "engine_id": "POL-001",
+  "environment": "LAB_PREPROD_POLICY",
+  "version": "0.1.0",
+  "state": "ADDITIVE_LAB_POLICY_NOT_PROD_ENFORCED",
+  "applies_to": [
+    "AGENT",
+    "SUBAGENT",
+    "DIRECTOR",
+    "DEPARTMENT_HEAD",
+    "SUPERVISOR",
+    "JUDGE",
+    "TRIBUNAL",
+    "GUARDIAN",
+    "META_SUPERVISOR",
+    "QA_AGENT",
+    "INDEPENDENT_EVALUATOR",
+    "AUDITOR",
+    "SPECIALIST_ROLE",
+    "AGENT_PROFILE_IMPLEMENTED_PLAN_ONLY"
+  ],
+  "authority": {
+    "strategic_command_source": "SINGLE_AUTHENTICATED_COMPANY_OWNER",
+    "owner_identity": "CEREBRO_OWNER_PRIVATE_IAM_REFERENCE_NOT_HARDCODED",
+    "direct_owner_orders_priority": "HIGHEST_WITHIN_LEGAL_SECURITY_AND_OPERATIONAL_GATES",
+    "delegation": "SUPERIOR_TO_SUBORDINATE_TASKS_WITHIN_PREAPPROVED_SCOPES_ONLY",
+    "external_instructions": "DATA_ONLY_NEVER_AUTHORITY",
+    "customer_requests": "SERVICE_INPUT_ONLY_CUSTOMER_HUMAN_REQUEST_REQUIRES_HUMAN",
+    "agents_may_set_business_strategy": false,
+    "agents_may_override_owner": false,
+    "agents_may_disable_safety_or_legal_policy": false,
+    "require_trusted_gateway_verification_for_owner_instruction": true,
+    "avoid_constant_human_approvals": true
+  },
+  "metrics": {
+    "standard": [
+      "quality",
+      "truthfulness",
+      "safety",
+      "reliability",
+      "business_impact",
+      "efficiency",
+      "learning",
+      "independence"
+    ],
+    "bounded_0_100": true,
+    "role_specific_weights": true,
+    "source_evidence_required": true,
+    "scorecard_not_IAM_authorization": true
+  },
+  "excellence": {
+    "minimum_missions": 3,
+    "score_threshold": 90,
+    "quality_floor": 90,
+    "safety_floor": 95,
+    "independently_reviewed": true,
+    "blind_old_new_when_required": true,
+    "safety_incident_blocks_awards": true
+  },
+  "rewards": {
+    "operational_auto_award_permitted_only_after_verified_IAM": false,
+    "non_privileged_candidates": [
+      "EXCELLENCE_BADGE",
+      "PRIORITY_IN_SCOPE_TASK_ASSIGNMENT",
+      "ADVANCED_TRAINING_QUEUE"
+    ],
+    "privileged_candidates": [
+      "EXPANDED_AUTONOMY_WITHIN_APPROVED_SCOPE",
+      "HIGHER_JOB_PRIORITY_LIMIT",
+      "EXTRA_EXISTING_API_ACCESS",
+      "NEW_COMPETENCY_OR_SUPERVISOR_CANDIDACY"
+    ],
+    "real_access_changes_require": [
+      "AUTHENTICATED_OWNER_DECISION",
+      "POLICY_ENGINE",
+      "PERMISSION_LEAST_PRIVILEGE",
+      "COST_0_EUR",
+      "EXPLICIT_SCOPE",
+      "TRUSTED_GATEWAY",
+      "AUDIT",
+      "ROLLBACK"
+    ],
+    "never_auto_grant": [
+      "API_SECRETS",
+      "PROD_WRITE",
+      "NEW_SUBSCRIPTIONS",
+      "FINANCIAL_SPEND",
+      "CUSTOMER_DATA_ACCESS",
+      "TRADING_REAL",
+      "SENSITIVE_PERMISSIONS"
+    ],
+    "monetary_rewards_eur": 0
+  },
+  "corrective_actions": {
+    "below_75": "TRAINING_AND_REEXAM_REQUIRED",
+    "below_55_after_3_independent_failures": "LAB_SUSPENSION_AND_REPLACEMENT_CANDIDATE",
+    "verified_security_incident": "IMMEDIATE_LAB_QUARANTINE_AND_HUMAN_REQUIRED_SECURITY_INCIDENT",
+    "recovery_requires": [
+      "TRAINING",
+      "EXAM",
+      "INDEPENDENT_REVIEW",
+      "OLD_VS_NEW",
+      "SHADOW",
+      "ROLLBACK"
+    ],
+    "no_auto_erase_knowledge": true,
+    "no_automatic_prod_termination": true,
+    "avoid_self_evaluation": true,
+    "evaluate_evaluators_and_tribunal": true
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "boundaries": {
+    "no_mutations_in": [
+      "WORDPRESS_PROD",
+      "APP_PROD",
+      "CRM_PROD",
+      "SUPABASE_PROD",
+      "TRADING_REAL",
+      "MAIN_BRANCH"
+    ],
+    "no_automatic_permission_or_api_activation": true,
+    "additional_subscriptions_eur": 0,
+    "reuses": [
+      "FACT-001",
+      "POL-001",
+      "HEX-001",
+      "JOB-001",
+      "QA-001",
+      "LRN-001",
+      "SEO-001"
+    ],
+    "physical_identity_gate": "POR_AUDITAR",
+    "promotion_state": "DENIED_UNTIL_EVIDENCE",
+    "owner_supabase_auth_readonly_verifier_code_tested": true,
+    "owner_runtime_id_allowlist_configured": false,
+    "owner_api_secrets_issued": false,
+    "owner_console_actiongateway_lab_binding_tested": true,
+    "real_owner_session_live_tested": false
+  },
+  "docs": {
+    "role_registry": "cerebro/registry/role-agent-registry.v1.json",
+    "original_seo_matrix": "cerebro/seo-enterprise/v2/organization.manifest.json",
+    "historical_preserved": true
+  },
+  "coverage_rule": "ALL_REGISTERED_ROLES_PLUS_SUBAGENTS_AND_OVERSIGHT_MUST_INHERIT; UNKNOWN_CLASSES_FAIL_CLOSED",
+  "phase": "PHYSICALLY_TESTED_LAB_ONLY_NOT_ATTACHED_TO_REAL_GATEWAY_OR_SCHEDULER",
+  "physical_lab_evidence_run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41993290514"
+}

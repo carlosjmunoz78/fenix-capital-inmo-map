@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "feature": "AUTONOMOUS_EDITORIAL_SELF_REPAIR",
+  "owner_mission": "AUTOCORRECT_QUALITY_FAILURES_UNTIL_TESTED_PASS_WITHIN_SAFE_RESOURCES",
+  "state": "REAL_SELF_REPAIR_V1_EXECUTED_HOLD_3_ATTEMPTS_EACH",
+  "source_code": [
+    "cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs",
+    "cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs"
+  ],
+  "tests": [
+    "cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs",
+    "cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs",
+    "cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs"
+  ],
+  "ci_run_id": 42440481732,
+  "ci_result": "SUCCESS",
+  "learned_tests": 12,
+  "selfrepair_tests": 12,
+  "existing_writer_tests": 6,
+  "total_tests": 30,
+  "passing_tests": 30,
+  "validation_layers": [
+    "DETERMINISTIC_FAQ_WRAPPER_REPAIR_ONLY_UNIQUE_SIX_PAIRS_WITHOUT_CHANGING_CONTENT",
+    "INDEPENDENT_EDITORIAL_QA_REEVALUATED_AFTER_EACH_ATTEMPT",
+    "TARGETED_ERROR_CODES_ONLY_FOR_NEXT_MODEL_PROMPT",
+    "STOP_ON_EXACT_REPEATED_CONTENT",
+    "STOP_ON_PROVIDER_HOLD_OR_MISSING_SECRET",
+    "STOP_ON_PER_ITEM_AND_SHARED_BATCH_BUDGET",
+    "LEGAL_YMYL_CLAIMS_CANNOT_AUTO_CERTIFY",
+    "MEDIA_PROVENANCE_DESKTOP_MOBILE_CRM_E2E_NOT_INFERRED_FROM_TEXT"
+  ],
+  "limits": {
+    "max_attempts_per_item": 3,
+    "max_external_requests_per_batch": 6,
+    "paid_fallbacks": 0,
+    "wordpress_writes": 0,
+    "crm_writes": 0,
+    "publish": false,
+    "automatic_next_batch": false
+  },
+  "real_model_revision_adapter": "ACTUALLY_EXECUTED_6_GEMINI_REQUESTS",
+  "free_project_reverification_required": true,
+  "previous_batch_id": "SEO001-AUTONOMY-PILOT-20261108-ONE",
+  "previous_batch_state": "COMPLETED_HOLD",
+  "previous_batch_immutable": true,
+  "company_contract": "MULTIEMPRESA_READY_COMPANY_ID_REQUIRED_BUT_THIS_V0_SCOPED_TO_FENIX",
+  "requires_for_production": [
+    "UNIQUE_NEW_BATCH_ID_AND_EXPLICIT_OWNER_COST_GATES",
+    "VALIDATED_CMS_RENDER_AND_SINGLE_H1",
+    "REAL_ORIGINAL_MEDIA_PROVENANCE",
+    "REAL_MOBILE_DESKTOP_VISUAL_QA",
+    "CRM_LEADS_E2E_AND_PRIVACY",
+    "LEGAL_YMYL_REVIEW",
+    "BACKUP_ROLLBACK_PREPROD_APPROVAL"
+  ],
+  "status_indicators": {
+    "architecture": "HECHO",
+    "code": "HECHO",
+    "qa_ci": "VERIFICADO_37_TESTS",
+    "real_model_retry": "HECHO_3_ITERACIONES_CADA_UNO",
+    "physical_quality": "POR_AUDITAR",
+    "autonomous_publication": "BLOQUEADO"
+  },
+  "next_action": "NEW_UNIQUE_OWNER_GATED_FREE_ONLY_PILOT_AFTER_TARGETED_DIAGNOSTIC_FIX; THEN MEDIA AND MOBILE QA; NEVER REOPEN CONSUMED_BUDGET",
+  "cost": {
+    "new_subscription_eur": 0,
+    "model_calls_real_v1": 6,
+    "provider_billing_actual": "NOT_INDEPENDENTLY_AUDITED",
+    "model_calls_regression": 0
+  },
+  "real_live_revision_run_id": 42441908078,
+  "regression_verified_run_id": 42442349298,
+  "regression_total_tests_passed": 37,
+  "real_outcome": "2_OF_2_CONTENT_ITEMS_HOLD; FAQ_AND_H2_STRUCTURE_IMPROVED; PARAGRAPH_DETAILS_MISSING_BEFORE_FIX",
+  "feedback_record": "cerebro/seo-enterprise/v2/training-pilots/SEO_D32_AUTOREPAIR_V1_FEEDBACK_20261108.json",
+  "latest_actual_media_qa": false,
+  "autonomous_editorial_excellence_proven": false,
+  "next_batch_auto_allowed": false
+}

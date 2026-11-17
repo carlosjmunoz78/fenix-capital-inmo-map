@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "13.0.0",
+  "status": "PREPARED_LOCAL_LOOPBACK_GATE_NOT_REAL_CRM",
+  "upstream": "V12 PHP original code excerpts + existing V8 GitHub Actions",
+  "local_transport": "127.0.0.1:34381",
+  "persistence": "GitHub runner temporary dummy-only JSON",
+  "gates": {
+    "actual_php_source": true,
+    "loopback_http": true,
+    "dummy_write_readback": true,
+    "idempotency": true,
+    "dummy_rollback": true,
+    "real_positive_crm_e2e": false,
+    "release_allowed": false
+  },
+  "limits": {
+    "external_requests": 0,
+    "supabase_writes": 0,
+    "wordpress_writes": 0,
+    "paid_calls": 0,
+    "real_contacts": 0
+  }
+}

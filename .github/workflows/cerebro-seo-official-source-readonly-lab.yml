@@ -1,0 +1,51 @@
+name: CEREBRO SEO Official Source Read Only LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-professional-source-registry-v0.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo001-official-feed-readonly-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo001-professional-source-registry-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-official-source-readonly-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-feed-observation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Offline contracts and negative controls
+        run: node --test cerebro/seo-enterprise/v2/tests/seo001-professional-source-registry-v0.test.mjs
+      - name: Public official RSS delta against physically observed 17 Nov 2026 baseline (no customer data)
+        env:
+          SEO001_OBSERVED_BASELINE: 7564444e6957014af299a88b541d5b14e7f28503eb36a7ee68aa5c85cbc08f0c
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo001-official-feed-readonly-v0.mjs "$RUNNER_TEMP/seo001-gsc-rss-readonly.json" "$SEO001_OBSERVED_BASELINE"
+      - name: Independent technical receipt integrity check; NOT professional D31 certification
+        env:
+          SEO001_OBSERVED_BASELINE: 7564444e6957014af299a88b541d5b14e7f28503eb36a7ee68aa5c85cbc08f0c
+        run: |
+          node --input-type=module - "$RUNNER_TEMP/seo001-gsc-rss-readonly.json" <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const p=process.argv[2];
+          const x=JSON.parse(fs.readFileSync(p,'utf8'));
+          const {receipt_sha256,...payload}=x;
+          const observed=crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+          if(receipt_sha256!==observed || x.previous_sha256!==process.env.SEO001_OBSERVED_BASELINE ||
+             x.environment!=='LAB'||x.department_id!=='SEO-D09'||x.source_id!=='GSC-RSS'||
+             x.prod_publication_allowed!==false||x.prod_departments_certified!==0||
+             x.independent_qa!=='SEO-D31_PENDING'||x.learning!=='SEO-D32_CANDIDATE_NOT_TRAINED'||
+             !['UNCHANGED','CHANGED'].includes(x.delta_state))
+            throw Error('TECHNICAL_RSS_RECEIPT_REJECTED');
+          console.log(JSON.stringify({state:x.delta_state,technical_receipt_validated:true,
+             D31_professional_certified:false,D32_training_certified:false,prod_writes:0}));
+          NODE
+      - name: Publish evidence artifact for independent D31 review
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-official-rss-second-observation-no-certification
+          path: ${{ runner.temp }}/seo001-gsc-rss-readonly.json
+          retention-days: 7
+          if-no-files-found: error

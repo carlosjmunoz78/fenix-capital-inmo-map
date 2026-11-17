@@ -1,0 +1,62 @@
+{
+  "schema_version": "0.1.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "PHYSICAL_THREE_GITHUB_JOB_CHAIN_VERIFIED_SYNTHETIC_LAB_ONLY",
+  "git_sha": "bce7e5b1b1e03556259c06e2969c922ee0c380fa",
+  "workflow_run_id": 41989528379,
+  "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41989528379",
+  "jobs": [
+    {
+      "role": "SEO_D15_WORKER",
+      "job_name": "seo-worker-isolated",
+      "github_job_id": 127118165570,
+      "job_status": "success",
+      "contract": "JOB-001 durable journal and signed worker evidence",
+      "artifact_id": 13396809968
+    },
+    {
+      "role": "SEO_D31_QA",
+      "job_name": "seo-qa-isolated",
+      "github_job_id": 127118220340,
+      "job_status": "success",
+      "contract": "provider-reverified worker job, recomputed synthetic input and signed QA",
+      "artifact_id": 13397343573
+    },
+    {
+      "role": "SEO_JUDGE_A",
+      "job_name": "seo-tribunal-isolated",
+      "github_job_id": 127118306547,
+      "job_status": "success",
+      "contract": "provider-reverified worker and QA jobs and checked signed receipts",
+      "artifact_id": 13396499665
+    }
+  ],
+  "ci": {
+    "seo_contract_tests_passed": 65,
+    "seo_readonly_tests_passed": 36,
+    "failed": 0
+  },
+  "source_type": "IN_REPO_SYNTHETIC_FIXTURE",
+  "factual_public_staging_website_audited_by_isolated_jobs": false,
+  "github_provider_confirmed_distinct_job_ids": true,
+  "github_repo_workload_read_only": true,
+  "separate_iam_credential_per_agent_confirmed": false,
+  "signed_receipts_external_pki_trusted": false,
+  "production_promotion": false,
+  "wordpress_staging_content_changed": false,
+  "web_prod_changed": false,
+  "app_crm_prod_changed": false,
+  "reward_applied": false,
+  "new_subscriptions_eur": 0,
+  "artifact_retention_days": 14,
+  "limitations": [
+    "Source is synthetic, not live public website.",
+    "GitHub verifies distinct jobs, not unique external agent IAM accounts or human identities.",
+    "No provider OIDC attestation or external PKI.",
+    "No physical website rollback, user consent or GSC/GA4 authentication.",
+    "GitHub Actions minutes are existing-plan consumption, not guaranteed unmetered."
+  ]
+}

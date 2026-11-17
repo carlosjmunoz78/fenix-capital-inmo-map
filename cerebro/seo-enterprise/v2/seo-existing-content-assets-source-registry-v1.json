@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "HISTORICAL_STAGING_REFERENCE",
+  "version": "1.0.0",
+  "priority": "REUSE_PREVIOUS_INVENTORIES_BEFORE_MARKETING_AND_SEO_ASSET_CREATION",
+  "canonical_snapshot": {
+    "status": "VERIFIED_GITHUB_ARCHIVE_AND_MANIFEST_NOT_JOB001_INGESTED",
+    "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+    "branch": "cerebro/seo001-staging-audit-v5-20261018",
+    "captured_at": "2026-10-18T01:27:55+00:00",
+    "scope": "STAGING",
+    "zip": "docs/web-baseline/2026-10-18-v4/CEREBRO_FENIX_STAGING_BASELINE_2026-10-18.zip",
+    "sha256": "59944be1aba38d15a29991e7aa27579941382fc6dae701ef6032adfeae2f2b04",
+    "manifest": "docs/web-baseline/2026-10-18-v4/manifest.json",
+    "pointer": "docs/web-baseline/2026-10-18-v4/ARTIFACT_POINTER.md",
+    "artifact_id": 12120333543,
+    "url_count": 204,
+    "image_count": 680,
+    "internal_links": 42073,
+    "archive_members": {
+      "urls": "urls.csv + urls.json",
+      "copy": "copy/*.html + copy/*.txt + copy/*.json",
+      "images": "images/images.csv + images/images.json + images/image_usage.csv",
+      "links": "tree/internal_links.csv",
+      "dependencies": "tree/dependencies.csv"
+    },
+    "earlier_unmodified_csv_root": "docs/web-baseline/2026-10-18/",
+    "earlier_csv_paths": [
+      "urls.csv",
+      "images.csv",
+      "image_usage.csv",
+      "internal_links.csv",
+      "dependencies.csv",
+      "wordpress_parent_tree.md"
+    ],
+    "git_commit_sha": "bfc9bdaf2e98e214f7bae09e83ca0ac1c251def2",
+    "archive_size_bytes": 16353907,
+    "corpus_lookup_runtime": "cerebro/seo-enterprise/v2/runtime/seo-historical-web-assets-reader-v1.py"
+  },
+  "notion": {
+    "inventory": "https://app.notion.com/p/3ad3ba78c8b9449986bbcddc06bff687",
+    "inventory_source": "collection://71c5ac0c-ea87-4cfe-8e9f-c68728240a06",
+    "as_is": "https://app.notion.com/p/3b481b1a756d81029a0cfa76a35cade3",
+    "audit_v4": "https://app.notion.com/p/3fd81b1a756d8119b558c4dc9c4f6548",
+    "legacy_url_subset_counts_not_current": true
+  },
+  "prod_today": {
+    "site": "https://fenixcapital.es",
+    "published_pages_last_seen": 166,
+    "published_posts_last_seen": 34,
+    "as_of": "2026-11-05",
+    "staging_not_prod": true
+  },
+  "mandatory_preflight": [
+    "EXISTING_URL",
+    "EXISTING_COPY",
+    "IMAGE_USAGE_AND_RIGHTS",
+    "INTERNAL_LINKS_AND_CANONICALS",
+    "CTA_AND_FUNNEL",
+    "BUYER_PERSONA",
+    "DELTA_ONLY_NO_DUPLICATE",
+    "TARGETED_LIVE_PROD_CHECK_BEFORE_WRITE",
+    "OWNER_APPROVAL"
+  ],
+  "constraints": {
+    "no_global_reaudit_now": true,
+    "archive_immutable": true,
+    "unknown_image_rights_must_not_be_invented": true,
+    "new_content_without_asset_preflight_blocked": true,
+    "no_mass_town_redesign": true
+  },
+  "real_state": {
+    "sources_verified": true,
+    "all_204_copy_payloads_loaded_in_job001": false,
+    "all_680_image_maps_joined_to_prod": false,
+    "production_write_authorized": false,
+    "historical_archive_physically_read_in_ci": true,
+    "history_index_generated_in_lab": true,
+    "evidence": {
+      "status": "READ_AND_VALIDATED_IN_ISOLATED_GITHUB_ACTIONS_LAB",
+      "verified_commit": "33203008d99d6b7a3339dce8b3d44db5af40bf3f",
+      "run_id": 42087026853,
+      "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42087026853",
+      "artifact_id": 13444185541,
+      "sha256_validated": true,
+      "url_rows": 204,
+      "copy_html_files": 204,
+      "copy_text_files": 204,
+      "copy_json_files": 204,
+      "images": 680,
+      "image_usage_rows": 1534,
+      "urls_with_image_usage": 204,
+      "customer_private_editor_source_coverage_unverified": true,
+      "original_archive_unchanged": true,
+      "historical_source_environment": "STAGING",
+      "current_prod_corpus_reconciled": false,
+      "wordPress_prod_writes": 0,
+      "job001_prod_mounted": false,
+      "cost_additional_eur": 0
+    },
+    "marketing_content_only_after_per_url_inventory_read": true
+  }
+}
