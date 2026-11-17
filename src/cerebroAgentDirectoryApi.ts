@@ -24,7 +24,8 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
  const host=window.location.hostname,prod=host==='app.fenixcapital.es';
  if(!prod&&(!PREVIEW_HOST.test(host)||new URLSearchParams(window.location.search).get('visual_lab')!=='cockpit-v3'))
   return unavailable('denied','OWNER_SCOPE_REQUIRED');
- const transport=prod?'OWNER_PROD_READONLY':'PREVIEW_ONLY_SERVER_VERIFIED';
+ const acceptedTransports=prod?['OWNER_PROD_READONLY']:
+  ['PREVIEW_ONLY_SERVER_VERIFIED','OWNER_PROD_READONLY']; // production-stage exact host is server validated
  try{
   const {data:{session}}=await supabase.auth.getSession();
   if(!session?.access_token)return unavailable('denied','OWNER_SESSION_REQUIRED');
@@ -36,7 +37,7 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
   if(r.status!==200)return unavailable('unavailable','DIRECTORY_SOURCE_UNAVAILABLE');
   const data=await r.json() as AgentDirectoryResponse;
   if(data.status!=='OK'||data.company_id!=='fenix'||data.coverage!=='PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS'||
-   data.transport!==transport||data.read_only!==true||data.executed!==false||
+   !acceptedTransports.includes(data.transport)||data.read_only!==true||data.executed!==false||
    data.active_agents_verified!==false||data.subagent_instances_verified!==false||
    data.counts?.total_runtime_instances!==null||
    !Array.isArray(data.records)||data.records.length>filters.limit||

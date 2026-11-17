@@ -17,8 +17,10 @@ type Req={method?:string;url?:string;headers:Record<string,H>};
 type Res={status:(n:number)=>Res;setHeader:(name:string,val:string)=>void;json:(body:unknown)=>void};
 const PREVIEW_HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 const PROD_HOST='app.fenixcapital.es';
-export function verifiedReadOnlyMode(host:string,env:string|undefined){
- if(env==='production'&&host===PROD_HOST)return 'OWNER_PROD_READONLY' as const;
+export function verifiedReadOnlyMode(host:string,env:string|undefined,uniqueDeploymentHost:string|undefined=process.env.VERCEL_URL){
+ if(env==='production'&&(host===PROD_HOST||
+  (PREVIEW_HOST.test(host)&&host===uniqueDeploymentHost)))
+  return 'OWNER_PROD_READONLY' as const;
  if(env==='preview'&&PREVIEW_HOST.test(host))return 'PREVIEW_ONLY_SERVER_VERIFIED' as const;
  return null;
 }

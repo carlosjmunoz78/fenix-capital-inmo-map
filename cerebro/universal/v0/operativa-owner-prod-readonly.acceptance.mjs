@@ -18,6 +18,8 @@ try{
  assert.equal(verifiedReadOnlyMode(host,'preview'),null);
  assert.equal(verifiedReadOnlyMode(preview,'preview'),'PREVIEW_ONLY_SERVER_VERIFIED');
  assert.equal(verifiedReadOnlyMode(preview,'production'),null);
+ assert.equal(verifiedReadOnlyMode(preview,'production',preview),'OWNER_PROD_READONLY');
+ assert.equal(verifiedReadOnlyMode('other-fenix-capital-preprod-xxxx.vercel.app','production',preview),null);
  assert.equal(verifiedReadOnlyMode('evil.example','production'),null);
  let authorizedCalls=0;
  globalThis.fetch=async(url,options)=>{
@@ -43,6 +45,12 @@ try{
  assert.equal(pr.code,200);
  assert.equal(pr.body.transport,'PREVIEW_ONLY_SERVER_VERIFIED');
  assert.equal(pr.body.page.total,2506);
+ process.env.VERCEL_URL=preview;
+ const stagedProd=await run({hostname:preview,env:'production'});
+ assert.equal(stagedProd.code,200);
+ assert.equal(stagedProd.body.transport,'OWNER_PROD_READONLY');
+ assert.equal(stagedProd.body.page.total,2506);
+ delete process.env.VERCEL_URL;
  const count=authorizedCalls;
  for(const bad of [
   {hostname:preview,env:'production'},

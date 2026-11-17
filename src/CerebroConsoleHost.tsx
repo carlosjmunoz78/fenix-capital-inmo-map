@@ -42,7 +42,10 @@ export default function CerebroConsoleHost(){
  const realProduction=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
  const legacyRequested=params.get('operativa_legacy')==='1';
  const showPremiumV3=(realProduction||visualPreview)&&!legacyRequested;
- const previewOwnerGate=Boolean(isCerebroPath&&previewHost&&visualPreview);
+ const previewOwnerGate=Boolean(isCerebroPath&&previewHost&&visualPreview&&
+  import.meta.env.VITE_FENIX_ENV!=='prod');
+ // Production-target canary under its private Vercel hostname uses the same canonical
+ // owner session validator as app.fenixcapital.es; no client-granted owner access.
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
  const[previewLogged,setPreviewLogged]=useState(false);
