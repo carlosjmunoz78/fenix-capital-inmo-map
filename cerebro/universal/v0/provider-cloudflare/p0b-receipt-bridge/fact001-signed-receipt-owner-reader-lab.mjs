@@ -44,7 +44,7 @@ export async function readFact001SignedReceiptOwnerLabV0({
  // Server must inject createFenixOwnerContextResolverV0. A client-supplied
  // ownerContext is NOT an authentication proof and is never accepted.
  if(typeof verifyOwnerSession!=='function'||typeof sessionToken!=='string'||
-    sessionToken.length<20||sessionToken.length>8192||/\\s/.test(sessionToken))
+    sessionToken.length<20||sessionToken.length>8192||/\s/.test(sessionToken))
   return denied('OWNER_SESSION_VERIFIER_MISSING');
  let ownerContext;
  try{ownerContext=await verifyOwnerSession(sessionToken)}
