@@ -1,17 +1,25 @@
-/** Isolated PREVIEW-only server-verified owner identity. No DB writes. */
+/** Isolated preview/staged-deployment owner identity. No DB writes or PROD aliases. */
 type H=string|string[]|undefined;
 type Req={method?:string;headers:Record<string,H>};
 type Res={status:(code:number)=>Res;setHeader:(key:string,value:string)=>void;json:(value:unknown)=>void};
 function h(value:H){return Array.isArray(value)?value[0]||'':value||''}
 const TARGET='https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context';
 const PREVIEW_HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const PINNED_PRIVATE_DEPLOYMENT=/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/;
+/** Production-mode deployments are allowed ONLY on their own deployment hostname,
+ * never on PROD aliases or another Vercel deployment. Auth remains mandatory. */
+export function verifiedOwnerPreviewScope(host:string,env:string|undefined,uniqueHost:string|undefined){
+ if(!PREVIEW_HOST.test(host))return false;
+ if(env==='preview')return true;
+ return env==='production'&&PINNED_PRIVATE_DEPLOYMENT.test(host)&&uniqueHost===host;
+}
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','no-store, max-age=0');
  res.setHeader('Vary','Authorization');
  res.setHeader('X-Content-Type-Options','nosniff');
  if(req.method!=='GET')return res.status(405).json({allowed:false,reason:'METHOD_NOT_ALLOWED'});
  const host=h(req.headers.host).toLowerCase();
- if(process.env.VERCEL_ENV!=='preview'||!PREVIEW_HOST.test(host))
+ if(!verifiedOwnerPreviewScope(host,process.env.VERCEL_ENV,process.env.VERCEL_URL))
   return res.status(403).json({allowed:false,reason:'LAB_ONLY'});
  const origin=h(req.headers.origin);
  if(origin&&origin!=='https://'+host)
