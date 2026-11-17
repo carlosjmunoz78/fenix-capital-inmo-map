@@ -26,6 +26,6 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  if(!out||!path.isAbsolute(out)||fs.existsSync(out))throw Error('NEW_ABSOLUTE_OUTPUT_REQUIRED');
  const controller=new AbortController();
  const timeout=setTimeout(()=>controller.abort(),12000);
- try{const report=await checkOfficialSeoFeed({signal:controller.signal});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n',{flag:'wx',mode:0o600});process.stdout.write(JSON.stringify({state:report.delta_state,source:report.source_id,sha256:report.content_sha256})+'\n')}
+ try{const report=await checkOfficialSeoFeed({signal:controller.signal,priorDigest:process.argv[3]||null});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n',{flag:'wx',mode:0o600});process.stdout.write(JSON.stringify({state:report.delta_state,source:report.source_id,sha256:report.content_sha256})+'\n')}
  finally{clearTimeout(timeout)}
 }

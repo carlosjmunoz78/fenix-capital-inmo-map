@@ -1,0 +1,26 @@
+name: CEREBRO SEO Leads Consent Routing Candidate LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo001-fenix-leads-consent-routing-candidate-v0.php'
+      - 'cerebro/seo-enterprise/v2/tests/seo001-fenix-leads-consent-routing-candidate-v0.test.php'
+      - '.github/workflows/cerebro-seo-leads-consent-candidate-lab.yml'
+permissions:
+  contents: read
+jobs:
+  candidate-contract-only:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Validate actual PHP contract with negative fixtures and zero production operations
+        run: |
+          php -l cerebro/seo-enterprise/v2/runtime/seo001-fenix-leads-consent-routing-candidate-v0.php
+          php -l cerebro/seo-enterprise/v2/tests/seo001-fenix-leads-consent-routing-candidate-v0.test.php
+          php cerebro/seo-enterprise/v2/tests/seo001-fenix-leads-consent-routing-candidate-v0.test.php
+      - name: Deny promotion and external requests
+        run: echo 'PURE_PHP_FIXTURE_ONLY=YES REAL_FENIX_LEADS_DEPLOYED=NO LIVE_WP_WRITE=0 CRM_MUTATION=0 PROD_LEAD_PRIVACY_GATE=HOLD'
