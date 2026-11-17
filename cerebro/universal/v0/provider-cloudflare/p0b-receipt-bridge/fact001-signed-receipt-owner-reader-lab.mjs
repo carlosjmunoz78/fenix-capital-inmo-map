@@ -38,9 +38,17 @@ const denied=(reason)=>Object.freeze({
 });
 const goodScope=(row)=>row&&Object.entries(SCOPED).every(([field,v])=>row[field]===v);
 const timestamp=(v)=>Number.isSafeInteger(v)&&v>0;
-export async function readFact001SignedReceiptOwnerLabV0({db,jobId,signingKey,ownerContext}={}){
- // Must be injected from existing server-side createFenixOwnerContextResolverV0.
- // NEVER accept an ownerContext object from client parameters or persisted D1.
+export async function readFact001SignedReceiptOwnerLabV0({
+ db,jobId,signingKey,verifyOwnerSession,sessionToken
+}={}){
+ // Server must inject createFenixOwnerContextResolverV0. A client-supplied
+ // ownerContext is NOT an authentication proof and is never accepted.
+ if(typeof verifyOwnerSession!=='function'||typeof sessionToken!=='string'||
+    sessionToken.length<20||sessionToken.length>8192||/\\s/.test(sessionToken))
+  return denied('OWNER_SESSION_VERIFIER_MISSING');
+ let ownerContext;
+ try{ownerContext=await verifyOwnerSession(sessionToken)}
+ catch{return denied('OWNER_SESSION_VERIFICATION_FAILED');}
  if(ownerContext?.auth_source!=='SERVER_VERIFIED_FENIX_CONTEXT'||
     ownerContext?.actor_id!=='CARLOS-ADMIN'||
     !Array.isArray(ownerContext?.company_ids)||
