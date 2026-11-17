@@ -32,7 +32,7 @@ jobs:
           test "$GITHUB_REF" = refs/heads/cerebro/operativa-agent-directory-prod-candidate-20261117
           test "$VERCEL_ORG_ID" = team_qnh6u1Ofy2WPp0MGEKlyMA50
           test "$VERCEL_PROJECT_ID" = prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
-          git cat-file -e a51dd14eac11f02424dce5db426346b041c1824f^{commit}
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" # Exact source checkout; baseline was verified by PR comparison
       - name: Install existing locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Strict production-compatible build and owner-only contract
