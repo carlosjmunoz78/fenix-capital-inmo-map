@@ -2,18 +2,19 @@ import {useMemo,useState,type FormEvent,type KeyboardEvent,type ReactNode,type R
 import {
  Activity,AudioLines,BarChart3,Building2,CheckCircle2,ChevronLeft,ChevronRight,
  CircleAlert,Clock3,Cpu,Database,ExternalLink,FileCheck2,Layers3,Mic,Play,
- Search,Send,ShieldCheck,Square,Workflow,Volume2
+ Search,Send,ShieldCheck,Square,Users,Workflow,Volume2
 } from 'lucide-react';
 import type {CerebroActivityRun} from './cerebroActivityApi';
 import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
 import CerebroFleetControlPanel from './CerebroFleetControlPanel';
+import CerebroRoleAgentRosterLab from './CerebroRoleAgentRosterLab';
 import CerebroAudioDiagnostics from './CerebroAudioDiagnostics';
 import './cerebro-operative-cockpit-v3.css';
 
 type VoiceSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
 type Company='all'|'fenix'|'aion'|'captacasa';
-type View='resumen'|'control'|'entidades'|'proyectos'|'motores'|'trabajos'|'evidencias'|'decisiones';
+type View='resumen'|'control'|'entidades'|'proyectos'|'motores'|'agentes'|'trabajos'|'evidencias'|'decisiones';
 type FeedStatus='LIVE'|'CACHED'|'UNAVAILABLE';
 type Props={
  snapshot:VoiceSnapshot;composer:string;onComposerChange:(value:string)=>void;
@@ -33,7 +34,7 @@ type Props={
 };
 const NAV:readonly [View,string,typeof Building2][]=[
  ['control','Control',ShieldCheck],['entidades','Entidades',Building2],['proyectos','Proyectos',Layers3],
- ['motores','Motores',Cpu],['trabajos','Trabajos',Workflow],
+ ['motores','Motores',Cpu],['agentes','Agentes',Users],['trabajos','Trabajos',Workflow],
  ['evidencias','Evidencias',FileCheck2]
 ];
 const NAMES:Record<Company,string>={
@@ -75,7 +76,7 @@ function initialOperativaPreviewPanel():View{
  if(query.get('section')!=='operativa'||query.get('visual_lab')!=='cockpit-v3')return 'resumen';
  // Preview-only deep link; user/role checks remain in the existing ConsoleHost.
  const requested=query.get('op3_panel');
- return requested==='motores'||requested==='control'?requested:'resumen';
+ return requested==='motores'||requested==='control'||requested==='agentes'?requested:'resumen';
 }
 
 export default function CerebroOperativeCockpitV3({
@@ -117,7 +118,8 @@ export default function CerebroOperativeCockpitV3({
   }
   return [...engines.entries()].sort((a,b)=>b[1].count-a[1].count);
  },[runs]);
- const canSend=scopeCanExecute&&!snapshot.sending; // Inventory reads have an independent owner-authenticated Preview source.
+ const agentRosterPreview=typeof window!=='undefined'&&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)&&new URLSearchParams(window.location.search).get('visual_lab')==='cockpit-v3';
+  const canSend=scopeCanExecute&&!snapshot.sending; // Inventory reads have an independent owner-authenticated Preview source.
  return <main className={`op3-root op3-${status}`} aria-label={typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?'Centro de mando operativo (acceso privado)':'Centro de mando operativo (ensayo)'}>
   <div className="op3-backplate" aria-hidden="true"/>
   <div className="op3-wrapper">
@@ -243,7 +245,7 @@ export default function CerebroOperativeCockpitV3({
     </div>
     <h2>{({
      control:'Control operativo e inventario vivo',entidades:'Entidades y conexiones',proyectos:'Proyectos y dependencias',
-     motores:'Motores observados',trabajos:'Trabajos y ejecuciones',
+     motores:'Motores observados',agentes:'Agentes, especialistas y subagentes',trabajos:'Trabajos y ejecuciones',
      evidencias:'Evidencias de ejecución',decisiones:'Estado y revisiones',
      resumen:'Resumen'
     } as Record<View,string>)[view]}</h2>
@@ -252,6 +254,7 @@ export default function CerebroOperativeCockpitV3({
       entidades:'Empresas realmente devueltas por el Gateway de laboratorio; selector sin concesión de permisos.',
      proyectos:'Proyectos registrados y comprobados en el Gateway de laboratorio; fuente parcial, no inventario global.',
      motores:'Registros, catálogo de diseño FACT-001 y ejecuciones observadas, sin equipararlos.',
+      agentes:'Perfiles definidos en el registro canónico con identidad, jerarquía y actividad separadas; sin inventar agentes activos.',
      trabajos:'Actividad publicada por la fuente autenticada, con acceso a su evidencia.',
      evidencias:'Referencias originales de ejecución; no se generan informes ficticios.',
      decisiones:'Fallos observados; las aprobaciones humanas requieren su propia fuente.',
@@ -263,6 +266,7 @@ export default function CerebroOperativeCockpitV3({
        activitySource={source} onCompanyChange={onCompanyChange} onNavigate={selectPanel}
        observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
       />:null}
+    {view==='agentes'?(agentRosterPreview&&company==='fenix'?<CerebroRoleAgentRosterLab/>:<p className="op3-empty-proof">Registro de agentes disponible únicamente en el LAB autenticado de Fénix. Ningún otro contexto obtiene acceso por el selector.</p>):null}
     {(view==='trabajos'||view==='evidencias'||view==='decisiones')?
      <div className="op3-data-lines">
       {((view==='decisiones'?failed:view==='evidencias'?runs.filter(x=>validLink(x)):recentRuns)
@@ -284,7 +288,7 @@ export default function CerebroOperativeCockpitV3({
 
    <nav className="op3-navigation" aria-label="Áreas de Operativa">
     <button className={view==='resumen'?'is-active':''} type="button" onClick={()=>selectPanel('resumen')}><Activity size={20}/><span>Resumen</span></button>
-    {NAV.map(([key,label,Icon])=><button type="button" key={key} className={view===key?'is-active':''}
+    {NAV.filter(([key])=>key!=='agentes'||agentRosterPreview).map(([key,label,Icon])=><button type="button" key={key} className={view===key?'is-active':''}
       onClick={()=>selectPanel(key)} aria-current={view===key?'page':undefined}>
       <Icon size={20}/><span>{label}</span></button>)}
    </nav>
