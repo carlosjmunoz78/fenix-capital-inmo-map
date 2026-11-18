@@ -1,0 +1,109 @@
+{
+  "manifest_version": "1.0.0",
+  "component_id": "DISPATCH-OBS-001",
+  "company_id": "fenix",
+  "engine_id": "DISPATCH-OBS-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "lifecycle": "LAB_HEALTH_PROBE_VERIFIED",
+  "production_promotion": "HOLD",
+  "purpose": "Shared read-only health observer for existing OIDC-protected PREPROD dispatchers; NEVER substitute for execution attestation",
+  "monitors": [
+    {
+      "engine_id": "CONSOLE-001",
+      "service": "jarvis-work-dispatch-v1-preprod"
+    },
+    {
+      "engine_id": "CONSOLE-001",
+      "service": "cerebro-browser-work-total-dispatch-v1-preprod"
+    },
+    {
+      "engine_id": "FACT-001",
+      "service": "cerebro-creative-dispatch-v1"
+    },
+    {
+      "engine_id": "UMS-001",
+      "service": "cerebro-ums-production-dispatch-v1"
+    }
+  ],
+  "runtime": {
+    "provider": "SUPABASE_LAB_EXISTING",
+    "shared": true,
+    "implementation": [
+      "SQL",
+      "pg_net",
+      "pg_cron",
+      "Edge-read-only"
+    ],
+    "requires_github_actions": false,
+    "jobs": [
+      {
+        "job_id": 80,
+        "name": "cerebro-dispatch-health-enqueue-lab-v1",
+        "schedule": "8,38 * * * *"
+      },
+      {
+        "job_id": 81,
+        "name": "cerebro-dispatch-health-collect-lab-v1",
+        "schedule": "10,40 * * * *"
+      }
+    ]
+  },
+  "data_contract": {
+    "input": "FIXED_PREPROD_GET_HEALTH_NO_HEADERS_WITH_SECRETS",
+    "output": "SIGNED_FOUR_SOURCE_HEALTH_EVIDENCE",
+    "signature": "HMAC_SHA256_PRIVATE_RANDOM_KEY",
+    "verification": "public.cerebro_lab_dispatch_health_observe_v1()",
+    "provenance": "INTERNAL_PG_NET_HTTP_RESPONSE_REQUEST_ID",
+    "role_execution_attribution": false,
+    "business_execution_certified": false,
+    "autonomous_original_workers_certified": false
+  },
+  "permissions": {
+    "postgres_cron_execute": true,
+    "anonymous_table_read": false,
+    "authenticated_table_read": false,
+    "service_role_table_direct_read": false,
+    "service_role_verified_rpc_read": true,
+    "owner_gate": "CARLOS-ADMIN",
+    "original_github_oidc_preserved": true,
+    "hold_jobs_untouched": true
+  },
+  "observed": {
+    "manual_network_requests": 4,
+    "verified_200_health_responses": 4,
+    "signed_receipts": 4,
+    "edge_security_anonymous_denial": true,
+    "owner_ui_verified": true,
+    "first_automatic_probe_cycle": "PENDING_TO_VERIFY",
+    "github_oidc_worker_runs": 0
+  },
+  "evaluation": {
+    "network": true,
+    "hmac": true,
+    "preprod_scope": true,
+    "private_owner_access": true,
+    "cron_created_active": true,
+    "cron_autonomous_sample_observed": false,
+    "complete_functional_worker_test": false,
+    "tribunal": false,
+    "rollback_prod": false,
+    "independent_backup": false
+  },
+  "cost": {
+    "additional_subscriptions_eur": 0,
+    "marginal_network_database_eur": "UNMEASURED",
+    "calls_per_hour": 8,
+    "paid_model_required": false
+  },
+  "rollback": {
+    "stop": [
+      "select cron.unschedule('cerebro-dispatch-health-enqueue-lab-v1');",
+      "select cron.unschedule('cerebro-dispatch-health-collect-lab-v1');"
+    ],
+    "last_lab_preview_deployment": "dpl_FrHvqwa8zWjZN6B9DKW6yjhCkBfj",
+    "full_rollback_physically_tested": false
+  },
+  "doc": "cerebro/universal/v0/DISPATCH_OBS001_HEALTH_SIGNED_LAB_2026-11-18.md",
+  "autonomous_engine_counts_unchanged": true
+}
