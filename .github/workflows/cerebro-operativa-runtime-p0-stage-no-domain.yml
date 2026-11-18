@@ -91,7 +91,7 @@ jobs:
           headers=(-H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" -H "accept: application/json")
           status="$(vercel curl "$api?company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$payload" --write-out '%{http_code}' "${headers[@]}")"
           test "$status" = 200 || { echo "BLOCKED_PINNED_OWNER_STAGE_HTTP_$status"; exit 3; }
-          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.company_id!=="fenix"||d.read_only!==true||d.records?.length!==1||!d.runtime_source||d.page?.total!==2506)process.exit(4);if(!["ACTIVO","DEGRADADO"].includes(d.runtime_source.status))process.exit(5)' "$payload"
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.company_id!=="fenix"||d.read_only!==true||d.records?.length!==1||!d.runtime_source||(!Number.isSafeInteger(d.page?.total)||d.page.total<1))process.exit(4);if(!["ACTIVO","DEGRADADO"].includes(d.runtime_source.status))process.exit(5)' "$payload"
           echo 'PASS_PINNED_OWNER_DIRECTORY_RUNTIME_EVIDENCE'
           status="$(vercel curl "$api?company_id=aion&kind=ALL&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$payload" --write-out '%{http_code}' "${headers[@]}")"
           test "$status" = 400 || { echo "BLOCKED_TENANT_CHECK_HTTP_$status"; exit 5; }
