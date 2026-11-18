@@ -5,6 +5,7 @@
  * To earn an identity, a receipt MUST explicitly carry an existing profile ID.
  */
 import {RECEIPT_ATTESTED_V1} from './agent-receipt-attestor-v1.mjs';
+import {GITHUB_PROVIDER_ATTESTED_V1} from './agent-github-run-attestor-v1.mjs';
 export const PROJECTION_ATTESTED_V1=Symbol('CEREBRO_SERVER_PROJECTED_HMAC_V1');
 const PROVIDERS=new Set(['CLOUDFLARE','SUPABASE','GITHUB_ACTIONS','VERCEL','CEREBRO_JOB']);
 const EVENTS=new Set(['STARTED','HEARTBEAT','SUCCEEDED','FAILED']);
@@ -40,7 +41,8 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
  const byProfile=new Map(),seen=new Set(),rejected={duplicate:0,untrusted:0,unmatched:0,invalid:0};
  for(const r of receipts){
   if(!r||!PROVIDERS.has(r.source)||!authorized.has(r.source)||
-    r.server_collector_verified!==true||r.integrity!=='VERIFIED_BY_SOURCE_ADAPTER'||r[RECEIPT_ATTESTED_V1]!==true){
+    r.server_collector_verified!==true||r.integrity!=='VERIFIED_BY_SOURCE_ADAPTER'||
+    !(r[RECEIPT_ATTESTED_V1]===true||(r.source==='GITHUB_ACTIONS'&&r[GITHUB_PROVIDER_ATTESTED_V1]===true))){
    rejected.untrusted++;continue;
   }
   const ts=date(r.emitted_at);
