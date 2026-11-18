@@ -88,15 +88,36 @@
     "draft_pr": 79,
     "prod_baseline_deployment": "dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
     "earlier_restore_deployment": "dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h",
-    "stage_sample_deployment": "dpl_Hw6YreN9cs84VXEHx3o3pMrFFJcT"
+    "stage_sample_deployment": "dpl_Hw6YreN9cs84VXEHx3o3pMrFFJcT",
+    "stage_latest": {
+      "deployment_id": "dpl_GmS5Z9FtPBxpVk8hrPFXg7FEhRHL",
+      "url": "https://fenix-capital-preprod-a25o9g4yb.vercel.app",
+      "sha": "5d01a2bebf16900ba0e133bd0fa5660cd1857cc6",
+      "ready_state": "READY",
+      "alias_count": 0,
+      "source": "Vercel deployment exact-SHA verified"
+    }
   },
   "test_sources": [
     "cerebro/universal/v0/cerebro-shared-state-core.test.mjs",
     "cerebro/universal/v0/cerebro-shared-state-api.test.mjs",
     ".github/workflows/cerebro-shared-state-all-interfaces-qa.yml",
-    ".github/workflows/cerebro-shared-state-stage-no-domain.yml"
+    ".github/workflows/cerebro-shared-state-stage-no-domain.yml",
+    ".github/workflows/cerebro-shared-state-verify-pinned-stage.yml"
   ],
   "rollout_rule": "No PROD alias changes until exact-SHA live owner 200, security negatives, OLD vs NEW, CRM smoke, backup and rollback GREEN.",
   "documentation": "cerebro/universal/v0/CEREBRO_SHARED_STATE_ALL_INTERFACES_V0_20261118.md",
-  "created_at": "2026-11-18"
+  "created_at": "2026-11-18",
+  "gates": {
+    "compile-and-regression": "SUCCESS",
+    "deterministic-profile-state-tests": "SUCCESS",
+    "live-stage-private-ready": "PASS",
+    "live-stage-anonymous-denied": "401 PASS",
+    "live-stage-cross-tenant-denied": "400 PASS",
+    "live-stage-write-denied": "405 PASS",
+    "live-stage-technical-account-denied": "403 PASS",
+    "live-stage-owner-positive": "BLOCKED: CEREBRO_E2E_USER_JWT expired confirmed via GitHub Action 44330328085",
+    "prod-promotion": "NOT_STARTED",
+    "prod-alias-intact": "YES, dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e"
+  }
 }
