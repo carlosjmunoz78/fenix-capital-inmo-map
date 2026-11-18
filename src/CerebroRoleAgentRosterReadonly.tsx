@@ -92,6 +92,24 @@ export default function CerebroRoleAgentRosterReadonly(){
     )}</ul>
    </section>:
    <p className="op3-source-note">Auditoría de actividad real por motor: lectura no disponible ahora; no equivale a motores operativos.</p>}
+  {coverage.kind==='ready'&&coverage.data?.dispatch_health.status==='LIVE'?
+   <section className="op3-source-note" aria-label="Comprobación de salud de cuatro despachadores PREPROD">
+    <strong>Salud real de API · cuatro ejecutores existentes · sin GitHub Actions</strong>
+    <p>Responden sus rutas de salud, verificadas por `pg_net` y recibos HMAC:
+     <b> {coverage.data.dispatch_health.healthy_endpoints}/{coverage.data.dispatch_health.signed_samples}</b>.
+     Son pruebas de disponibilidad, <b>NO de ejecución, agentes activos ni certificación autónoma</b>.
+     Los ejecutores originales siguen exigiendo su identidad OIDC para ejecutar trabajos.</p>
+    <ul>{coverage.data.dispatch_health.sources.map(p=>
+     <li key={p.service}>
+      <b>{p.engine_id}</b> · {p.service} ·
+      <b> {p.health_state==='HEALTH_ENDPOINT_OK'&&p.recent?'API ACCESIBLE':'SALUD NO ACREDITADA'}</b> ·
+      firma {p.signature_verified?'válida':'inválida'} ·
+      comprobación {new Date(p.last_checked_at).toLocaleString('es-ES')}.
+      Ejecución: <b>POR ACREDITAR</b>.
+     </li>
+    )}</ul>
+   </section>:
+   <p className="op3-source-note">Comprobación firmada de disponibilidad de ejecutores: sin lectura verificable. No implica caída ni actividad de sus motores.</p>}
   {coverage.kind==='ready'&&coverage.data?.durable_supervisor.status==='LIVE'?
    <p className="op3-source-note" role="status">
     <b>SUPERVISOR AUTÓNOMO LAB</b> · revisión programada cada 15 minutos ·
