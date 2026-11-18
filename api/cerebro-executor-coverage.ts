@@ -180,6 +180,44 @@ async function readEngineTruth(auth:string,ownerKey:string,labKey:string):Promis
   all_engines_certified:false,autonomy_global_certified:false};
 }
 
+type CertEntry={id:'QA-001'|'FACT-001'|'CONSOLE-001'|'UMS-001'|'SOCIAL_LAB_SCHEDULES';
+ kind:string;full_engine_certified:false;business_quality_certified?:false;
+ specific_capability_evidenced?:boolean;receipt_id?:string|null;
+ signed_runs?:number;tests_passed?:number;tests_total?:number;
+ historical_rows?:number;active_schedules?:number;scheduled_jobs_total?:number;
+ active_schedules_succeeded_within_48h?:number;last_schedule_run_at?:string|null;
+ last_schedule_status?:string|null;run_history_sampling?:string;
+ business_outcome_verified?:false;agent_identity_verified?:false};
+type CertSource={status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';evidence_categories:CertEntry[];
+ global_autonomy_certified:false;global_excellence_certified:false;cost_measured:false};
+const CERT_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-certification-gates-lab-v1?company_id=fenix&environment=LAB';
+async function readCertification(auth:string,ownerKey:string,labKey:string):Promise<CertSource>{
+ const result=await fetch(CERT_URL,{method:'GET',cache:'no-store',redirect:'error',
+  headers:{authorization:auth,apikey:labKey,'x-cerebro-owner-prod-apikey':ownerKey,accept:'application/json'},
+  signal:AbortSignal.timeout(8000)});
+ if(result.status!==200)throw Error('CERT_SOURCE_DENIED');
+ const raw=await result.text();
+ if(raw.length>26000)throw Error('CERT_SOURCE_OVERSIZE');
+ const d=JSON.parse(raw);
+ const ids=['QA-001','FACT-001','CONSOLE-001','UMS-001','SOCIAL_LAB_SCHEDULES'];
+ if(d.status!=='OK'||d.source!=='CEREBRO_LAB_CERTIFICATION_GATES_V1'||
+  d.company_id!=='fenix'||d.environment!=='LAB'||d.read_only!==true||
+  d.executed!==false||d.prod_execution_enabled!==false||
+  d.global_autonomy_certified!==false||d.global_excellence_certified!==false||
+  d.cost_measured!==false||!Array.isArray(d.evidence_categories)||
+  d.evidence_categories.length!==5||
+  new Set(d.evidence_categories.map((x:CertEntry)=>x.id)).size!==5||
+  !ids.every(id=>d.evidence_categories.some((x:CertEntry)=>x.id===id))||
+  d.evidence_categories.some((x:CertEntry)=>
+   x.full_engine_certified!==false||
+   (x.id!=='SOCIAL_LAB_SCHEDULES'&&x.business_quality_certified!==false)||
+   (x.id==='SOCIAL_LAB_SCHEDULES'&&(x.agent_identity_verified!==false||x.business_outcome_verified!==false||
+    !Number.isSafeInteger(x.active_schedules)||!Number.isSafeInteger(x.scheduled_jobs_total)||
+    Number(x.scheduled_jobs_total)<Number(x.active_schedules)))))throw Error('CERT_SOURCE_CONTRACT');
+ return{status:'LIVE',evidence_categories:d.evidence_categories,
+  global_autonomy_certified:false,global_excellence_certified:false,cost_measured:false};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -211,7 +249,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github,qa,truth]=await Promise.all([
+ const [cf,lab,github,qa,truth,cert]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -234,6 +272,14 @@ export default async function handler(req:Req,res:Res){
    try{return await readEngineTruth(auth,apikey,labKey)}catch{
     return{status:'UNAVAILABLE',historical_job_rows:null,sources:[],
      all_engines_certified:false,autonomy_global_certified:false};
+   }
+  })(),
+  (async():Promise<CertSource>=>{
+   if(labKey.length<12)return{status:'NOT_CONFIGURED',evidence_categories:[],
+    global_autonomy_certified:false,global_excellence_certified:false,cost_measured:false};
+   try{return await readCertification(auth,apikey,labKey)}catch{
+    return{status:'UNAVAILABLE',evidence_categories:[],
+     global_autonomy_certified:false,global_excellence_certified:false,cost_measured:false};
    }
   })()
  ]);
@@ -271,6 +317,7 @@ export default async function handler(req:Req,res:Res){
   receipt_source_status:physicalQa?'SUPABASE_SIGNED_SQL_QA':github.state==='VERIFIED'?'GITHUB_VERIFIED_QA_JOB':'NOT_CONNECTED',
   verified_profiles:verifiedProfiles,
   engine_truth:truth,
+  certification_gates:cert,
   lab_qa:{
    source:'SUPABASE_PGCRON_QA_LAB_V1',
    status:qa.status,
@@ -296,7 +343,8 @@ export default async function handler(req:Req,res:Res){
    source_failure_observations:[
     ...statuses.filter(v=>v.status==='UNAVAILABLE').map(v=>v.source),
     ...(qa.status==='UNAVAILABLE'?['SUPABASE_SQL_QA']:[]),
-    ...(truth.status==='UNAVAILABLE'?['SUPABASE_ENGINE_TRUTH']:[])
+    ...(truth.status==='UNAVAILABLE'?['SUPABASE_ENGINE_TRUTH']:[]),
+    ...(cert.status==='UNAVAILABLE'?['SUPABASE_CERTIFICATION_GATES']:[])
    ],
    last_observed_at:stamp
   },
