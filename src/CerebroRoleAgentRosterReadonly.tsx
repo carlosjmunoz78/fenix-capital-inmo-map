@@ -92,6 +92,17 @@ export default function CerebroRoleAgentRosterReadonly(){
     )}</ul>
    </section>:
    <p className="op3-source-note">Auditoría de actividad real por motor: lectura no disponible ahora; no equivale a motores operativos.</p>}
+  {coverage.kind==='ready'&&coverage.data?.durable_supervisor.status==='LIVE'?
+   <p className="op3-source-note" role="status">
+    <b>SUPERVISOR AUTÓNOMO LAB</b> · revisión programada cada 15 minutos ·
+    historial firmado: <b>{coverage.data.durable_supervisor.history_count} informe(s)</b> ·
+    integridad: <b>{coverage.data.durable_supervisor.signed?'VERIFICADA':'BLOQUEADA'}</b> ·
+    último informe: <b>{coverage.data.durable_supervisor.observed_at?
+     new Date(coverage.data.durable_supervisor.observed_at).toLocaleString('es-ES'):'—'}</b> ·
+    {coverage.data.durable_supervisor.recent?' seguimiento reciente':' sin informe reciente'} ·
+    {coverage.data.durable_supervisor.health==='GATE_HOLD'?'GATE EN HOLD':'evidencias observadas; ningún motor promovido'}.
+   </p>:
+   <p className="op3-source-note">Historial firmado del supervisor automático: SIN LECTURA VERIFICABLE.</p>}
   {coverage.kind==='ready'&&coverage.data?.certification_gates.status==='LIVE'?
    <section className="op3-source-note" aria-label="Matriz de preparación para certificación por motor">
     <strong>Preparación para certificación · 5 fuentes examinadas · LAB</strong>
