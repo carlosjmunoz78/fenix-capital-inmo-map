@@ -54,7 +54,15 @@
       "required_tests_passed=true",
       "rollback_verified=true"
     ],
-    "source_degraded": "DEGRADADO is source health, never synthetic profile failure"
+    "source_degraded": "DEGRADADO is source health, never synthetic profile failure",
+    "source_departments": {
+      "seo": 32,
+      "ums": 48,
+      "canonical_department_groups": 2,
+      "source_profiles_explicit_department": 618,
+      "exposure": "summary.source_departments, and profiles[].department_id",
+      "preserve_parent_ids": true
+    }
   },
   "governance": {
     "permissions": "OWNER_READ_ONLY",
@@ -118,6 +126,7 @@
     "live-stage-technical-account-denied": "403 PASS",
     "live-stage-owner-positive": "BLOCKED: CEREBRO_E2E_USER_JWT expired confirmed via GitHub Action 44330328085",
     "prod-promotion": "NOT_STARTED",
-    "prod-alias-intact": "YES, dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e"
+    "prod-alias-intact": "YES, dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
+    "department-hierarchy-regression": "PASS (32 SEO, 48 UMS, 11 canonical, 618 original assigned profiles)"
   }
 }

@@ -33,3 +33,15 @@
 - **ACLARACIÓN**: los ocho grupos del resumen son ocho *familias de fuentes*, NO solamente ocho departamentos. Los departamentos y responsables internos siguen donde están; `parent_id` no se modifica ni se reconstruye artificialmente.
 - **PENDIENTE**: identidad del ejecutor por perfil en el feed real; `cerebro-console-activity-v0` solo entrega datos de workflow/engine actualmente. Para los motores que no emiten `profile_key`, se implementará el emisor una sola vez por motor/runtime, NO manualmente por 2.506 perfiles.
 - **LÍMITE**: contrato compartido entre interfaces de CEREBRO bajo `app.fenixcapital.es`. Una interfaz alojada en otro dominio debe entrar por el Gateway con autenticación; no habilitar CORS general ni publicar datos.
+
+## Organización departamental verificada · 18/11/2026
+
+**HECHO EN CANDIDATO:** conexión jerárquica sin relocalización de perfiles. Se conserva `department_id` únicamente cuando existe en el registro original, separado de `family` y `parent_id`. El resumen universal contiene tanto `departments` (8 familias de fuentes, campo legacy) como `source_departments` (IDs administrativos realmente definidos por cada fuente).
+
+- SEO: 8 familias SEO y **32 departamentos `SEO-D01`–`SEO-D32`**, con 175 perfiles adscritos por fuente y 16 puestos de dirección/supervisión con `department_id=null`. Sin asignaciones inventadas.
+- Productora UMS-001: **48 departamentos** fuente, cada responsable `DEPARTMENT_HEAD` y sus 384 especialistas conservan identificador propio y enlace al responsable. 48 + 384 = 432 adscripciones documentadas.
+- Canónicos Fénix: 11 roles con campo departamental original `ENGINEERING` / `REVENUE_SALES`.
+- Resto: conserva `family`, `parent_id`, `name` y origen, sin inferir departamento donde la fuente no lo declara.
+- Prueba de reconciliación: `48+384+175+11 = 618` adscripciones explícitas, 0 cambios de padres; los otros perfiles quedan por familia sin pérdida de relaciones.
+
+**Incidencia CI ajena a STATE-001:** un shard de carga de 50 jobs falló una vez por completar 42 en su ventana, y el mismo job rerun [44330871514](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44330871514) pasó con las mismas exigencias; no se modificó el runtime. Seguimos manteniendo gate owner en NO-GO por expiración física del JWT privado.
