@@ -63,3 +63,17 @@ No se han creado nuevas cuotas, Workers, D1 ni funciones Edge. Ninguna ejecució
 - Conclusión: `OWNER_CI_JWT_INVALID_OR_EXPIRED` / `OWNER_E2E_POSITIVE=BLOCKED`. Renovación legítima del secreto E2E usando una sesión real autorizada; NO aflojar Auth, RBAC, RLS, SSO, CORS ni enmascarar fallos con mocks.
 - **HUMAN_REQUIRED · LOW_CONFIDENCE** exclusivamente para obtener un JWT de prueba propietario válido o completar el login protegido y certificar el E2E. No exigir otros permisos ya concedidos. Tras ello repetir E2E, rollback y comparación antes de promoción.
 - PR #78 comentario de bloqueo: `https://github.com/carlosjmunoz78/fenix-capital-inmo-map/pull/78#issuecomment-6974750925`.
+
+## Continuación tras autenticación manual del propietario · 18/11/2026
+
+**HECHO · E2E positivo de propietario en despliegue privado desde Opera:** usuario inició sesión por sí mismo en `https://fenix-capital-preprod-4f1il4udq.vercel.app/cerebro?section=operativa&visual_lab=cockpit-v3&op3_panel=agentes`. El árbol de accesibilidad del navegador autenticado mostró `Centro de mando operativo (ensayo)`, directorio `1–25 de 2506`, estado `Fuente CEREBRO_CONSOLE_ACTIVITY_V0 · observada 2026-11-18T09:41:04.395Z`, `perfiles con identidad exacta 0`; registros marcados `POR VERIFICAR`. Esto prueba lectura real de **una interfaz OPERATIVA** con acceso permitido al propietario, no certifica ejecuciones de 2506 perfiles.
+
+**INCONSISTENCIA DE PERSISTENCIA POR AUDITAR:** al abrir después pestañas adicionales del mismo despliegue para NEURONAL/JARVIS, la vista mostró de nuevo `Acceso seguro`. No se ha demostrado que la sesión perdure ni logrado una segunda interfaz autorizada en ese mismo despliegue; no asumir revocación global por el hecho de ver un formulario. La App en dominio actual seguía mostrando acceso autenticado, sin alterarse.
+
+**BLOQUEO INDEPENDIENTE CI:** la credencial cifrada de Actions `CEREBRO_E2E_USER_JWT` produjo 401 en workflow `44278139673` incluso consultando directamente `cerebro-console-activity-v0`. La autenticación manual en Opera NO actualiza automáticamente ese secreto; no se ha leído/copiadado el JWT de navegador. Para poner verde esa prueba automatizada hace falta renovar la credencial en GitHub o establecer un método legítimo equivalente sin debilitar permisos.
+
+**Rollback y publicación:** artefacto histórico `dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ` verificado READY con SHA `a51dd14eac11f02424dce5db426346b041c1824f`; artefacto publicado `dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h` READY SHA `7163dccd962a19fbd5301b14fcacacf08b7245ea`, preview `dpl_HosSkpwg9czo4jQ5QEB6suSmNB5Q` READY SHA `184e5ad6bdcb7291660ea96847f95cbf0f96e7ee`. Esta lectura acredita disponibilidad de artefactos, **no ensayo de reversión efectiva**. Alias `app.fenixcapital.es` sigue en el despliegue original por consulta Vercel `get_alias`.
+
+**Salud Supabase v8:** consulta posterior a logs por GET v8: 108 respuestas 200, 24 respuestas 403 (autoridad denegada/no atribuidas aún), 2 respuestas 401 y **0 respuestas 503** en la ventana disponible hasta 09:51:56Z. No interpretar los 403 sin inspeccionar actor; no equivalen a fallos de disponibilidad.
+
+**NO-GO aún:** faltan prueba duradera de la sesión en preview, dos interfaces autorizadas consultando el mismo backend con fechas comparables, E2E automático corregido y rollback funcional. No promover PR #78 ni cambiar dominio.
