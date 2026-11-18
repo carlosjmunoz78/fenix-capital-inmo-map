@@ -35,6 +35,27 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
  const urls=[];
  globalThis.fetch=async (url)=>{
   urls.push(String(url));
+  if(String(url).includes('api.github.com')&&String(url).includes('/actions/workflows/')){
+   const observed=new Date().toISOString();
+   return{status:200,ok:true,text:async()=>JSON.stringify({workflow_runs:[{
+    id:44373404586,workflow_id:422902482,name:'CEREBRO Operativa verified evidence bridge LAB',
+    event:'pull_request',head_branch:'cerebro/operativa-live-evidence-bridge-lab-20261118',
+    head_sha:'fa69e852aba63c3d5934b43b8e3f319da5dd6e8e',
+    path:'.github/workflows/cerebro-operativa-evidence-bridge-lab.yml@refs/pull/81/merge',
+    status:'completed',conclusion:'success',updated_at:observed,
+    head_repository:{full_name:'carlosjmunoz78/fenix-capital-inmo-map'},
+    html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44373404586'
+   }]})};
+  }
+  if(String(url).includes('api.github.com')&&String(url).includes('/actions/runs/44373404586/jobs')){
+   const observed=new Date().toISOString();
+   return{status:200,ok:true,text:async()=>JSON.stringify({jobs:[{
+    id:135050000001,name:'evidence-bridge',status:'completed',conclusion:'success',
+    completed_at:observed,steps:[
+      {name:'Run node --experimental-strip-types --test cerebro/universal/v0/agent-evidence-bridge-v1.test.mjs',status:'completed',conclusion:'success'},
+      {name:'Run npm run build',status:'completed',conclusion:'success'}]
+   }]})};
+  }
   if(String(url).includes('fenix-app-gateway/session/context'))return{status:200,json:async()=>({ok:true,context:{actor_code:'CARLOS-ADMIN'}})};
   if(String(url).includes('cloudflare.com'))return{status:200,ok:true,text:async()=>JSON.stringify({
    success:true,result:[{id:'worker-one'},{id:'worker-two'}],result_info:{total_pages:1}
@@ -54,13 +75,16 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.inventory_sources[1].visible_count,7);
   assert.equal(x.body.inventory_sources[0].metric_label,'WORKERS_IN_ACCOUNT');
   assert.equal(x.body.inventory_sources[1].metric_label,'HISTORICAL_LAB_JOB_ROWS');
-  assert.equal(x.body.runtime_verified_profiles,0);
+  assert.equal(x.body.runtime_verified_profiles,1);
   assert.equal(x.body.active_recent_profiles,0);
-  assert.equal(x.body.unverified_profiles,2477);
+  assert.equal(x.body.unverified_profiles,2476);
   assert.equal(x.body.templates_not_instances,29);
   assert.equal(x.body.active_executor_count,null);
-  assert.equal(x.body.receipt_source_status,'NOT_CONNECTED');
-  assert.equal(urls.length,3);
+  assert.equal(x.body.receipt_source_status,'GITHUB_VERIFIED_QA_JOB');
+  assert.equal(x.body.verified_profiles[0].id,'ENG-QA');
+  assert.equal(x.body.verified_profiles[0].tribunal_passed,false);
+  assert.equal(x.body.supervisor.excellence_verified,0);
+  assert.equal(urls.length,5);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
