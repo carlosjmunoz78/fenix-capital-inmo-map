@@ -33,7 +33,8 @@ test('2506 registry profiles: live deployed provider inventory does not certify 
  assert.equal(result.profile_total,2506);
  assert.equal(result.runtime_verified_profiles,0);
  assert.equal(result.active_recent_profiles,0);
- assert.equal(result.unverified_profiles,2506);
+ assert.equal(result.unverified_profiles,2477);
+ assert.equal(result.templates_not_instances,29);
  assert.deepEqual(result.provider_inventory.map(x=>x.visible_executors),[1,1]);
  assert.equal(result.provider_inventory[0].active_agents_from_inventory,null);
 });
@@ -47,7 +48,7 @@ test('one source-verified receipt auto-links exact agent and subagent, no manual
   assert.equal(profile.last_receipt_id,'cloudflare-receipt-123');
   assert.equal(profile.verified_events,1);
  }
- assert.equal(result.unverified_profiles,2504);
+ assert.equal(result.unverified_profiles,2475);
 });
 test('provider inventory, spoofed receipt, unknown source and missing identity never accredit roles',()=>{
  const result=project({receipts:[
