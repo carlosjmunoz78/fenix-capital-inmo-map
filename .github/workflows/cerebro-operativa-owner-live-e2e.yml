@@ -49,14 +49,14 @@ jobs:
           # Vercel CLI uses existing VERCEL_TOKEN to pass Deployment Protection.
           # The application still checks owner JWT and tenant itself.
           api="$STAGE_URL/api/cerebro-agent-directory"
-          status="$(vercel curl "$api?company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&limit=1" --scope=carlosjmunozcabeza-2582s-projects --token="$VERCEL_TOKEN" --output "$resp" --write-out '%{http_code}' "${headers[@]}")"
+          status="$(vercel curl "$api?company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$resp" --write-out '%{http_code}' "${headers[@]}")"
           if [ "$status" != 200 ]; then echo "BLOCKED_OWNER_LIVE_PREVIEW_HTTP_$status"; exit 3; fi
           node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.company_id!=="fenix"||d.read_only!==true||d.records.length!==1||!d.runtime_source)process.exit(4);if(!["ACTIVO","DEGRADADO"].includes(d.runtime_source.status))process.exit(5)' "$resp"
           echo 'PASS_OWNER_PREVIEW_READ_ONLY_WITH_RUNTIME_EVIDENCE'
-          status="$(vercel curl "$api?company_id=aion&kind=ALL&limit=1" --scope=carlosjmunozcabeza-2582s-projects --token="$VERCEL_TOKEN" --output "$resp" --write-out '%{http_code}' "${headers[@]}")"
+          status="$(vercel curl "$api?company_id=aion&kind=ALL&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$resp" --write-out '%{http_code}' "${headers[@]}")"
           test "$status" = 400
           echo 'PASS_TENANT_DENIED'
-          status="$(vercel curl "$api?company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --token="$VERCEL_TOKEN" --output "$resp" --write-out '%{http_code}' -X POST "${headers[@]}")"
+          status="$(vercel curl "$api?company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$resp" --write-out '%{http_code}' -X POST "${headers[@]}")"
           test "$status" = 405
           echo 'PASS_WRITE_DENIED'
           status="$(curl -sS -o "$resp" -w '%{http_code}' --max-time 15 -H "apikey: $PROD_PUBLISHABLE_KEY" "$ACTIVITY_URL")"
