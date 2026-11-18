@@ -294,7 +294,9 @@ export async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
   };
  });
  return {source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,status:'ACTIVO' as const,observed_at:feed.observed_at!,error_code:null,
-  verified_profiles:records.filter(x=>x.runtime_verified).length,observed_execution_ids:new Set([...byEngine.values()].map(x=>x.run_id)).size,records};
+  verified_profiles:records.filter(x=>x.runtime_verified).length,observed_execution_ids:new Set([...byEngine.values()].map(x=>x.run_id)).size,
+  engine_runs:[...byEngine.values()].map(x=>({engine_id:x.engine_id!,company_id:'fenix',provider:'GITHUB_ACTIONS',runtime_id:String(x.run_id),
+   observed_at:x.updated_at!,status:x.status!,conclusion:x.conclusion??null,evidence:x.html_url!})),records};
 }
 
 export default async function handler(req:Req,res:Res){

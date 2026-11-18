@@ -3,7 +3,8 @@
  */
 import {buildCerebroAgentDirectoryV0,queryCerebroAgentDirectoryV0,validateCerebroAgentDirectoryQueryV0,
   verifiedReadOnlyMode,observeExecutors} from './cerebro-agent-directory.ts';
-import {buildSharedState} from '../cerebro/universal/v0/cerebro-shared-state-core.mjs';
+import {buildSharedState,buildEngineActivity} from '../cerebro/universal/v0/cerebro-shared-state-core.mjs';
+import engineRegistry from '../cerebro/registry/engine-registry.v1.json' with {type:'json'};
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
 type Res={status:(n:number)=>Res;setHeader:(name:string,val:string)=>void;json:(body:unknown)=>void};
@@ -15,7 +16,7 @@ export function validateSharedQuery(search:URLSearchParams){
  if([...search.keys()].some(k=>!allowed.has(k)||search.getAll(k).length!==1))throw Error('INVALID_QUERY');
  if(search.get('company_id')!=='fenix')throw Error('INVALID_COMPANY');
  const mode=search.get('mode')||'summary';
- if(!['summary','profiles','ci_summary'].includes(mode))throw Error('INVALID_MODE');
+ if(!['summary','profiles','engines','ci_summary'].includes(mode))throw Error('INVALID_MODE');
  if((mode==='summary'||mode==='ci_summary')&&[...search.keys()].some(k=>!['mode','company_id'].includes(k)))throw Error('SUMMARY_QUERY_INVALID');
  const filters=new URLSearchParams(search);
  filters.delete('mode');
@@ -84,7 +85,16 @@ export default async function handler(req:Req,res:Res){
   const runtime=await observeExecutors(req,existing);
   const state=buildSharedState(runtime.records,runtime);
   const {records,...summary}=state;
-  if(input.mode==='summary')return res.status(200).json({status:'OK',...summary,transport:scope});
+  const engines=buildEngineActivity(engineRegistry.engine_ids,runtime);
+  const {records:engineRows,...engineSummary}=engines;
+  if(input.mode==='summary')return res.status(200).json({status:'OK',...summary,engine_activity:engineSummary,transport:scope});
+  if(input.mode==='engines'){
+   const offset=Number(input.filters.get('offset')??0),limit=Number(input.filters.get('limit')??25);
+   return res.status(200).json({status:'OK',schema:'CEREBRO_ENGINE_ACTIVITY_V1',company_id:'fenix',read_only:true,
+    executed:false,transport:scope,overview:engineSummary,
+    page:{offset,limit,total:engineRows.length,next_offset:offset+limit<engineRows.length?offset+limit:null},
+    records:engineRows.slice(offset,offset+limit)});
+  }
   // Existing source directory owns order, filter semantics, parent_id and page boundaries.
   const directory=queryCerebroAgentDirectoryV0(input.filters);
   const byKey=new Map(records.map(x=>[x.kind+':'+x.id,x]));
@@ -94,6 +104,6 @@ export default async function handler(req:Req,res:Res){
    runtime_source:{provider:'CEREBRO_CONSOLE_ACTIVITY_V0',status:runtime.status,
     observed_at:runtime.observed_at,error_code:runtime.error_code,
     verified_profiles:runtime.verified_profiles,observed_execution_ids:runtime.observed_execution_ids},
-   shared_state:summary});
+   shared_state:summary,engine_activity:engineSummary});
  }catch{return deny(res,503,'SHARED_STATE_CONTRACT_INVALID')}
 }

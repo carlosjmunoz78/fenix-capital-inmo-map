@@ -4,7 +4,9 @@ export type SharedStateStatus='ACTIVO'|'PERFECTO'|'PARCIAL'|'FALLANDO'|'DEFINIDO
 export type SharedDepartment={department_key:string;total:number;states:Record<SharedStateStatus,number>};
 export type SharedSummary={schema:'CEREBRO_SHARED_STATE_V1';company_id:'fenix';status:'OK';feed_health:'LIVE_EVIDENCE_FEED'|'DEGRADED_EVIDENCE_FEED';source_status:'ACTIVO'|'DEGRADADO';observed_at:string|null;read_only:true;executed:false;
  overview:{total_profiles:number;departments:number;states:Record<SharedStateStatus,number>;verified_running_profiles:number;templates:number;engine_association_is_not_execution:true};
- departments:SharedDepartment[];source_departments?:Array<SharedDepartment&{family:string;source:string}>;refresh_interval_seconds:number};
+ departments:SharedDepartment[];source_departments?:Array<SharedDepartment&{family:string;source:string}>;refresh_interval_seconds:number;
+ engine_activity?:{registry_count:number;observed_workflow_engines:number;runtime_health_verified:number;
+  status_counts:Record<SharedStateStatus,number>;recent_observed:Array<{engine_id:string;status:SharedStateStatus;reason:string;runtime_evidence:{evidence:string}|null}>;source_limitations:string}};
 type SharedContext={status:'loading'|'ready'|'denied'|'unavailable';summary:SharedSummary|null;updatedAt:string|null;refresh:()=>void};
 const Context=createContext<SharedContext>({status:'loading',summary:null,updatedAt:null,refresh:()=>{}});
 export const useCerebroSharedState=()=>useContext(Context);
@@ -64,6 +66,7 @@ export function CerebroSharedStatusBanner(){
     <span>{summary.overview.total_profiles.toLocaleString('es-ES')} perfiles · {summary.overview.departments} familias fuente · {summary.source_departments?.length??'—'} departamentos con ID explícito</span>
     {(['ACTIVO','PERFECTO','PARCIAL','FALLANDO','POR_VERIFICAR'] as const).map(key=>
      <span key={key}>{labels[key]}: <strong>{counts[key]}</strong></span>)}
+    <span>Motores registrados: {summary.engine_activity?.registry_count??'—'} · actividad GitHub reciente: {summary.engine_activity?.observed_workflow_engines??'—'} · fallos observados: {summary.engine_activity?.status_counts.FALLANDO??'—'}</span>
     <span>Fuente: {summary.source_status} · {summary.observed_at?new Date(summary.observed_at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'sin datos'}</span>
    </>:<span role="status">{status==='loading'?'Consultando estados…':status==='denied'?'Acceso no autorizado':'Fuente compartida no disponible · sin estados inventados'}</span>}
    <button type="button" onClick={refresh} style={{padding:'4px 8px',background:'transparent',color:'inherit',border:'1px solid currentColor',borderRadius:6}}>Actualizar</button>
@@ -75,6 +78,14 @@ export function CerebroSharedStatusBanner(){
       <strong>{dep.department_key}</strong> · {dep.total} · activos {dep.states.ACTIVO} · excelencia {dep.states.PERFECTO} · parciales {dep.states.PARCIAL} · fallos {dep.states.FALLANDO}
      </span>)}
     </div>
+    {summary.engine_activity?.recent_observed?.length?<div style={{marginTop:8,paddingTop:7,borderTop:'1px solid #31516c'}}>
+      <strong>Motores con actividad GitHub observada (no certifica su estado general)</strong>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',paddingTop:6}}>
+       {summary.engine_activity.recent_observed.map(e=><span key={e.engine_id} style={{padding:'5px 8px',border:'1px solid #31516c',borderRadius:6}}>
+        {e.engine_id} · {e.status} {e.runtime_evidence?.evidence?<a href={e.runtime_evidence.evidence} target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Ver ejecución</a>:null}
+       </span>)}
+      </div>
+    </div>:null}
     <small>Los motores compartidos y los perfiles lógicos no se consideran activos sin evidencia exacta. Última consulta local: {updatedAt?new Date(updatedAt).toLocaleTimeString('es-ES'):'—'}.</small>
    </details>:null}
  </section>;

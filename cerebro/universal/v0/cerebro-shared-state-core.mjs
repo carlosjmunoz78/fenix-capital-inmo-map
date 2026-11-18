@@ -72,3 +72,51 @@ export function buildSharedState(entries,source,now=Date.now()){
     engine_association_is_not_execution:true},
   departments:Object.values(departments),source_departments:Object.values(sourceDepartments),records};
 }
+
+/** ENGINE telemetry is separate from profile identity. A GitHub workflow with an
+ * engine ID establishes only observed CI activity, not engine health or specialist state.
+ * No manual per-engine mapping is needed when the source already emits an exact ID.
+ */
+export function buildEngineActivity(engineIds,source,now=Date.now()){
+ if(!Array.isArray(engineIds)||engineIds.length!==179||new Set(engineIds).size!==179||
+  engineIds.some(id=>typeof id!=='string'||!/^[A-Z][A-Z0-9-]{2,25}$/.test(id)))
+  throw Error('CANONICAL_ENGINE_REGISTRY_DRIFT');
+ const counts=Object.fromEntries(STATES.map(s=>[s,0]));
+ const freshSource=source?.status==='ACTIVO'&&Number.isFinite(times(source.observed_at))&&
+   now-times(source.observed_at)>=-120000&&now-times(source.observed_at)<=MAX_FEED_AGE_MS;
+ const allowed=new Set(engineIds),byId=new Map();
+ if(freshSource)for(const obs of (Array.isArray(source.engine_runs)?source.engine_runs:[])){
+  const when=times(obs.observed_at);
+  if(!allowed.has(obs.engine_id)||obs.provider!=='GITHUB_ACTIONS'||obs.company_id!=='fenix'||
+   !/^\d+$/.test(String(obs.runtime_id))||!evidenceUrl(obs.evidence)||
+   !Number.isFinite(when)||now-when< -120000||now-when>MAX_FEED_AGE_MS)continue;
+  const old=byId.get(obs.engine_id);
+  if(!old||times(old.observed_at)<when)byId.set(obs.engine_id,obs);
+ }
+ const records=engineIds.map(engine_id=>{
+  const obs=byId.get(engine_id);
+  let status='POR_VERIFICAR',reason=source?.status==='DEGRADADO'?'SOURCE_DEGRADED':'NO_RECENT_EXACT_ENGINE_WORKFLOW';
+  if(obs){
+   if(obs.status==='in_progress'&&now-times(obs.observed_at)<=120000){
+    status='ACTIVO';reason='RECENT_GITHUB_WORKFLOW_IN_PROGRESS_NOT_ENGINE_HEALTH';
+   }else if(obs.status==='completed'&&['failure','timed_out'].includes(obs.conclusion)){
+    status='FALLANDO';reason='RECENT_GITHUB_WORKFLOW_FAILED_NOT_ENGINE_UNIVERSAL_HEALTH';
+   }else if(obs.status==='completed'&&obs.conclusion==='success'){
+    status='PARCIAL';reason='RECENT_GITHUB_WORKFLOW_SUCCESS_NOT_ENGINE_QUALITY';
+   }else if(['queued','waiting','requested','pending'].includes(obs.status)){
+    status='PARCIAL';reason='GITHUB_WORKFLOW_QUEUED_NOT_RUNNING';
+   }
+  }
+  counts[status]+=1;
+  return {engine_id,company_id:'fenix',status,reason,
+   runtime_evidence:obs?{provider:obs.provider,run_id:obs.runtime_id,observed_at:obs.observed_at,
+    evidence:obs.evidence,result:obs.conclusion??null}:null,
+   runtime_health_verified:false};
+ });
+ if(records.length!==179||Object.values(counts).reduce((s,n)=>s+n,0)!==179)
+  throw Error('ENGINE_ACTIVITY_TOTAL_DRIFT');
+ return {registry_count:179,source:'GITHUB_ACTIONS',source_observed_at:source?.observed_at??null,
+  observed_workflow_engines:byId.size,runtime_health_verified:0,
+  status_counts:counts,source_limitations:'GitHub workflow engine ID is a lower-bound observed run, not all provider runtimes or autonomous health',
+  recent_observed:records.filter(x=>x.runtime_evidence).slice(0,10),records};
+}
