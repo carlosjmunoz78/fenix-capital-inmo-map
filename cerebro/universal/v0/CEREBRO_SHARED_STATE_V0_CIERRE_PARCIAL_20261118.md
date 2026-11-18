@@ -60,3 +60,17 @@ La conexión de perfiles ya estaba publicada físicamente en App PROD como `dpl_
 Ahora `STATE-001` añade proyección determinista de los **179 IDs del catálogo canónico de motores** a partir de las ejecuciones GitHub que emiten `engine_id` exacto, con sus evidencias. No confundir ejecuciones de workflow con motor autónomo íntegramente sano. `engine_activity.runtime_health_verified=0` hasta verificar contratos funcionales, logs y observabilidad por proveedor. La comparación de perfiles exige `profile_key` firmado/atestiguado y no se deduce de `engine_id`. El ID legítimo `3RD-001` se conserva y acepta sin modificar el registro.
 
 **Límite físico:** muchos motores de Cloudflare y Supabase no publican datos de ejecución en esta única fuente GitHub. Su actividad no se debe inferir ni clasificar como perfecta. Integración física por proveedor pendiente en el canal de ejecución correspondiente. El contrato está centralizado, de modo que esa integración será por fuente, no por cada perfil.
+
+## Promoción UI de lectura verificada, 18 de noviembre de 2026
+
+**HECHO · Producción:** alias `app.fenixcapital.es` asignado y verificado físicamente a Vercel `dpl_8bt9hwnbZGtxZDZ11XbKNvBVvcaJ` (SHA código `603f72149ef84c74805320ff966e0cc11c2ca52c`). Restauración inmediata disponible mediante `dpl_CdRZireU6DbA3aas6NteKBchfLob` (sin realizarla).
+
+**HECHO · CI:** [QA de motores/perfiles](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44347849535) SUCCESS; [Vercel STAGE aislado + token renovado automáticamente + negativos de seguridad](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44347849539) SUCCESS. Sin JWT owner en este circuito de CI, sin modificar Auth del propietario, sin persistir refresh token.
+
+**HECHO · Prueba visual real en Opera autenticado:** OPERATIVA presenta ESTADO COMPARTIDO, `2506` perfiles, `82` departamentos con ID de fuente, `179` motores canónicos en inventario y fuente de actividad ACTIVO. En esa observación **0 motores con ejecución GitHub reciente identificada**, **0 perfiles con ejecución individual acreditada** y **2477 por verificar** (29 plantillas). Esto NO significa que los motores reales estén detenidos; significa que la fuente no ofrece todavía esa prueba.
+
+**PARCIAL · Conexión física total:** la consola tiene contrato, sincronización y registro compartidos, pero los motores/agents/subagents que no emiten `profile_key` y eventos firmados siguen sin evidencia de estado. El feeder integrado actualmente inspecciona la actividad GitHub; **Cloudflare, Supabase y otros proveedores todavía no están instrumentados en esa misma fuente por perfil**. Añadir adaptadores por proveedor/runtime (una vez por origen, no 2506 conexiones).
+
+**PARCIAL · JWT owner histórico:** `CEREBRO_E2E_USER_JWT` permanece caducado en flujos heredados; no se ha renovado ni sustituido ese secreto. La nueva validación CI utiliza `cerebro-e2e@fenixcapital.es` con JWT renovado por ejecución para lectura mínima en STAGE, **nunca se hace pasar por CARLOS-ADMIN**.
+
+**MODO DE PROMOCIÓN:** UI lectura, sin habilitar autonomía, sin mutar permisos App/CRM/Auth ni DNS. El PR #79 continúa DRAFT; el despliegue promovido corresponde al SHA probado, no al commit posterior de documentación.

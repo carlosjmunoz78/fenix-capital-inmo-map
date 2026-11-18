@@ -5,7 +5,7 @@
   "name": "CEREBRO Universal Shared Status & Profile Evidence",
   "environment": "LAB",
   "version": "0.1.0",
-  "state": "PARCIAL_STAGE_CANDIDATE_OWNER_E2E_BLOCKED",
+  "state": "PROD_READONLY_UI_ACTIVE_ENGINE_AND_PROFILE_EVENT_ATTESTATION_PARTIAL",
   "sources": {
     "profiles": "api/cerebro-agent-directory.ts (sourced pinned registries)",
     "activity": "Supabase Edge Function cerebro-console-activity-v0",
@@ -92,7 +92,7 @@
     "no_per_profile_worker": true,
     "shared_runtime": true,
     "no_new_subscriptions": true,
-    "prod_promotion": false,
+    "prod_promotion": true,
     "draft_pr": 79,
     "prod_baseline_deployment": "dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
     "earlier_restore_deployment": "dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h",
@@ -104,7 +104,14 @@
       "ready_state": "READY",
       "aliases": [],
       "owner_gate": "BLOCKED_EXPIRED_OWNER_E2E_JWT"
-    }
+    },
+    "prod_deployment_id": "dpl_8bt9hwnbZGtxZDZ11XbKNvBVvcaJ",
+    "prod_sha": "603f72149ef84c74805320ff966e0cc11c2ca52c",
+    "prepromotion_deployment_id": "dpl_CdRZireU6DbA3aas6NteKBchfLob",
+    "prod_alias": "app.fenixcapital.es",
+    "actual_owner_browser_smoke": "PASS: authenticated Opera view OPERATIVA shows shared state, 2506 profiles, 179 canonical engine IDs",
+    "actual_engine_workflow_observed": 0,
+    "actual_profile_verified_running": 0
   },
   "test_sources": [
     "cerebro/universal/v0/cerebro-shared-state-core.test.mjs",
@@ -130,6 +137,11 @@
     "department-hierarchy-regression": "PASS (32 SEO, 48 UMS, 11 canonical, 618 original assigned profiles)",
     "source-departments-integration": "SUCCESS: 32 SEO + 48 UMS source departments / all 2506 profiles preserved",
     "exact-final-stage": "READY without alias, sha 06e5893d, four security negatives PASS",
-    "owner-ci-token-expired": "REQUIRES HUMAN: no owner token replay, no impersonation"
+    "owner-ci-token-expired": "REQUIRES HUMAN: no owner token replay, no impersonation",
+    "prod-alias": "VERIFIED: dpl_8bt9hwnbZGtxZDZ11XbKNvBVvcaJ",
+    "prod-owner-browser-ui": "PASS authenticated Opera",
+    "prod-profile-runtime-attestation": "PENDING: 2477 non-template profiles without exact runtime attestation",
+    "prod-engine-runtime-attestation": "PENDING: 179 engine IDs registered, 0 recent GitHub observations; other provider feeds not integrated",
+    "ci-ephemeral-auth": "PASS run 44347849539: new token per execution, owner/private denial; static owner JWT not replaced in legacy workflows"
   }
 }
