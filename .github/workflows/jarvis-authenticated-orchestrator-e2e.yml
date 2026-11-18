@@ -17,20 +17,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
     env:
-      JARVIS_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      PROD_URL: https://cluhljgonannaafpmblx.supabase.co
+      PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      CEREBRO_E2E_TEST_EMAIL: ${{ secrets.CEREBRO_E2E_TEST_EMAIL }}
+      CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
       BASE: https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0
       SAFE_BRANCH: cerebro/jarvis-core-prod-candidate-20261103
       EXPECTED_SHA: ${{ github.sha }}
     steps:
-      - name: Verify authenticated secret is configured without exposing it
+      - name: Acquire fresh short-lived test identity, fail closed if absent
+        shell: bash
+        run: bash scripts/cerebro-e2e-ephemeral-session.sh
+
+      - name: Verify ephemeral identity origin
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${JARVIS_E2E_JWT:-}" ]; then
-            echo 'JARVIS_AUTH_E2E_SECRET=MISSING'
-            exit 31
-          fi
-          echo 'JARVIS_AUTH_E2E_SECRET=PRESENT'
+          test "${CEREBRO_E2E_AUTH_MODE:-}" = EPHEMERAL_PASSWORD_GRANT
+          test -n "${JARVIS_E2E_JWT:-}"
+          echo 'JARVIS_AUTH_E2E=FRESH_CREDENTIAL'
 
       - name: Authenticated readonly orchestration chain
         shell: bash
