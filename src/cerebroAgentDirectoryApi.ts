@@ -22,7 +22,7 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
  const unavailable=(kind:AgentDirectoryResult['kind'],reason:string):AgentDirectoryResult=>({kind,data:null,reason});
  if(typeof window==='undefined')return unavailable('denied','BROWSER_REQUIRED');
  const host=window.location.hostname,prod=host==='app.fenixcapital.es';
- if(!prod&&(!PREVIEW_HOST.test(host)||new URLSearchParams(window.location.search).get('visual_lab')!=='cockpit-v3'))
+ if(!prod&&!PREVIEW_HOST.test(host))
   return unavailable('denied','OWNER_SCOPE_REQUIRED');
  const acceptedTransports=prod?['OWNER_PROD_READONLY']:
   ['PREVIEW_ONLY_SERVER_VERIFIED','OWNER_PROD_READONLY']; // production-stage exact host is server validated
