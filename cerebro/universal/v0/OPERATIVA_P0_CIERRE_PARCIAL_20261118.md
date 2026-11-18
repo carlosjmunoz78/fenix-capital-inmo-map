@@ -85,3 +85,19 @@ No se han creado nuevas cuotas, Workers, D1 ni funciones Edge. Ninguna ejecució
 **Sigue BLOQUEADO:** GitHub CI `CEREBRO_E2E_USER_JWT` no es válido; acciones `44278139673` HTTP 401 contra Supabase; la autorización del navegador no repara por sí sola un secreto cifrado persistente. No se han expuesto tokens ni ampliado permisos. Resto de workflow QA específicos 27 éxitos, 1 skip, 1 E2E failure (última consulta PR #78). No promover sin resolver la identidad CI y prueba de rollback.
 
 **Supabase Activity V8:** 126 GET 200, 80 GET 403, 2 GET 401, cero 503 en ventana de observación hasta 09:59:36Z. El 403 indica autorización denegada, no disponibilidad 503. Rollback y App originales intactos.
+
+## 18/11/2026 · RCA del gateway privado y stage con configuración de producción
+
+**HECHO / CAUSA CONFIRMADA:** en el preview de Vercel compilado con `--prod --skip-domain`, `api/cerebro-preview-gateway.ts` tenía gate `process.env.VERCEL_ENV!=='preview'`, de modo que `/api/cerebro-preview-gateway?resource=activity` devolvía `403 PREVIEW_ONLY` aunque el propio despliegue fuese privado, protegido y servía OPERATIVA. NEURONAL usa esa API en `visual_lab=cockpit-v3`. La ruta del directorio, en cambio, ya admitía un deployment production-config *con exact `VERCEL_URL`*.
+
+**HECHO / CORRECCIÓN SEGURA:** la autorización del gateway reutiliza por contrato la misma validación de host privado exacto existente en `api/cerebro-preview-owner.ts`, con comparación de regresión. No se permite PROD alias ni se amplía identidad, tenant, acciones, permisos o recursos. Primer intento en preview `dpl_3NMdt7fCsoGkJ7kr7Pz2U1GLTy4y` tuvo `500 FUNCTION_INVOCATION_FAILED` por importación ESM sin extensión (logs Vercel: `ERR_MODULE_NOT_FOUND /var/task/api/cerebro-preview-owner`); se corrigió incluyendo un guard puro sin dependencia runtime y pruebas de equivalencia/owner/negative. Nuevo stage `dpl_852XekBTRRWSHfiJzJVFbiHd9FDk` (`fenix-capital-preprod-ng0bal2fd.vercel.app`), SHA exacto `55d13170b56c69995f1fd78a9cd742e1f60b7225`, `READY`, production configuration, `--skip-domain`, workflow `44283908024` SUCCESS.
+
+**PRUEBA HTTP REAL:** gateway viejo producción-config `dpl_788PWZ4DJtQsf1bXPjyEPxbfbwT6` sin auth `403 PREVIEW_ONLY`; intento ESM `500`; gateway corregido, misma petición anónima `401 AUTH_REQUIRED` en la nueva URL, que acredita avance hacia validación de identidad sin abrir acceso. FALTA **GET positivo owner desde esta URL** y **NEURONAL + OPERATIVA mismo observed_at** (nueva URL requiere sesión).
+
+**SUPABASE ACTIVITY CORS RESTAURADO:** el intento de permitir de modo exacto el origin privado en v9 se identificó como innecesario para el camino proxy del preview. Se revirtió aplicando código v8 byte-identical, manteniendo fallback GitHub y auth; Edge Function resultante v10 `ACTIVE`, `verify_jwt=true`, SHA binario `08c33889f71df9374400fb07d27a0f9d05fd7518a078dddc99a196226129a012`. La lista CORS vuelve a ser exclusivamente `https://app.fenixcapital.es` y `https://www.app.fenixcapital.es`. Respaldo v8 en GitHub.
+
+**APP REAL INTACTA:** `app.fenixcapital.es` alias Vercel apunta a `dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h`; la App/CRM no cambiaron. Nueva versión aislada pendiente de gates completos, la PR #78 sigue DRAFT, sin merge; #76 y #77 sin tocar.
+
+**BLOCKER CI NO RESUELTO:** `CEREBRO_E2E_USER_JWT` repo secret existe, pero Actions devuelve `401` contra función owner en el runner; no se han registrado ni leído tokens. Nada aquí justifica relajar ese gate: renovar credencial con mecanismo legítimo durable o evidenciar prueba física alternativa y decisión de política antes de promoción. Rollback producción anterior identificado y READY, pero no se ha simulado con cambio de alias.
+
+**Gates:** Source/CORS/owner-negative/registry/build PASS; owner-positive nuevo stage PENDING; cross-interface nuevo stage PENDING; CI owner-live FAIL; real alias unchanged; rollback production not physically exercised. No declaración de terminación aún.
