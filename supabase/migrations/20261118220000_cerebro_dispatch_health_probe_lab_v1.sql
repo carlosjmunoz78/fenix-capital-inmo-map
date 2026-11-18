@@ -105,13 +105,14 @@ begin
   if not found and sample.requested_at>now()-interval '90 seconds' then
    continue;
   end if;
-  code:=raw.status_code;
-  content_hash:=case when raw.id is not null then
-   encode(extensions.digest(coalesce(raw.content,''),'sha256'),'hex')
-   else null end;
-  final_state:='HEALTH_ENDPOINT_FAILED';
-  if raw.id is null then final_state:='NO_RESPONSE';
-  elsif raw.status_code=200 and not coalesce(raw.timed_out,false) then
+  if not found then
+   code:=null;content_hash:=null;final_state:='NO_RESPONSE';
+  else
+   code:=raw.status_code;
+   content_hash:=encode(extensions.digest(coalesce(raw.content,''),'sha256'),'hex');
+   final_state:='HEALTH_ENDPOINT_FAILED';
+  end if;
+  if raw.id is not null and raw.status_code=200 and not coalesce(raw.timed_out,false) then
    begin
     content_json:=raw.content::jsonb;
     if content_json->>'ok'='true' and
@@ -161,7 +162,7 @@ declare
  total_count integer:=0;
  last_state text;
 begin
- select key_bytes into key_bytes from cerebro_lab.dispatch_health_signer_v1 where id=1;
+ select k.key_bytes into key_bytes from cerebro_lab.dispatch_health_signer_v1 k where k.id=1;
  for sample in
   select distinct on (service_slug)
    request_id,service_slug,engine_id,environment,state,http_status,
