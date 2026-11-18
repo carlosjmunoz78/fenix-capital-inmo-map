@@ -83,3 +83,7 @@ PR #78 DRAFT `cerebro/operativa-runtime-p0-fix-20261118` (HEAD último verificad
 
 ### Estado actualizado del incidente de actividad (18/11/2026)
 Supabase Activity `cerebro-console-activity-v0` promovida solo de v7 a **v8** con fallback público GitHub cuando el snapshot de 20 minutos caduca. Ver reporte enlazado `OPERATIVA_P0_CIERRE_PARCIAL_20261118.md` para SHA exactos, 9 respuestas 200/1 401 y copia de recuperación. App permanece en deployment original, PR #78 sin promover; gate de auth preview owner positivo pendiente.
+
+
+### 9. Cierre PROD validado 18/11/2026 (sustituye estados anteriores de este traspaso)
+**ESTADO ACTUAL: OPERATIVA P0 EN PROD, verificada físicamente.** La publicación canónica y su rollback quedan en [CEREBRO_OPERATIVA_P0_CIERRE_PROD_2026-11-18.md](CEREBRO_OPERATIVA_P0_CIERRE_PROD_2026-11-18.md). SHA publicado `ad010a3fb7e27da61f061d944f83b8af3835de70`, Vercel `dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e`, Supabase Activity v10. E2E post-promoción PROD [44289712801](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44289712801) SUCCESS. Los apartados previos de bloqueo y preproducción son **históricos**, no el estado actual. PR #78 DRAFT, sin merge. 2506 roles lógicos ≠ 2506 motores activos.

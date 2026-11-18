@@ -66,7 +66,7 @@
     {
       "runtime_id": "cerebro-jarvis-lab-eu",
       "provider": "CLOUDFLARE",
-      "status": "PARCIAL",
+      "status": "POR_VERIFICAR",
       "evidence": "JARVIS_B2_B3_LIVE_ENABLED=false; JARVIS_GATEWAY_ENABLED=false; no cron"
     }
   ],
@@ -76,7 +76,43 @@
     "The two binding IDs are grounded in Cloudflare settings ENGINE_ID, not human profile identity.",
     "An Edge Function marked ACTIVE does not attest to a job or role running.",
     "Any role without exact runtime instance evidence remains POR_VERIFICAR.",
-    "Source observations are point-in-time; consume real APIs for present-state decisions."
+    "Source observations are point-in-time; consume real APIs for present-state decisions.",
+    "OPERATIVA interface PROD is verified service availability and shared activity only, not 2506 independent agent runtime instances.",
+    "CEREBRO_E2E_USER_JWT was refreshed and smoke succeeded 2026-11-18; token expiry is an operational limitation.",
+    "Private alias rollback tested; production alias rollback is prepared but not physically enacted."
   ],
-  "prod_change": false
+  "prod_change": true,
+  "operativa_interface_production": {
+    "company_id": "fenix",
+    "engine_id": "OPERATIVA_P0_INTERFACE",
+    "environment": "PROD",
+    "version": "ad010a3fb7e27da61f061d944f83b8af3835de70",
+    "status": "ACTIVO",
+    "runtime_id": "dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
+    "provider": "VERCEL",
+    "source": "app.fenixcapital.es + authenticated GitHub Actions post-production smoke",
+    "observed_at": "2026-11-18T10:54:14Z",
+    "last_run": "2026-11-18T10:54:16Z",
+    "last_run_result": "SUCCESS",
+    "evidence": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44289712801",
+    "read_only": true,
+    "scope": "DIRECTORY_AND_ACTIVITY_GATEWAY_ONLY_NOT_ENGINE_AUTONOMY",
+    "rollback_deployment": "dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h"
+  },
+  "shared_activity_backend": {
+    "company_id": "fenix",
+    "engine_id": "CEREBRO_CONSOLE_ACTIVITY_V0",
+    "environment": "PROD",
+    "version": "10",
+    "status": "ACTIVO",
+    "runtime_id": "f4417ef4-3ff2-41f0-84e9-ddf6d38abdea",
+    "provider": "SUPABASE",
+    "source": "Supabase Edge Functions / cerebro-console-activity-v0",
+    "evidence": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44289712801",
+    "verify_jwt": true,
+    "source_sha256": "08c33889f71df9374400fb07d27a0f9d05fd7518a078dddc99a196226129a012",
+    "observed_at": "2026-11-18T10:54:14Z",
+    "last_run": "2026-11-18T10:54:14Z",
+    "last_run_result": "SUCCESS"
+  }
 }
