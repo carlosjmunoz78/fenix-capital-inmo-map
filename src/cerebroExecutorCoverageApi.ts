@@ -27,6 +27,15 @@ export type ExecutorCoverage={
   receipt_id:string|null;health:'EVIDENCE_OK_NOT_CERTIFIED'|'GATE_HOLD'|null;
   signed:boolean;recent:boolean;observed_at:string|null;history_count:number|null;
   gate_count:number|null;cron_job_id:77|null;global_autonomy_certified:false};
+ dispatch_health:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  health_status:'HEALTH_ENDPOINTS_RESPOND'|'DEGRADED_OR_NOT_CHECKED'|null;
+  signed_samples:number;healthy_endpoints:number;full_engine_certified:false;
+  legacy_jobs_executed:false;github_oidc_required:true;
+  sources:Array<{service:string;engine_id:'CONSOLE-001'|'FACT-001'|'UMS-001';
+   last_checked_at:string;http_status:number|null;
+   health_state:'HEALTH_ENDPOINT_OK'|'HEALTH_ENDPOINT_FAILED'|'NO_RESPONSE';
+   signature_verified:true;recent:boolean;runtime_execution_verified:false;
+   autonomy_certified:false}>};
  lab_qa:{source:'SUPABASE_PGCRON_QA_LAB_V1';status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';signature_verified:boolean;execution_status:'SUCCEEDED'|'FAILED'|null;tests_passed:number|null;tests_total:number|null;runs_count:number|null;observed_at:string|null;recent:boolean;first_party_scheduled:true;extra_subscriptions_required:false;operational_autonomy_certified:false;excellence_certified:false};
  supervisor:{provider_health:'LIVE'|'PARTIAL';github_qa_attestation:'VERIFIED'|'NOT_VERIFIED'|'UNAVAILABLE';agent_quality:'NOT_ATTESTED_GLOBAL';excellence_verified:0;qa_metadata_check:'PASS'|'HOLD_OR_FAIL';qa_execution_attributed:boolean;qa_signature_verified:boolean;source_failure_observations:string[];last_observed_at:string};
 };
@@ -107,6 +116,27 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
      !Number.isFinite(Date.parse(data.durable_supervisor.observed_at??''))||
      !/^[a-f0-9-]{36}$/.test(data.durable_supervisor.receipt_id??'')))||
    (data.durable_supervisor.status!=='LIVE'&&data.durable_supervisor.signed!==false)||
+   !data.dispatch_health||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.dispatch_health.status)||
+   data.dispatch_health.full_engine_certified!==false||
+   data.dispatch_health.legacy_jobs_executed!==false||
+   data.dispatch_health.github_oidc_required!==true||
+   !Number.isSafeInteger(data.dispatch_health.signed_samples)||
+   data.dispatch_health.signed_samples<0||data.dispatch_health.signed_samples>4||
+   !Number.isSafeInteger(data.dispatch_health.healthy_endpoints)||
+   data.dispatch_health.healthy_endpoints<0||
+   data.dispatch_health.healthy_endpoints>data.dispatch_health.signed_samples||
+   !Array.isArray(data.dispatch_health.sources)||
+   data.dispatch_health.sources.length!==data.dispatch_health.signed_samples||
+   new Set(data.dispatch_health.sources.map(x=>x.service)).size!==data.dispatch_health.sources.length||
+   (data.dispatch_health.status==='LIVE'&&(
+    !['HEALTH_ENDPOINTS_RESPOND','DEGRADED_OR_NOT_CHECKED'].includes(String(data.dispatch_health.health_status))||
+    data.dispatch_health.sources.some(x=>
+     !['CONSOLE-001','FACT-001','UMS-001'].includes(x.engine_id)||
+     !['HEALTH_ENDPOINT_OK','HEALTH_ENDPOINT_FAILED','NO_RESPONSE'].includes(x.health_state)||
+     x.signature_verified!==true||x.autonomy_certified!==false||
+     x.runtime_execution_verified!==false||typeof x.recent!=='boolean'||!Number.isFinite(Date.parse(x.last_checked_at)))))||
+   (data.dispatch_health.status!=='LIVE'&&data.dispatch_health.health_status!==null)||
    !data.lab_qa||data.lab_qa.source!=='SUPABASE_PGCRON_QA_LAB_V1'||
    !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.lab_qa.status)||
    data.lab_qa.operational_autonomy_certified!==false||data.lab_qa.excellence_certified!==false||
