@@ -33,6 +33,11 @@ export default function CerebroRoleAgentRosterReadonly(){
    <span>DIRECTORIO FEDERADO · REGISTROS + DISEÑOS · SOLO LECTURA</span>
    <strong className={data?'is-ok':'is-amber'}>{data?'Fuentes consultadas · inventario parcial':result.kind==='denied'?'Acceso denegado':'Sin lectura verificable'}</strong>
   </div>
+  <p className="op3-source-note" role="status">Estado de ejecutores: {data?.runtime_source?.status==='DEGRADADO'?
+    'DEGRADADO · '+(data.runtime_source.error_code||'fuente no disponible'):
+    data?.runtime_source?.status==='ACTIVO'?
+    'Fuente '+data.runtime_source.provider+' · observada '+data.runtime_source.observed_at+' · perfiles con identidad exacta '+data.runtime_source.verified_profiles:
+    'POR VERIFICAR · fuente de ejecución pendiente'}. Un motor observado no implica que todos sus perfiles estén ejecutándose.</p>
   <p className="op3-source-note">Los ingenieros aparecen primero por organización, <b>pero no son todo CEREBRO</b>. Este directorio reúne fuentes reales de Productora, SEO, Facebook, Instagram y LinkedIn, además de ingeniería y comercial.
    Cada ficha puede mostrar los motores documentados asociados y cada subagente conserva el responsable documentado. Los perfiles definidos no equivalen a procesos activos; el censo completo de toda la plataforma sigue pendiente de verificar.
    Pulsa sobre un registro para ver la ficha técnica o sitúa el cursor sobre su nombre para comprender claramente para qué sirve.</p>
@@ -90,13 +95,17 @@ export default function CerebroRoleAgentRosterReadonly(){
       <details><summary>Ficha técnica y procedencia</summary>
        <p><b>Función técnica:</b> {item.purpose_technical}</p>
        <p><b>Tipo:</b> {item.kind==='AGENT_ROLE'?'Agente lógico / rol':item.kind==='SUBAGENT_ROLE'?'Especialista/subagente lógico':'Plantilla conceptual de subagente'}</p>
-       <p><b>Estado declarado:</b> {item.state}. <b>Runtime:</b> NO VERIFICADO.</p>
+       <p><b>Estado declarado:</b> {item.state}. <b>Runtime de este perfil:</b> {item.runtime_verified?'ACTIVO VERIFICADO':'POR VERIFICAR'}.</p>
+       {item.runtime_observation?<p><b>Motor relacionado observado:</b> {item.runtime_observation.engine_id} · {item.runtime_observation.status}
+        · {item.runtime_observation.provider} · {item.runtime_observation.observed_at}
+        · <a href={item.runtime_observation.evidence} target="_blank" rel="noreferrer">Evidencia GitHub</a>.
+        La actividad del motor NO acredita la ejecución de este rol salvo identidad exacta.</p>:null}
        <p><b>Jerarquía:</b> {item.hierarchy_verified?'Verificada':'SIN VERIFICAR'}. <b>Empresa:</b> {item.company_scope}.</p>
        <a href={item.source_url} target="_blank" rel="noreferrer">Abrir fuente original</a>
       </details>
      </div>
      <div className="op3-agent-controls">
-      <span className="is-amber">{item.kind==='SUBAGENT_TEMPLATE'?'NO INSTANCIADO':'NO ACTIVO VERIFICADO'}</span>
+      <span className={item.runtime_verified?'is-ok':'is-amber'}>{item.kind==='SUBAGENT_TEMPLATE'?'NO INSTANCIADO':item.runtime_verified?'ACTIVO VERIFICADO':'POR VERIFICAR'}</span>
       {item.engine_ids.length?<details><summary>Motores documentados ({item.engine_ids.length})</summary>
         {item.engine_ids.map(id=><code key={id} style={{display:'inline-block',margin:'4px'}}>{id}</code>)}
        </details>:

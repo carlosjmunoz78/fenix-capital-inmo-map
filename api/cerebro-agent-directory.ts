@@ -47,6 +47,8 @@ export type AgentDirectoryEntry={
  state:string;source:string;purpose_plain:string;purpose_technical:string;
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
  company_scope:string;source_url:string;
+ runtime_status?:'ACTIVO'|'INACTIVO'|'DEGRADADO'|'PREPARADO'|'DEFINIDO'|'POR_VERIFICAR';
+ runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR'}|null;
 };
 export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
  if(roles.registry_id!=='CEREBRO_ROLE_AGENT_REGISTRY_V1'||!Array.isArray(roles.roles)||
@@ -219,6 +221,69 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
   records:records.slice(offset,offset+limit)
  };
 }
+
+/** Runtime is evidence, not a property of a logical role. Fail closed if feed is stale.
+ * This is the SAME owner-gated activity source already consumed by JARVIS and NEURONAL.
+ */
+type RuntimeFeedRun={run_id?:number;engine_id?:string|null;company_id?:string;status?:string;updated_at?:string;conclusion?:string|null;html_url?:string;environment?:string;version?:string};
+type RuntimeFeed={status?:string;source_status?:string;observed_at?:string;runs?:RuntimeFeedRun[];reason?:string};
+const ACTIVITY_SOURCE='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/';
+const VALID_STATES=new Set(['in_progress','queued','waiting','requested','pending','completed']);
+const FRESH_MS=20*60_000;
+function acceptedFeedRun(x:RuntimeFeedRun){
+ return Number.isSafeInteger(x.run_id)&&Number(x.run_id)>0&&
+  x.company_id==='fenix'&&typeof x.engine_id==='string'&&/^[A-Z][A-Z0-9-]{2,25}$/.test(x.engine_id)&&
+  VALID_STATES.has(String(x.status))&&
+  String(x.html_url??'').startsWith('https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/')&&
+  Number.isFinite(Date.parse(x.updated_at??''));
+}
+async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
+ const degraded=(error_code:string)=>({source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,status:'DEGRADADO' as const,observed_at:null as string|null,error_code,verified_profiles:0,observed_execution_ids:0,records:entries});
+ let feed:RuntimeFeed;
+ try{
+  const response=await fetch(ACTIVITY_SOURCE,{method:'GET',headers:{
+   authorization:head(req.headers.authorization),apikey:head(req.headers.apikey),accept:'application/json'
+  },cache:'no-store',redirect:'error',signal:AbortSignal.timeout(4500)});
+  if(!response.ok)return degraded('ACTIVITY_HTTP_'+response.status);
+  feed=await response.json() as RuntimeFeed;
+ }catch{return degraded('ACTIVITY_SOURCE_UNREACHABLE')}
+ const age=Date.now()-Date.parse(feed.observed_at??'');
+ if(feed.status!=='OK'||!['LIVE','CACHED'].includes(feed.source_status??'')||
+   !Number.isFinite(age)||age<(-120000)||age>FRESH_MS||!Array.isArray(feed.runs))
+  return degraded('ACTIVITY_EVIDENCE_STALE_OR_INVALID');
+ const byEngine=new Map<string,RuntimeFeedRun>();
+ for(const r of feed.runs){
+  if(!acceptedFeedRun(r))continue;
+  const prior=byEngine.get(r.engine_id!);
+  if(!prior||String(r.updated_at)>String(prior.updated_at))byEngine.set(r.engine_id!,r);
+ }
+ const records=entries.map(entry=>{
+  // Engine-level evidence is NOT role-level proof. Exact role/runtime identity
+  // is required to mark a logical profile itself runtime_verified.
+  const associated=entry.engine_ids.map(id=>byEngine.get(id)).filter((r):r is RuntimeFeedRun=>Boolean(r));
+  const exact=byEngine.get(entry.id);
+  const match=exact||associated.sort((a,b)=>String(b.updated_at).localeCompare(String(a.updated_at)))[0];
+  if(!match)return {...entry,runtime_verified:false,runtime_status:'POR_VERIFICAR' as const,runtime_observation:null};
+  const activityIsFresh=feed.source_status==='LIVE'&&Date.now()-Date.parse(match.updated_at??'')<=120000;
+  const active=activityIsFresh&&match.status==='in_progress';
+  const queued=activityIsFresh&&['queued','waiting','requested','pending'].includes(match.status??'');
+  const status=active?'ACTIVO' as const:queued?'PREPARADO' as const:'POR_VERIFICAR' as const;
+  const verified=Boolean(exact&&active&&entry.kind!=='SUBAGENT_TEMPLATE');
+  return {...entry,runtime_verified:verified,
+    runtime_status:verified?'ACTIVO' as const:'POR_VERIFICAR' as const,
+    runtime_observation:{
+     provider:'GITHUB_ACTIONS' as const,runtime_id:String(match.run_id),engine_id:match.engine_id!,
+     company_id:'fenix' as const,environment:String(match.environment??'UNKNOWN'),
+     version:String(match.version??'UNKNOWN'),observed_at:feed.observed_at!,
+     last_run:match.updated_at||null,last_run_result:match.conclusion??null,
+     source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,evidence:match.html_url!,status
+    }
+  };
+ });
+ return {source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,status:'ACTIVO' as const,observed_at:feed.observed_at!,error_code:null,
+  verified_profiles:records.filter(x=>x.runtime_verified).length,observed_execution_ids:new Set([...byEngine.values()].map(x=>x.run_id)).size,records};
+}
+
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private, no-store, max-age=0');
  res.setHeader('Vary','Authorization');
@@ -244,6 +309,13 @@ export default async function handler(req:Req,res:Res){
   const ctx=body?.context&&typeof body.context==='object'?body.context:body;
   if(body?.ok===false||ctx?.actor_code!=='CARLOS-ADMIN')return fail(res,403,'OWNER_NOT_VERIFIED');
  }catch{return fail(res,503,'OWNER_RESOLVER_UNAVAILABLE')}
- try{return res.status(200).json({...queryCerebroAgentDirectoryV0(query),transport:mode})}
- catch{return fail(res,503,'REGISTRY_SOURCE_INVALID')}
+ try{
+  const directory=queryCerebroAgentDirectoryV0(query);
+  const runtime=await observeExecutors(req,directory.records);
+  return res.status(200).json({...directory,transport:mode,
+   active_agents_verified:runtime.verified_profiles>0,
+   runtime_source:{provider:runtime.source,status:runtime.status,observed_at:runtime.observed_at,
+     error_code:runtime.error_code,verified_profiles:runtime.verified_profiles,observed_execution_ids:runtime.observed_execution_ids},
+   records:runtime.records});
+ }catch{return fail(res,503,'REGISTRY_SOURCE_INVALID')}
 }

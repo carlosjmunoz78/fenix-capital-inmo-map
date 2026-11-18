@@ -3,12 +3,15 @@ export type AgentDirectoryRecord={
  id:string;name:string;kind:'AGENT_ROLE'|'SUBAGENT_ROLE'|'SUBAGENT_TEMPLATE';family:string;
  state:string;source:string;purpose_plain:string;purpose_technical:string;
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
- company_scope:string;source_url:string
+ company_scope:string;source_url:string;
+ runtime_status?:'ACTIVO'|'INACTIVO'|'DEGRADADO'|'PREPARADO'|'DEFINIDO'|'POR_VERIFICAR';
+ runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR'}|null
 };
 export type AgentDirectoryResponse={
  status:'OK';company_id:'fenix';coverage:'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS';
  transport:'PREVIEW_ONLY_SERVER_VERIFIED'|'OWNER_PROD_READONLY';read_only:true;executed:false;
- active_agents_verified:false;subagent_instances_verified:false;
+ active_agents_verified:boolean;subagent_instances_verified:false;
+ runtime_source?:{provider:'CEREBRO_CONSOLE_ACTIVITY_V0';status:'ACTIVO'|'DEGRADADO';observed_at:string|null;error_code:string|null;verified_profiles:number;observed_execution_ids:number};
  counts:{known_agent_roles:number;registered_logical_subagent_roles:number;media_studio_source_roles:number;facebook_source_components:number;seo_source_profiles:number;instagram_source_components:number;linkedin_source_components:number;instagram_department_roles:number;subagent_templates_not_instances:number;
  total_runtime_instances:null;unindexed_sources_possible:boolean};
  page:{offset:number;limit:number;total:number;next_offset:number|null};
@@ -38,14 +41,16 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
   const data=await r.json() as AgentDirectoryResponse;
   if(data.status!=='OK'||data.company_id!=='fenix'||data.coverage!=='PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS'||
    !acceptedTransports.includes(data.transport)||data.read_only!==true||data.executed!==false||
-   data.active_agents_verified!==false||data.subagent_instances_verified!==false||
+   typeof data.active_agents_verified!=='boolean'||data.subagent_instances_verified!==false||
    data.counts?.total_runtime_instances!==null||
    !Array.isArray(data.records)||data.records.length>filters.limit||
    data.page?.offset!==filters.offset||data.page?.limit!==filters.limit||
    !Number.isSafeInteger(data.page.total)||data.page.total<0||
    data.records.some(x=>!x.id||!x.name||!x.purpose_plain||!x.source||
      !['AGENT_ROLE','SUBAGENT_ROLE','SUBAGENT_TEMPLATE'].includes(x.kind)||!Array.isArray(x.engine_ids)||
-     x.runtime_verified!==false||typeof x.hierarchy_verified!=='boolean'))
+     typeof x.runtime_verified!=='boolean'||typeof x.hierarchy_verified!=='boolean'||
+     (x.runtime_verified===true&&(!x.runtime_observation||x.runtime_observation.engine_id!==x.id||
+      x.runtime_observation.status!=='ACTIVO'||x.runtime_observation.provider!=='GITHUB_ACTIONS'))))
     return unavailable('unavailable','DIRECTORY_CONTRACT_INVALID');
   return {kind:'ready',data,reason:''};
  }catch{
