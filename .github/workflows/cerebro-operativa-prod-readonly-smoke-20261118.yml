@@ -1,0 +1,59 @@
+name: CEREBRO OPERATIVA · PROD owner read-only post-promotion smoke 2026-11-18
+on:
+  push:
+    branches: [cerebro/operativa-runtime-p0-handoff-20261118]
+    paths: [.github/workflows/cerebro-operativa-prod-readonly-smoke-20261118.yml]
+permissions: {contents: read}
+jobs:
+  prod-owner-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      APP: https://app.fenixcapital.es
+    steps:
+      - name: Authenticate read-only owner and verify exact observed runtime contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          [ -n "$OWNER_E2E_JWT" ] || { echo 'BLOCKED_OWNER_CI_SECRET_MISSING'; exit 2; }
+          [ -n "$PUBLISHABLE_KEY" ] || { echo 'BLOCKED_PUBLISHABLE_KEY_MISSING'; exit 2; }
+          resp="$(mktemp)"
+          trap 'rm -f "$resp"' EXIT
+          auth=(-H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PUBLISHABLE_KEY" -H "accept: application/json")
+          api="$APP/api/cerebro-agent-directory"
+          status="$(curl --max-time 20 -sS --output "$resp" --write-out '%{http_code}' "${auth[@]}" "$api?company_id=fenix&kind=ALL&family=ALL&limit=1")"
+          test "$status" = 200 || { echo "BLOCKED_PROD_OWNER_DIRECTORY_HTTP_$status"; exit 3; }
+          node - "$resp" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(d.status!=='OK'||d.company_id!=='fenix'||d.read_only!==true||d.executed!==false)process.exit(4);
+          if(d.page?.total!==2506||d.records?.length!==1)process.exit(5);
+          if(!d.runtime_source||d.runtime_source.status!=='ACTIVO'||!d.runtime_source.observed_at)process.exit(6);
+          const age=Date.now()-Date.parse(d.runtime_source.observed_at);
+          if(!Number.isFinite(age)||age>20*60_000||age< -120000)process.exit(7);
+          if(d.records.some(r=>r.runtime_verified && (!r.runtime_observation||r.runtime_observation.engine_id!==r.id)))process.exit(8);
+          console.log('PASS_PROD_RUNTIME_SOURCE_FRESH_LOGICAL_PROFILE_TOTAL_2506_NOT_ACTIVE_COUNT');
+          NODE
+          status="$(curl --max-time 20 -sS --output "$resp" --write-out '%{http_code}' "${auth[@]}" "$api?company_id=aion&kind=ALL&limit=1")"
+          test "$status" = 400 || { echo "BLOCKED_CROSS_TENANT_HTTP_$status"; exit 9; }
+          echo 'PASS_CROSS_COMPANY_DENIED'
+          status="$(curl --max-time 20 -sS --output "$resp" --write-out '%{http_code}' -X POST "${auth[@]}" "$api?company_id=fenix")"
+          test "$status" = 405 || { echo "BLOCKED_PROD_WRITE_HTTP_$status"; exit 10; }
+          echo 'PASS_PROD_READ_ONLY'
+          status="$(curl --max-time 20 -sS --output "$resp" --write-out '%{http_code}' "$api?company_id=fenix&kind=ALL&limit=1")"
+          test "$status" = 401 || { echo "BLOCKED_PROD_ANONYMOUS_HTTP_$status"; exit 11; }
+          echo 'PASS_PROD_ANONYMOUS_DENIED'
+      - name: App and CRM route availability (not CRM data mutation)
+        shell: bash
+        run: |
+          set -euo pipefail
+          resp="$(mktemp)"
+          trap 'rm -f "$resp"' EXIT
+          for route in /inicio /expedientes /contactos; do
+            status="$(curl --max-time 20 -LsS --output "$resp" --write-out '%{http_code}' "$APP$route")"
+            test "$status" = 200 || { echo "BLOCKED_EXISTING_APP_CRM_ROUTE_HTTP_$status"; exit 12; }
+          done
+          echo 'PASS_APP_AND_CRM_ROUTE_HTTP_REACHABILITY'
+          echo 'NO_CRM_DATA_WRITES; NO_AUTH_CHANGES; NO_DNS_CHANGES'
