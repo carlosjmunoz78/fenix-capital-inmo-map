@@ -1,0 +1,39 @@
+{
+  "schema": "CEREBRO_PROFILE_RUNTIME_AUDIT_2506_V1",
+  "generated_by": "deterministic_repo_registry",
+  "company_id": "fenix",
+  "source_snapshot": "cerebro/registry/operativa-provider-discovery-20261118.v1.json",
+  "source_snapshot_observed_at": "2026-11-18T11:11:57.806Z",
+  "sources": "GitHub pinned directory registries + read-only Cloudflare/Supabase executor discovery",
+  "total_logical_profiles": 2506,
+  "by_family": {
+    "ENGINEERING": 10,
+    "REVENUE_SALES": 1,
+    "SOCIAL_FACEBOOK": 598,
+    "MEDIA_STUDIO": 529,
+    "SEO_ENTERPRISE": 191,
+    "SOCIAL_INSTAGRAM": 569,
+    "SOCIAL_LINKEDIN": 569,
+    "INSTAGRAM_DEPARTMENTS": 39
+  },
+  "with_declared_engine_ids": 202,
+  "without_declared_engine_ids": 2304,
+  "profile_with_at_least_one_source_configured_matching_worker_engine_id": 0,
+  "profiles_with_exact_engine_id_equal_to_profile_id_in_cloudflare_settings": 0,
+  "templates_not_runtime_instances": 29,
+  "verified_running_profiles": 0,
+  "provider_discovery_counts": {
+    "cloudflare_workers": 45,
+    "supabase_functions": 118,
+    "cloudflare_engine_id_bindings": 8,
+    "cloudflare_unique_engine_ids": 5
+  },
+  "status": "PARTIAL_RUNTIME_EVIDENCE_NOT_ALL_AGENTS_LIVE",
+  "unresolved_profiles": 2477,
+  "limitations": [
+    "Not proving that an engine is running from a deployed Worker, Supabase ACTIVE function, workflow name, or family association.",
+    "No profile execution identity (profile_id/job_id/engine_id) was attested with freshness and contract.",
+    "Do not auto-map SOC-001 roles to SOC-FB-FINANCIAL-REAL-ESTATE-V1 or SEO roles to any named jobs without explicit contract.",
+    "This is a date-scoped source classification, not a live monitoring API."
+  ]
+}
