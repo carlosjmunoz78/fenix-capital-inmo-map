@@ -6,7 +6,8 @@ const old=fs.readFileSync(new URL('./backup/cerebro-console-activity-v8-index.ts
 const origin='https://fenix-capital-preprod-eptv5utjp.vercel.app';
 test('only exact isolated stage origin added; all other code identical',()=>{
   const anchor='  "https://www.app.fenixcapital.es"';
-  assert.equal(f.replace(anchor+',\\n  "'+origin+'"',anchor),old);
+  const gap=String.fromCharCode(10);
+  assert.equal(f.replace(anchor+','+gap+'  "'+origin+'"',anchor),old);
 });
 test('owner and JWT-dependent guard remain unchanged',()=>{
   assert.match(f,/withSupabase\(\{auth:"user"\}/);
