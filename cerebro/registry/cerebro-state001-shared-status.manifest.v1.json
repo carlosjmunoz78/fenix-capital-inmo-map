@@ -98,12 +98,12 @@
     "earlier_restore_deployment": "dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h",
     "stage_sample_deployment": "dpl_Hw6YreN9cs84VXEHx3o3pMrFFJcT",
     "stage_latest": {
-      "deployment_id": "dpl_GmS5Z9FtPBxpVk8hrPFXg7FEhRHL",
-      "url": "https://fenix-capital-preprod-a25o9g4yb.vercel.app",
-      "sha": "5d01a2bebf16900ba0e133bd0fa5660cd1857cc6",
+      "deployment_id": "dpl_5qs5BwJt1FAExuPgJe6z5KBzaUqw",
+      "url": "https://fenix-capital-preprod-kimtw29gj.vercel.app",
+      "sha": "06e5893d1d47f6838f343e3a6e470c8072ec9a50",
       "ready_state": "READY",
-      "alias_count": 0,
-      "source": "Vercel deployment exact-SHA verified"
+      "aliases": [],
+      "owner_gate": "BLOCKED_EXPIRED_OWNER_E2E_JWT"
     }
   },
   "test_sources": [
@@ -125,8 +125,11 @@
     "live-stage-write-denied": "405 PASS",
     "live-stage-technical-account-denied": "403 PASS",
     "live-stage-owner-positive": "BLOCKED: CEREBRO_E2E_USER_JWT expired confirmed via GitHub Action 44330328085",
-    "prod-promotion": "NOT_STARTED",
+    "prod-promotion": "NO-GO until owner positive 200 & all acceptance, no PROD alias change",
     "prod-alias-intact": "YES, dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
-    "department-hierarchy-regression": "PASS (32 SEO, 48 UMS, 11 canonical, 618 original assigned profiles)"
+    "department-hierarchy-regression": "PASS (32 SEO, 48 UMS, 11 canonical, 618 original assigned profiles)",
+    "source-departments-integration": "SUCCESS: 32 SEO + 48 UMS source departments / all 2506 profiles preserved",
+    "exact-final-stage": "READY without alias, sha 06e5893d, four security negatives PASS",
+    "owner-ci-token-expired": "REQUIRES HUMAN: no owner token replay, no impersonation"
   }
 }

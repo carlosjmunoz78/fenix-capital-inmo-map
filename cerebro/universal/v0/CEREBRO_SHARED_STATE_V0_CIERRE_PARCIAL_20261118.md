@@ -31,3 +31,11 @@
 PROD sigue intacta, por tanto no se necesita rollback. En cualquier promoción futura, baseline `dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e` reservado. El fallback local mantiene la lectura antigua `/api/cerebro-agent-directory`, el feed `cerebro-console-activity-v0` permanece sin cambios. Reasignar alias únicamente con comprobaciones físicas y consentimiento de la política de CEREBRO.
 
 **Coste adicional de suscripciones: 0 €; uso ordinario de despliegues Vercel existente.**
+
+## Verificación de candidato actualizado · 18/11/2026
+
+- QA con **32 departamentos SEO + 48 Productora**, y 618 adscripciones explícitas: [GitHub run 44339765015](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44339765015) SUCCESS y [run 44340332674](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44340332674) SUCCESS.
+- Candidato de **código exacto 06e5893d...** READY, protegido y aislado: Vercel `dpl_5qs5BwJt1FAExuPgJe6z5KBzaUqw`, URL `https://fenix-capital-preprod-kimtw29gj.vercel.app`, **0 aliases**, no PROD. [Stage run 44340332713](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44340332713): acceso anónimo 401, tenant externo 400, POST 405 y cuenta técnica 403: PASS. **Owner +403 por JWT caducado, NO-GO de promoción**.
+- El workflow `cerebro-shared-state-verify-pinned-stage.yml` se fija a este candidato y queda en `workflow_dispatch` explícito para que no se repitan pruebas que dependen de una credencial humana caducada y consuman créditos inútilmente. Cuando el secreto owner se refresque, ejecutar el workflow y verificar sus resultados antes de promover.
+- GitHub Enterprise load 50-job aislada se recuperó satisfactoriamente por reintento del job fallido, sin tocar la prueba ni el runtime.
+- **Ningún cambio en `app.fenixcapital.es`, CRM, DNS, Supabase Auth, main, PR #76/#77 ni servicios de pago.** El alias PROD permanece `dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e` y el anterior despliegue `dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h` sigue registrado como alternativa de restauración.

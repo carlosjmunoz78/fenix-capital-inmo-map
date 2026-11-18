@@ -1,8 +1,5 @@
 name: CEREBRO SHARED STATE · Pinned stage security + owner authorization E2E
 on:
-  push:
-    branches: [cerebro/shared-state-all-interfaces-v0-20261118]
-    paths: [.github/workflows/cerebro-shared-state-verify-pinned-stage.yml]
   workflow_dispatch:
 permissions: {contents: read}
 jobs:
@@ -14,8 +11,8 @@ jobs:
       PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
       CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
       OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
-      STAGED_URL: https://fenix-capital-preprod-a25o9g4yb.vercel.app
-      DEPLOYMENT_SHA: 5d01a2bebf16900ba0e133bd0fa5660cd1857cc6
+      STAGED_URL: https://fenix-capital-preprod-kimtw29gj.vercel.app
+      DEPLOYMENT_SHA: 06e5893d1d47f6838f343e3a6e470c8072ec9a50
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: {persist-credentials: false}
