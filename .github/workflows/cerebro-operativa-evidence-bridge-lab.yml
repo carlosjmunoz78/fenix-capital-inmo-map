@@ -6,6 +6,12 @@ permissions:
   contents: read
 jobs:
   evidence-bridge:
+    # Explicit canonical identity; source adapter validates GitHub job + steps.
+    env:
+      CEREBRO_COMPANY_ID: fenix
+      CEREBRO_ENGINE_ID: QA-001
+      CEREBRO_AGENT_ROLE_ID: ENG-QA
+      CEREBRO_EVIDENCE_MODE: PROVIDER_GITHUB_JOB_READBACK
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -34,4 +40,15 @@ jobs:
           test "$status" -eq 42
           grep -q 'BLOCKED_DEDICATED_TEST_IDENTITY_NOT_CONFIGURED' /tmp/e2e-auth-negative.out
           rm -f /tmp/e2e-auth-negative.out
+      - name: Report renewable dedicated-test identity readiness without reading secrets
+        env:
+          E2E_EMAIL_CONFIGURED: ${{ secrets.CEREBRO_E2E_TEST_EMAIL != '' }}
+          E2E_PASSWORD_CONFIGURED: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD != '' }}
+        shell: bash
+        run: |
+          if [ "$E2E_EMAIL_CONFIGURED" = 'true' ] && [ "$E2E_PASSWORD_CONFIGURED" = 'true' ]; then
+            echo 'IAM004_FRESH_TOKEN_TEST_IDENTITY=CONFIGURED' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'IAM004_FRESH_TOKEN_TEST_IDENTITY=BLOCKED_NOT_CONFIGURED' >> "$GITHUB_STEP_SUMMARY"
+          fi
       - run: npm run build
