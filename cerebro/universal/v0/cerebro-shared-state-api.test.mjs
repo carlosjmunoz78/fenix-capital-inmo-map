@@ -35,8 +35,10 @@ test('isolated CI summary accepts only authenticated technical identity on exact
  const tech='0c71641f-ae5e-44ab-b380-09aef0b44f7f';
  globalThis.fetch=async url=>{
   calls.push(String(url));
-  assert.equal(String(url),'https://cluhljgonannaafpmblx.supabase.co/auth/v1/user');
-  return{status:200,json:async()=>({id:tech,email:'cerebro-e2e@fenixcapital.es',email_confirmed_at:'2026-11-18T12:00:00Z',app_metadata:{provider:'email'}})};
+  if(String(url)==='https://cluhljgonannaafpmblx.supabase.co/auth/v1/user')
+   return{status:200,json:async()=>({id:tech,email:'cerebro-e2e@fenixcapital.es',email_confirmed_at:'2026-11-18T12:00:00Z',app_metadata:{provider:'email'}})};
+  if(String(url).includes('/session/context'))return{status:403};
+  throw Error('UNEXPECTED_NETWORK');
  };
  const technical=req(q('mode=ci_summary&company_id=fenix'),'GET',{host:stage});
  const r=res();await handler(technical,r);
