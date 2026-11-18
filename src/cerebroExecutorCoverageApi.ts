@@ -36,6 +36,11 @@ export type ExecutorCoverage={
    health_state:'HEALTH_ENDPOINT_OK'|'HEALTH_ENDPOINT_FAILED'|'NO_RESPONSE';
    signature_verified:true;recent:boolean;runtime_execution_verified:false;
    autonomy_certified:false}>};
+ console_job:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  execution_state:'SUCCEEDED'|null;job_id:string|null;observed_commit_sha:string|null;
+  last_execution_at:string|null;completed_job_count:number|null;
+  signature_verified:boolean;specific_capability_evidenced:boolean;
+  legacy_worker_executed:false;full_engine_certified:false;agent_role_identity_verified:false};
  lab_qa:{source:'SUPABASE_PGCRON_QA_LAB_V1';status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';signature_verified:boolean;execution_status:'SUCCEEDED'|'FAILED'|null;tests_passed:number|null;tests_total:number|null;runs_count:number|null;observed_at:string|null;recent:boolean;first_party_scheduled:true;extra_subscriptions_required:false;operational_autonomy_certified:false;excellence_certified:false};
  supervisor:{provider_health:'LIVE'|'PARTIAL';github_qa_attestation:'VERIFIED'|'NOT_VERIFIED'|'UNAVAILABLE';agent_quality:'NOT_ATTESTED_GLOBAL';excellence_verified:0;qa_metadata_check:'PASS'|'HOLD_OR_FAIL';qa_execution_attributed:boolean;qa_signature_verified:boolean;source_failure_observations:string[];last_observed_at:string};
 };
@@ -137,6 +142,21 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
      x.signature_verified!==true||x.autonomy_certified!==false||
      x.runtime_execution_verified!==false||typeof x.recent!=='boolean'||!Number.isFinite(Date.parse(x.last_checked_at)))))||
    (data.dispatch_health.status!=='LIVE'&&data.dispatch_health.health_status!==null)||
+   !data.console_job||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.console_job.status)||
+   data.console_job.legacy_worker_executed!==false||
+   data.console_job.full_engine_certified!==false||
+   data.console_job.agent_role_identity_verified!==false||
+   (data.console_job.status==='LIVE'&&(
+     data.console_job.execution_state!=='SUCCEEDED'||
+     data.console_job.signature_verified!==true||
+     data.console_job.specific_capability_evidenced!==true||
+     !/^[a-f0-9-]{36}$/.test(data.console_job.job_id??'')||
+     !/^[a-f0-9]{40}$/.test(data.console_job.observed_commit_sha??'')||
+     !Number.isFinite(Date.parse(data.console_job.last_execution_at??''))||
+     !Number.isSafeInteger(data.console_job.completed_job_count)||
+     Number(data.console_job.completed_job_count)<1))||
+   (data.console_job.status!=='LIVE'&&data.console_job.signature_verified!==false)||
    !data.lab_qa||data.lab_qa.source!=='SUPABASE_PGCRON_QA_LAB_V1'||
    !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.lab_qa.status)||
    data.lab_qa.operational_autonomy_certified!==false||data.lab_qa.excellence_certified!==false||
