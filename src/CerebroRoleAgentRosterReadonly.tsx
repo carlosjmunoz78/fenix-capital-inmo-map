@@ -1,5 +1,6 @@
 import {useEffect,useState,type FormEvent} from 'react';
 import {readAgentDirectoryLab,type AgentDirectoryRecord,type AgentDirectoryFilters,type AgentDirectoryResult} from './cerebroAgentDirectoryApi';
+import {readExecutorCoverage,type ExecutorCoverageResult} from './cerebroExecutorCoverageApi';
 import './cerebro-role-agent-roster-readonly.css';
 const initial:AgentDirectoryResult={kind:'unavailable',data:null,reason:'NOT_READ_YET'};
 const PAGE_SIZE=25;
@@ -15,6 +16,18 @@ export default function CerebroRoleAgentRosterReadonly(){
  const [offset,setOffset]=useState(0);
  const [loading,setLoading]=useState(true);
  const [refresh,setRefresh]=useState(0);
+ const [coverage,setCoverage]=useState<ExecutorCoverageResult>({kind:'unavailable',data:null});
+ // Source coverage uses one bounded read every 30 seconds; provider inventories
+ // never establish that any logical agent or subagent is actually running.
+ useEffect(()=>{
+  if(!/^fenix-capital-preprod-[a-z0-9]+\\.vercel\\.app$/.test(window.location.hostname))return;
+  let mounted=true;
+  const controller=new AbortController();
+  const load=()=>{void readExecutorCoverage(controller.signal).then(x=>{if(mounted)setCoverage(x)})};
+  load();
+  const timer=window.setInterval(load,30000);
+  return()=>{mounted=false;controller.abort();window.clearInterval(timer)};
+ },[]);
  useEffect(()=>{
   let open=true;const controller=new AbortController();
   setLoading(true);
@@ -36,6 +49,11 @@ export default function CerebroRoleAgentRosterReadonly(){
   <p className="op3-source-note">Los ingenieros aparecen primero por organización, <b>pero no son todo CEREBRO</b>. Este directorio reúne fuentes reales de Productora, SEO, Facebook, Instagram y LinkedIn, además de ingeniería y comercial.
    Cada ficha puede mostrar los motores documentados asociados y cada subagente conserva el responsable documentado. Los perfiles definidos no equivalen a procesos activos; el censo completo de toda la plataforma sigue pendiente de verificar.
    Pulsa sobre un registro para ver la ficha técnica o sitúa el cursor sobre su nombre para comprender claramente para qué sirve.</p>
+  {coverage.kind==='ready'&&coverage.data?
+   <p className="op3-source-note" role="status">Ejecutores consultados en directo · {coverage.data.inventory_sources.map(s=>
+    s.source+': '+(s.status==='LIVE'?s.visible_count+' despliegues visibles':s.status)
+   ).join(' · ')}. <b>Esto acredita infraestructura, NO ejecución de perfiles.</b> Los recibos individuales siguen pendientes de conexión.</p>:
+   <p className="op3-source-note">Cobertura de ejecutores Cloudflare/Supabase: no acreditada desde este entorno. El catálogo permanece disponible sin inventar estados.</p>}
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
    <div><strong>{count?.registered_logical_subagent_roles??'—'}</strong><small>Especialistas/subagentes lógicos · ejecución no verificada</small></div>
