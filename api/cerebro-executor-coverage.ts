@@ -115,6 +115,37 @@ async function githubQaProof(stamp:string):Promise<GithubClaim>{
  return out;
 }
 
+
+const LAB_QA_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-agent-qa-health-lab-v1?company_id=fenix&environment=LAB';
+type SqlQaProof={status:'OK';source:'SUPABASE_PGCRON_QA_LAB_V1';receipt_id:string;
+ observed_at:string;execution_status:'SUCCEEDED'|'FAILED';tests_passed:number;tests_total:6;
+ runs_count:number;recent:boolean;signature_verified:true;read_only:true;physical_execution_evidenced:true};
+async function collectSqlQa(auth:string,apikey:string,labKey:string):Promise<SqlQaProof>{
+ const response=await fetch(LAB_QA_URL,{method:'GET',redirect:'error',cache:'no-store',
+  headers:{authorization:auth,apikey:labKey,'x-cerebro-owner-prod-apikey':apikey,
+   accept:'application/json'},signal:AbortSignal.timeout(8500)});
+ if(response.status!==200)throw Error('SQL_QA_READER_DENIED');
+ const body=await response.text();
+ if(body.length>16000)throw Error('SQL_QA_RESPONSE_OVERSIZE');
+ const q=JSON.parse(body);
+ if(q.status!=='OK'||q.source!=='SUPABASE_PGCRON_QA_LAB_V1'||
+    q.company_id!=='fenix'||q.environment!=='LAB'||q.engine_id!=='QA-001'||
+    q.agent_role_id!=='ENG-QA'||q.read_only!==true||q.request_executed_job!==false||
+    q.signature_verified!==true||q.physical_execution_evidenced!==true||
+    q.operational_autonomy_certified!==false||q.excellence_certified!==false||
+    q.customer_data_touched!==false||q.prod_execution_enabled!==false||
+    !['SUCCEEDED','FAILED'].includes(q.execution_status)||
+    typeof q.receipt_id!=='string'||!/^[a-f0-9-]{36}$/.test(q.receipt_id)||
+    !Number.isFinite(Date.parse(q.observed_at))||
+    !Number.isSafeInteger(q.runs_count)||q.runs_count<1||
+    !Number.isSafeInteger(q.tests_passed)||q.tests_passed<0||q.tests_passed>6||
+    q.tests_total!==6||typeof q.recent!=='boolean')throw Error('SQL_QA_ATTESTATION_INVALID');
+ return {status:'OK',source:'SUPABASE_PGCRON_QA_LAB_V1',receipt_id:q.receipt_id,
+  observed_at:q.observed_at,execution_status:q.execution_status,
+  tests_passed:q.tests_passed,tests_total:6,runs_count:q.runs_count,
+  recent:q.recent,signature_verified:true,read_only:true,physical_execution_evidenced:true};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -146,7 +177,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github]=await Promise.all([
+ const [cf,lab,github,qa]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -157,7 +188,12 @@ export default async function handler(req:Req,res:Res){
    try{return{source:'SUPABASE' as const,status:'LIVE' as const,count:await collectLabJobs(auth,apikey,labKey)}}
    catch{return{source:'SUPABASE' as const,status:'UNAVAILABLE' as const,count:null as number|null}}
   })(),
-  githubQaProof(stamp)
+  githubQaProof(stamp),
+  (async()=>{
+   if(labKey.length<12)return{status:'NOT_CONFIGURED' as const,proof:null as SqlQaProof|null};
+   try{return{status:'LIVE' as const,proof:await collectSqlQa(auth,apikey,labKey)}}
+   catch{return{status:'UNAVAILABLE' as const,proof:null as SqlQaProof|null}}
+  })()
  ]);
  const statuses:Status[]=[
   {source:'CLOUDFLARE',status:cf.status,metric_label:'WORKERS_IN_ACCOUNT',
@@ -165,6 +201,19 @@ export default async function handler(req:Req,res:Res){
   {source:'SUPABASE',status:lab.status,metric_label:'HISTORICAL_LAB_JOB_ROWS',
    visible_count:lab.status==='LIVE'?lab.count:null,observed_at:lab.status==='LIVE'?stamp:null}
  ];
+ const physicalQa=qa.status==='LIVE'&&qa.proof?.signature_verified===true;
+ const credited=physicalQa||github.state==='VERIFIED';
+ const qaSuccessful=physicalQa&&qa.proof?.execution_status==='SUCCEEDED'&&qa.proof.tests_passed===6;
+ const verifiedProfiles=physicalQa?[{
+  id:'ENG-QA',engine_id:'QA-001',state:'EXECUTION_EVIDENCED_NOT_AUTONOMOUS' as const,
+  proof_id:qa.proof!.receipt_id,proof_url:null,observed_at:qa.proof!.observed_at,
+  quality:qaSuccessful?'QA_METADATA_PROBES_PASSED_NO_TRIBUNAL':'QA_METADATA_PROBES_FAILED_NO_TRIBUNAL',
+  tribunal_passed:false,proof_source:'SUPABASE_PGCRON' as const
+ }]:github.state==='VERIFIED'?[{
+  id:'ENG-QA',engine_id:'QA-001',state:'EXECUTION_EVIDENCED_NOT_AUTONOMOUS' as const,
+  proof_id:github.proof_id,proof_url:github.run_url,observed_at:github.observed_at,
+  quality:github.quality,tribunal_passed:false,proof_source:'GITHUB_ACTIONS' as const
+ }]:[];
  // The separate canonical directory endpoint owns the 2506 count.
  // Only the explicitly attested ENG-QA first-party GitHub job can earn historical execution here.
  // Avoid importing Vercel's independent API route as a Node module (cold-start 500).
@@ -173,22 +222,39 @@ export default async function handler(req:Req,res:Res){
   inventory_sources:statuses,profile_total:2506,
   templates_not_instances:29,
   accreditable_profiles:2477,
-  runtime_verified_profiles:github.state==='VERIFIED'?1:0,
+  runtime_verified_profiles:credited?1:0,
   active_recent_profiles:0,
-  unverified_profiles:github.state==='VERIFIED'?2476:2477,
+  unverified_profiles:credited?2476:2477,
   active_executor_count:null,
-  receipt_source_status:github.state==='VERIFIED'?'GITHUB_VERIFIED_QA_JOB':'NOT_CONNECTED',
-  verified_profiles:github.state==='VERIFIED'?[{
-   id:'ENG-QA',engine_id:'QA-001',state:'EXECUTION_EVIDENCED_NOT_AUTONOMOUS',
-   proof_id:github.proof_id,proof_url:github.run_url,observed_at:github.observed_at,
-   quality:github.quality,tribunal_passed:false
-  }]:[],
+  receipt_source_status:physicalQa?'SUPABASE_SIGNED_SQL_QA':github.state==='VERIFIED'?'GITHUB_VERIFIED_QA_JOB':'NOT_CONNECTED',
+  verified_profiles:verifiedProfiles,
+  lab_qa:{
+   source:'SUPABASE_PGCRON_QA_LAB_V1',
+   status:qa.status,
+   signature_verified:physicalQa,
+   execution_status:qa.proof?.execution_status??null,
+   tests_passed:qa.proof?.tests_passed??null,
+   tests_total:qa.proof?.tests_total??null,
+   runs_count:qa.proof?.runs_count??null,
+   observed_at:qa.proof?.observed_at??null,
+   recent:qa.proof?.recent??false,
+   first_party_scheduled:true,
+   extra_subscriptions_required:false,
+   operational_autonomy_certified:false,
+   excellence_certified:false
+  },
   supervisor:{
    provider_health:statuses.every(v=>v.status==='LIVE')?'LIVE':'PARTIAL',
    github_qa_attestation:github.state,
    agent_quality:'NOT_ATTESTED_GLOBAL',excellence_verified:0,
-   source_failure_observations:statuses.filter(v=>v.status==='UNAVAILABLE').map(v=>v.source),
+   qa_metadata_check:qaSuccessful?'PASS':'HOLD_OR_FAIL',
+   qa_execution_attributed:physicalQa,
+   qa_signature_verified:physicalQa,
+   source_failure_observations:[
+    ...statuses.filter(v=>v.status==='UNAVAILABLE').map(v=>v.source),
+    ...(qa.status==='UNAVAILABLE'?['SUPABASE_SQL_QA']:[])
+   ],
    last_observed_at:stamp
   },
-  warning:'CLOUDFLARE_ACCOUNT_WORKERS_AND_SUPABASE_HISTORICAL_LAB_JOBS_ARE_NOT_ACTIVE_AGENTS; SIGNED_IDENTITY_RECEIPTS_PENDING'});
+  warning:'QA-001_SQL_CRON_PROVES_ONLY_ONE_SIGNED_LAB_EXECUTION_CAPABILITY; OTHER_2476_PROFILES_REQUIRE_OWN_RUNTIME_RECEIPTS_AND_TRIBUNAL'});
 }
