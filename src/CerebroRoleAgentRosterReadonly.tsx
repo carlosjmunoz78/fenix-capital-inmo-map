@@ -52,7 +52,7 @@ export default function CerebroRoleAgentRosterReadonly(){
   {coverage.kind==='ready'&&coverage.data?
    <p className="op3-source-note" role="status">Ejecutores consultados en directo · {coverage.data.inventory_sources.map(s=>
     s.source+': '+(s.status==='LIVE'?s.visible_count+(s.metric_label==='WORKERS_IN_ACCOUNT'?' Workers inventariados':' registros históricos LAB'):s.status)
-   ).join(' · ')}. <b>Esto acredita infraestructura, NO ejecución de perfiles.</b> Los recibos individuales siguen pendientes de conexión.</p>:
+   ).join(' · ')}. <b>Esto acredita infraestructura, NO ejecución de perfiles.</b> {coverage.data.receipt_source_status==='SUPABASE_SIGNED_SQL_QA'?'QA-001 dispone de recibos reales firmados; los demás roles no quedan acreditados por esta comprobación.':'Los recibos de los demás perfiles siguen pendientes de conexión.'}</p>:
    <p className="op3-source-note">Cobertura de ejecutores Cloudflare/Supabase: no acreditada desde este entorno. El catálogo permanece disponible sin inventar estados.</p>}
   {coverage.kind==='ready'&&coverage.data?
    <p className="op3-source-note" role="status">
