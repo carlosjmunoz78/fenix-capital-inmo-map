@@ -15,8 +15,8 @@ export function validateSharedQuery(search:URLSearchParams){
  if([...search.keys()].some(k=>!allowed.has(k)||search.getAll(k).length!==1))throw Error('INVALID_QUERY');
  if(search.get('company_id')!=='fenix')throw Error('INVALID_COMPANY');
  const mode=search.get('mode')||'summary';
- if(!['summary','profiles'].includes(mode))throw Error('INVALID_MODE');
- if(mode==='summary'&&[...search.keys()].some(k=>!['mode','company_id'].includes(k)))throw Error('SUMMARY_QUERY_INVALID');
+ if(!['summary','profiles','ci_summary'].includes(mode))throw Error('INVALID_MODE');
+ if((mode==='summary'||mode==='ci_summary')&&[...search.keys()].some(k=>!['mode','company_id'].includes(k)))throw Error('SUMMARY_QUERY_INVALID');
  const filters=new URLSearchParams(search);
  filters.delete('mode');
  if(!filters.has('kind'))filters.set('kind','ALL');
@@ -42,7 +42,34 @@ export default async function handler(req:Req,res:Res){
  catch{return deny(res,400,'INVALID_QUERY_OR_SCOPE')}
  const bearer=get(req.headers.authorization),apikey=get(req.headers.apikey);
  if(!/^Bearer\s+\S{20,8192}$/i.test(bearer)||apikey.length<12||apikey.length>256)
-  return deny(res,401,'OWNER_SESSION_REQUIRED');
+  return deny(res,401,'SESSION_REQUIRED');
+ // Dedicated CI account gets ONLY a minimal summary on the exact isolated Vercel stage.
+ // This does not make the account an owner and never grants access to profile records,
+ // runtime execution, App/CRM APIs, or the production hostname.
+ if(input.mode==='ci_summary'){
+  if(host==='app.fenixcapital.es'||!/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(host)||
+    process.env.VERCEL_URL!==host)return deny(res,403,'CI_STAGE_SCOPE_DENIED');
+  try{
+   const identity=await fetch('https://cluhljgonannaafpmblx.supabase.co/auth/v1/user',{
+    method:'GET',headers:{authorization:bearer,apikey,accept:'application/json'},
+    redirect:'error',cache:'no-store',signal:AbortSignal.timeout(6500)
+   });
+   if(identity.status!==200)return deny(res,403,'CI_IDENTITY_DENIED');
+   const user=await identity.json();
+   if(user?.id!=='0c71641f-ae5e-44ab-b380-09aef0b44f7f'||
+      String(user?.email??'').toLowerCase()!=='cerebro-e2e@fenixcapital.es'||
+      !user?.email_confirmed_at||user?.app_metadata?.actor_code==='CARLOS-ADMIN')
+     return deny(res,403,'CI_IDENTITY_DENIED');
+   const existing=buildCerebroAgentDirectoryV0();
+   if(existing.length!==2506)return deny(res,503,'REGISTRY_DRIFT');
+   // No call to owner-gated activity or any private profile page.
+   const state=buildSharedState(existing,{status:'DEGRADADO',observed_at:null});
+   const {records,...summary}=state;
+   return res.status(200).json({status:'OK',...summary,transport:scope,
+    access:'TECHNICAL_CI_READONLY_SUMMARY_ONLY',runtime_source:'NOT_PROBED_IN_CI'});
+  }catch{return deny(res,503,'CI_AUTH_OR_CONTRACT_UNAVAILABLE')}
+ }
+
  try{
   const response=await fetch(owner,{method:'GET',headers:{authorization:bearer,apikey,accept:'application/json'},
    redirect:'error',cache:'no-store',signal:AbortSignal.timeout(6500)});
