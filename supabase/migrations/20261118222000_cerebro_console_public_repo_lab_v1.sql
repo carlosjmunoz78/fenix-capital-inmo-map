@@ -69,7 +69,7 @@ declare
  r record;
  response record;
  sha text;
- state text;
+ final_state text;
  code integer;
  stamp timestamptz;
  signing bytea;
@@ -93,15 +93,15 @@ begin
   if not found and r.created_at>now()-interval '90 seconds' then continue; end if;
   sha:=null;
   if response.id is null then
-   state:='NO_RESPONSE';code:=null;
+   final_state:='NO_RESPONSE';code:=null;
   else
-   code:=response.status_code;state:='FAILED';
+   code:=response.status_code;final_state:='FAILED';
    if code=200 and not coalesce(response.timed_out,false) and
       char_length(coalesce(response.content,'')) between 20 and 200000 then
     begin
      sha:=(response.content::jsonb)->>'sha';
-     if sha~'^[a-f0-9]{40}$' then state:='SUCCEEDED';else sha:=null;end if;
-    exception when others then sha:=null;state:='FAILED';
+     if sha~'^[a-f0-9]{40}$' then final_state:='SUCCEEDED';else sha:=null;end if;
+    exception when others then sha:=null;final_state:='FAILED';
     end;
    end if;
   end if;
@@ -109,13 +109,13 @@ begin
   material:=concat_ws('|','CEREBRO_CONSOLE_PUBLIC_REPO_V1',r.job_id::text,r.request_id::text,
    'fenix','CONSOLE-001','LAB','1.0.0','repo.sandbox.public.readonly.v0',
    'SUPABASE_PG_NET','carlosjmunoz78/fenix-capital-inmo-map','main',
-   stamp::text,state,coalesce(code::text,'NULL'),coalesce(sha,'NULL'));
+   stamp::text,final_state,coalesce(code::text,'NULL'),coalesce(sha,'NULL'));
   signature:=encode(extensions.hmac(convert_to(material,'UTF8'),signing,'sha256'),'hex');
   update cerebro_lab.console_repo_readonly_v1 x set
-   completed_at=stamp,state=state,http_status=code,observed_sha=sha,signature_hex=signature
+   completed_at=stamp,state=final_state,http_status=code,observed_sha=sha,signature_hex=signature
    where x.request_id=r.request_id and x.state='QUEUED';
   processed:=processed+1;
-  if state='SUCCEEDED' then successes:=successes+1;end if;
+  if final_state='SUCCEEDED' then successes:=successes+1;end if;
  end loop;
  return jsonb_build_object('status','COLLECTED','jobs_finished',processed,
   'jobs_succeeded',successes,'legacy_worker_executed',false);
