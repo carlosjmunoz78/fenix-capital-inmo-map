@@ -28,3 +28,21 @@
 4. Reutilizar el contrato común en JARVIS, OPERATIVA y NEURONAL solo después de verificaciones de seguridad, integridad, dependencias y rollback.
 
 Regla: CONSERVAR - ENTENDER - ENVOLVER - PROBAR - MEJORAR - MIGRAR.
+
+
+## 18/11/2026 · Verificación tras inicio de sesión y corrección visual
+- **OPERATIVA V3 recuperada físicamente en sesión Opera existente** al visitar /cerebro?section=operativa&op3_panel=agentes&visual_lab=cockpit-v3 en el Preview anterior. Árbol de accesibilidad confirma menú JARVIS/OPERATIVA/NEURONAL, directorio paginado de 2.506 y paneles reales. El enlace sin visual_lab mostraba el inicio genérico, que el propietario describió como "se ve mal".
+- **Causa adicional** de cobertura no visible: regexp doblemente escapada en src/CerebroRoleAgentRosterReadonly.tsx impedía activar el polling de /api/cerebro-executor-coverage incluso con autenticación válida. Reparada la regexp y agregada regresión.
+- **Ruta privada mejorada:** src/CerebroConsoleHost.tsx ahora sirve V3 por defecto en /cerebro de la familia de despliegues privados verificados, sin necesitar visual_lab; acceso propietario continúa fail-closed mediante /api/cerebro-preview-owner. No cambia la App real.
+- **Emisor genérico añadido:** agent-receipt-emitter-v1.mjs (WebCrypto, servidor, LAB únicamente), probado en interoperabilidad con verificador Node; envío sin acuse durable sigue SUBMITTED_UNVERIFIED, nunca acredita ejecución.
+- **Precisión de estado:** la proyección ya no deja ACTIVE_RECENT en un job cuyo último evento es SUCCEEDED o FAILED; admite otro job concurrente que siga vivo y rechaza reactivación por recibos desordenados.
+- **CI del código** SHA d650cf06dfe7f248f0779f531e17f596228a3ccc: CEREBRO Operativa verified evidence bridge LAB = SUCCESS; CEREBRO Governed Main Integration V0 = SUCCESS. Incluye pruebas de acceso, rutas, firma, emisor, caducidad y estado terminal, más build.
+- **Último Preview REAL READY:** dpl_52p3U33HziPQmatHq5rx2ZbCCqdx, https://fenix-capital-preprod-553npv93c.vercel.app, target=null. GET anónimo en /api/cerebro-executor-coverage?company_id=fenix devuelve 401 OWNER_SESSION_REQUIRED, executed:false; no 500.
+- **Límite E2E:** cada despliegue privado tiene un hostname nuevo y la sesión Supabase del Preview anterior no se comparte automáticamente. La sesión propietaria positiva se verificó en Preview anterior, pero falta prueba positiva LIVE de Cloudflare/Supabase en este último despliegue. No inventar que ambas lecturas están verificadas en Vercel. Los emitters reales de Cloudflare/Supabase/JARVIS aún no invocan automáticamente el nuevo hook de firma.
+
+## Gates actuales
+- Catálogo y UI V3 protegida: HECHO LAB y verificado con propietario en Preview anterior; nueva ruta automática comprobada en CI.
+- Cloudflare / Supabase fuente: API y credenciales preparadas, falta owner positive E2E del último build.
+- Emisor genérico HMAC: HECHO LAB (código y tests); suscripción por runtimes reales: PARCIAL.
+- Acreditación live por ID: NO VERIFICADA; no extrapolar test de QA al censo 2.477.
+- PROD: HOLD; sin modificación de aliases reales, App/CRM, WordPress, Supabase PROD, Workers, DNS ni trading.
