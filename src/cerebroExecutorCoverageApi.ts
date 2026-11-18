@@ -36,6 +36,11 @@ export type ExecutorCoverage={
    health_state:'HEALTH_ENDPOINT_OK'|'HEALTH_ENDPOINT_FAILED'|'NO_RESPONSE';
    signature_verified:true;recent:boolean;runtime_execution_verified:false;
    autonomy_certified:false}>};
+ creative_hold_gates:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  owner_rejection_override:false;paid_generation_enabled:false;all_certified:false;
+  engines:Array<{engine_id:'FACT-001'|'UMS-001';historical_jobs:number;jobs_on_hold:number;
+   historical_succeeded:number;safe_to_resume:false;autonomy_certified:false;
+   blockers:Array<{state:'HOLD'|'SUCCEEDED';reason_code:string;count:number}>}>};
  console_job:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
   execution_state:'SUCCEEDED'|null;job_id:string|null;observed_commit_sha:string|null;
   last_execution_at:string|null;completed_job_count:number|null;
@@ -142,6 +147,23 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
      x.signature_verified!==true||x.autonomy_certified!==false||
      x.runtime_execution_verified!==false||typeof x.recent!=='boolean'||!Number.isFinite(Date.parse(x.last_checked_at)))))||
    (data.dispatch_health.status!=='LIVE'&&data.dispatch_health.health_status!==null)||
+   !data.creative_hold_gates||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.creative_hold_gates.status)||
+   data.creative_hold_gates.owner_rejection_override!==false||
+   data.creative_hold_gates.paid_generation_enabled!==false||
+   data.creative_hold_gates.all_certified!==false||
+   !Array.isArray(data.creative_hold_gates.engines)||data.creative_hold_gates.engines.length>2||
+   (data.creative_hold_gates.status==='LIVE'&&(
+    data.creative_hold_gates.engines.length!==2||
+    !['FACT-001','UMS-001'].every(id=>data.creative_hold_gates.engines.some(x=>x.engine_id===id))))||
+   data.creative_hold_gates.engines.some(x=>!['FACT-001','UMS-001'].includes(x.engine_id)||
+    x.safe_to_resume!==false||x.autonomy_certified!==false||
+    !Number.isSafeInteger(x.historical_jobs)||!Number.isSafeInteger(x.jobs_on_hold)||
+    !Number.isSafeInteger(x.historical_succeeded)||
+    x.historical_jobs<x.jobs_on_hold+x.historical_succeeded||!Array.isArray(x.blockers)||
+    x.blockers.some(b=>!['HOLD','SUCCEEDED'].includes(b.state)||
+     typeof b.reason_code!=='string'||b.reason_code.length>100||
+     !Number.isSafeInteger(b.count)))||
    !data.console_job||
    !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.console_job.status)||
    data.console_job.legacy_worker_executed!==false||
