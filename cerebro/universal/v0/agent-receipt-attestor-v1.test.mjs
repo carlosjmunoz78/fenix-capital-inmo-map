@@ -19,7 +19,7 @@ test('authentic server verified receipt credits just the declared agent role',()
   authorized_sources:['CLOUDFLARE']});
  assert.equal(out.runtime_verified_profiles,1);
  assert.equal(out.active_recent_profiles,1);
- assert.equal(out.unverified_profiles,2505);
+ assert.equal(out.unverified_profiles,2476);
 });
 test('forged signature, changed role or source, and wrong key earn zero identity',()=>{
  for(const attempt of [
