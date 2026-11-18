@@ -92,6 +92,20 @@ export default function CerebroRoleAgentRosterReadonly(){
     )}</ul>
    </section>:
    <p className="op3-source-note">Auditoría de actividad real por motor: lectura no disponible ahora; no equivale a motores operativos.</p>}
+  {coverage.kind==='ready'&&coverage.data?.console_job.status==='LIVE'?
+   <section className="op3-source-note" aria-label="Trabajo real de lectura pública de CONSOLE-001">
+    <strong>CONSOLE-001 · CAPACIDAD DE REPOSITORIO EJECUTADA EN LAB</strong>
+    <p><b>repo.sandbox.public.readonly.v0</b> · Supabase SQL/pg_net, sin GitHub Actions ·
+      recibo firmado: <b>{coverage.data.console_job.signature_verified?'VERIFICADO':'NO'}</b> ·
+      trabajo: <code>{coverage.data.console_job.job_id}</code> ·
+      resultado: <b>{coverage.data.console_job.execution_state}</b> ·
+      commit leído: <code>{coverage.data.console_job.observed_commit_sha?.slice(0,12)}</code> ·
+      trabajos comprobados: {coverage.data.console_job.completed_job_count}.
+      <b> No se ejecutó el antiguo worker OIDC ni se modificó el repositorio.</b>
+      Certificación completa y agente personal identificado: <b>PENDIENTES</b>.
+    </p>
+   </section>:
+   <p className="op3-source-note">CONSOLE-001 · lectura real del repositorio: pendiente de prueba firmada o de acceso a la fuente.</p>}
   {coverage.kind==='ready'&&coverage.data?.dispatch_health.status==='LIVE'?
    <section className="op3-source-note" aria-label="Comprobación de salud de cuatro despachadores PREPROD">
     <strong>Salud real de API · cuatro ejecutores existentes · sin GitHub Actions</strong>
