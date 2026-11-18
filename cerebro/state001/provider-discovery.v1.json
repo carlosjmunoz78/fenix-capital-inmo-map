@@ -3,15 +3,15 @@
   "company_id": "fenix",
   "environment": "PROD_READONLY",
   "version": "1.0.0",
-  "generated_at": "2026-11-18T16:58:24.124Z",
+  "generated_at": "2026-11-18T23:23:17.785Z",
   "read_only": true,
   "no_runtime_execution_claim": true,
   "providers": {
     "cloudflare": {
       "metadata_observed": true,
-      "worker_scripts_total": 45,
-      "lab_named": 42,
-      "observed_at": "2026-11-18T16:58:24.124Z",
+      "worker_scripts_total": 47,
+      "lab_named": 44,
+      "observed_at": "2026-11-18T23:23:17.785Z",
       "source": "CLOUDFLARE_WORKERS_LIST_API"
     },
     "supabase": {
@@ -33,7 +33,7 @@
   ],
   "engine_candidates_count": 1,
   "unmatched_resources": {
-    "cloudflare_workers": 39,
+    "cloudflare_workers": 41,
     "supabase_functions": 101
   },
   "semantic_limits": "Metadata only. Worker/function existence is not execution or a profile runtime proof.",
