@@ -2,7 +2,7 @@ import {createContext,useContext,useEffect,useState,type ReactNode} from 'react'
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 export type SharedStateStatus='ACTIVO'|'PARCIAL'|'FALLANDO'|'DEFINIDO'|'POR_VERIFICAR';
 export type SharedDepartment={department_key:string;total:number;states:Record<SharedStateStatus,number>};
-export type SharedSummary={schema:'CEREBRO_SHARED_STATE_V1';company_id:'fenix';status:string;source_status:'ACTIVO'|'DEGRADADO';observed_at:string|null;read_only:true;executed:false;
+export type SharedSummary={schema:'CEREBRO_SHARED_STATE_V1';company_id:'fenix';status:'OK';feed_health:'LIVE_EVIDENCE_FEED'|'DEGRADED_EVIDENCE_FEED';source_status:'ACTIVO'|'DEGRADADO';observed_at:string|null;read_only:true;executed:false;
  overview:{total_profiles:number;departments:number;states:Record<SharedStateStatus,number>;verified_running_profiles:number;templates:number;engine_association_is_not_execution:true};
  departments:SharedDepartment[];refresh_interval_seconds:number};
 type SharedContext={status:'loading'|'ready'|'denied'|'unavailable';summary:SharedSummary|null;updatedAt:string|null;refresh:()=>void};

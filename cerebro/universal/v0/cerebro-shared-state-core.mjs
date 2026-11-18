@@ -52,7 +52,7 @@ export function buildSharedState(entries,source,now=Date.now()){
  if(total!==fromDepartments||Object.values(counts).reduce((a,b)=>a+b,0)!==total)throw Error('GROUP_COUNT_DRIFT');
  const verifiedNow=counts.ACTIVO;
  return {schema:CONTRACT,company_id:'fenix',environment:'PROD_READONLY',version:'1.0.0',
-  status:source?.status==='ACTIVO'?'LIVE_EVIDENCE_FEED':'DEGRADED_EVIDENCE_FEED',
+  feed_health:source?.status==='ACTIVO'?'LIVE_EVIDENCE_FEED':'DEGRADED_EVIDENCE_FEED',
   observed_at:source?.observed_at??null,source_status:source?.status??'DEGRADADO',
   source:'CEREBRO_CONSOLE_ACTIVITY_V0',refresh_interval_seconds:30,
   read_only:true,executed:false,
