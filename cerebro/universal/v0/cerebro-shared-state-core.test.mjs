@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildSharedState,classifyProfile,CONTRACT} from './cerebro-shared-state-core.mjs';
+import {buildSharedState,classifyProfile,buildEngineActivity,CONTRACT} from './cerebro-shared-state-core.mjs';
+import engineRegistry from '../../registry/engine-registry.v1.json' with {type:'json'};
 const now=Date.parse('2026-11-18T12:00:00Z');
 const source={status:'ACTIVO',observed_at:'2026-11-18T11:59:40Z'};
 const run={provider:'GITHUB_ACTIONS',runtime_id:'44288787233',engine_id:'SEO-001',profile_key:'AGENT_ROLE:SEO-PF01:DIRECTOR',profile_provenance:'EXPLICIT_EXECUTOR_ATTESTATION',company_id:'fenix',observed_at:source.observed_at,last_run:'2026-11-18T11:59:25Z',last_run_result:'success',source:'CEREBRO_CONSOLE_ACTIVITY_V0',evidence:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44288787233',status:'POR_VERIFICAR'};
@@ -56,3 +57,34 @@ test('no exact evidence, forged provider or wrong company is rejected',()=>{
  }
 });
 test('duplicates rejected without mutation',()=>assert.throws(()=>buildSharedState([profile('A'),profile('A')],source,now),/DUPLICATE/));
+
+test('all 179 canonical engines remain independent of logical profile certification',()=>{
+ const report=buildEngineActivity(engineRegistry.engine_ids,source,now);
+ assert.equal(report.registry_count,179);
+ assert.equal(report.observed_workflow_engines,0);
+ assert.equal(report.runtime_health_verified,0);
+ assert.equal(report.status_counts.POR_VERIFICAR,179);
+});
+test('an actual workflow with exact canonical engine ID changes only that engine',()=>{
+ const r={engine_id:'SEO-001',company_id:'fenix',provider:'GITHUB_ACTIONS',runtime_id:'12345678',
+  observed_at:source.observed_at,status:'in_progress',conclusion:null,
+  evidence:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/12345678'};
+ const one=buildEngineActivity(engineRegistry.engine_ids,{...source,engine_runs:[r]},now);
+ assert.equal(one.status_counts.ACTIVO,1);
+ assert.equal(one.status_counts.POR_VERIFICAR,178);
+ assert.equal(one.runtime_health_verified,0);
+ const failed=buildEngineActivity(engineRegistry.engine_ids,{...source,engine_runs:[{...r,status:'completed',conclusion:'failure'}]},now);
+ assert.equal(failed.status_counts.FALLANDO,1);
+ const success=buildEngineActivity(engineRegistry.engine_ids,{...source,engine_runs:[{...r,status:'completed',conclusion:'success'}]},now);
+ assert.equal(success.status_counts.PARCIAL,1);
+ const stale=buildEngineActivity(engineRegistry.engine_ids,{...source,status:'DEGRADADO',engine_runs:[r]},now);
+ assert.equal(stale.status_counts.ACTIVO,0);
+ assert.equal(stale.status_counts.POR_VERIFICAR,179);
+});
+test('engine observations with fake URL or wrong company cannot assert real status',()=>{
+ const r={engine_id:'SEO-001',company_id:'other',provider:'GITHUB_ACTIONS',runtime_id:'12345678',
+  observed_at:source.observed_at,status:'in_progress',evidence:'https://example.org/runs/12345678'};
+ const x=buildEngineActivity(engineRegistry.engine_ids,{...source,engine_runs:[r]},now);
+ assert.equal(x.observed_workflow_engines,0);
+ assert.equal(x.status_counts.ACTIVO,0);
+});

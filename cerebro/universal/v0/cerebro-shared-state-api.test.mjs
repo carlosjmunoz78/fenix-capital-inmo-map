@@ -110,6 +110,19 @@ test('paged shared profile details preserve identifiers, family and original par
   assert.equal(x.shared_state.status,'POR_VERIFICAR');
  }
 });
+test('canonical 179 motors get independent live workflow observations without falsifying specialist activity',async()=>{
+ fake({running:true});const response=res();await handler(req(),response);
+ assert.equal(response.state.status,200);
+ assert.equal(response.state.payload.engine_activity.registry_count,179);
+ assert.equal(response.state.payload.engine_activity.observed_workflow_engines,1);
+ assert.equal(response.state.payload.engine_activity.status_counts.ACTIVO,1);
+ assert.equal(response.state.payload.overview.states.ACTIVO,0);
+ const paged=res();await handler(req(q('mode=engines&company_id=fenix&offset=0&limit=7')),paged);
+ assert.equal(paged.state.status,200);
+ assert.equal(paged.state.payload.schema,'CEREBRO_ENGINE_ACTIVITY_V1');
+ assert.equal(paged.state.payload.page.total,179);
+ assert.equal(paged.state.payload.records.length,7);
+});
 test('running engine does not turn 191 SEO profiles active by family association',async()=>{
  fake({running:true});const response=res();await handler(req(),response);
  assert.equal(response.state.status,200);
