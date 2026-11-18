@@ -28,9 +28,9 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = refs/heads/cerebro/operativa-cloudflare-portability-lab-20261118
-          test -z "$CLOUDFLARE_API_TOKEN"
-          test -z "$CLOUDFLARE_ACCOUNT_ID"
-          test -z "$VERCEL_TOKEN"
+          test -z "${CLOUDFLARE_API_TOKEN:-}"
+          test -z "${CLOUDFLARE_ACCOUNT_ID:-}"
+          test -z "${VERCEL_TOKEN:-}"
           node -e 'const fs=require("node:fs");const c=JSON.parse(fs.readFileSync("cerebro/universal/cloudflare-portability-lab/wrangler.jsonc"));if(c.workers_dev!==false||c.preview_urls!==false||c.routes||c.triggers||c.vars||c.observability?.enabled!==false)throw Error("CF_PUBLIC_OR_SCHEDULED_SCOPE_DENIED")'
       - name: Original Vite build unchanged
         run: |
