@@ -7,6 +7,7 @@ import CerebroOperativeConsole from './CerebroOperativeConsole';
 import CerebroOperativeCockpitV3Bridge from './CerebroOperativeCockpitV3Bridge';
 import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar';
 import CerebroNeuralView from './CerebroNeuralView';
+import {CerebroSharedStateProvider,CerebroSharedStatusBanner} from './cerebroSharedState';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import JarvisVisibleLanguageGuard from './JarvisVisibleLanguageGuard';
 import {fetchAppApi,supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
@@ -77,20 +78,21 @@ export default function CerebroConsoleHost(){
    <p>{ownerAccess==='checking'?'Comprobando acceso de propietario…':'No se ha podido verificar tu acceso de propietario. No se han cambiado tus permisos.'}</p>
   </section>;
  if(ownerAccess!=='allowed')return <><JarvisVisibleLanguageGuard/><CerebroConsoleShell/></>;
- if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
+ if(view==='V0')return <CerebroSharedStateProvider><div className="cerebro-console-host view-v0"><CerebroSharedStatusBanner/><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div></CerebroSharedStateProvider>;
 
  const primaryView=view as CerebroPrimaryView;
  // Owner authentication is unchanged; V3 and classic share the canonical chat/voice hook.
 
- return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
+ return <CerebroSharedStateProvider><div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
   {primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null}
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
+  <CerebroSharedStatusBanner/>
   <div className="cerebro-interface-stage">
    {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
    {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">{showPremiumV3?<CerebroOperativeCockpitV3Bridge/>:<><CerebroOperativeConsole/>{realProduction?<div style={{padding:'12px 20px',textAlign:'center'}}><a href="/cerebro?section=operativa" style={{color:'#8bdcf8'}}>Abrir Operativa Premium V3</a></div>:null}</>}</div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>
- </div>;
+ </div></CerebroSharedStateProvider>;
 }
