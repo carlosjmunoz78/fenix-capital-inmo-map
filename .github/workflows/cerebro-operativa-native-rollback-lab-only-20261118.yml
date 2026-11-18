@@ -54,8 +54,10 @@ jobs:
           export XDG_DATA_HOME="$RUNNER_TEMP/cerebro-native-rollback-only-auth"
           echo "XDG_DATA_HOME=$XDG_DATA_HOME" >> "$GITHUB_ENV"
           node -e 'const fs=require("node:fs"),p=require("node:path"),d=p.join(process.env.XDG_DATA_HOME,"com.vercel.cli");fs.mkdirSync(d,{recursive:true,mode:0o700});fs.writeFileSync(p.join(d,"auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600})'
-          vercel link --yes --project="$LAB_PROJECT_NAME" --scope=carlosjmunozcabeza-2582s-projects >/dev/null
-          node -e 'const p=require("./.vercel/project.json");if(p.orgId!==process.env.VERCEL_ORG_ID||p.projectId!==process.env.VERCEL_PROJECT_ID)throw Error("BLOCKED: NOT_ISOLATED_LAB_PROJECT")'
+          # With VERCEL_PROJECT_ID set, modern CLI uses env and need not write .vercel/project.json.
+          # Verify server-confirmed exact scoped project name in sanitized local CLI output.
+          vercel link --yes --project="$LAB_PROJECT_NAME" --scope=carlosjmunozcabeza-2582s-projects > "$RUNNER_TEMP/cerebro-static-lab-link.log" 2>&1
+          grep -Fq "carlosjmunozcabeza-2582s-projects/cerebro-operativa-rollback-drill-20261118" "$RUNNER_TEMP/cerebro-static-lab-link.log" || { echo "BLOCKED: LAB_LINK_NOT_CERTIFIED"; exit 4; }
           echo 'LINKED_EXACT_STATIC_LAB_PASS'
           # Hobby only supports reverting to the immediately previous deployment.
           # Deployment B was created after A and verified as the current LAB alias.
@@ -67,4 +69,5 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$RUNNER_TEMP/cerebro-native-rollback-only-auth" .vercel
+          rm -f "$RUNNER_TEMP/cerebro-static-lab-link.log"
           echo 'EPHEMERAL_AUTH_REMOVED; NO_FENIX_PROD_ALIAS_TOUCHED'
