@@ -2,13 +2,14 @@
  * Supervisor v1. No network or database access. Inputs must come from already
  * cryptographically verified runtime projections; inventory NEVER proves health.
  */
+import {PROJECTION_ATTESTED_V1} from './agent-evidence-bridge-v1.mjs';
 const date=x=>typeof x==='string'&&Number.isFinite(Date.parse(x))?Date.parse(x):null;
 const summary=(arr,p)=>arr.filter(p).length;
 export function superviseAgentsV1({projection,observed_at}={}){
  const now=date(observed_at);
  if(!projection||projection.status!=='OK'||projection.read_only!==true||
     projection.source!=='CEREBRO_VERIFIED_EXECUTOR_EVIDENCE_V1'||
-    projection.company_id!=='fenix'||!Array.isArray(projection.profiles)||
+    projection.company_id!=='fenix'||projection[PROJECTION_ATTESTED_V1]!==true||!Array.isArray(projection.profiles)||
     projection.profile_total!==projection.profiles.length||now===null)
   throw Error('SUPERVISOR_UNTRUSTED_PROJECTION');
  if(Math.abs(now-date(projection.observed_at))>120000)throw Error('SUPERVISOR_STALE_PROJECTION');
