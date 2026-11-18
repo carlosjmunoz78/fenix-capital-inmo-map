@@ -1,0 +1,48 @@
+name: CEREBRO OPERATIVA · App CRM recovery source contract READONLY
+on:
+  push:
+    branches: [cerebro/operativa-app-crm-recovery-gates-20261118]
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-operativa-app-crm-source-recovery-20261118
+  cancel-in-progress: false
+jobs:
+  app-crm-recovery-source-contract:
+    if: contains(github.event.head_commit.message, '[CHECK_APP_CRM_RECOVERY_ONLY]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact QA branch with ancestor baseline history
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 50
+          persist-credentials: false
+      - name: Set up Node 24 for pinned application build
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Enforce lab-only branch, no secrets, no infrastructure mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/cerebro/operativa-app-crm-recovery-gates-20261118
+          test -z "${VERCEL_TOKEN:-}"
+          git cat-file -e a51dd14eac11f02424dce5db426346b041c1824f^{commit}
+          git cat-file -e 7163dccd962a19fbd5301b14fcacacf08b7245ea^{commit}
+          echo 'GATE_READ_ONLY_SOURCE_BASELINE_CONFIRMED'
+      - name: Install pinned lockfile with no new subscriptions
+        run: npm ci --no-audit --no-fund
+      - name: TypeScript + Vite build with inherited App/CRM baseline
+        run: npm run build
+      - name: Existing owner directory negative and positive tests
+        run: node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs
+      - name: Diff + protected App CRM Auth recovery contract
+        run: node cerebro/universal/v0/operativa-app-crm-recovery-check.mjs
+      - name: Seal result: source gate only, no production promotion
+        run: |
+          echo 'SOURCE_RECOVERY_CONTRACT=PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'APP_CRM_RUNTIME_E2E=NOT_TESTED' >> "$GITHUB_STEP_SUMMARY"
+          echo 'NATIVE_ROLLBACK_ONLY_VERIFIED_IN_STATIC_LAB=YES' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD_PROMOTION=HOLD' >> "$GITHUB_STEP_SUMMARY"
