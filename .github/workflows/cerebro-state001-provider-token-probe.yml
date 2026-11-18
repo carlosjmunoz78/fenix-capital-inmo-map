@@ -23,6 +23,6 @@ jobs:
           for key in CF_STANDARD CF_ALT CF_GENERIC CF_CEREBRO SUPA_STANDARD SUPA_ALT SUPA_CEREBRO; do
             val="${!key}"
             if [[ "$val" != "true" && "$val" != "false" ]]; then exit 9; fi
-            printf '%s=%s\n' "$key" "$val" >> "$GITHUB_STEP_SUMMARY"
+            printf '%s=%s\n' "$key" "$val" | tee -a "$GITHUB_STEP_SUMMARY"
           done
           echo "NO_CREDENTIALS_PRINTED_OR_USED; NO_PROD_MUTATIONS" >> "$GITHUB_STEP_SUMMARY"
