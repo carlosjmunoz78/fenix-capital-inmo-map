@@ -73,6 +73,22 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
     read_only:true,request_executed_job:false
    })
   };
+  if(String(url).includes('cerebro-dispatch-health-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
+   status:'HEALTH_ENDPOINTS_RESPOND',source:'CEREBRO_LAB_DISPATCH_HEALTH_SIGNED_V1',
+   company_id:'fenix',environment:'LAB',read_only:true,executed:false,
+   signed_samples:4,healthy_endpoints:4,runner_capability:'HTTP_HEALTH_ONLY',
+   legacy_jobs_executed:false,full_engine_certified:false,prod_execution_enabled:false,
+   github_actions_required_to_execute_original_workers:true,
+   signed_by_private_db_key:true,certifies_original_executors:false,
+   sources:[
+    {service:'jarvis-work-dispatch-v1-preprod',engine_id:'CONSOLE-001'},
+    {service:'cerebro-browser-work-total-dispatch-v1-preprod',engine_id:'CONSOLE-001'},
+    {service:'cerebro-creative-dispatch-v1',engine_id:'FACT-001'},
+    {service:'cerebro-ums-production-dispatch-v1',engine_id:'UMS-001'}
+   ].map(x=>({...x,last_checked_at:new Date().toISOString(),http_status:200,
+    health_state:'HEALTH_ENDPOINT_OK',signature_verified:true,recent:true,
+    runtime_execution_verified:false,autonomy_certified:false}))
+  })};
   if(String(url).includes('cerebro-cert-supervisor-history-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
    status:'OK',source:'CEREBRO_CERT_SUPERVISOR_DURABLE_LAB_V1',read_only:true,
    executed:false,company_id:'fenix',environment:'LAB',receipt_id:'aaaaaaa1-bbbb-4ccc-8ddd-eeeeeeeeeeee',
@@ -164,7 +180,12 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.durable_supervisor.signed,true);
   assert.equal(x.body.durable_supervisor.cron_job_id,77);
   assert.equal(x.body.durable_supervisor.global_autonomy_certified,false);
-  assert.equal(urls.length,9);
+  assert.equal(x.body.dispatch_health.status,'LIVE');
+  assert.equal(x.body.dispatch_health.healthy_endpoints,4);
+  assert.equal(x.body.dispatch_health.signed_samples,4);
+  assert.equal(x.body.dispatch_health.full_engine_certified,false);
+  assert.equal(x.body.dispatch_health.sources.every(x=>x.signature_verified===true&&x.runtime_execution_verified===false),true);
+  assert.equal(urls.length,10);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
