@@ -12,7 +12,7 @@ export function classifyProfile(profile,source,now=Date.now()){
  const obs=profile?.runtime_observation;
  const valid=source?.status==='ACTIVO'&&Number.isFinite(times(source.observed_at))&&
    now-times(source.observed_at)>=-120000&&now-times(source.observed_at)<=MAX_FEED_AGE_MS&&
-   obs&&obs.engine_id===profile.id&&obs.company_id==='fenix'&&
+   obs&&obs.company_id==='fenix'&&typeof obs.engine_id==='string'&&/^[A-Z][A-Z0-9-]{2,25}$/.test(obs.engine_id)&&
    // A GitHub workflow engine_id, even exact, is not an independently attested profile identity.
    obs.profile_key===profile.kind+':'+profile.id&&
    obs.profile_provenance==='EXPLICIT_EXECUTOR_ATTESTATION'&&

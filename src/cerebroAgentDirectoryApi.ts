@@ -5,7 +5,7 @@ export type AgentDirectoryRecord={
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
  company_scope:string;source_url:string;
  runtime_status?:'ACTIVO'|'INACTIVO'|'DEGRADADO'|'PREPARADO'|'DEFINIDO'|'POR_VERIFICAR';
- runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR'}|null;
+ runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR';profile_key?:string|null;profile_provenance?:string|null}|null;
  shared_state?:{status:'ACTIVO'|'PARCIAL'|'FALLANDO'|'DEFINIDO'|'POR_VERIFICAR';reason:string;evidence:string|null;profile_key:string;department_key:string;observed_at:string|null}
 };
 export type AgentDirectoryResponse={

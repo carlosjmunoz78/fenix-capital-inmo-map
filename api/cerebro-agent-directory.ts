@@ -225,7 +225,7 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
 /** Runtime is evidence, not a property of a logical role. Fail closed if feed is stale.
  * This is the SAME owner-gated activity source already consumed by JARVIS and NEURONAL.
  */
-type RuntimeFeedRun={run_id?:number;engine_id?:string|null;company_id?:string;status?:string;updated_at?:string;conclusion?:string|null;html_url?:string;environment?:string;version?:string};
+type RuntimeFeedRun={run_id?:number;engine_id?:string|null;company_id?:string;status?:string;updated_at?:string;conclusion?:string|null;html_url?:string;environment?:string;version?:string;profile_key?:string;profile_provenance?:string};
 type RuntimeFeed={status?:string;source_status?:string;observed_at?:string;runs?:RuntimeFeedRun[];reason?:string};
 const ACTIVITY_SOURCE='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/';
 const VALID_STATES=new Set(['in_progress','queued','waiting','requested','pending','completed']);
@@ -252,16 +252,24 @@ export async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
    !Number.isFinite(age)||age<(-120000)||age>FRESH_MS||!Array.isArray(feed.runs))
   return degraded('ACTIVITY_EVIDENCE_STALE_OR_INVALID');
  const byEngine=new Map<string,RuntimeFeedRun>();
+ const byProfile=new Map<string,RuntimeFeedRun>();
+ const knownProfiles=new Set(entries.map(x=>x.kind+':'+x.id));
  for(const r of feed.runs){
   if(!acceptedFeedRun(r))continue;
   const prior=byEngine.get(r.engine_id!);
   if(!prior||String(r.updated_at)>String(prior.updated_at))byEngine.set(r.engine_id!,r);
+  // Only explicit identity attestation from the authenticated source may link a logical profile.
+  // Derived workflow names and family aliases are NEVER accepted as profile identity.
+  if(r.profile_provenance==='EXPLICIT_EXECUTOR_ATTESTATION'&&typeof r.profile_key==='string'&&knownProfiles.has(r.profile_key)){
+   const previous=byProfile.get(r.profile_key);
+   if(!previous||String(r.updated_at)>String(previous.updated_at))byProfile.set(r.profile_key,r);
+  }
  }
  const records=entries.map(entry=>{
   // Engine-level evidence is NOT role-level proof. Exact role/runtime identity
   // is required to mark a logical profile itself runtime_verified.
   const associated=entry.engine_ids.map(id=>byEngine.get(id)).filter((r):r is RuntimeFeedRun=>Boolean(r));
-  const exact=byEngine.get(entry.id);
+  const exact=byProfile.get(entry.kind+':'+entry.id);
   const match=exact||associated.sort((a,b)=>String(b.updated_at).localeCompare(String(a.updated_at)))[0];
   if(!match)return {...entry,runtime_verified:false,runtime_status:'POR_VERIFICAR' as const,runtime_observation:null};
   const activityIsFresh=feed.source_status==='LIVE'&&Date.now()-Date.parse(match.updated_at??'')<=120000;
@@ -276,7 +284,8 @@ export async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
      company_id:'fenix' as const,environment:String(match.environment??'UNKNOWN'),
      version:String(match.version??'UNKNOWN'),observed_at:feed.observed_at!,
      last_run:match.updated_at||null,last_run_result:match.conclusion??null,
-     source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,evidence:match.html_url!,status
+     source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,evidence:match.html_url!,status,
+     profile_key:exact?.profile_key??null,profile_provenance:exact?.profile_provenance??null
     }
   };
  });

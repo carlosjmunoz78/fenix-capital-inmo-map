@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {buildSharedState,classifyProfile,CONTRACT} from './cerebro-shared-state-core.mjs';
 const now=Date.parse('2026-11-18T12:00:00Z');
 const source={status:'ACTIVO',observed_at:'2026-11-18T11:59:40Z'};
-const run={provider:'GITHUB_ACTIONS',runtime_id:'44288787233',engine_id:'SEO-PF01:DIRECTOR',profile_key:'AGENT_ROLE:SEO-PF01:DIRECTOR',profile_provenance:'EXPLICIT_EXECUTOR_ATTESTATION',company_id:'fenix',observed_at:source.observed_at,last_run:'2026-11-18T11:59:25Z',last_run_result:'success',source:'CEREBRO_CONSOLE_ACTIVITY_V0',evidence:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44288787233',status:'POR_VERIFICAR'};
+const run={provider:'GITHUB_ACTIONS',runtime_id:'44288787233',engine_id:'SEO-001',profile_key:'AGENT_ROLE:SEO-PF01:DIRECTOR',profile_provenance:'EXPLICIT_EXECUTOR_ATTESTATION',company_id:'fenix',observed_at:source.observed_at,last_run:'2026-11-18T11:59:25Z',last_run_result:'success',source:'CEREBRO_CONSOLE_ACTIVITY_V0',evidence:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44288787233',status:'POR_VERIFICAR'};
 const profile=(id,kind='AGENT_ROLE')=>({id,name:id,kind,family:'SEO_ENTERPRISE',engine_ids:['SEO-001'],parent_id:null,runtime_verified:false});
 test('group by original department no migration, no orphan and exact counts',()=>{
  const data=buildSharedState([profile('A'),profile('B'),{...profile('T','SUBAGENT_TEMPLATE'),family:'SOCIAL_FACEBOOK'}],source,now);
@@ -24,6 +24,10 @@ test('another profile kind or cross-company attestation is rejected',()=>{
  const x={...profile(run.engine_id),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
  assert.equal(classifyProfile({...x,kind:'SUBAGENT_ROLE'},source,now).status,'POR_VERIFICAR');
  assert.equal(classifyProfile({...x,runtime_observation:{...run,company_id:'aion'}},source,now).status,'POR_VERIFICAR');
+});
+test('explicit attestation is the only proof that a shared engine is running a specialist',()=>{
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,status:'ACTIVO',last_run_result:null},runtime_verified:true};
+ assert.equal(classifyProfile(x,source,now).status,'ACTIVO');
 });
 test('a fresh EXACT id with running proof can be active',()=>{
  const x={...profile(run.engine_id),runtime_observation:{...run,status:'ACTIVO',last_run_result:null},runtime_verified:true};
