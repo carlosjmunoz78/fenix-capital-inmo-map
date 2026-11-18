@@ -4,6 +4,7 @@
  * 30s logical refresh; never fetches secrets, logs, worker scripts or CRM rows.
  * NO PROD endpoint: only isolated Vercel Preview or exact private --skip-domain stage.
  */
+import {attestGithubQaRunV1,GITHUB_QA_WORKFLOW_ID,GITHUB_QA_HEAD} from '../cerebro/universal/v0/agent-github-run-attestor-v1.mjs';
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
 type Res={status:(n:number)=>Res;setHeader:(key:string,val:string)=>void;json:(x:unknown)=>void};
@@ -72,6 +73,48 @@ async function collectLabJobs(ownerBearer:string,prodApikey:string,labPublishabl
  }
  return count; // historical records, NOT active agents or live executing jobs
 }
+
+type GithubClaim={state:'VERIFIED'|'NOT_VERIFIED'|'UNAVAILABLE';profile_id:'ENG-QA'|null;
+ proof_id:string|null;run_url:string|null;quality:'CI_TESTS_PASS_NO_TRIBUNAL'|'NOT_ATTESTED';observed_at:string|null};
+let githubCache:{at:number;result:GithubClaim}|null=null;
+async function githubJson(path:string){
+ const url='https://api.github.com/repos/carlosjmunoz78/fenix-capital-inmo-map/'+path;
+ const resp=await fetch(url,{method:'GET',cache:'no-store',redirect:'error',
+  headers:{accept:'application/vnd.github+json','x-github-api-version':'2022-11-28',
+   'user-agent':'cerebro-operativa-agent-evidence-lab-v1'},signal:AbortSignal.timeout(6000)});
+ if(!resp.ok)throw Error('GITHUB_READBACK_DENIED');
+ const text=await resp.text();
+ if(text.length>450000)throw Error('GITHUB_READBACK_OVERSIZE');
+ return JSON.parse(text);
+}
+async function githubQaProof(stamp:string):Promise<GithubClaim>{
+ const now=Date.parse(stamp);
+ if(githubCache&&now-githubCache.at<180000)return githubCache.result;
+ let out:GithubClaim={state:'UNAVAILABLE',profile_id:null,proof_id:null,run_url:null,
+  quality:'NOT_ATTESTED',observed_at:null};
+ try{
+  const first=await githubJson('actions/workflows/'+GITHUB_QA_WORKFLOW_ID+
+    '/runs?branch='+encodeURIComponent(GITHUB_QA_HEAD)+'&per_page=10');
+  if(!Array.isArray(first.workflow_runs)||first.workflow_runs.length>10)throw Error('GITHUB_SCHEMA_INVALID');
+  out={...out,state:'NOT_VERIFIED'};
+  for(const run of first.workflow_runs){
+   if(run?.conclusion!=='success'||run?.status!=='completed'||
+      Date.parse(run.updated_at||'')<now-86400000)continue;
+   const details=await githubJson('actions/runs/'+run.id+'/jobs?per_page=100');
+   if(!Array.isArray(details.jobs)||details.jobs.length>100)continue;
+   const verified=attestGithubQaRunV1({run,jobs:details.jobs,now:stamp});
+   if(verified){
+    out={state:'VERIFIED',profile_id:'ENG-QA',proof_id:verified.receipt_id,
+      run_url:verified.run_url,quality:'CI_TESTS_PASS_NO_TRIBUNAL',
+      observed_at:verified.emitted_at};
+    break;
+   }
+  }
+ }catch{/* no heuristic fallback, absence is not failure of any engine */}
+ githubCache={at:now,result:out};
+ return out;
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -103,7 +146,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab]=await Promise.all([
+ const [cf,lab,github]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -114,6 +157,7 @@ export default async function handler(req:Req,res:Res){
    try{return{source:'SUPABASE' as const,status:'LIVE' as const,count:await collectLabJobs(auth,apikey,labKey)}}
    catch{return{source:'SUPABASE' as const,status:'UNAVAILABLE' as const,count:null as number|null}}
   })()
+  githubQaProof(stamp)
  ]);
  const statuses:Status[]=[
   {source:'CLOUDFLARE',status:cf.status,metric_label:'WORKERS_IN_ACCOUNT',
@@ -122,17 +166,29 @@ export default async function handler(req:Req,res:Res){
    visible_count:lab.status==='LIVE'?lab.count:null,observed_at:lab.status==='LIVE'?stamp:null}
  ];
  // The separate canonical directory endpoint owns the 2506 count.
- // No receipts reach this coverage endpoint yet; DO NOT certify any profile.
+ // Only the explicitly attested ENG-QA first-party GitHub job can earn historical execution here.
  // Avoid importing Vercel's independent API route as a Node module (cold-start 500).
   return res.status(200).json({status:statuses.every(x=>x.status==='LIVE')?'OK':'PARTIAL',
   company_id:'fenix',observed_at:stamp,read_only:true,executed:false,
   inventory_sources:statuses,profile_total:2506,
   templates_not_instances:29,
   accreditable_profiles:2477,
-  runtime_verified_profiles:0,
+  runtime_verified_profiles:github.state==='VERIFIED'?1:0,
   active_recent_profiles:0,
-  unverified_profiles:2477,
+  unverified_profiles:github.state==='VERIFIED'?2476:2477,
   active_executor_count:null,
-  receipt_source_status:'NOT_CONNECTED',
+  receipt_source_status:github.state==='VERIFIED'?'GITHUB_VERIFIED_QA_JOB':'NOT_CONNECTED',
+  verified_profiles:github.state==='VERIFIED'?[{
+   id:'ENG-QA',engine_id:'QA-001',state:'EXECUTION_EVIDENCED_NOT_AUTONOMOUS',
+   proof_id:github.proof_id,proof_url:github.run_url,observed_at:github.observed_at,
+   quality:github.quality,tribunal_passed:false
+  }]:[],
+  supervisor:{
+   provider_health:statuses.every(v=>v.status==='LIVE')?'LIVE':'PARTIAL',
+   github_qa_attestation:github.state,
+   agent_quality:'NOT_ATTESTED_GLOBAL',excellence_verified:0,
+   source_failure_observations:statuses.filter(v=>v.status==='UNAVAILABLE').map(v=>v.source),
+   last_observed_at:stamp
+  },
   warning:'CLOUDFLARE_ACCOUNT_WORKERS_AND_SUPABASE_HISTORICAL_LAB_JOBS_ARE_NOT_ACTIVE_AGENTS; SIGNED_IDENTITY_RECEIPTS_PENDING'});
 }
