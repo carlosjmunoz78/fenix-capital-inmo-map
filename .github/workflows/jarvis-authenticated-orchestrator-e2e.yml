@@ -19,7 +19,7 @@ jobs:
     env:
       PROD_URL: https://cluhljgonannaafpmblx.supabase.co
       PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
-      CEREBRO_E2E_TEST_EMAIL: ${{ secrets.CEREBRO_E2E_TEST_EMAIL }}
+      CEREBRO_E2E_TEST_EMAIL: ${{ secrets.CEREBRO_E2E_TEST_EMAIL || 'cerebro-e2e@fenixcapital.es' }}
       CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
       BASE: https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0
       SAFE_BRANCH: cerebro/jarvis-core-prod-candidate-20261103
