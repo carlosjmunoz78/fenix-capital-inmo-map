@@ -77,6 +77,21 @@ export default function CerebroRoleAgentRosterReadonly(){
      </span>:<span> Sin identidades de ejecución acreditadas.</span>}
     Tribunal y excelencia global: <b>PENDIENTES</b>.
    </p>:null}
+  {coverage.kind==='ready'&&coverage.data?.engine_truth.status==='LIVE'?
+   <section className="op3-source-note" aria-label="Auditoría de motores existentes y evidencias">
+    <strong>Estado REAL de los motores existentes (solo lectura LAB)</strong>.
+    <p>El historial no demuestra que los motores estén ejecutándose. Revisados {coverage.data.engine_truth.historical_job_rows} trabajos
+     en JARVIS, navegador y productora. No se atribuyen automáticamente a agentes.</p>
+    <ul>{coverage.data.engine_truth.sources.map(e=>
+     <li key={e.source+'-'+e.engine_id+'-'+e.environment}>
+      <b>{e.engine_id}</b> · {e.source} · {e.historical_jobs} trabajos históricos;
+      <b> {e.recent_metadata_rows===0?'SIN ACTIVIDAD RECIENTE ACREDITADA':'CON METADATOS RECIENTES SIN CERTIFICACIÓN'}</b>;
+      identificadores de rol explícitos: {e.explicit_role_rows};
+      certificación autónoma: <b>NO</b>.
+     </li>
+    )}</ul>
+   </section>:
+   <p className="op3-source-note">Auditoría de actividad real por motor: lectura no disponible ahora; no equivale a motores operativos.</p>}
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
    <div><strong>{count?.registered_logical_subagent_roles??'—'}</strong><small>Especialistas/subagentes lógicos · ejecución no verificada</small></div>
