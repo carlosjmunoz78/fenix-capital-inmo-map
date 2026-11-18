@@ -18,7 +18,7 @@ const rawReceipt=(overrides={})=>({
 const key=Uint8Array.from({length:32},(_,i)=>i+1);
 const receipt=(overrides={})=>{
  const raw=rawReceipt(overrides);
- const sig=createHmac('sha256',key).update('CEREBRO_AGENT_RECEIPT_V1\\n'+canonicalAgentReceiptV1(raw)).digest('hex');
+ const sig=createHmac('sha256',key).update('CEREBRO_AGENT_RECEIPT_V1\n'+canonicalAgentReceiptV1(raw)).digest('hex');
  return verifyAgentReceiptHmacV1({receipt:raw,signature_hex:sig,key,expected_source:raw.source});
 };
 const project=(opts={})=>projectAgentEvidenceV1({roster,company_id:'fenix',observed_at:stamp,
