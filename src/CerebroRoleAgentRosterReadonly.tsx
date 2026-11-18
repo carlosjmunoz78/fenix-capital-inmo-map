@@ -20,7 +20,7 @@ export default function CerebroRoleAgentRosterReadonly(){
  // Source coverage uses one bounded read every 30 seconds; provider inventories
  // never establish that any logical agent or subagent is actually running.
  useEffect(()=>{
-  if(!/^fenix-capital-preprod-[a-z0-9]+\\.vercel\\.app$/.test(window.location.hostname))return;
+  if(!/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(window.location.hostname))return;
   let mounted=true;
   const controller=new AbortController();
   const load=()=>{void readExecutorCoverage(controller.signal).then(x=>{if(mounted)setCoverage(x)})};
