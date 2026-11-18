@@ -8,7 +8,7 @@ const apikey='sb_publishable_contract_test';
 const q=(suffix='mode=summary&company_id=fenix')=>'/api/cerebro-shared-state?'+suffix;
 const req=(url=q(),method='GET',headers={})=>({method,url,headers:{host:'app.fenixcapital.es',authorization:auth,apikey,accept:'application/json',...headers}});
 const res=()=>{let status=200,payload,headers={};return{setHeader(k,v){headers[k]=v},status(s){status=s;return this},json(b){payload=b;return this},get state(){return{status,payload,headers}}}};
-function fake({owner=true,feed='LIVE',running=false}={}){
+function fake({owner=true,feed='LIVE',running=false,attested=false,failed=false}={}){
  const calls=[];
  globalThis.fetch=async (url)=>{
   calls.push(String(url));
@@ -18,9 +18,10 @@ function fake({owner=true,feed='LIVE',running=false}={}){
    const today=new Date().toISOString();
    return{ok:true,status:200,json:async()=>({status:'OK',source_status:feed==='STALE'?'CACHED':'LIVE',
     observed_at:feed==='STALE'?'2026-01-01T00:00:00Z':today,runs:running?[{
-     run_id:12345678,company_id:'fenix',engine_id:'SEO-001',status:'in_progress',updated_at:today,
+     run_id:12345678,company_id:'fenix',engine_id:'SEO-001',status:failed?'completed':'in_progress',updated_at:today,
+     ...(attested?{profile_key:'AGENT_ROLE:SEO-PF01:DIRECTOR',profile_provenance:'EXPLICIT_EXECUTOR_ATTESTATION'}:{}),
      html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/12345678',
-     environment:'PROD',version:'mock',conclusion:null
+     environment:'PROD',version:'mock',conclusion:failed?'failure':null
     }]:[]})};
   }
   throw Error('UNEXPECTED_NETWORK');
@@ -65,6 +66,23 @@ test('running engine does not turn 191 SEO profiles active by family association
  assert.equal(response.state.status,200);
  assert.equal(response.state.payload.overview.verified_running_profiles,0);
  assert.equal(response.state.payload.overview.states.ACTIVO,0);
+});
+test('one attested specialist run changes only that specialist, preserving 2505 other states',async()=>{
+ fake({running:true,attested:true});const response=res();await handler(req(),response);
+ assert.equal(response.state.status,200);
+ assert.equal(response.state.payload.overview.verified_running_profiles,1);
+ assert.equal(response.state.payload.overview.states.ACTIVO,1);
+ assert.equal(response.state.payload.departments.find(x=>x.department_key==='SEO_ENTERPRISE').states.ACTIVO,1);
+ const response2=res();await handler(req(q('mode=profiles&company_id=fenix&family=SEO_ENTERPRISE&kind=ALL&offset=0&limit=1')),response2);
+ assert.equal(response2.state.payload.records[0].id,'SEO-PF01:DIRECTOR');
+ assert.equal(response2.state.payload.records[0].shared_state.status,'ACTIVO');
+});
+test('a failed attested run updates only the affected profile to FALLANDO, not the whole department',async()=>{
+ fake({running:true,attested:true,failed:true});const response=res();await handler(req(),response);
+ assert.equal(response.state.status,200);
+ assert.equal(response.state.payload.overview.states.FALLANDO,1);
+ assert.equal(response.state.payload.overview.states.ACTIVO,0);
+ assert.equal(response.state.payload.departments.find(x=>x.department_key==='SEO_ENTERPRISE').states.FALLANDO,1);
 });
 test('an outdated or failed common activity source degrades without 2506 fake failures',async()=>{
  for(const feed of ['STALE','HTTP503']){

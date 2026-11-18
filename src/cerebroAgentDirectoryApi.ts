@@ -52,7 +52,9 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
    data.records.some(x=>!x.id||!x.name||!x.purpose_plain||!x.source||
      !['AGENT_ROLE','SUBAGENT_ROLE','SUBAGENT_TEMPLATE'].includes(x.kind)||!Array.isArray(x.engine_ids)||
      typeof x.runtime_verified!=='boolean'||typeof x.hierarchy_verified!=='boolean'||
-     (x.runtime_verified===true&&(!x.runtime_observation||x.runtime_observation.engine_id!==x.id||
+     (x.runtime_verified===true&&(!x.runtime_observation||
+      x.runtime_observation.profile_key!==x.kind+':'+x.id||
+      x.runtime_observation.profile_provenance!=='EXPLICIT_EXECUTOR_ATTESTATION'||
       x.runtime_observation.status!=='ACTIVO'||x.runtime_observation.provider!=='GITHUB_ACTIONS'))||
      (x.shared_state&&(!['ACTIVO','PARCIAL','FALLANDO','DEFINIDO','POR_VERIFICAR'].includes(x.shared_state.status)||
       x.shared_state.department_key!==x.family||x.shared_state.profile_key!==x.kind+':'+x.id))))

@@ -13,15 +13,15 @@ test('group by original department no migration, no orphan and exact counts',()=
  assert.equal(data.records[0].id,'A');
 });
 test('engine ID association alone never makes the role active or failing',()=>{
- const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,engine_id:'SEO-001',status:'ACTIVO'},runtime_verified:true};
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,profile_key:null,profile_provenance:null,status:'ACTIVO'},runtime_verified:true};
  assert.equal(classifyProfile(x,source,now).status,'POR_VERIFICAR');
 });
 test('missing explicit profile attestation never becomes active',()=>{
- const x={...profile(run.engine_id),runtime_observation:{...run,profile_key:undefined,status:'ACTIVO'},runtime_verified:true};
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,profile_key:undefined,status:'ACTIVO'},runtime_verified:true};
  assert.equal(classifyProfile(x,source,now).status,'POR_VERIFICAR');
 });
 test('another profile kind or cross-company attestation is rejected',()=>{
- const x={...profile(run.engine_id),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
  assert.equal(classifyProfile({...x,kind:'SUBAGENT_ROLE'},source,now).status,'POR_VERIFICAR');
  assert.equal(classifyProfile({...x,runtime_observation:{...run,company_id:'aion'}},source,now).status,'POR_VERIFICAR');
 });
@@ -30,21 +30,21 @@ test('explicit attestation is the only proof that a shared engine is running a s
  assert.equal(classifyProfile(x,source,now).status,'ACTIVO');
 });
 test('a fresh EXACT id with running proof can be active',()=>{
- const x={...profile(run.engine_id),runtime_observation:{...run,status:'ACTIVO',last_run_result:null},runtime_verified:true};
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,status:'ACTIVO',last_run_result:null},runtime_verified:true};
  assert.equal(classifyProfile(x,source,now).status,'ACTIVO');
 });
 test('exact failed and passed job do not claim perfect quality',()=>{
- const x={...profile(run.engine_id),runtime_observation:run};
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:run};
  assert.equal(classifyProfile(x,source,now).status,'PARCIAL');
  assert.equal(classifyProfile({...x,runtime_observation:{...run,last_run_result:'failure'}},source,now).status,'FALLANDO');
 });
 test('stale or degraded sources cannot claim running',()=>{
- const x={...profile(run.engine_id),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
  assert.equal(classifyProfile(x,{status:'DEGRADADO',observed_at:source.observed_at},now).status,'POR_VERIFICAR');
  assert.equal(classifyProfile(x,{...source,observed_at:'2026-11-17T12:00:00Z'},now).status,'POR_VERIFICAR');
 });
 test('no exact evidence, forged provider or wrong company is rejected',()=>{
- const x={...profile(run.engine_id),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
  for(const update of [{provider:'CLOUDFLARE'},{company_id:'other'},{evidence:'https://example.com/fake'},{runtime_id:'fake'}]){
   assert.equal(classifyProfile({...x,runtime_observation:{...x.runtime_observation,...update}},source,now).status,'POR_VERIFICAR');
  }
