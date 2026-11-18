@@ -90,9 +90,11 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
  const credited=profiles.filter(p=>p.runtime_verified);
  return {status:'OK',source:'CEREBRO_VERIFIED_EXECUTOR_EVIDENCE_V1',company_id,observed_at,read_only:true,
   semantics:'PER_PROFILE_EXECUTION_RECEIPTS_NOT_WORKER_INVENTORY',
-  profile_total:profiles.length,runtime_verified_profiles:credited.length,
+  profile_total:profiles.length,templates_not_instances:profiles.filter(p=>p.kind==='SUBAGENT_TEMPLATE').length,
+  accreditable_profiles:profiles.filter(p=>p.kind!=='SUBAGENT_TEMPLATE').length,
+  runtime_verified_profiles:credited.length,
   active_recent_profiles:credited.filter(p=>p.active_execution_verified).length,
-  unverified_profiles:profiles.length-credited.length,
+  unverified_profiles:profiles.filter(p=>p.kind!=='SUBAGENT_TEMPLATE').length-credited.length,
   provider_inventory:[...providerStates].map(([source,set])=>({source,visible_executors:set.size,
    active_agents_from_inventory:null})).sort((a,b)=>a.source.localeCompare(b.source)),
   rejected_receipts:rejected,profiles};
