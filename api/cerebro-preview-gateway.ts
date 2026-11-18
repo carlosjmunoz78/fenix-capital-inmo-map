@@ -8,7 +8,7 @@ type Req={method?:string;url?:string;headers:Record<string,H>;query?:Record<stri
 type Res={status:(code:number)=>Res;setHeader:(key:string,value:string)=>void;json:(value:unknown)=>void};
 function hdr(v:H){return Array.isArray(v)?v[0]||'':v||''}
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
-const PINNED_PRIVATE_DEPLOYMENT=/^fenix-capital-preprod-[a-z0-9]+\\.vercel\\.app$/;
+const PINNED_PRIVATE_DEPLOYMENT=/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/;
 export function verifiedPrivateGatewayHost(host:string,env:string|undefined,uniqueHost:string|undefined){
  if(!HOST.test(host))return false;
  return env==='preview'||(env==='production'&&PINNED_PRIVATE_DEPLOYMENT.test(host)&&uniqueHost===host);
