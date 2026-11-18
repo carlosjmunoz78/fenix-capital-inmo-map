@@ -156,7 +156,7 @@ export default async function handler(req:Req,res:Res){
    if(labKey.length<12)return{source:'SUPABASE' as const,status:'NOT_CONFIGURED' as const,count:null as number|null};
    try{return{source:'SUPABASE' as const,status:'LIVE' as const,count:await collectLabJobs(auth,apikey,labKey)}}
    catch{return{source:'SUPABASE' as const,status:'UNAVAILABLE' as const,count:null as number|null}}
-  })()
+  })(),
   githubQaProof(stamp)
  ]);
  const statuses:Status[]=[
