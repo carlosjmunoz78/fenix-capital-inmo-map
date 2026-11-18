@@ -1,0 +1,130 @@
+name: CEREBRO SHARED STATE · Exact SHA isolated Vercel stage NO DOMAIN
+on:
+  push:
+    branches: [cerebro/shared-state-all-interfaces-v0-20261118]
+permissions: {contents: read}
+concurrency: {group: cerebro-shared-state-isolated-stage, cancel-in-progress: false}
+jobs:
+  stage:
+    if: contains(github.event.head_commit.message, '[STAGE_SHARED_STATE_NO_DOMAIN]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
+      # No owner JWT or refresh token in CI; technical account generates one per job.
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24', cache: npm}
+      - name: Pin known repo branch and target identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/cerebro/shared-state-all-interfaces-v0-20261118'
+          test "$VERCEL_ORG_ID" = 'team_qnh6u1Ofy2WPp0MGEKlyMA50'
+          test "$VERCEL_PROJECT_ID" = 'prj_4ElVl8e2KzrHS7r5yvBGBban1DXV'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -n "$VERCEL_TOKEN" && test -n "$PROD_SUPABASE_PUBLISHABLE_KEY"
+      - name: Build and verify deterministic contracts
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          node --test cerebro/universal/v0/cerebro-shared-state-core.test.mjs
+          node --experimental-strip-types --test cerebro/universal/v0/cerebro-shared-state-api.test.mjs
+          node --experimental-strip-types --test cerebro/universal/v0/operativa-runtime-p0-bridge.test.mjs
+      - name: Use existing Vercel project and lock deployment to this SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global vercel@65.8.0 --no-audit --no-fund >/dev/null
+          export XDG_DATA_HOME="$RUNNER_TEMP/cerebro-shared-state-vercel-auth"
+          echo "XDG_DATA_HOME=$XDG_DATA_HOME" >> "$GITHUB_ENV"
+          node -e 'const fs=require("fs"),path=require("path");const dir=path.join(process.env.XDG_DATA_HOME,"com.vercel.cli");fs.mkdirSync(dir,{recursive:true,mode:0o700});fs.writeFileSync(path.join(dir,"auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600})'
+          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects
+          node -e 'const p=require("./.vercel/project.json");if(p.orgId!==process.env.VERCEL_ORG_ID||p.projectId!==process.env.VERCEL_PROJECT_ID)throw Error("PROJECT_DRIFT")'
+          vercel build --prod --scope=carlosjmunozcabeza-2582s-projects
+      - name: Deploy isolated candidate WITHOUT any production alias
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGED_URL="$(vercel deploy --prebuilt --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects)"
+          case "$STAGED_URL" in https://fenix-capital-preprod-*.vercel.app) ;; *) echo 'BLOCKED_STAGE_HOST_NOT_TRUSTED'; exit 4;; esac
+          echo "STAGED_URL=$STAGED_URL" >> "$GITHUB_ENV"
+          echo "STAGED_URL=$STAGED_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "SHA=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD_DOMAIN_CHANGE=NO' >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify exact stage, authorization barriers and dedicated technical identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          [ -n "${STAGED_URL:-}" ]
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          api="$STAGED_URL/api/cerebro-shared-state"
+          status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}')"
+          test "$status" = 401 || { echo "BLOCKED_ANONYMOUS_HTTP_$status"; exit 5; }
+          echo 'PASS_ANONYMOUS_DENIED'
+          status="$(vercel curl "$api?mode=summary&company_id=aion" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}')"
+          test "$status" = 400 || { echo "BLOCKED_FOREIGN_COMPANY_HTTP_$status"; exit 6; }
+          echo 'PASS_CROSS_TENANT_DENIED'
+          status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' -X POST)"
+          test "$status" = 405 || { echo "BLOCKED_POST_HTTP_$status"; exit 7; }
+          echo 'PASS_ALL_WRITES_DENIED'
+      - name: Obtain ephemeral technical JWT for the following step
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CEREBRO_E2E_TEST_PASSWORD" || { echo 'BLOCKED_TECHNICAL_IDENTITY_MISSING'; exit 8; }
+          node cerebro/universal/v0/e2e-ephemeral-token.mjs
+      - name: Verify technical identity is not an owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "${CEREBRO_E2E_RUNTIME_JWT:-}" || { echo 'BLOCKED_EPHEMERAL_TOKEN_NOT_PROPAGATED'; exit 8; }
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          api="$STAGED_URL/api/cerebro-shared-state"
+          status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' -H "authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY")"
+          test "$status" = 403 || { echo "BLOCKED_NON_OWNER_HTTP_$status"; exit 9; }
+          echo 'PASS_TECHNICAL_USER_DENIED'
+      - name: Live ephemeral CI summary positive; owner-only paths remain denied
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CEREBRO_E2E_RUNTIME_JWT:-}" || { echo 'BLOCKED_NO_AUTOMATIC_TEST_JWT'; exit 12; }
+          umask 077
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          api="$STAGED_URL/api/cerebro-shared-state"
+          headers=(-H "authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY")
+          status="$(vercel curl "$api?mode=ci_summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' "${headers[@]}")"
+          test "$status" = 200 || { echo "BLOCKED_TECHNICAL_CI_POSITIVE_HTTP_$status"; exit 13; }
+          node - "$body" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(d.status!=='OK'||d.schema!=='CEREBRO_SHARED_STATE_V1'||d.access!=='TECHNICAL_CI_READONLY_SUMMARY_ONLY'||d.read_only!==true||d.executed!==false)process.exit(3);
+          if(d.overview?.total_profiles!==2506||d.overview?.departments!==8||d.overview.states.DEFINIDO!==29)process.exit(4);
+          if(d.source_departments.filter(x=>x.family==='SEO_ENTERPRISE'&&x.department_key.startsWith('SEO-D')).length!==32)process.exit(5);
+          if(d.source_departments.filter(x=>x.family==='MEDIA_STUDIO'&&x.department_key.startsWith('UMS:')).length!==48)process.exit(6);
+          if(d.overview.states.ACTIVO!==0)process.exit(7); // No false execution proof from a CI account.
+          console.log('PASS_AUTO_RENEWED_CI_JWT_SHARED_2506_AND_80_SOURCE_DEPARTMENTS');
+          NODE
+          status="$(vercel curl "$api?mode=profiles&company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' "${headers[@]}")"
+          test "$status" = 403 || { echo "BLOCKED_CI_ROLE_DATA_UNEXPECTED_HTTP_$status"; exit 14; }
+          echo 'PASS_TECHNICIAN_CANNOT_FETCH_PRIVATE_PROFILE_DETAILS'
+          echo 'STAGE_CI_GATES_GREEN_WITH_AUTOMATIC_SHORT_LIVED_SESSION; OWNER_SESSION_PATH_NOT_BYPASSED' >> "$GITHUB_STEP_SUMMARY"
+      - name: Cleanup tokens and ephemeral Vercel metadata
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/cerebro-shared-state-vercel-auth" .vercel
+          if [ -n "${CEREBRO_E2E_RUNTIME_JWT:-}" ]; then
+            curl --max-time 15 -sS -o /dev/null -X POST -H "Authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY" 'https://cluhljgonannaafpmblx.supabase.co/auth/v1/logout' || true
+          fi
+          echo 'STAGE_ONLY; NO_ALIAS_CHANGE; CLEANUP_COMPLETED'

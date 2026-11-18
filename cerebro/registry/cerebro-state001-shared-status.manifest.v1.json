@@ -1,0 +1,147 @@
+{
+  "schema": "CEREBRO_ENGINE_MANIFEST_V1",
+  "company_id": "fenix",
+  "engine_id": "STATE-001",
+  "name": "CEREBRO Universal Shared Status & Profile Evidence",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "state": "PROD_READONLY_UI_ACTIVE_ENGINE_AND_PROFILE_EVENT_ATTESTATION_PARTIAL",
+  "sources": {
+    "profiles": "api/cerebro-agent-directory.ts (sourced pinned registries)",
+    "activity": "Supabase Edge Function cerebro-console-activity-v0",
+    "canonical_state": "api/cerebro-shared-state.ts",
+    "state_core": "cerebro/universal/v0/cerebro-shared-state-core.mjs"
+  },
+  "consumers": [
+    "JARVIS",
+    "OPERATIVA",
+    "NEURONAL",
+    "NAVEGADOR",
+    "V0",
+    "FUTURE_GATEWAY_INTERFACE"
+  ],
+  "contract": {
+    "schema": "CEREBRO_SHARED_STATE_V1",
+    "summary": "GET /api/cerebro-shared-state?mode=summary&company_id=fenix",
+    "profiles": "GET /api/cerebro-shared-state?mode=profiles&company_id=fenix&family=ALL&kind=ALL&offset=0&limit=25",
+    "refresh_seconds": 30,
+    "group_semantics": "eight source families, preserve existing department hierarchy and parent_id",
+    "profile_identity": "kind:id",
+    "event_identity": "EXPLICIT_EXECUTOR_ATTESTATION with exact profile_key",
+    "event_dimensions": [
+      "company_id",
+      "engine_id",
+      "profile_key",
+      "runtime_id",
+      "environment",
+      "version",
+      "observed_at",
+      "last_run",
+      "last_run_result",
+      "evidence"
+    ],
+    "state_levels": [
+      "ACTIVO",
+      "PERFECTO",
+      "PARCIAL",
+      "FALLANDO",
+      "DEFINIDO",
+      "POR_VERIFICAR"
+    ],
+    "perfect_only_if": [
+      "last_run_result=success",
+      "quality_gate=TRIBUNAL_GREEN",
+      "required_tests_passed=true",
+      "rollback_verified=true"
+    ],
+    "source_degraded": "DEGRADADO is source health, never synthetic profile failure",
+    "source_departments": {
+      "seo": 32,
+      "ums": 48,
+      "canonical_department_groups": 2,
+      "source_profiles_explicit_department": 618,
+      "exposure": "summary.source_departments, and profiles[].department_id",
+      "preserve_parent_ids": true
+    }
+  },
+  "governance": {
+    "permissions": "OWNER_READ_ONLY",
+    "allow_company": [
+      "fenix"
+    ],
+    "methods": [
+      "GET"
+    ],
+    "old_paths_unchanged": true,
+    "preserves_app_crm": true,
+    "external_clients": "must use same CEREBRO Gateway and owner auth; never open wildcard CORS",
+    "human_exception": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "runtime": {
+    "frontend_shared_provider": "src/cerebroSharedState.tsx",
+    "no_per_profile_connection": true,
+    "no_per_profile_worker": true,
+    "shared_runtime": true,
+    "no_new_subscriptions": true,
+    "prod_promotion": true,
+    "draft_pr": 79,
+    "prod_baseline_deployment": "dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
+    "earlier_restore_deployment": "dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h",
+    "stage_sample_deployment": "dpl_Hw6YreN9cs84VXEHx3o3pMrFFJcT",
+    "stage_latest": {
+      "deployment_id": "dpl_5qs5BwJt1FAExuPgJe6z5KBzaUqw",
+      "url": "https://fenix-capital-preprod-kimtw29gj.vercel.app",
+      "sha": "06e5893d1d47f6838f343e3a6e470c8072ec9a50",
+      "ready_state": "READY",
+      "aliases": [],
+      "owner_gate": "BLOCKED_EXPIRED_OWNER_E2E_JWT"
+    },
+    "prod_deployment_id": "dpl_8bt9hwnbZGtxZDZ11XbKNvBVvcaJ",
+    "prod_sha": "603f72149ef84c74805320ff966e0cc11c2ca52c",
+    "prepromotion_deployment_id": "dpl_CdRZireU6DbA3aas6NteKBchfLob",
+    "prod_alias": "app.fenixcapital.es",
+    "actual_owner_browser_smoke": "PASS: authenticated Opera view OPERATIVA shows shared state, 2506 profiles, 179 canonical engine IDs",
+    "actual_engine_workflow_observed": 0,
+    "actual_profile_verified_running": 0
+  },
+  "test_sources": [
+    "cerebro/universal/v0/cerebro-shared-state-core.test.mjs",
+    "cerebro/universal/v0/cerebro-shared-state-api.test.mjs",
+    ".github/workflows/cerebro-shared-state-all-interfaces-qa.yml",
+    ".github/workflows/cerebro-shared-state-stage-no-domain.yml",
+    ".github/workflows/cerebro-shared-state-verify-pinned-stage.yml"
+  ],
+  "rollout_rule": "No PROD alias changes until exact-SHA live owner 200, security negatives, OLD vs NEW, CRM smoke, backup and rollback GREEN.",
+  "documentation": "cerebro/universal/v0/CEREBRO_SHARED_STATE_ALL_INTERFACES_V0_20261118.md",
+  "created_at": "2026-11-18",
+  "gates": {
+    "compile-and-regression": "SUCCESS",
+    "deterministic-profile-state-tests": "SUCCESS",
+    "live-stage-private-ready": "PASS",
+    "live-stage-anonymous-denied": "401 PASS",
+    "live-stage-cross-tenant-denied": "400 PASS",
+    "live-stage-write-denied": "405 PASS",
+    "live-stage-technical-account-denied": "403 PASS",
+    "live-stage-owner-positive": "BLOCKED: CEREBRO_E2E_USER_JWT expired confirmed via GitHub Action 44330328085",
+    "prod-promotion": "NO-GO until owner positive 200 & all acceptance, no PROD alias change",
+    "prod-alias-intact": "YES, dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
+    "department-hierarchy-regression": "PASS (32 SEO, 48 UMS, 11 canonical, 618 original assigned profiles)",
+    "source-departments-integration": "SUCCESS: 32 SEO + 48 UMS source departments / all 2506 profiles preserved",
+    "exact-final-stage": "READY without alias, sha 06e5893d, four security negatives PASS",
+    "owner-ci-token-expired": "REQUIRES HUMAN: no owner token replay, no impersonation",
+    "prod-alias": "VERIFIED: dpl_8bt9hwnbZGtxZDZ11XbKNvBVvcaJ",
+    "prod-owner-browser-ui": "PASS authenticated Opera",
+    "prod-profile-runtime-attestation": "PENDING: 2477 non-template profiles without exact runtime attestation",
+    "prod-engine-runtime-attestation": "PENDING: 179 engine IDs registered, 0 recent GitHub observations; other provider feeds not integrated",
+    "ci-ephemeral-auth": "PASS run 44347849539: new token per execution, owner/private denial; static owner JWT not replaced in legacy workflows"
+  }
+}

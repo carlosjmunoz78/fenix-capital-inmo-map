@@ -1,0 +1,37 @@
+name: STATE001 · Cloudflare inventory refresh (zero provider writes)
+on:
+  push:
+    branches: [cerebro/shared-state-all-interfaces-v0-20261118]
+    paths:
+      - 'cerebro/state001/cloudflare-provider-refresh.mjs'
+      - '.github/workflows/cerebro-state001-provider-refresh.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+permissions: {contents: write}
+concurrency: {group: cerebro-state001-provider-feed, cancel-in-progress: false}
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map'
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - name: Read Cloudflare metadata + update private CEREBRO data branch, no resource writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CEREBRO_CLOUDFLARE_API_TOKEN" || { echo 'BLOCKED_CLOUDFLARE_TOKEN_MISSING'; exit 3; }
+          node cerebro/state001/cloudflare-provider-refresh.mjs
+      - name: No production mutation or agent execution
+        if: always()
+        run: |
+          echo 'APP_CRM_AUTH_DNS_UNTOUCHED=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'CLOUDFLARE_HTTP_METHODS=GET_ONLY' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GITHUB_SCOPE=provider-discovery-branch' >> "$GITHUB_STEP_SUMMARY"

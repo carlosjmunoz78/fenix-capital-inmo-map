@@ -47,6 +47,7 @@ export type AgentDirectoryEntry={
  state:string;source:string;purpose_plain:string;purpose_technical:string;
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
  company_scope:string;source_url:string;
+ department_id?:string|null; // ONLY an explicit source department, never inferred from a family
  runtime_status?:'ACTIVO'|'INACTIVO'|'DEGRADADO'|'PREPARADO'|'DEFINIDO'|'POR_VERIFICAR';
  runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR'}|null;
 };
@@ -59,7 +60,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   state:r.state,source:'GITHUB_CANONICAL_ROLE_REGISTRY',purpose_plain:simple[r.role_id]||'Función pendiente de descripción verificada.',
   purpose_technical:packMap.get(r.role_id)?.mission||'Misión técnica pendiente de verificar.',
   engine_ids:[...r.engines],parent_id:r.reports_to,hierarchy_verified:r.reports_to_state!=='UNRESOLVED',
-  runtime_verified:false,company_scope:r.company_scope,
+  runtime_verified:false,company_scope:r.company_scope,department_id:r.department,
   source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/registry/role-agent-registry.v1.json'
  }));
  const fblist=fbComponents.components;
@@ -85,7 +86,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
      (r.parent_id?' / parent '+r.parent_id:''),
    engine_ids:[], // SOC-001 is a source-associated engine, absent from historical 179; no false link
    parent_id:r.parent_id||null,hierarchy_verified:child,runtime_verified:false,
-   company_scope:'GLOBAL_OR_SCOPED',
+   company_scope:'GLOBAL_OR_SCOPED',department_id:null,
    source_url:'https://github.com/carlosjmunoz78/fenix-capital-cerebro-social/blob/'+
     fbComponents.source_commit_sha+'/families/facebook/financial-real-estate/roles.v1.json'
   };
@@ -95,7 +96,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   state:'TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE',source:'NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT',
   purpose_plain:'Especialidad prevista de subagentes para '+r.name+'. No hay instancia ni ejecución acreditadas.',
   purpose_technical:'Subagent family template: '+r.name,engine_ids:[],parent_id:null,
-  hierarchy_verified:false,runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',
+  hierarchy_verified:false,runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',department_id:null,
   source_url:facebook.source_url
  }));
 
@@ -125,6 +126,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
    engine_ids:[], // UMS-001 is NOT in the 179 historical engine IDs; do not invent a catalog link
    parent_id:parentId?'UMS:'+parentId:null,hierarchy_verified:parentId!==null,
    runtime_verified:false,company_scope:'GLOBAL_MULTI_COMPANY',
+   department_id:r.role_kind==='DEPARTMENT_HEAD'?'UMS:'+r.id:child&&parentId?'UMS:'+parentId:null,
    source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/media-studio/v2/registry/role-registry.mjs'
   };
  });
@@ -145,7 +147,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   purpose_technical:'SEO-001 / '+r.family_id+(r.department_id?' / '+r.department_id:'')+' / '+r.id,
   engine_ids:['SEO-001'], // source: roster engine_id SEO-001; does NOT imply runtime certified
   parent_id:r.parent_id,hierarchy_verified:r.parent_id!==null,
-  runtime_verified:false,company_scope:'fenix',
+  runtime_verified:false,company_scope:'fenix',department_id:r.department_id,
   source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/'+
    seoProfiles.source_head_sha+'/cerebro/seo-enterprise/v2/seo-specialist-role-roster-v2.json'
  }));
@@ -167,7 +169,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
    source:'PINNED_SOCIAL_REPO_'+family,purpose_plain:x.purpose_plain,
    purpose_technical:x.purpose_technical,engine_ids:[],
    parent_id:x.parent_id,hierarchy_verified:x.parent_id!==null,runtime_verified:false,
-   company_scope:'fenix-capital',source_url:x.source_url
+   company_scope:'fenix-capital',department_id:null,source_url:x.source_url
   }));
  });
 
@@ -225,19 +227,19 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
 /** Runtime is evidence, not a property of a logical role. Fail closed if feed is stale.
  * This is the SAME owner-gated activity source already consumed by JARVIS and NEURONAL.
  */
-type RuntimeFeedRun={run_id?:number;engine_id?:string|null;company_id?:string;status?:string;updated_at?:string;conclusion?:string|null;html_url?:string;environment?:string;version?:string};
+type RuntimeFeedRun={run_id?:number;engine_id?:string|null;company_id?:string;status?:string;updated_at?:string;conclusion?:string|null;html_url?:string;environment?:string;version?:string;profile_key?:string;profile_provenance?:string;quality_gate?:string;required_tests_passed?:boolean;rollback_verified?:boolean};
 type RuntimeFeed={status?:string;source_status?:string;observed_at?:string;runs?:RuntimeFeedRun[];reason?:string};
 const ACTIVITY_SOURCE='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/';
 const VALID_STATES=new Set(['in_progress','queued','waiting','requested','pending','completed']);
 const FRESH_MS=20*60_000;
 function acceptedFeedRun(x:RuntimeFeedRun){
  return Number.isSafeInteger(x.run_id)&&Number(x.run_id)>0&&
-  x.company_id==='fenix'&&typeof x.engine_id==='string'&&/^[A-Z][A-Z0-9-]{2,25}$/.test(x.engine_id)&&
+  x.company_id==='fenix'&&typeof x.engine_id==='string'&&/^[A-Z0-9][A-Z0-9-]{2,25}$/.test(x.engine_id)&&
   VALID_STATES.has(String(x.status))&&
   String(x.html_url??'').startsWith('https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/')&&
   Number.isFinite(Date.parse(x.updated_at??''));
 }
-async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
+export async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
  const degraded=(error_code:string)=>({source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,status:'DEGRADADO' as const,observed_at:null as string|null,error_code,verified_profiles:0,observed_execution_ids:0,records:entries});
  let feed:RuntimeFeed;
  try{
@@ -252,16 +254,24 @@ async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
    !Number.isFinite(age)||age<(-120000)||age>FRESH_MS||!Array.isArray(feed.runs))
   return degraded('ACTIVITY_EVIDENCE_STALE_OR_INVALID');
  const byEngine=new Map<string,RuntimeFeedRun>();
+ const byProfile=new Map<string,RuntimeFeedRun>();
+ const knownProfiles=new Set(entries.map(x=>x.kind+':'+x.id));
  for(const r of feed.runs){
   if(!acceptedFeedRun(r))continue;
   const prior=byEngine.get(r.engine_id!);
   if(!prior||String(r.updated_at)>String(prior.updated_at))byEngine.set(r.engine_id!,r);
+  // Only explicit identity attestation from the authenticated source may link a logical profile.
+  // Derived workflow names and family aliases are NEVER accepted as profile identity.
+  if(r.profile_provenance==='EXPLICIT_EXECUTOR_ATTESTATION'&&typeof r.profile_key==='string'&&knownProfiles.has(r.profile_key)){
+   const previous=byProfile.get(r.profile_key);
+   if(!previous||String(r.updated_at)>String(previous.updated_at))byProfile.set(r.profile_key,r);
+  }
  }
  const records=entries.map(entry=>{
   // Engine-level evidence is NOT role-level proof. Exact role/runtime identity
   // is required to mark a logical profile itself runtime_verified.
   const associated=entry.engine_ids.map(id=>byEngine.get(id)).filter((r):r is RuntimeFeedRun=>Boolean(r));
-  const exact=byEngine.get(entry.id);
+  const exact=byProfile.get(entry.kind+':'+entry.id);
   const match=exact||associated.sort((a,b)=>String(b.updated_at).localeCompare(String(a.updated_at)))[0];
   if(!match)return {...entry,runtime_verified:false,runtime_status:'POR_VERIFICAR' as const,runtime_observation:null};
   const activityIsFresh=feed.source_status==='LIVE'&&Date.now()-Date.parse(match.updated_at??'')<=120000;
@@ -276,12 +286,17 @@ async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
      company_id:'fenix' as const,environment:String(match.environment??'UNKNOWN'),
      version:String(match.version??'UNKNOWN'),observed_at:feed.observed_at!,
      last_run:match.updated_at||null,last_run_result:match.conclusion??null,
-     source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,evidence:match.html_url!,status
+     source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,evidence:match.html_url!,status,
+     profile_key:exact?.profile_key??null,profile_provenance:exact?.profile_provenance??null,
+     quality_gate:exact?.quality_gate??null,required_tests_passed:exact?.required_tests_passed===true,
+     rollback_verified:exact?.rollback_verified===true
     }
   };
  });
  return {source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,status:'ACTIVO' as const,observed_at:feed.observed_at!,error_code:null,
-  verified_profiles:records.filter(x=>x.runtime_verified).length,observed_execution_ids:new Set([...byEngine.values()].map(x=>x.run_id)).size,records};
+  verified_profiles:records.filter(x=>x.runtime_verified).length,observed_execution_ids:new Set([...byEngine.values()].map(x=>x.run_id)).size,
+  engine_runs:[...byEngine.values()].map(x=>({engine_id:x.engine_id!,company_id:'fenix',provider:'GITHUB_ACTIONS',runtime_id:String(x.run_id),
+   observed_at:x.updated_at!,status:x.status!,conclusion:x.conclusion??null,evidence:x.html_url!})),records};
 }
 
 export default async function handler(req:Req,res:Res){
