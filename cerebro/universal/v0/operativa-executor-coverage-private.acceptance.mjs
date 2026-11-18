@@ -60,6 +60,19 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   if(String(url).includes('cloudflare.com'))return{status:200,ok:true,text:async()=>JSON.stringify({
    success:true,result:[{id:'worker-one'},{id:'worker-two'}],result_info:{total_pages:1}
   })};
+  if(String(url).includes('cerebro-agent-qa-health-lab-v1'))return{
+   status:200,ok:true,text:async()=>JSON.stringify({
+    status:'OK',source:'SUPABASE_PGCRON_QA_LAB_V1',company_id:'fenix',
+    environment:'LAB',engine_id:'QA-001',agent_role_id:'ENG-QA',
+    receipt_id:'11111111-2222-4333-8444-555555555555',
+    observed_at:new Date().toISOString(),execution_status:'SUCCEEDED',
+    tests_passed:6,tests_total:6,runs_count:2,recent:true,
+    signature_verified:true,physical_execution_evidenced:true,
+    operational_autonomy_certified:false,excellence_certified:false,
+    customer_data_touched:false,prod_execution_enabled:false,
+    read_only:true,request_executed_job:false
+   })
+  };
   if(String(url).includes('cerebro-operativa-job-telemetry-lab-v0'))return{status:200,ok:true,text:async()=>JSON.stringify({
    status:'OK',source:'FENIX_LAB_AGENT_JOB_AGGREGATE_V1',company_id:'fenix',environment:'LAB',
    read_only:true,agent_identity_verified:false,active_agent_count:null,
@@ -80,11 +93,16 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.unverified_profiles,2476);
   assert.equal(x.body.templates_not_instances,29);
   assert.equal(x.body.active_executor_count,null);
-  assert.equal(x.body.receipt_source_status,'GITHUB_VERIFIED_QA_JOB');
+  assert.equal(x.body.receipt_source_status,'SUPABASE_SIGNED_SQL_QA');
+  assert.equal(x.body.lab_qa.status,'LIVE');
+  assert.equal(x.body.lab_qa.signature_verified,true);
+  assert.equal(x.body.lab_qa.tests_passed,6);
+  assert.equal(x.body.verified_profiles[0].proof_source,'SUPABASE_PGCRON');
+  assert.equal(x.body.verified_profiles[0].proof_url,null);
   assert.equal(x.body.verified_profiles[0].id,'ENG-QA');
   assert.equal(x.body.verified_profiles[0].tribunal_passed,false);
   assert.equal(x.body.supervisor.excellence_verified,0);
-  assert.equal(urls.length,5);
+  assert.equal(urls.length,6);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
