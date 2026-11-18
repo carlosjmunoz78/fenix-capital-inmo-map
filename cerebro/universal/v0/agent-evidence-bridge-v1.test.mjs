@@ -13,7 +13,7 @@ const rawReceipt=(overrides={})=>({
  source:'CLOUDFLARE',company_id:'fenix',environment:'LAB',engine_id:'UMS-001',
  event:'HEARTBEAT',executor_id:'worker-example-lab',agent_role_id:pair.agent.id,
  subagent_role_id:pair.sub.id,job_id:'job-123',receipt_id:'cloudflare-receipt-123',
- emitted_at:stamp,integrity:'VERIFIED_BY_SOURCE_ADAPTER',server_collector_verified:true,...overrides
+ emitted_at:stamp,version:'test',integrity:'VERIFIED_BY_SOURCE_ADAPTER',server_collector_verified:true,...overrides
 });
 const key=Uint8Array.from({length:32},(_,i)=>i+1);
 const receipt=(overrides={})=>{
