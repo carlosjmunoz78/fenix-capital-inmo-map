@@ -1,3 +1,4 @@
+import {verifiedOwnerPreviewScope} from './cerebro-preview-owner';
 /**
  * CEREBRO Operativa Premium V3 — isolated PREVIEW owner-only gateway.
  * Strict allowlist; no service-role key, no proxy URL input, no storage,
@@ -26,7 +27,7 @@ export default async function handler(req:Req,res:Res){
  res.setHeader('Vary','Authorization');
  res.setHeader('X-Content-Type-Options','nosniff');
  const host=hdr(req.headers.host).toLowerCase();
- if(process.env.VERCEL_ENV!=='preview'||!HOST.test(host))
+ if(!HOST.test(host)||!verifiedOwnerPreviewScope(host,process.env.VERCEL_ENV,process.env.VERCEL_URL))
   return res.status(403).json({status:'CLOSED',reason:'PREVIEW_ONLY'});
  const origin=hdr(req.headers.origin);
  if(origin&&origin!=='https://'+host)

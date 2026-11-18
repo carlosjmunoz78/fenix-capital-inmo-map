@@ -16,7 +16,7 @@ test('Cross-origin preview requests go only to local owner-verified Vercel LAB g
 });
 test('Preview server enforces owner rights and never allows confirmation actions',()=>{
  const server=read('api/cerebro-preview-gateway.ts');
- for(const text of ["process.env.VERCEL_ENV!=='preview'","HOST.test(host)","origin&&origin!=='https://'+host",
+ for(const text of ["verifiedOwnerPreviewScope(host,process.env.VERCEL_ENV,process.env.VERCEL_URL)","HOST.test(host)","origin&&origin!=='https://'+host",
  "identity?.actor_code!=='CARLOS-ADMIN'","METHOD_NOT_ALLOWED","RESOURCE_NOT_ALLOWED",
  "pending_action:null","read_context:null","learning_candidate:null","COMPANY_SCOPE_DENIED",
  "source==='chat'","postBody=JSON.stringify","source==='universe'"]){
@@ -49,4 +49,14 @@ test('V3 labels accurately distinguish production private canary from LAB',()=>{
  assert.ok(cockpit.includes("window.location.hostname==='app.fenixcapital.es'"));
  assert.ok(cockpit.includes('V3 EN PRODUCCIÓN · VISTA PRIVADA DEL PROPIETARIO'));
  assert.ok(cockpit.includes('ENSAYO VISUAL · SIN PROMOCIÓN A PRODUCCIÓN'));
+});
+
+test('Production-config private deployment is allowed only on its exact own host',async()=>{
+ const {verifiedOwnerPreviewScope}=await import('../api/cerebro-preview-owner.ts');
+ const exact='fenix-capital-preprod-eptv5utjp.vercel.app';
+ assert.equal(verifiedOwnerPreviewScope(exact,'production',exact),true);
+ assert.equal(verifiedOwnerPreviewScope(exact,'production','fenix-capital-preprod-other.vercel.app'),false);
+ assert.equal(verifiedOwnerPreviewScope('app.fenixcapital.es','production','app.fenixcapital.es'),false);
+ assert.equal(verifiedOwnerPreviewScope(exact,'staging',exact),false);
+ assert.equal(verifiedOwnerPreviewScope('malicious.example','preview',undefined),false);
 });
