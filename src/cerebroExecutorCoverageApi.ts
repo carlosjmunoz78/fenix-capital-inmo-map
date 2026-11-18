@@ -1,6 +1,6 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 export type ExecutorCoverageSource={source:'CLOUDFLARE'|'SUPABASE';
- status:'LIVE'|'NOT_CONFIGURED'|'UNAVAILABLE';visible_count:number|null;observed_at:string|null};
+ status:'LIVE'|'NOT_CONFIGURED'|'UNAVAILABLE';visible_count:number|null;observed_at:string|null;metric_label:'WORKERS_IN_ACCOUNT'|'HISTORICAL_LAB_JOB_ROWS'};
 export type ExecutorCoverage={
  status:'OK'|'PARTIAL';company_id:'fenix';observed_at:string;read_only:true;executed:false;
  inventory_sources:ExecutorCoverageSource[];profile_total:number;
@@ -29,6 +29,8 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
    data.active_executor_count!==null||data.receipt_source_status!=='NOT_CONNECTED'||
    !Number.isFinite(Date.parse(data.observed_at))||!Array.isArray(sources)||sources.length!==2||
    sources.some(s=>!['CLOUDFLARE','SUPABASE'].includes(s.source)||
+    (s.source==='CLOUDFLARE'&&s.metric_label!=='WORKERS_IN_ACCOUNT')||
+    (s.source==='SUPABASE'&&s.metric_label!=='HISTORICAL_LAB_JOB_ROWS')||
     !['LIVE','NOT_CONFIGURED','UNAVAILABLE'].includes(s.status)||
     (s.status==='LIVE'&&(!Number.isSafeInteger(s.visible_count)||Number(s.visible_count)<0))||
     (s.status!=='LIVE'&&s.visible_count!==null))||
