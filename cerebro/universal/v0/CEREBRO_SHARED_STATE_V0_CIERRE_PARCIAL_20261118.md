@@ -52,3 +52,11 @@ Para eliminar la caducidad del secreto `CEREBRO_E2E_USER_JWT` de este bloque, la
 - destruye sesión al terminar el workflow. **No almacena refresh token** ni reescribe secretos GitHub.
 
 Esto resuelve la necesidad de renovar el token *de estas pruebas* por ejecución, sin hacer a la cuenta técnica propietaria. **No equivale a certificar E2E real del propietario.** La autorización de la App permanece idéntica.
+
+## 18/11/2026 · Conexión universal de motores canónicos
+
+La conexión de perfiles ya estaba publicada físicamente en App PROD como `dpl_CdRZireU6DbA3aas6NteKBchfLob` y se verificó con sesión real de Opera en JARVIS/OPERATIVA/NEURONAL/NAVEGADOR. La cuenta técnica obtiene JWT nuevo por ejecución: [44344057653](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44344057653) SUCCESS y no tiene facultades owner.
+
+Ahora `STATE-001` añade proyección determinista de los **179 IDs del catálogo canónico de motores** a partir de las ejecuciones GitHub que emiten `engine_id` exacto, con sus evidencias. No confundir ejecuciones de workflow con motor autónomo íntegramente sano. `engine_activity.runtime_health_verified=0` hasta verificar contratos funcionales, logs y observabilidad por proveedor. La comparación de perfiles exige `profile_key` firmado/atestiguado y no se deduce de `engine_id`. El ID legítimo `3RD-001` se conserva y acepta sin modificar el registro.
+
+**Límite físico:** muchos motores de Cloudflare y Supabase no publican datos de ejecución en esta única fuente GitHub. Su actividad no se debe inferir ni clasificar como perfecta. Integración física por proveedor pendiente en el canal de ejecución correspondiente. El contrato está centralizado, de modo que esa integración será por fuente, no por cada perfil.

@@ -81,6 +81,15 @@ test('an actual workflow with exact canonical engine ID changes only that engine
  assert.equal(stale.status_counts.ACTIVO,0);
  assert.equal(stale.status_counts.POR_VERIFICAR,179);
 });
+test('canonical 3RD-001 motor ID is accepted, never misclassified as a specialist',()=>{
+ const runtime={engine_id:'3RD-001',company_id:'fenix',provider:'GITHUB_ACTIONS',runtime_id:'12345678',
+  observed_at:source.observed_at,status:'in_progress',conclusion:null,
+  evidence:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/12345678'};
+ const r=buildEngineActivity(engineRegistry.engine_ids,{...source,engine_runs:[runtime]},now);
+ assert.equal(r.status_counts.ACTIVO,1);
+ assert.equal(r.records.find(x=>x.engine_id==='3RD-001').status,'ACTIVO');
+ assert.equal(r.runtime_health_verified,0);
+});
 test('engine observations with fake URL or wrong company cannot assert real status',()=>{
  const r={engine_id:'SEO-001',company_id:'other',provider:'GITHUB_ACTIONS',runtime_id:'12345678',
   observed_at:source.observed_at,status:'in_progress',evidence:'https://example.org/runs/12345678'};
