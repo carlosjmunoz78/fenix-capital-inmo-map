@@ -46,3 +46,19 @@ Regla: CONSERVAR - ENTENDER - ENVOLVER - PROBAR - MEJORAR - MIGRAR.
 - Emisor genérico HMAC: HECHO LAB (código y tests); suscripción por runtimes reales: PARCIAL.
 - Acreditación live por ID: NO VERIFICADA; no extrapolar test de QA al censo 2.477.
 - PROD: HOLD; sin modificación de aliases reales, App/CRM, WordPress, Supabase PROD, Workers, DNS ni trading.
+
+
+## Bloque 2 + 3 + 4 · 18/11/2026 · Estado y gates
+**P2 Identidad**: el emisor WebCrypto/HMAC y el proyector por IDs ya existían en LAB. Se añadió agent-github-run-attestor-v1.mjs, que SOLO puede atribuir la capacidad QA-001 al perfil ENG-QA cuando la API oficial de GitHub demuestra el workflow ID 422902482, repositorio y rama exactos, un job evidence-bridge finalizado con éxito y los pasos de tests/build aprobados. El nuevo trabajo declara explícitamente CEREBRO_AGENT_ROLE_ID=ENG-QA y CEREBRO_ENGINE_ID=QA-001. Ni inventarios de Cloudflare ni jobs históricos sin IDs sirven como acreditación. Un job finalizado se considera HISTÓRICO, nunca autónomo activo.
+
+**P3 Supervisor**: agent-supervisor-v1.mjs con marca de proyección verificada en el mismo proceso; estados NOT_VERIFIED / RUNNING_VERIFIED / FAILED_VERIFIED / EXECUTED_NOT_RUNNING / HISTORICAL_FAILURE / HISTORICAL_EVIDENCE / TEMPLATE_NOT_INSTALLED. Un SUCCEEDED o FAILED revoca el RUNNING de su mismo job; varios jobs se observan separadamente. Excelencia = 0 hasta tener contratos, permisos, QA, evaluación, tribunal, coste, backup, rebuild y rollback con pruebas individuales. API Preview expone estado de conexiones y un único registro de QA solo si la lectura oficial de GitHub lo confirma; los datos del navegador no pueden acreditarlo.
+
+**P4 Renovación de JWT**: scripts/cerebro-e2e-ephemeral-session.sh obtiene JWT nuevo por CI desde /auth/v1/token usando **credenciales de una cuenta técnica de pruebas** almacenadas en secretos de GitHub, sin publicar ni reciclar JWT fijo, y con issuer/aud/exp validados. Los workflows cerebro-session-context-auth-e2e.yml y jarvis-authenticated-orchestrator-e2e.yml han sido adaptados. Si CEREBRO_E2E_TEST_EMAIL y CEREBRO_E2E_TEST_PASSWORD no están configurados el flujo BLOQUEA con código 42, nunca afirma GREEN. IAM-001 auditor de referencias actualizado a estas nuevas credenciales. No modificar perfiles ni usar contraseña personal de propietario.
+
+**Pruebas**: CI del commit 651def029688364235b91920eede56aa37d83eb0: puente OPERATIVA, IAM-001 y Governed Main Integration completaron SUCCESS. El commit posterior b637506401c5d8d3a3b851d9cbae247c8246a834 añade identidad explícita del job QA y la lectura de presencia de secretos, pendiente de certificación exact-HEAD al escribir este registro.
+
+**PREVIEW**: dpl_94Eb1tXQ9QJ7ckF7rutGu6SdCsTn, https://fenix-capital-preprod-ori2eqt8n.vercel.app, READY, sin alias de producción. La comprobación física anónima del endpoint nuevo devolvió 401 OWNER_SESSION_REQUIRED, no 500. Falta prueba positiva de lectura GitHub de este Preview, pues el hostname nuevo no hereda sesión del anterior.
+
+**No terminado**: conectar emitters a Cloudflare/Supabase reales mediante hooks de runtimes compartidos, observar eventos firmados verdaderos de esos ejecutores, supervisar calidad completa por cada motor y demostrar la renovación de sesión en un workflow real con cuenta de pruebas autorizada. No declarar los puntos 2-4 cerrados por tests sintéticos o por catálogos. Todos siguen PARCIAL, con avances LAB verificables. No cambiar App/CRM/DNS/Supabase PROD/Worker ni fusionar PR #81 hasta gates PREPROD/OLD-vs-NEW/rollback/coste.
+
+**Gates siguientes, mínimos**: GitHub QA real leído desde Vercel con propietario -> registrar una sola prueba de ejecución verificada; emitters compartidos en LAB (no por perfil) -> E2E firma y readback durable -> supervisor salud/tribunal sobre prueba real -> credenciales de test técnico ya existentes o explicitamente aprobadas -> E2E JWT fresco. No inventar contraseña, no resetear identidad del propietario.
