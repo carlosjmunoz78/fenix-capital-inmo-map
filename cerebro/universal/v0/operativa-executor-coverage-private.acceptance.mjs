@@ -73,6 +73,21 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
     read_only:true,request_executed_job:false
    })
   };
+  if(String(url).includes('cerebro-console-readonly-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
+   status:'OK',source:'CEREBRO_CONSOLE_READONLY_LAB_V1',
+   company_id:'fenix',environment:'LAB',engine_id:'CONSOLE-001',
+   capability_id:'repo.sandbox.public.readonly.v0',
+   repository:'carlosjmunoz78/fenix-capital-inmo-map',branch:'main',
+   read_only:true,executed_job:true,github_actions_used:false,
+   original_dispatcher_unchanged:true,legacy_worker_executed:false,
+   agent_role_identity_verified:false,full_engine_certified:false,
+   autonomy_certified:false,external_actions_executed:false,prod_execution_enabled:false,
+   marginal_cost_eur_measured:false,specific_capability_evidenced:true,signed:true,
+   execution_state:'SUCCEEDED',http_status:200,
+   completed_job_count:1,job_id:'997567e9-77d1-49e0-832c-e4695c25e18d',
+   observed_commit_sha:'902022f5d4dcc4aab29e6d35411a63c38fe438e7',
+   last_execution_at:new Date().toISOString()
+  })};
   if(String(url).includes('cerebro-dispatch-health-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
    status:'HEALTH_ENDPOINTS_RESPOND',source:'CEREBRO_LAB_DISPATCH_HEALTH_SIGNED_V1',
    company_id:'fenix',environment:'LAB',read_only:true,executed:false,
@@ -185,7 +200,12 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.dispatch_health.signed_samples,4);
   assert.equal(x.body.dispatch_health.full_engine_certified,false);
   assert.equal(x.body.dispatch_health.sources.every(x=>x.signature_verified===true&&x.runtime_execution_verified===false),true);
-  assert.equal(urls.length,10);
+  assert.equal(x.body.console_job.status,'LIVE');
+  assert.equal(x.body.console_job.signature_verified,true);
+  assert.equal(x.body.console_job.specific_capability_evidenced,true);
+  assert.equal(x.body.console_job.legacy_worker_executed,false);
+  assert.equal(x.body.console_job.agent_role_identity_verified,false);
+  assert.equal(urls.length,11);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
