@@ -48,7 +48,7 @@ async function collectCloudflare(token:string,stamp:string):Promise<Entry[]>{
  if(names.length>300||names.some((x:unknown)=>typeof x!=='string'||! /^(?:[a-z0-9][a-z0-9_-]{2,127})$/.test(x))||
     new Set(names).size!==names.length)throw Error('CF_WORKERS_INVALID');
  return names.map((id:string)=>({source:'CLOUDFLARE',company_id:'fenix',
-  environment:'LAB',executor_id:id,observed_at:stamp,server_collector_verified:true}));
+  environment:'UNKNOWN',executor_id:id,observed_at:stamp,server_collector_verified:true}));
 }
 async function collectSupabase(token:string,stamp:string):Promise<Entry[]>{
  const rows=await fetchJson('https://api.supabase.com/v1/projects/'+PROJECT+'/functions',token,9000);
