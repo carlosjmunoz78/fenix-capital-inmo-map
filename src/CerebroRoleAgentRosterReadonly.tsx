@@ -57,11 +57,25 @@ export default function CerebroRoleAgentRosterReadonly(){
   {coverage.kind==='ready'&&coverage.data?
    <p className="op3-source-note" role="status">
     Supervisor de fuentes: <b>{coverage.data.supervisor.provider_health==='LIVE'?'lecturas disponibles':'cobertura parcial'}</b>.
-    Supervisión de calidad de los agentes: <b>POR ACREDITAR</b> (exámenes, evaluación, tribunal y recuperación).
+    Motor de pruebas QA-001 en Supabase LAB: <b>{coverage.data.lab_qa.status==='LIVE'?
+       (coverage.data.lab_qa.execution_status==='SUCCEEDED'?'EJECUCIÓN REAL VERIFICADA':'FALLO DE PRUEBA VERIFICADO'):'SIN LECTURA ACTUAL'}</b>.
+    {coverage.data.lab_qa.status==='LIVE'?
+      <span> Firma comprobada: <b>{coverage.data.lab_qa.signature_verified?'SÍ':'NO'}</b>;
+       verificaciones: <b>{coverage.data.lab_qa.tests_passed}/{coverage.data.lab_qa.tests_total}</b>;
+       recibos persistidos: <b>{coverage.data.lab_qa.runs_count}</b>.
+       Ejecutor periódico compartido (cada 15 minutos), sin GitHub Actions.
+      </span>:null}
     {coverage.data.verified_profiles.length>0?
-     <span> Ejecución física comprobada: <b>ENG-QA</b> · QA-001 · CI GitHub finalizada;
-      no demuestra agente autónomo ni excelencia. <a href={coverage.data.verified_profiles[0].proof_url} target="_blank" rel="noopener noreferrer">Ver prueba del ejecutor</a>.
-     </span>:<span> Ningún perfil nuevo acreditado por esta fuente todavía.</span>}
+     <span> Identidad atribuida: <b>ENG-QA</b> · QA-001 ·
+      {coverage.data.verified_profiles[0].proof_source==='SUPABASE_PGCRON'?
+       <span> recibo de Supabase <code>{coverage.data.verified_profiles[0].proof_id}</code>.</span>:
+       <span> trabajo histórico de GitHub.
+        {coverage.data.verified_profiles[0].proof_url?
+         <a href={coverage.data.verified_profiles[0].proof_url} target="_blank" rel="noopener noreferrer">Ver prueba del ejecutor</a>:null}
+       </span>}
+      Esta evidencia NO acredita autonomía ni excelencia de los otros perfiles.
+     </span>:<span> Sin identidades de ejecución acreditadas.</span>}
+    Tribunal y excelencia global: <b>PENDIENTES</b>.
    </p>:null}
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
