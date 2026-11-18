@@ -17,6 +17,8 @@ jobs:
         run: npm run build
       - name: Universal state, provenance and tenancy unit contracts
         run: node --test cerebro/universal/v0/cerebro-shared-state-core.test.mjs
+      - name: Owner, tenant, runtime and source-degradation gateway tests
+        run: node --experimental-strip-types --test cerebro/universal/v0/cerebro-shared-state-api.test.mjs
       - name: Old vs new and 2506 real registry
         run: |
           node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs

@@ -2,7 +2,7 @@
  * The old directory and activity endpoints remain untouched; this only wraps.
  */
 import {buildCerebroAgentDirectoryV0,queryCerebroAgentDirectoryV0,validateCerebroAgentDirectoryQueryV0,
-  verifiedReadOnlyMode,observeExecutors} from './cerebro-agent-directory';
+  verifiedReadOnlyMode,observeExecutors} from './cerebro-agent-directory.ts';
 import {buildSharedState} from '../cerebro/universal/v0/cerebro-shared-state-core.mjs';
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
