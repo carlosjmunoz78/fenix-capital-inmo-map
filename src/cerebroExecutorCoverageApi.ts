@@ -30,7 +30,7 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
    !Number.isFinite(Date.parse(data.observed_at))||!Array.isArray(sources)||sources.length!==2||
    sources.some(s=>!['CLOUDFLARE','SUPABASE'].includes(s.source)||
     !['LIVE','NOT_CONFIGURED','UNAVAILABLE'].includes(s.status)||
-    (s.status==='LIVE'&&(!Number.isSafeInteger(s.visible_count)||s.visible_count!<0))||
+    (s.status==='LIVE'&&(!Number.isSafeInteger(s.visible_count)||Number(s.visible_count)<0))||
     (s.status!=='LIVE'&&s.visible_count!==null))||
    !Number.isSafeInteger(data.profile_total)||data.profile_total!==2506||
    data.runtime_verified_profiles!==0||data.active_recent_profiles!==0||
