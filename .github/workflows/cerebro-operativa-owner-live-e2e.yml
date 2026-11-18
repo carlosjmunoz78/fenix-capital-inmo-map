@@ -11,7 +11,7 @@ jobs:
       OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
       PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
       VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
-      STAGE_URL: https://fenix-capital-preprod-4f1il4udq.vercel.app
+      STAGE_URL: https://fenix-capital-preprod-ng0bal2fd.vercel.app
       ACTIVITY_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/
     steps:
       - name: Verify existing owner-only test prerequisites (never print secrets)
