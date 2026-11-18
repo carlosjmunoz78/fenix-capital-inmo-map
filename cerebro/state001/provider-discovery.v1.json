@@ -3,7 +3,7 @@
   "company_id": "fenix",
   "environment": "PROD_READONLY",
   "version": "1.0.0",
-  "generated_at": "2026-11-18T16:46:04.196Z",
+  "generated_at": "2026-11-18T16:51:47.265Z",
   "read_only": true,
   "no_runtime_execution_claim": true,
   "providers": {
@@ -11,6 +11,7 @@
       "metadata_observed": true,
       "worker_scripts_total": 45,
       "lab_named": 42,
+      "observed_at": "2026-11-18T16:51:47.265Z",
       "source": "CLOUDFLARE_WORKERS_LIST_API"
     },
     "supabase": {
@@ -18,7 +19,8 @@
       "edge_functions_total": 119,
       "active_deployed": 119,
       "lab_named": 45,
-      "source": "SUPABASE_MANAGEMENT_FUNCTIONS_API"
+      "source": "SUPABASE_MANAGEMENT_FUNCTIONS_API",
+      "observed_at": "2026-11-18T16:46:04.196Z"
     }
   },
   "canonical_engines": 179,
@@ -34,6 +36,7 @@
     "cloudflare_workers": 39,
     "supabase_functions": 101
   },
-  "semantic_limits": "Worker/function existence and name-similarity do NOT prove runtime activity, autonomy, or exact profile execution; never write profile statuses from this feed",
-  "field_security": "Contains aggregate counts and preexisting canonical engine IDs only; excludes service resource names, tenants, customer records, secrets, logs and credentials"
+  "semantic_limits": "Metadata only. Worker/function existence is not execution or a profile runtime proof.",
+  "field_security": "Aggregate provider totals and existing canonical engine IDs only; zero names/keys/logs/customer data",
+  "update_mode": "HOURLY_CLOUDFLARE_ONLY_SUPABASE_REQUIRES_MGMT_CREDENTIAL"
 }
