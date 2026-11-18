@@ -17,8 +17,7 @@ const MAX_DETAILED_PROGRESS_RUNS=GITHUB_TOKEN_CONFIGURED?4:0;
 const MAX_JOB_PAGES=1;
 const ALLOWED_ORIGINS=new Set([
   "https://app.fenixcapital.es",
-  "https://www.app.fenixcapital.es",
-  "https://fenix-capital-preprod-eptv5utjp.vercel.app"
+  "https://www.app.fenixcapital.es"
 ]);
 const QUEUED_JOB_STATUSES=new Set(["queued","waiting","requested","pending"]);
 
