@@ -3,7 +3,7 @@ export type ExecutorCoverageSource={source:'CLOUDFLARE'|'SUPABASE';
  status:'LIVE'|'NOT_CONFIGURED'|'UNAVAILABLE';visible_count:number|null;observed_at:string|null;metric_label:'WORKERS_IN_ACCOUNT'|'HISTORICAL_LAB_JOB_ROWS'};
 export type ExecutorCoverage={
  status:'OK'|'PARTIAL';company_id:'fenix';observed_at:string;read_only:true;executed:false;
- inventory_sources:ExecutorCoverageSource[];profile_total:number;
+ inventory_sources:ExecutorCoverageSource[];profile_total:number;templates_not_instances:number;accreditable_profiles:number;
  runtime_verified_profiles:number;active_recent_profiles:number;unverified_profiles:number;
  active_executor_count:null;receipt_source_status:'NOT_CONNECTED';warning:string;
 };
@@ -35,8 +35,9 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
     (s.status==='LIVE'&&(!Number.isSafeInteger(s.visible_count)||Number(s.visible_count)<0))||
     (s.status!=='LIVE'&&s.visible_count!==null))||
    !Number.isSafeInteger(data.profile_total)||data.profile_total!==2506||
+   data.templates_not_instances!==29||data.accreditable_profiles!==2477||
    data.runtime_verified_profiles!==0||data.active_recent_profiles!==0||
-   data.unverified_profiles!==data.profile_total)return missing('unavailable');
+   data.unverified_profiles!==data.accreditable_profiles)return missing('unavailable');
   return {kind:'ready',data};
  }catch{return missing('unavailable')}
 }
