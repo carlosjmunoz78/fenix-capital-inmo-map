@@ -20,6 +20,17 @@ jobs:
           set -euo pipefail
           if [ -z "$OWNER_E2E_JWT" ]; then echo 'BLOCKED_EXISTING_OWNER_E2E_JWT_NOT_CONFIGURED'; exit 2; fi
           if [ -z "$PROD_PUBLISHABLE_KEY" ]; then echo 'BLOCKED_EXISTING_PUBLISHABLE_KEY_NOT_CONFIGURED'; exit 2; fi
+      - name: Distinguish Supabase owner token from Vercel preview protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          result="$(mktemp)"
+          trap 'rm -f "$result"' EXIT
+          status="$(curl -sS -o "$result" -w '%{http_code}' --max-time 15 -H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" "$ACTIVITY_URL")"
+          if [ "$status" != 200 ]; then echo "BLOCKED_EXISTING_OWNER_JWT_OR_SCOPE_HTTP_$status"; exit 7; fi
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.source!=="GITHUB_ACTIONS")process.exit(8)' "$result"
+          echo 'PASS_EXISTING_OWNER_JWT_AND_SHARED_ACTIVITY'
       - name: Live backend read/denied/tenant/verb gates (no private payload in logs)
         shell: bash
         run: |
