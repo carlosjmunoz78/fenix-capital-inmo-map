@@ -4,6 +4,7 @@
  * A transport-supplied "verified" boolean is not proof; HMAC must pass first.
  */
 import {createHmac,timingSafeEqual} from 'node:crypto';
+export const RECEIPT_ATTESTED_V1=Symbol('CEREBRO_HMAC_ATTESTED_RECEIPT_V1');
 const FIELDS=['source','company_id','environment','engine_id','executor_id','job_id',
  'receipt_id','agent_role_id','subagent_role_id','event','emitted_at','version'];
 const PROVIDERS=new Set(['CLOUDFLARE','SUPABASE','GITHUB_ACTIONS','VERCEL','CEREBRO_JOB']);
@@ -32,5 +33,6 @@ export function verifyAgentReceiptHmacV1({receipt,signature_hex,key,expected_sou
  const expected=createHmac('sha256',key).update('CEREBRO_AGENT_RECEIPT_V1\n'+canonical).digest();
  if(!timingSafeEqual(actual,expected))return null;
  const safe=JSON.parse(canonical);
- return {...safe,server_collector_verified:true,integrity:'VERIFIED_BY_SOURCE_ADAPTER'};
+ return Object.defineProperty({...safe,server_collector_verified:true,integrity:'VERIFIED_BY_SOURCE_ADAPTER'},
+  RECEIPT_ATTESTED_V1,{value:true,enumerable:false,writable:false});
 }
