@@ -73,6 +73,27 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
     read_only:true,request_executed_job:false
    })
   };
+  if(String(url).includes('cerebro-engine-truth-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
+   status:'OK',source:'CEREBRO_LAB_ENGINE_TRUTH_AUDIT_V1',read_only:true,executed:false,
+   company_id:'fenix',environment:'LAB',all_engines_certified:false,autonomy_global_certified:false,
+   historical_job_rows:141,sources:[
+    {source:'JARVIS',engine_id:'CONSOLE-001',environment:'PREPROD',
+     historical_jobs:6,explicit_role_rows:0,recent_metadata_rows:0,
+     last_job_metadata_at:'2026-11-09T00:00:00Z',diagnosis:'NO_RECENT_METADATA',
+     role_activation_verified:false,engine_certified_autonomous:false},
+    {source:'BROWSER',engine_id:'CONSOLE-001',environment:'PREPROD',
+     historical_jobs:117,explicit_role_rows:0,recent_metadata_rows:0,
+     last_job_metadata_at:'2026-10-26T00:00:00Z',diagnosis:'NO_RECENT_METADATA',
+     role_activation_verified:false,engine_certified_autonomous:false},
+    {source:'CREATIVE',engine_id:'FACT-001',environment:'PREPROD',
+     historical_jobs:17,explicit_role_rows:0,recent_metadata_rows:0,
+     last_job_metadata_at:'2026-11-05T00:00:00Z',diagnosis:'NO_RECENT_METADATA',
+     role_activation_verified:false,engine_certified_autonomous:false},
+    {source:'CREATIVE',engine_id:'UMS-001',environment:'PREPROD',
+     historical_jobs:1,explicit_role_rows:0,recent_metadata_rows:0,
+     last_job_metadata_at:'2026-10-26T00:00:00Z',diagnosis:'NO_RECENT_METADATA',
+     role_activation_verified:false,engine_certified_autonomous:false}
+   ]})};
   if(String(url).includes('cerebro-operativa-job-telemetry-lab-v0'))return{status:200,ok:true,text:async()=>JSON.stringify({
    status:'OK',source:'FENIX_LAB_AGENT_JOB_AGGREGATE_V1',company_id:'fenix',environment:'LAB',
    read_only:true,agent_identity_verified:false,active_agent_count:null,
@@ -102,7 +123,12 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.verified_profiles[0].id,'ENG-QA');
   assert.equal(x.body.verified_profiles[0].tribunal_passed,false);
   assert.equal(x.body.supervisor.excellence_verified,0);
-  assert.equal(urls.length,6);
+  assert.equal(x.body.engine_truth.status,'LIVE');
+  assert.equal(x.body.engine_truth.historical_job_rows,141);
+  assert.equal(x.body.engine_truth.sources.length,4);
+  assert.equal(x.body.engine_truth.sources.filter(x=>x.recent_metadata_rows>0).length,0);
+  assert.equal(x.body.engine_truth.sources.every(x=>x.engine_certified_autonomous===false),true);
+  assert.equal(urls.length,7);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
