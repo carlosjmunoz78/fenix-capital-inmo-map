@@ -63,16 +63,25 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
   for(const p of [agent,...(sub?[sub]:[])]){
    const key=p.kind+':'+p.id;
    const entry=byProfile.get(key)||{id:p.id,kind:p.kind,engine_ids:new Set(),providers:new Set(),last_event:null,
-    last_receipt_at:null,last_receipt_id:null,last_heartbeat_at:null,verified_events:0,active_execution_verified:false};
+    last_receipt_at:null,last_receipt_id:null,last_heartbeat_at:null,verified_events:0,jobs:new Map()};
    entry.verified_events++;
    entry.engine_ids.add(r.engine_id);entry.providers.add(r.source);
-   if(entry.last_receipt_at===null||ts>=date(entry.last_receipt_at)){
+   const terminal=event=>event==='SUCCEEDED'||event==='FAILED';
+   const jobKey=[r.source,r.environment,r.engine_id,r.executor_id,r.job_id].join(':');
+   const previous=entry.jobs.get(jobKey);
+   // Terminal events supersede starts/heartbeats for the SAME physical job,
+   // even if receipts arrive out of order or share a timestamp.
+   if(!previous||ts>previous.ts||
+     (ts===previous.ts&&terminal(r.event)&&!terminal(previous.event))){
+    entry.jobs.set(jobKey,{event:r.event,ts});
+   }
+   if(entry.last_receipt_at===null||ts>date(entry.last_receipt_at)||
+      (ts===date(entry.last_receipt_at)&&terminal(r.event)&&!terminal(entry.last_event))){
     entry.last_event=r.event;entry.last_receipt_at=r.emitted_at;entry.last_receipt_id=r.receipt_id;
    }
-   if((r.event==='HEARTBEAT'||r.event==='STARTED')&&fresh(ts,now,ACTIVE_AGE)){
-    entry.active_execution_verified=true;
-    if(entry.last_heartbeat_at===null||ts>date(entry.last_heartbeat_at))entry.last_heartbeat_at=r.emitted_at;
-   }
+   if((r.event==='HEARTBEAT'||r.event==='STARTED')&&
+      (entry.last_heartbeat_at===null||ts>date(entry.last_heartbeat_at)))
+    entry.last_heartbeat_at=r.emitted_at;
    byProfile.set(key,entry);
   }
  }
@@ -81,8 +90,10 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
   if(!item)return{id:p.id,kind:p.kind,evidence_state:EMPTY,runtime_verified:false,
    active_execution_verified:false,last_event:null,last_receipt_at:null,last_receipt_id:null,
    last_heartbeat_at:null,evidence_providers:[],engine_ids_observed:[],verified_events:0};
-  return{id:p.id,kind:p.kind,evidence_state:item.active_execution_verified?'ACTIVE_RECENT':
-    'EXECUTION_EVIDENCED',runtime_verified:true,active_execution_verified:item.active_execution_verified,
+  const active=[...item.jobs.values()].some(j=>
+   (j.event==='STARTED'||j.event==='HEARTBEAT')&&fresh(j.ts,now,ACTIVE_AGE));
+  return{id:p.id,kind:p.kind,evidence_state:active?'ACTIVE_RECENT':
+    'EXECUTION_EVIDENCED',runtime_verified:true,active_execution_verified:active,
    last_event:item.last_event,last_receipt_at:item.last_receipt_at,last_receipt_id:item.last_receipt_id,
    last_heartbeat_at:item.last_heartbeat_at,evidence_providers:[...item.providers].sort(),
    engine_ids_observed:[...item.engine_ids].sort(),verified_events:item.verified_events};
