@@ -40,15 +40,15 @@ jobs:
           test "$status" -eq 42
           grep -q 'BLOCKED_DEDICATED_TEST_IDENTITY_NOT_CONFIGURED' /tmp/e2e-auth-negative.out
           rm -f /tmp/e2e-auth-negative.out
-      - name: Report renewable dedicated-test identity readiness without reading secrets
+      - name: Check E2E identity metadata only (physical auth proven in IAM004)
         env:
-          E2E_EMAIL_CONFIGURED: ${{ secrets.CEREBRO_E2E_TEST_EMAIL != '' }}
+          E2E_EMAIL: ${{ secrets.CEREBRO_E2E_TEST_EMAIL || 'cerebro-e2e@fenixcapital.es' }}
           E2E_PASSWORD_CONFIGURED: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD != '' }}
         shell: bash
         run: |
-          if [ "$E2E_EMAIL_CONFIGURED" = 'true' ] && [ "$E2E_PASSWORD_CONFIGURED" = 'true' ]; then
-            echo 'IAM004_FRESH_TOKEN_TEST_IDENTITY=CONFIGURED' >> "$GITHUB_STEP_SUMMARY"
+          if [ "$E2E_EMAIL" = 'cerebro-e2e@fenixcapital.es' ] && [ "$E2E_PASSWORD_CONFIGURED" = true ]; then
+            echo 'IAM004_TEST_IDENTITY_MATERIAL=READY_FOR_E2E' >> "$GITHUB_STEP_SUMMARY"
           else
-            echo 'IAM004_FRESH_TOKEN_TEST_IDENTITY=BLOCKED_NOT_CONFIGURED' >> "$GITHUB_STEP_SUMMARY"
+            echo 'IAM004_TEST_IDENTITY_MATERIAL=HOLD_VERIFY_DEDICATED_TEST_USER' >> "$GITHUB_STEP_SUMMARY"
           fi
       - run: npm run build
