@@ -127,9 +127,11 @@ export default async function handler(req:Req,res:Res){
   return res.status(200).json({status:statuses.every(x=>x.status==='LIVE')?'OK':'PARTIAL',
   company_id:'fenix',observed_at:stamp,read_only:true,executed:false,
   inventory_sources:statuses,profile_total:2506,
+  templates_not_instances:29,
+  accreditable_profiles:2477,
   runtime_verified_profiles:0,
   active_recent_profiles:0,
-  unverified_profiles:2506,
+  unverified_profiles:2477,
   active_executor_count:null,
   receipt_source_status:'NOT_CONNECTED',
   warning:'CLOUDFLARE_ACCOUNT_WORKERS_AND_SUPABASE_HISTORICAL_LAB_JOBS_ARE_NOT_ACTIVE_AGENTS; SIGNED_IDENTITY_RECEIPTS_PENDING'});
