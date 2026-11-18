@@ -5,6 +5,11 @@ export type SharedDepartment={department_key:string;total:number;states:Record<S
 export type SharedSummary={schema:'CEREBRO_SHARED_STATE_V1';company_id:'fenix';status:'OK';feed_health:'LIVE_EVIDENCE_FEED'|'DEGRADED_EVIDENCE_FEED';source_status:'ACTIVO'|'DEGRADADO';observed_at:string|null;read_only:true;executed:false;
  overview:{total_profiles:number;departments:number;states:Record<SharedStateStatus,number>;verified_running_profiles:number;templates:number;engine_association_is_not_execution:true};
  departments:SharedDepartment[];source_departments?:Array<SharedDepartment&{family:string;source:string}>;refresh_interval_seconds:number;
+ provider_inventory?:{status:'FRESH'|'PARTIAL'|'STALE'|'UNAVAILABLE';sources:{
+  cloudflare:{status:string;total?:number;lab_named?:number|null;observed_at?:string};
+  supabase:{status:string;total?:number;active_deployed?:number|null;lab_named?:number|null;observed_at?:string}};
+  engine_candidates_count:number;candidate_links:Array<{engine_id:string;cloudflare_worker_count:number;supabase_function_count:number;attestation:string}>;
+  runtime_activity_verified:false;profiles_running_verified:0;semantics:string};
  engine_activity?:{registry_count:number;observed_workflow_engines:number;runtime_health_verified:number;
   status_counts:Record<SharedStateStatus,number>;recent_observed:Array<{engine_id:string;status:SharedStateStatus;reason:string;runtime_evidence:{evidence:string}|null}>;source_limitations:string}};
 type SharedContext={status:'loading'|'ready'|'denied'|'unavailable';summary:SharedSummary|null;updatedAt:string|null;refresh:()=>void};
@@ -67,6 +72,7 @@ export function CerebroSharedStatusBanner(){
     {(['ACTIVO','PERFECTO','PARCIAL','FALLANDO','POR_VERIFICAR'] as const).map(key=>
      <span key={key}>{labels[key]}: <strong>{counts[key]}</strong></span>)}
     <span>Motores registrados: {summary.engine_activity?.registry_count??'—'} · actividad GitHub reciente: {summary.engine_activity?.observed_workflow_engines??'—'} · fallos observados: {summary.engine_activity?.status_counts.FALLANDO??'—'}</span>
+    <span>Recursos detectados: Cloudflare {summary.provider_inventory?.sources?.cloudflare?.total??'—'} · Supabase {summary.provider_inventory?.sources?.supabase?.total??'—'} · estado inventario {summary.provider_inventory?.status??'SIN DATOS'}</span>
     <span>Fuente: {summary.source_status} · {summary.observed_at?new Date(summary.observed_at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'sin datos'}</span>
    </>:<span role="status">{status==='loading'?'Consultando estados…':status==='denied'?'Acceso no autorizado':'Fuente compartida no disponible · sin estados inventados'}</span>}
    <button type="button" onClick={refresh} style={{padding:'4px 8px',background:'transparent',color:'inherit',border:'1px solid currentColor',borderRadius:6}}>Actualizar</button>
@@ -83,6 +89,14 @@ export function CerebroSharedStatusBanner(){
       <div style={{display:'flex',gap:8,flexWrap:'wrap',paddingTop:6}}>
        {summary.engine_activity.recent_observed.map(e=><span key={e.engine_id} style={{padding:'5px 8px',border:'1px solid #31516c',borderRadius:6}}>
         {e.engine_id} · {e.status} {e.runtime_evidence?.evidence?<a href={e.runtime_evidence.evidence} target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline'}}>Ver ejecución</a>:null}
+       </span>)}
+      </div>
+    </div>:null}
+    {summary.provider_inventory?.candidate_links?.length?<div style={{marginTop:8,paddingTop:7,borderTop:'1px solid #31516c'}}>
+      <strong>Recursos asociados por nombre a motores (solo candidatos, no actividad)</strong>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',paddingTop:6}}>
+       {summary.provider_inventory.candidate_links.map(e=><span key={e.engine_id} style={{padding:'5px 8px',border:'1px solid #31516c',borderRadius:6}}>
+        {e.engine_id} · Cloudflare {e.cloudflare_worker_count} · Supabase {e.supabase_function_count}
        </span>)}
       </div>
     </div>:null}

@@ -4,6 +4,7 @@
 import {buildCerebroAgentDirectoryV0,queryCerebroAgentDirectoryV0,validateCerebroAgentDirectoryQueryV0,
   verifiedReadOnlyMode,observeExecutors} from './cerebro-agent-directory.ts';
 import {buildSharedState,buildEngineActivity} from '../cerebro/universal/v0/cerebro-shared-state-core.mjs';
+import {readProviderDiscovery} from '../cerebro/universal/v0/cerebro-provider-discovery.mjs';
 import engineRegistry from '../cerebro/registry/engine-registry.v1.json' with {type:'json'};
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
@@ -87,7 +88,9 @@ export default async function handler(req:Req,res:Res){
   const {records,...summary}=state;
   const engines=buildEngineActivity(engineRegistry.engine_ids,runtime);
   const {records:engineRows,...engineSummary}=engines;
-  if(input.mode==='summary')return res.status(200).json({status:'OK',...summary,engine_activity:engineSummary,transport:scope});
+  // Read-only sanitized provider snapshot. An error never affects existing directory/API.
+  const providerInventory=await readProviderDiscovery();
+  if(input.mode==='summary')return res.status(200).json({status:'OK',...summary,engine_activity:engineSummary,provider_inventory:providerInventory,transport:scope});
   if(input.mode==='engines'){
    const offset=Number(input.filters.get('offset')??0),limit=Number(input.filters.get('limit')??25);
    return res.status(200).json({status:'OK',schema:'CEREBRO_ENGINE_ACTIVITY_V1',company_id:'fenix',read_only:true,
@@ -104,6 +107,6 @@ export default async function handler(req:Req,res:Res){
    runtime_source:{provider:'CEREBRO_CONSOLE_ACTIVITY_V0',status:runtime.status,
     observed_at:runtime.observed_at,error_code:runtime.error_code,
     verified_profiles:runtime.verified_profiles,observed_execution_ids:runtime.observed_execution_ids},
-   shared_state:summary,engine_activity:engineSummary});
+   shared_state:summary,engine_activity:engineSummary,provider_inventory:providerInventory});
  }catch{return deny(res,503,'SHARED_STATE_CONTRACT_INVALID')}
 }
