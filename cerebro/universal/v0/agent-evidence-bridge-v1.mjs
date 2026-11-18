@@ -29,7 +29,7 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
  // Provider metadata = inventory visibility only; not runtime activity or certified identities.
  for(const m of inventories){
   if(!m||!PROVIDERS.has(m.source)||!safe(m.executor_id)||m.company_id!==company_id||
-    !ENV.has(m.environment)||!fresh(date(m.observed_at),now,600000)||
+    !['LAB','PREPROD','PROD','UNKNOWN'].includes(m.environment)||!fresh(date(m.observed_at),now,600000)||
     m.server_collector_verified!==true)continue;
   if(!authorized.has(m.source))continue;
   if(!providerStates.has(m.source))providerStates.set(m.source,new Set());
