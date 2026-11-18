@@ -79,7 +79,7 @@ export function buildSharedState(entries,source,now=Date.now()){
  */
 export function buildEngineActivity(engineIds,source,now=Date.now()){
  if(!Array.isArray(engineIds)||engineIds.length!==179||new Set(engineIds).size!==179||
-  engineIds.some(id=>typeof id!=='string'||!/^[A-Z][A-Z0-9-]{2,25}$/.test(id)))
+  engineIds.some(id=>typeof id!=='string'||!/^[A-Z0-9][A-Z0-9-]{2,25}$/.test(id)))
   throw Error('CANONICAL_ENGINE_REGISTRY_DRIFT');
  const counts=Object.fromEntries(STATES.map(s=>[s,0]));
  const freshSource=source?.status==='ACTIVO'&&Number.isFinite(times(source.observed_at))&&
