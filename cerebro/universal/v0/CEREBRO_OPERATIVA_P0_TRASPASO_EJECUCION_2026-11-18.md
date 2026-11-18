@@ -73,3 +73,9 @@ Recursos de arranque:
 **HECHO:** fuente + ruta + commit/deployment + prueba; **PARCIAL:** parte ejecutada, riesgo; **BLOQUEADO:** causa concreta, herramienta, gate, humano requerido; **POR AUDITAR:** no afirmar.
 Mostrar: `PROFILE_COUNT`, `RUNTIME_DISCOVERED_BY_PROVIDER`, `LINKED_VERIFIED_COUNT`, `ACTIVE_CONFIRMED`, `DEGRADED_CONFIRMED`, `UNLINKED`, `FEED_FRESHNESS`, `SHARED_GATEWAY`, `PROD_DEPLOYMENT`, `ROLLBACK_READY`, `ADDITIONAL_SPEND`.
 **El criterio de éxito es prueba física de lectura compartida desde dos interfaces y evidencia por agente, NO tener más PRs.**
+
+
+## 8. Actualización verificada 18/11/2026 · Operativa P0 continuación
+**Documentación canónica de continuidad:** [OPERATIVA_P0_CIERRE_PARCIAL_20261118.md](OPERATIVA_P0_CIERRE_PARCIAL_20261118.md).
+**Inventario de ejecutores observado:** [operativa-runtime-evidence-20261118.v1.json](../../registry/operativa-runtime-evidence-20261118.v1.json).
+PR #78 DRAFT `cerebro/operativa-runtime-p0-fix-20261118` (HEAD último verificado `184e5ad6bdcb7291660ea96847f95cbf0f96e7ee`). Vercel preview READY `dpl_HosSkpwg9czo4jQ5QEB6suSmNB5Q` sin alias a PROD. Supabase Activity v7 PROD intacta; fallback solo candidato. Consultar estado CI general y smoke owner antes de promoción. No afirmar cierre.

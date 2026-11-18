@@ -1,0 +1,82 @@
+{
+  "schema": "CEREBRO_OPERATIVA_RUNTIME_EVIDENCE_V1",
+  "company_id": "fenix",
+  "environment": "MIXED_READONLY",
+  "version": "2026-11-18",
+  "observed_date": "2026-11-18",
+  "source_type": "PHYSICAL_CONNECTOR_INVENTORY",
+  "semantics": "DISCOVERY_NOT_AUTONOMY_CERTIFICATION",
+  "runtime_discovered_by_provider": {
+    "cloudflare": {
+      "count": 45,
+      "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+      "source": "GET Cloudflare /accounts/{account_id}/workers/scripts",
+      "status": "DEPLOYED_NOT_EXECUTION_VERIFIED"
+    },
+    "supabase": {
+      "count": 118,
+      "project_id": "cluhljgonannaafpmblx",
+      "source": "Supabase list_edge_functions 2026-11-18",
+      "service_status": "118 ACTIVE",
+      "status": "DEPLOYED_NOT_EXECUTION_VERIFIED",
+      "note": "Previously observed 117; count changed in subsequent live observation. Do not hardcode as permanent."
+    },
+    "github": {
+      "source": "GitHub Actions authenticated activity feed v1",
+      "last_verified_publish": {
+        "run_id": 44274151505,
+        "run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44274151505",
+        "conclusion": "success"
+      },
+      "count": "NOT_EXHAUSTIVE",
+      "status": "OBSERVED_WORKFLOWS_NOT_ROLE_INSTANCES"
+    }
+  },
+  "exact_engine_runtime_bindings_verified": [
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-FB-FINANCIAL-REAL-ESTATE-V1",
+      "provider": "CLOUDFLARE",
+      "runtime_id": "cerebro-facebook-autoqual-lab",
+      "environment": "LAB",
+      "status": "INACTIVO",
+      "evidence": "Cloudflare script settings binding ENGINE_ID + AUTOQUAL_ENABLED=false; schedules=[]",
+      "observed_date": "2026-11-18",
+      "role_profile_link": null
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-IG-FINANCIAL-REAL-ESTATE-V1",
+      "provider": "CLOUDFLARE",
+      "runtime_id": "cerebro-instagram-autoqual-lab",
+      "environment": "LAB",
+      "status": "INACTIVO",
+      "evidence": "Cloudflare script settings binding ENGINE_ID + AUTOQUAL_ENABLED=false; schedules=[]",
+      "observed_date": "2026-11-18",
+      "role_profile_link": null
+    }
+  ],
+  "other_verified_service_state": [
+    {
+      "runtime_id": "cerebro-operativa-auth-p0a-lab-eu",
+      "provider": "CLOUDFLARE",
+      "status": "INACTIVO",
+      "evidence": "CEREBRO_P0A_ENABLED=false and no scheduled cron"
+    },
+    {
+      "runtime_id": "cerebro-jarvis-lab-eu",
+      "provider": "CLOUDFLARE",
+      "status": "PARCIAL",
+      "evidence": "JARVIS_B2_B3_LIVE_ENABLED=false; JARVIS_GATEWAY_ENABLED=false; no cron"
+    }
+  ],
+  "profile_count": 2506,
+  "linked_verified_profile_count": 0,
+  "notes": [
+    "The two binding IDs are grounded in Cloudflare settings ENGINE_ID, not human profile identity.",
+    "An Edge Function marked ACTIVE does not attest to a job or role running.",
+    "Any role without exact runtime instance evidence remains POR_VERIFICAR.",
+    "Source observations are point-in-time; consume real APIs for present-state decisions."
+  ],
+  "prod_change": false
+}
