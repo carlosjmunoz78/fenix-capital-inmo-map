@@ -28,10 +28,10 @@ const fetchJson=async(url:string,token:string,ms=7000)=>{
  if(raw.length>500000)throw Error('UPSTREAM_OVERSIZE');
  return JSON.parse(raw);
 };
-type Entry={source:'CLOUDFLARE'|'SUPABASE';company_id:'fenix';environment:'UNKNOWN'|'PROD';
- executor_id:string;observed_at:string;server_collector_verified:true};
+type Entry={source:'CLOUDFLARE';company_id:'UNATTRIBUTED_ACCOUNT';
+ environment:'UNKNOWN';executor_id:string;observed_at:string;server_collector_verified:true};
 type Status={source:'CLOUDFLARE'|'SUPABASE';status:'LIVE'|'NOT_CONFIGURED'|'UNAVAILABLE';
- visible_count:number|null;observed_at:string|null};
+ visible_count:number|null;observed_at:string|null;metric_label:'WORKERS_IN_ACCOUNT'|'HISTORICAL_LAB_JOB_ROWS'};
 async function collectCloudflare(token:string,stamp:string):Promise<Entry[]>{
  const base='https://api.cloudflare.com/client/v4/accounts/'+ACCOUNT+'/workers/scripts';
  const first=await fetchJson(base+'?per_page=100',token);
@@ -47,17 +47,32 @@ async function collectCloudflare(token:string,stamp:string):Promise<Entry[]>{
  const names=all.map((x:any)=>x?.id);
  if(names.length>300||names.some((x:unknown)=>typeof x!=='string'||! /^(?:[a-z0-9][a-z0-9_-]{2,127})$/.test(x))||
     new Set(names).size!==names.length)throw Error('CF_WORKERS_INVALID');
- return names.map((id:string)=>({source:'CLOUDFLARE',company_id:'fenix',
+ // Workers belong to this Cloudflare account, not necessarily the Fénix company.
+ return names.map((id:string)=>({source:'CLOUDFLARE',company_id:'UNATTRIBUTED_ACCOUNT',
   environment:'UNKNOWN',executor_id:id,observed_at:stamp,server_collector_verified:true}));
 }
-async function collectSupabase(token:string,stamp:string):Promise<Entry[]>{
- const rows=await fetchJson('https://api.supabase.com/v1/projects/'+PROJECT+'/functions',token,9000);
- if(!Array.isArray(rows)||rows.length>500)throw Error('SB_SCHEMA');
- const names=rows.filter((x:any)=>x?.status==='ACTIVE').map((x:any)=>x?.slug);
- if(names.some((x:unknown)=>typeof x!=='string'||! /^[a-z0-9][a-z0-9_-]{2,127}$/.test(x))||
-   new Set(names).size!==names.length)throw Error('SB_FUNCTIONS_INVALID');
- return names.map((id:string)=>({source:'SUPABASE',company_id:'fenix',
-  environment:'PROD',executor_id:id,observed_at:stamp,server_collector_verified:true}));
+const LAB_JOB_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-operativa-job-telemetry-lab-v0?company_id=fenix&environment=LAB';
+async function collectLabJobs(ownerBearer:string,prodApikey:string,labPublishable:string):Promise<number>{
+ const r=await fetch(LAB_JOB_URL,{method:'GET',redirect:'error',cache:'no-store',
+  headers:{authorization:ownerBearer,apikey:labPublishable,
+   'x-cerebro-owner-prod-apikey':prodApikey,accept:'application/json'},
+  signal:AbortSignal.timeout(9000)});
+ if(r.status!==200)throw Error('SUPABASE_LAB_TELEMETRY_DENIED');
+ const raw=await r.text();
+ if(raw.length>24000)throw Error('SUPABASE_LAB_TELEMETRY_OVERSIZE');
+ const x=JSON.parse(raw);
+ if(x?.status!=='OK'||x?.source!=='FENIX_LAB_AGENT_JOB_AGGREGATE_V1'||
+    x.company_id!=='fenix'||x.environment!=='LAB'||x.read_only!==true||
+    x.agent_identity_verified!==false||x.active_agent_count!==null||
+    !Array.isArray(x.source_totals)||x.source_totals.length!==3)
+  throw Error('SUPABASE_TELEMETRY_CONTRACT_INVALID');
+ let count=0;
+ for(const t of x.source_totals){
+  if(!['JARVIS_WORK','BROWSER_V2','CREATIVE_V1'].includes(t.source)||
+     !Number.isSafeInteger(t.total_rows)||t.total_rows<0||t.total_rows>300)throw Error('SUPABASE_TELEMETRY_COUNT_INVALID');
+  count+=t.total_rows;
+ }
+ return count; // historical records, NOT active agents or live executing jobs
 }
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
@@ -88,25 +103,31 @@ export default async function handler(req:Req,res:Res){
     return unavailable(res,403,'OWNER_DENIED');
  }catch{return unavailable(res,503,'OWNER_RESOLVER_UNAVAILABLE')}
  const stamp=new Date().toISOString();
- const collectors=[
-  {source:'CLOUDFLARE' as const,secret:process.env.CEREBRO_CF_READ_TOKEN_PREVIEW,
-   run:collectCloudflare},
-  {source:'SUPABASE' as const,secret:process.env.CEREBRO_SUPABASE_MGMT_READ_TOKEN_PREVIEW,
-   run:collectSupabase}
+ const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
+ const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
+ const [cf,lab]=await Promise.all([
+  (async()=>{
+   if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
+   try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
+   catch{return{source:'CLOUDFLARE' as const,status:'UNAVAILABLE' as const,rows:[] as Entry[]}}
+  })(),
+  (async()=>{
+   if(labKey.length<12)return{source:'SUPABASE' as const,status:'NOT_CONFIGURED' as const,count:null as number|null};
+   try{return{source:'SUPABASE' as const,status:'LIVE' as const,count:await collectLabJobs(auth,apikey,labKey)}}
+   catch{return{source:'SUPABASE' as const,status:'UNAVAILABLE' as const,count:null as number|null}}
+  })()
+ ]);
+ const statuses:Status[]=[
+  {source:'CLOUDFLARE',status:cf.status,metric_label:'WORKERS_IN_ACCOUNT',
+   visible_count:cf.status==='LIVE'?cf.rows.length:null,observed_at:cf.status==='LIVE'?stamp:null},
+  {source:'SUPABASE',status:lab.status,metric_label:'HISTORICAL_LAB_JOB_ROWS',
+   visible_count:lab.status==='LIVE'?lab.count:null,observed_at:lab.status==='LIVE'?stamp:null}
  ];
- const settled=await Promise.all(collectors.map(async c=>{
-  if(!c.secret||c.secret.length<24)return {source:c.source,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
-  try{return {source:c.source,status:'LIVE' as const,rows:await c.run(c.secret,stamp)}}
-  catch{return {source:c.source,status:'UNAVAILABLE' as const,rows:[] as Entry[]}}
- }));
- const statuses:Status[]=settled.map(x=>({source:x.source,status:x.status,
-  visible_count:x.status==='LIVE'?x.rows.length:null,observed_at:x.status==='LIVE'?stamp:null}));
- // Deliberately no agent identity is inferred from a Worker/Function name or deploy state.
- // Future server-side signed receipt adapters supply receipts to this same projector.
- const inventory=settled.flatMap(x=>x.rows);
+ // No worker/job may be treated as a specific canonical agent without a verified, signed,
+ // tenant-scoped per-job identity receipt.
  const projection=projectAgentEvidenceV1({
-  roster:buildCerebroAgentDirectoryV0(),inventories:inventory,receipts:[],
-  company_id:'fenix',observed_at:stamp,authorized_sources:settled.filter(x=>x.status==='LIVE').map(x=>x.source)
+  roster:buildCerebroAgentDirectoryV0(),inventories:[],receipts:[],
+  company_id:'fenix',observed_at:stamp,authorized_sources:[]
  });
  return res.status(200).json({status:statuses.every(x=>x.status==='LIVE')?'OK':'PARTIAL',
   company_id:'fenix',observed_at:stamp,read_only:true,executed:false,
@@ -116,5 +137,5 @@ export default async function handler(req:Req,res:Res){
   unverified_profiles:projection.unverified_profiles,
   active_executor_count:null,
   receipt_source_status:'NOT_CONNECTED',
-  warning:'LIVE_DEPLOYMENT_INVENTORY_NOT_AGENT_ACTIVITY; PROFILES_REQUIRE_VERIFIED_SIGNED_JOB_RECEIPTS'});
+  warning:'CLOUDFLARE_ACCOUNT_WORKERS_AND_SUPABASE_HISTORICAL_LAB_JOBS_ARE_NOT_ACTIVE_AGENTS; SIGNED_IDENTITY_RECEIPTS_PENDING'});
 }
