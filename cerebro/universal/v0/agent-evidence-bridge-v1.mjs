@@ -4,6 +4,7 @@
  * Inventory and deployment metadata NEVER attest that an agent is working.
  * To earn an identity, a receipt MUST explicitly carry an existing profile ID.
  */
+import {RECEIPT_ATTESTED_V1} from './agent-receipt-attestor-v1.mjs';
 const PROVIDERS=new Set(['CLOUDFLARE','SUPABASE','GITHUB_ACTIONS','VERCEL','CEREBRO_JOB']);
 const EVENTS=new Set(['STARTED','HEARTBEAT','SUCCEEDED','FAILED']);
 const ENV=new Set(['LAB','PREPROD','PROD']);
@@ -38,7 +39,7 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
  const byProfile=new Map(),seen=new Set(),rejected={duplicate:0,untrusted:0,unmatched:0,invalid:0};
  for(const r of receipts){
   if(!r||!PROVIDERS.has(r.source)||!authorized.has(r.source)||
-    r.server_collector_verified!==true||r.integrity!=='VERIFIED_BY_SOURCE_ADAPTER'){
+    r.server_collector_verified!==true||r.integrity!=='VERIFIED_BY_SOURCE_ADAPTER'||r[RECEIPT_ATTESTED_V1]!==true){
    rejected.untrusted++;continue;
   }
   const ts=date(r.emitted_at);
