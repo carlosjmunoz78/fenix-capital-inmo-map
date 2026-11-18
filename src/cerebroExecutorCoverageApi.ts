@@ -23,6 +23,10 @@ export type ExecutorCoverage={
    active_schedules_succeeded_within_48h?:number;last_schedule_run_at?:string|null;
    last_schedule_status?:string|null;run_history_sampling?:string;
    business_outcome_verified?:false;agent_identity_verified?:false}>};
+ durable_supervisor:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  receipt_id:string|null;health:'EVIDENCE_OK_NOT_CERTIFIED'|'GATE_HOLD'|null;
+  signed:boolean;recent:boolean;observed_at:string|null;history_count:number|null;
+  gate_count:number|null;cron_job_id:77|null;global_autonomy_certified:false};
  lab_qa:{source:'SUPABASE_PGCRON_QA_LAB_V1';status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';signature_verified:boolean;execution_status:'SUCCEEDED'|'FAILED'|null;tests_passed:number|null;tests_total:number|null;runs_count:number|null;observed_at:string|null;recent:boolean;first_party_scheduled:true;extra_subscriptions_required:false;operational_autonomy_certified:false;excellence_certified:false};
  supervisor:{provider_health:'LIVE'|'PARTIAL';github_qa_attestation:'VERIFIED'|'NOT_VERIFIED'|'UNAVAILABLE';agent_quality:'NOT_ATTESTED_GLOBAL';excellence_verified:0;qa_metadata_check:'PASS'|'HOLD_OR_FAIL';qa_execution_attributed:boolean;qa_signature_verified:boolean;source_failure_observations:string[];last_observed_at:string};
 };
@@ -90,6 +94,19 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
        x.agent_identity_verified!==false||x.business_outcome_verified!==false||
        !Number.isSafeInteger(x.active_schedules)||Number(x.active_schedules)<0||
        !Number.isSafeInteger(x.scheduled_jobs_total)||Number(x.scheduled_jobs_total)<Number(x.active_schedules)))||
+   !data.durable_supervisor||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.durable_supervisor.status)||
+   data.durable_supervisor.global_autonomy_certified!==false||
+   (data.durable_supervisor.status==='LIVE'&&(
+     data.durable_supervisor.signed!==true||
+     data.durable_supervisor.cron_job_id!==77||
+     data.durable_supervisor.gate_count!==5||
+     !['EVIDENCE_OK_NOT_CERTIFIED','GATE_HOLD'].includes(String(data.durable_supervisor.health))||
+     !Number.isSafeInteger(data.durable_supervisor.history_count)||
+     Number(data.durable_supervisor.history_count)<1||
+     !Number.isFinite(Date.parse(data.durable_supervisor.observed_at??''))||
+     !/^[a-f0-9-]{36}$/.test(data.durable_supervisor.receipt_id??'')))||
+   (data.durable_supervisor.status!=='LIVE'&&data.durable_supervisor.signed!==false)||
    !data.lab_qa||data.lab_qa.source!=='SUPABASE_PGCRON_QA_LAB_V1'||
    !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.lab_qa.status)||
    data.lab_qa.operational_autonomy_certified!==false||data.lab_qa.excellence_certified!==false||
