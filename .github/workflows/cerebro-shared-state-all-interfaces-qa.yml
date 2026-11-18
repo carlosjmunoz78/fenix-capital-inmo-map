@@ -1,0 +1,40 @@
+name: CEREBRO SHARED STATE · All interfaces isolated QA
+on:
+  push:
+    branches: [cerebro/shared-state-all-interfaces-v0-20261118]
+permissions: {contents: read}
+jobs:
+  read-only-universal-state:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24', cache: npm}
+      - run: npm ci --no-audit --no-fund
+      - name: Build existing App without refactoring
+        run: npm run build
+      - name: Universal state, provenance and tenancy unit contracts
+        run: node --test cerebro/universal/v0/cerebro-shared-state-core.test.mjs
+      - name: Old vs new and 2506 real registry
+        run: |
+          node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs
+          node --experimental-strip-types --test cerebro/universal/v0/operativa-runtime-p0-bridge.test.mjs
+      - name: All interfaces use single provider and shared-state endpoint
+        run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const host=readFileSync("src/CerebroConsoleHost.tsx","utf8");
+            const state=readFileSync("src/cerebroSharedState.tsx","utf8");
+            const profiles=readFileSync("src/cerebroAgentDirectoryApi.ts","utf8");
+            const api=readFileSync("api/cerebro-shared-state.ts","utf8");
+            const old=readFileSync("api/cerebro-agent-directory.ts","utf8");
+            if(!["JARVIS","OPERATIVA","NEURONAL","NAVEGADOR","V0"].every(x=>host.includes(x)))process.exit(10);
+            if(!host.includes("<CerebroSharedStatusBanner/>")||!host.includes("CerebroSharedStateProvider"))process.exit(11);
+            if(!state.includes("/api/cerebro-shared-state?mode=summary")||!profiles.includes("/api/cerebro-shared-state?mode=profiles"))process.exit(12);
+            if(!api.includes("verifiedReadOnlyMode")||!api.includes("CARLOS-ADMIN")||!api.includes("observeExecutors")||!api.includes("buildSharedState"))process.exit(13);
+            if(!old.includes("export async function observeExecutors"))process.exit(14);
+            if(api.includes("SUPABASE_SERVICE_ROLE_KEY")||api.includes("req.headers.cookie"))process.exit(15);
+            console.log("PASS_UNIVERSAL_OWNER_READONLY_SHARED_STATE_ALL_INTERFACES_AND_FALLBACK");
+          '
