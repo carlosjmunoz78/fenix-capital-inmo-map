@@ -28,7 +28,7 @@ const fetchJson=async(url:string,token:string,ms=7000)=>{
  if(raw.length>500000)throw Error('UPSTREAM_OVERSIZE');
  return JSON.parse(raw);
 };
-type Entry={source:'CLOUDFLARE'|'SUPABASE';company_id:'fenix';environment:'LAB'|'PROD';
+type Entry={source:'CLOUDFLARE'|'SUPABASE';company_id:'fenix';environment:'UNKNOWN'|'PROD';
  executor_id:string;observed_at:string;server_collector_verified:true};
 type Status={source:'CLOUDFLARE'|'SUPABASE';status:'LIVE'|'NOT_CONFIGURED'|'UNAVAILABLE';
  visible_count:number|null;observed_at:string|null};
