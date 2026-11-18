@@ -1,0 +1,38 @@
+name: CEREBRO · Physical profile evidence 2506 · GitOps read-only audit
+on:
+  push:
+    branches: [cerebro/operativa-runtime-p0-handoff-20261118]
+    paths:
+      - cerebro/universal/v0/build-operativa-2506-audit.mjs
+      - cerebro/registry/operativa-provider-discovery-20261118.v1.json
+      - .github/workflows/cerebro-operativa-2506-audit.yml
+permissions:
+  contents: write
+concurrency: {group: operativa-2506-source-audit, cancel-in-progress: false}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: true}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - name: Materialize pinned profiles, no provider secrets or jobs
+        run: node --experimental-strip-types cerebro/universal/v0/build-operativa-2506-audit.mjs
+      - name: Check exact 2506 rows and summary without external writes
+        run: |
+          test "$(wc -l < cerebro/registry/operativa-profile-runtime-audit-2506.v1.jsonl)" = 2506
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync("cerebro/registry/operativa-profile-runtime-audit-2506.summary.v1.json"));if(d.total_logical_profiles!==2506||d.verified_running_profiles!==0||d.with_declared_engine_ids+d.without_declared_engine_ids!==2506)process.exit(1)'
+      - name: Commit only deterministic audit artifacts to this handoff branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/cerebro/operativa-runtime-p0-handoff-20261118"
+          git config user.name "cerebro-evidence-bot"
+          git config user.email "cerebro-evidence-bot@users.noreply.github.com"
+          git add cerebro/registry/operativa-profile-runtime-audit-2506.v1.jsonl cerebro/registry/operativa-profile-runtime-audit-2506.summary.v1.json cerebro/universal/v0/OPERATIVA_2506_MAPEO_EVIDENCIAS_2026-11-18.md
+          if git diff --cached --quiet; then echo 'AUDIT_ALREADY_CURRENT'; exit 0; fi
+          git commit -m "audit(cerebro): record 2506 source-linked profile evidence, no activity inferred"
+          git push origin HEAD:refs/heads/cerebro/operativa-runtime-p0-handoff-20261118
+          echo 'PERSISTED_2506_AUDIT_IN_CANONICAL_HANDOFF'
