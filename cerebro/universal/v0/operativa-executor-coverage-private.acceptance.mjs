@@ -73,6 +73,24 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
     read_only:true,request_executed_job:false
    })
   };
+  if(String(url).includes('cerebro-certification-gates-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
+   status:'OK',source:'CEREBRO_LAB_CERTIFICATION_GATES_V1',read_only:true,executed:false,
+   company_id:'fenix',environment:'LAB',prod_execution_enabled:false,
+   global_autonomy_certified:false,global_excellence_certified:false,cost_measured:false,
+   evidence_categories:[
+    {id:'QA-001',kind:'SIGNED_LAB_QA_EXECUTION',full_engine_certified:false,
+      business_quality_certified:false,specific_capability_evidenced:true,tests_passed:6,tests_total:6,signed_runs:5},
+    {id:'FACT-001',kind:'HISTORICAL_REGISTRY_ATTESTATION',full_engine_certified:false,
+      business_quality_certified:false,specific_capability_evidenced:true},
+    {id:'CONSOLE-001',kind:'LEGACY_JOB_HISTORY_UNATTRIBUTED',historical_rows:123,
+      full_engine_certified:false,business_quality_certified:false},
+    {id:'UMS-001',kind:'HOLD_IN_LEGACY_CREATIVE_QUEUE',historical_rows:1,
+      full_engine_certified:false,business_quality_certified:false},
+    {id:'SOCIAL_LAB_SCHEDULES',kind:'SCHEDULE_EXECUTION_METADATA',
+      scheduled_jobs_total:19,active_schedules:17,active_schedules_succeeded_within_48h:9,
+      agent_identity_verified:false,business_outcome_verified:false,full_engine_certified:false}
+   ]
+  })};
   if(String(url).includes('cerebro-engine-truth-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
    status:'OK',source:'CEREBRO_LAB_ENGINE_TRUTH_AUDIT_V1',read_only:true,executed:false,
    company_id:'fenix',environment:'LAB',all_engines_certified:false,autonomy_global_certified:false,
@@ -128,7 +146,12 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.engine_truth.sources.length,4);
   assert.equal(x.body.engine_truth.sources.filter(x=>x.recent_metadata_rows>0).length,0);
   assert.equal(x.body.engine_truth.sources.every(x=>x.engine_certified_autonomous===false),true);
-  assert.equal(urls.length,7);
+  assert.equal(x.body.certification_gates.status,'LIVE');
+  assert.equal(x.body.certification_gates.evidence_categories.length,5);
+  assert.equal(x.body.certification_gates.global_autonomy_certified,false);
+  assert.equal(x.body.certification_gates.evidence_categories.find(v=>v.id==='SOCIAL_LAB_SCHEDULES').active_schedules,17);
+  assert.equal(x.body.certification_gates.evidence_categories.find(v=>v.id==='UMS-001').full_engine_certified,false);
+  assert.equal(urls.length,8);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
