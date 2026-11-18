@@ -79,3 +79,7 @@ Mostrar: `PROFILE_COUNT`, `RUNTIME_DISCOVERED_BY_PROVIDER`, `LINKED_VERIFIED_COU
 **Documentación canónica de continuidad:** [OPERATIVA_P0_CIERRE_PARCIAL_20261118.md](OPERATIVA_P0_CIERRE_PARCIAL_20261118.md).
 **Inventario de ejecutores observado:** [operativa-runtime-evidence-20261118.v1.json](../../registry/operativa-runtime-evidence-20261118.v1.json).
 PR #78 DRAFT `cerebro/operativa-runtime-p0-fix-20261118` (HEAD último verificado `184e5ad6bdcb7291660ea96847f95cbf0f96e7ee`). Vercel preview READY `dpl_HosSkpwg9czo4jQ5QEB6suSmNB5Q` sin alias a PROD. Supabase Activity v7 PROD intacta; fallback solo candidato. Consultar estado CI general y smoke owner antes de promoción. No afirmar cierre.
+
+
+### Estado actualizado del incidente de actividad (18/11/2026)
+Supabase Activity `cerebro-console-activity-v0` promovida solo de v7 a **v8** con fallback público GitHub cuando el snapshot de 20 minutos caduca. Ver reporte enlazado `OPERATIVA_P0_CIERRE_PARCIAL_20261118.md` para SHA exactos, 9 respuestas 200/1 401 y copia de recuperación. App permanece en deployment original, PR #78 sin promover; gate de auth preview owner positivo pendiente.

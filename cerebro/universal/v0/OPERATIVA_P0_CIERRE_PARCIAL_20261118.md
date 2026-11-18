@@ -37,3 +37,20 @@
 4. Si gates pasan, promoción controlada solo del SHA probado y smoke propietario/anon/CRM, publicación documentada. Si no, conservar producción y registrar LOW_CONFIDENCE solo ante incertidumbre de seguridad real.
 
 No se han creado nuevas cuotas, Workers, D1 ni funciones Edge. Ninguna ejecución se atribuye a los 2506 perfiles por nombre.
+
+## Actualización física posterior · Activity Function V8
+
+**HECHO EN SUPABASE PROD, ALCANCE SOLO FUNCION DE ACTIVIDAD:**
+- Desplegada `cerebro-console-activity-v0` **v8**, misma función, mismo `function_id=f4417ef4-3ff2-41f0-84e9-ddf6d38abdea`, `verify_jwt=true`, `status=ACTIVE`.
+- SHA de artefacto Supabase v8: `08c33889f71df9374400fb07d27a0f9d05fd7518a078dddc99a196226129a012`. Source code: PR #78, `cerebro/universal/v0/supabase-activity/index.ts` + `public-github-fallback.mjs`.
+- Código v7 verificado byte a byte antes de desplegar; rollback exacto documentado en `cerebro/universal/v0/supabase-activity/backup/cerebro-console-activity-v7-index.ts` (SHA de artefacto original `72c99c22bafa4e0a6a26057dbd87145f7a9bc8eb4b4f8ee1ab92744c52f30410`). **Rollback restaurable por despliegue, no se ha ejecutado un rollback real**.
+- Incidencia reproducida: snapshot GitHub generado `2026-11-18T09:15:27.429Z` aún obsoleto al iniciar v8; últimos siete GET 503 de v7 entre 09:35:27Z y 09:36:19Z.
+- Tras v8: nueve GET HTTP 200 y una petición sin credenciales HTTP 401 hasta 09:38:19Z (logs de `function_edge_logs` filtrados por versión 8). Fuente UI NEURONAL vuelve a `CACHED` desde `UNAVAILABLE`. Este resultado demuestra recuperación puntual, todavía no SLA estable de días.
+- UI anónima Opera al endpoint Edge devuelve `UNAUTHORIZED_NO_AUTH_HEADER`; conserva aislamiento. App/CRM/Auth/DNS no modificados.
+- El feed publisher programado continúa existente, sin cambiar workflow ni permisos; el fallback solo entra si snapshot falla o caduca. Se requieren más observaciones para identificar todos los 503 históricos.
+
+**Estado App OPERATIVA**: PR #78 y preview Vercel siguen sin promoción. CI Enterprise Acceleration `44274079044` terminó **SUCCESS en run_attempt=2** tras fallo intermitente de carga 47/50 en el primer intento; no se ha debilitado la suite. El preview requiere prueba positiva de autenticación owner (Opera preview mostraba formulario de login independiente), reconciliación OLD vs NEW física y rollback de App probado. Por tanto `OPERATIVA_END_TO_END_PROD=PARCIAL`, no completo.
+
+**PROD alias intacto**: comprobación Vercel `get_alias(app.fenixcapital.es)` → `dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h` SHA `7163dccd962a19fbd5301b14fcacacf08b7245ea`, no preview `dpl_HosSkpwg9czo4jQ5QEB6suSmNB5Q`.
+
+**NEXT BLOCK:** prueba owner positiva sobre el preview protegido, smoke de dos interfaces sobre mismo origen, recuperación probada y promoción exacta del candidato únicamente si pasan gates. Sin privilegios nuevos, sin solicitudes repetidas.
