@@ -237,7 +237,7 @@ function acceptedFeedRun(x:RuntimeFeedRun){
   String(x.html_url??'').startsWith('https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/')&&
   Number.isFinite(Date.parse(x.updated_at??''));
 }
-async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
+export async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
  const degraded=(error_code:string)=>({source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,status:'DEGRADADO' as const,observed_at:null as string|null,error_code,verified_profiles:0,observed_execution_ids:0,records:entries});
  let feed:RuntimeFeed;
  try{
