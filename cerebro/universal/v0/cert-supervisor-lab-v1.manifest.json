@@ -1,0 +1,113 @@
+{
+  "manifest_version": "1.0.0",
+  "component_id": "CERT_SUPERVISOR_LAB_V1",
+  "display_name": "CEREBRO OS · Supervisor firmado de gates por motor",
+  "company_id": "fenix",
+  "engine_id": null,
+  "environment": "LAB",
+  "version": "1.0.0",
+  "lifecycle": "LAB_VALIDATED",
+  "production_promotion": "HOLD",
+  "runtime": {
+    "provider": "SUPABASE_EXISTING_LAB",
+    "shared_runtime": true,
+    "dedicated_server": false,
+    "cron_job_id": 77,
+    "cron_name": "cerebro-cert-supervisor-lab-v1",
+    "schedule": "3,18,33,48 * * * *",
+    "frequency_minutes": 15,
+    "requires_github_actions": false,
+    "logic": "SQL_DETERMINISTIC_NO_AI"
+  },
+  "data_contracts": {
+    "source": "public.cerebro_lab_certification_gates_v1()",
+    "history": "cerebro_lab.cert_supervisor_history_v1",
+    "verifier": "public.cerebro_lab_cert_supervisor_observe_v1()",
+    "signing": "HMAC_SHA256_PRIVATE_KEY_DOMAIN_SEPARATED",
+    "key_publicly_accessible": false,
+    "receipt_includes": [
+      "receipt_id",
+      "company_id",
+      "environment",
+      "component_id",
+      "version",
+      "observed_at",
+      "gate_snapshot",
+      "health",
+      "signature_hex"
+    ],
+    "engine_ids_assessed": [
+      "QA-001",
+      "FACT-001",
+      "CONSOLE-001",
+      "UMS-001"
+    ],
+    "aggregate_sources": [
+      "SOCIAL_LAB_SCHEDULES"
+    ],
+    "no_agent_instance_count_inferred": true
+  },
+  "permissions": {
+    "cron_execution_role": "postgres",
+    "private_schema_public_usage": false,
+    "private_signing_key_service_role_read": false,
+    "read_rpc_role": "service_role",
+    "anonymous_read": false,
+    "authenticated_read": false,
+    "owner_gateway_required": true,
+    "allow_creative_production": false,
+    "app_crm_prod_mutation": false,
+    "scope": "FENIX_LAB_ONLY"
+  },
+  "dependencies": [
+    "pg_cron existing extension",
+    "pgcrypto existing extension",
+    "QA-001 LAB signing and receipts",
+    "LAB FACT registry attestation",
+    "legacy CONSOLE-001 and UMS-001 read-only metadata",
+    "GitHub-independent Vercel Preview owner-only UI"
+  ],
+  "observability": {
+    "source": "cron.job_run_details jobid=77",
+    "signed_history": "public.cerebro_lab_cert_supervisor_observe_v1()",
+    "schedule_last_verified_active": true,
+    "run_test_mode": "DIRECT_EXECUTION_PLUS_REAL_PG_CRON",
+    "physical_runs_observed": 4,
+    "signature_verified": true,
+    "full_engine_certification_count": 0,
+    "total_evidence_categories": 5
+  },
+  "evaluations": {
+    "actual_lab_execution": true,
+    "real_cron_trigger_observed": true,
+    "hmac_verification": true,
+    "fail_closed_anonymous": true,
+    "temporary_scheduler_rollback_test": true,
+    "measured_marginal_eur": false,
+    "complete_operational_engine_tribunal": false,
+    "independent_backup": false,
+    "old_vs_new_prod": false,
+    "full_prod_rollback_test": false
+  },
+  "rollback": {
+    "pause": "select cron.unschedule('cerebro-cert-supervisor-lab-v1');",
+    "restore": "select cron.schedule('cerebro-cert-supervisor-lab-v1','3,18,33,48 * * * *','select cerebro_lab.run_cert_supervisor_v1();');",
+    "previous_private_preview_deployment": "dpl_7NZr86NMnhJdTnpB8oZVdJvsoCyE",
+    "tested": "TEMP_SCHEDULER_JOB_CREATED_AND_REMOVED_ONLY"
+  },
+  "cost": {
+    "new_subscriptions_eur": 0,
+    "marginal_usage_eur": "NOT_MEASURED",
+    "paid_ai_models_required": false
+  },
+  "documentation": {
+    "runbook": "cerebro/universal/v0/CERT001_SUPERVISOR_DURABLE_LAB_2026-11-18.md",
+    "audit": "cerebro/universal/v0/AUDIT001_REAL_ENGINE_STATUS_2026-11-18.md",
+    "pr": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/pull/81"
+  },
+  "training_hooks": {
+    "auto_promote": false,
+    "missing_evidence_can_be_collected": true,
+    "human_required_on_promotion": true
+  }
+}
