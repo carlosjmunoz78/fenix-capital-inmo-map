@@ -25,7 +25,10 @@ test('technical subject ID + server-confirmed email are sufficient with no eleva
 });
 test('different Supabase Auth user ID is denied even if email and label match',()=>assert.throws(()=>validateEphemeralSession(response({user:{id:'a406f1e3-f647-4c68-bc4a-3ccafe109dea',email:E2E_EMAIL,email_confirmed_at:'2026-11-18T11:00:00Z',app_metadata:marker}})),/MISMATCH/));
 test('privileged technical account forbidden',()=>assert.throws(()=>validateEphemeralSession(response({user:{id:uuid,email:E2E_EMAIL,email_confirmed_at:'2026-11-18T11:00:00Z',app_metadata:{...marker,actor_code:'CARLOS-ADMIN'}}})),/PRIVILEGED/));
-test('JWT without grant marker remains a technical identity, not owner',()=>assert.doesNotThrow(()=>validateEphemeralSession(response({access_token:jwt({app_metadata:{provider:'email'}})})));
+test('JWT without grant marker remains technical identity only',()=>{
+ const credential=response({access_token:jwt({app_metadata:{provider:'email'}})});
+ assert.equal(validateEphemeralSession(credential).access_token,credential.access_token);
+});
 test('privileged JWT app_metadata cannot grant owner power',()=>assert.throws(()=>validateEphemeralSession(response({access_token:jwt({app_metadata:{actor_code:'CARLOS-ADMIN'}})})),/TTL_INVALID/));
 test('wrong issuer, identity or expiring tokens fail',()=>{
  for(const claims of [{iss:'https://evil.example'},{sub:'another-identity'},{exp:now+120},{is_anonymous:true}]){
