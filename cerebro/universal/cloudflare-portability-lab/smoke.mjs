@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import worker,{offlineCatalogCheck} from './worker/index.ts';
 assert.deepEqual(offlineCatalogCheck(),{total:2506,read_only:true,executed:false,verified_live:false});
 const config=JSON.parse(readFileSync(new URL('./wrangler.jsonc',import.meta.url),'utf8'));
+assert.deepEqual(config.compatibility_flags,['nodejs_compat']);
 assert.equal(config.workers_dev,false);assert.equal(config.preview_urls,false);assert.equal(config.observability.enabled,false);
 assert.equal(config.assets.directory,'../../../dist');assert.equal(config.assets.not_found_handling,'single-page-application');
 assert.deepEqual(config.assets.run_worker_first,['/api/*']);assert.equal(config.main,'./worker/index.ts');

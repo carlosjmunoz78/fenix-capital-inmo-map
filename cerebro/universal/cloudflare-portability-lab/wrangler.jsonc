@@ -14,5 +14,8 @@
   },
   "observability": {
     "enabled": false
-  }
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
 }

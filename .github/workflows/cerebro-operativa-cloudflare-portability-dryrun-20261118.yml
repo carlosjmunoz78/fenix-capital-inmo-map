@@ -42,7 +42,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.45.0 deploy --dry-run --config cerebro/universal/cloudflare-portability-lab/wrangler.jsonc --outdir "$RUNNER_TEMP/cerebro-cf-dryrun"
+          npx --yes wrangler@4.164.0 deploy --dry-run --config cerebro/universal/cloudflare-portability-lab/wrangler.jsonc --outdir "$RUNNER_TEMP/cerebro-cf-dryrun" 2>&1 | tee "$RUNNER_TEMP/cerebro-cf-dryrun.log"
+          ! grep -Fq "Your Worker may throw errors at runtime" "$RUNNER_TEMP/cerebro-cf-dryrun.log"
           test -d "$RUNNER_TEMP/cerebro-cf-dryrun"
           echo 'CF_SOURCE_COMPAT_DRYRUN=PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'CLOUDFLARE_REMOTE_DEPLOYMENT=NO' >> "$GITHUB_STEP_SUMMARY"
