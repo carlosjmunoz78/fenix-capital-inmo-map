@@ -73,6 +73,22 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
     read_only:true,request_executed_job:false
    })
   };
+  if(String(url).includes('cerebro-creative-hold-gates-lab-v1'))return{
+   status:200,ok:true,text:async()=>JSON.stringify({
+    status:'OK',source:'CEREBRO_LAB_CREATIVE_HOLD_GATES_V1',company_id:'fenix',
+    environment:'LAB',read_only:true,executed:false,paid_generation_enabled:false,
+    owner_rejection_override:false,all_certified:false,prod_execution_enabled:false,
+    external_actions_executed:false,engines:[
+     {engine_id:'FACT-001',historical_jobs:17,jobs_on_hold:10,historical_succeeded:7,
+      safe_to_resume:false,autonomy_certified:false,blockers:[
+       {state:'HOLD',reason_code:'BLOCKED_EXECUTOR_PAID_LANE_NOT_DEPLOYED',count:1},
+       {state:'HOLD',reason_code:'OPENAI_PAID_WORKER_AND_SECURITY_GATE_PENDING',count:9},
+       {state:'SUCCEEDED',reason_code:'NONE',count:7}]},
+     {engine_id:'UMS-001',historical_jobs:1,jobs_on_hold:1,historical_succeeded:0,
+      safe_to_resume:false,autonomy_certified:false,blockers:[
+       {state:'HOLD',reason_code:'CREATIVE_REJECTED_BY_OWNER',count:1}]}
+    ]})
+  };
   if(String(url).includes('cerebro-console-readonly-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
    status:'OK',source:'CEREBRO_CONSOLE_READONLY_LAB_V1',
    company_id:'fenix',environment:'LAB',engine_id:'CONSOLE-001',
@@ -205,7 +221,11 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.console_job.specific_capability_evidenced,true);
   assert.equal(x.body.console_job.legacy_worker_executed,false);
   assert.equal(x.body.console_job.agent_role_identity_verified,false);
-  assert.equal(urls.length,11);
+  assert.equal(x.body.creative_hold_gates.status,'LIVE');
+  assert.equal(x.body.creative_hold_gates.engines[0].jobs_on_hold,10);
+  assert.equal(x.body.creative_hold_gates.engines[1].blockers[0].reason_code,'CREATIVE_REJECTED_BY_OWNER');
+  assert.equal(x.body.creative_hold_gates.owner_rejection_override,false);
+  assert.equal(urls.length,12);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
