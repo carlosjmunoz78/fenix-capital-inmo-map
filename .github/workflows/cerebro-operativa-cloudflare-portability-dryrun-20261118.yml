@@ -38,6 +38,8 @@ jobs:
           npm run build
       - name: Real source catalog smoke without network or credentials
         run: node --experimental-strip-types cerebro/universal/cloudflare-portability-lab/smoke.mjs
+      - name: Cloudflare Access RS256 signature and Gateway double-check (synthetic only)
+        run: node --experimental-strip-types cerebro/universal/cloudflare-portability-lab/owner-access-contract.test.mjs
       - name: Real workerd localhost SPA and denied API HTTP smoke (no remote deployment)
         shell: bash
         run: |
