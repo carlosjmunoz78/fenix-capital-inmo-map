@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHmac} from 'node:crypto';
+import {canonicalAgentReceiptV1,verifyAgentReceiptHmacV1} from './agent-receipt-attestor-v1.mjs';
 import {buildCerebroAgentDirectoryV0} from '../../../api/cerebro-agent-directory.ts';
 import {projectAgentEvidenceV1} from './agent-evidence-bridge-v1.mjs';
 const stamp='2026-11-18T18:00:00.000Z';
@@ -7,12 +9,18 @@ const roster=buildCerebroAgentDirectoryV0();
 const pair=roster.map(agent=>({agent,sub:roster.find(sub=>sub.kind==='SUBAGENT_ROLE'&&sub.parent_id===agent.id)}))
  .find(x=>x.agent.kind==='AGENT_ROLE'&&x.sub&&!x.agent.engine_ids?.length);
 if(!pair)throw Error('FIXTURE_AGENT_SUBAGENT_PAIR_MISSING');
-const receipt=(overrides={})=>({
+const rawReceipt=(overrides={})=>({
  source:'CLOUDFLARE',company_id:'fenix',environment:'LAB',engine_id:'UMS-001',
  event:'HEARTBEAT',executor_id:'worker-example-lab',agent_role_id:pair.agent.id,
  subagent_role_id:pair.sub.id,job_id:'job-123',receipt_id:'cloudflare-receipt-123',
  emitted_at:stamp,integrity:'VERIFIED_BY_SOURCE_ADAPTER',server_collector_verified:true,...overrides
 });
+const key=Uint8Array.from({length:32},(_,i)=>i+1);
+const receipt=(overrides={})=>{
+ const raw=rawReceipt(overrides);
+ const sig=createHmac('sha256',key).update('CEREBRO_AGENT_RECEIPT_V1\\n'+canonicalAgentReceiptV1(raw)).digest('hex');
+ return verifyAgentReceiptHmacV1({receipt:raw,signature_hex:sig,key,expected_source:raw.source});
+};
 const project=(opts={})=>projectAgentEvidenceV1({roster,company_id:'fenix',observed_at:stamp,
  authorized_sources:['CLOUDFLARE','SUPABASE'],...opts});
 test('2506 registry profiles: live deployed provider inventory does not certify a single active role',()=>{
@@ -43,9 +51,9 @@ test('one source-verified receipt auto-links exact agent and subagent, no manual
 });
 test('provider inventory, spoofed receipt, unknown source and missing identity never accredit roles',()=>{
  const result=project({receipts:[
-  receipt({receipt_id:'untrusted',server_collector_verified:false}),
+  rawReceipt({receipt_id:'untrusted',server_collector_verified:false}),
   receipt({receipt_id:'unregistered',agent_role_id:'NOT-IN-REGISTRY'}),
-  receipt({receipt_id:'unknown-source',source:'EXTERNAL'}),
+  rawReceipt({receipt_id:'unknown-source',source:'EXTERNAL'}),
   receipt({receipt_id:'bad-parent',subagent_role_id:'SEO-D000-INVALID'})]});
  assert.equal(result.runtime_verified_profiles,0);
  assert.equal(result.rejected_receipts.unmatched,2);
