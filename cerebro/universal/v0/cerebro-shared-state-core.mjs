@@ -13,6 +13,9 @@ export function classifyProfile(profile,source,now=Date.now()){
  const valid=source?.status==='ACTIVO'&&Number.isFinite(times(source.observed_at))&&
    now-times(source.observed_at)>=-120000&&now-times(source.observed_at)<=MAX_FEED_AGE_MS&&
    obs&&obs.engine_id===profile.id&&obs.company_id==='fenix'&&
+   // A GitHub workflow engine_id, even exact, is not an independently attested profile identity.
+   obs.profile_key===profile.kind+':'+profile.id&&
+   obs.profile_provenance==='EXPLICIT_EXECUTOR_ATTESTATION'&&
    obs.source==='CEREBRO_CONSOLE_ACTIVITY_V0'&&obs.provider==='GITHUB_ACTIONS'&&
    /^\d+$/.test(String(obs.runtime_id))&&evidenceUrl(obs.evidence)&&
    Number.isFinite(times(obs.last_run))&&now-times(obs.last_run)>=-120000&&
