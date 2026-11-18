@@ -5,6 +5,7 @@
  * To earn an identity, a receipt MUST explicitly carry an existing profile ID.
  */
 import {RECEIPT_ATTESTED_V1} from './agent-receipt-attestor-v1.mjs';
+export const PROJECTION_ATTESTED_V1=Symbol('CEREBRO_SERVER_PROJECTED_HMAC_V1');
 const PROVIDERS=new Set(['CLOUDFLARE','SUPABASE','GITHUB_ACTIONS','VERCEL','CEREBRO_JOB']);
 const EVENTS=new Set(['STARTED','HEARTBEAT','SUCCEEDED','FAILED']);
 const ENV=new Set(['LAB','PREPROD','PROD']);
@@ -99,7 +100,7 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
    engine_ids_observed:[...item.engine_ids].sort(),verified_events:item.verified_events};
  });
  const credited=profiles.filter(p=>p.runtime_verified);
- return {status:'OK',source:'CEREBRO_VERIFIED_EXECUTOR_EVIDENCE_V1',company_id,observed_at,read_only:true,
+ return Object.defineProperty({status:'OK',source:'CEREBRO_VERIFIED_EXECUTOR_EVIDENCE_V1',company_id,observed_at,read_only:true,
   semantics:'PER_PROFILE_EXECUTION_RECEIPTS_NOT_WORKER_INVENTORY',
   profile_total:profiles.length,templates_not_instances:profiles.filter(p=>p.kind==='SUBAGENT_TEMPLATE').length,
   accreditable_profiles:profiles.filter(p=>p.kind!=='SUBAGENT_TEMPLATE').length,
@@ -108,5 +109,5 @@ export function projectAgentEvidenceV1({roster,inventories=[],receipts=[],compan
   unverified_profiles:profiles.filter(p=>p.kind!=='SUBAGENT_TEMPLATE').length-credited.length,
   provider_inventory:[...providerStates].map(([source,set])=>({source,visible_executors:set.size,
    active_agents_from_inventory:null})).sort((a,b)=>a.source.localeCompare(b.source)),
-  rejected_receipts:rejected,profiles};
+  rejected_receipts:rejected,profiles},PROJECTION_ATTESTED_V1,{value:true,enumerable:false,writable:false});
 }
