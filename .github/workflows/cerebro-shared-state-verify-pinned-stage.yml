@@ -1,0 +1,93 @@
+name: CEREBRO SHARED STATE · Pinned stage security + owner authorization E2E
+on:
+  push:
+    branches: [cerebro/shared-state-all-interfaces-v0-20261118]
+    paths: [.github/workflows/cerebro-shared-state-verify-pinned-stage.yml]
+permissions: {contents: read}
+jobs:
+  pinned-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
+      OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      STAGED_URL: https://fenix-capital-preprod-i8u8vjjcx.vercel.app
+      DEPLOYMENT_SHA: 1f40e0450f718b912152010e0c3c7de16239abae
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - name: Attach existing Vercel authenticated client
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN" && test -n "$PROD_SUPABASE_PUBLISHABLE_KEY"
+          npm install --global vercel@65.8.0 --no-audit --no-fund >/dev/null
+          export XDG_DATA_HOME="$RUNNER_TEMP/shared-pin-auth"
+          echo "XDG_DATA_HOME=$XDG_DATA_HOME" >> "$GITHUB_ENV"
+          node -e 'const fs=require("fs"),path=require("path");const dir=path.join(process.env.XDG_DATA_HOME,"com.vercel.cli");fs.mkdirSync(dir,{recursive:true,mode:0o700});fs.writeFileSync(path.join(dir,"auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600})'
+      - name: Issue NEW short lived JWT solely for the technical account
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CEREBRO_E2E_TEST_PASSWORD" || { echo 'BLOCKED_TECHNICAL_SECRET_MISSING'; exit 2; }
+          node cerebro/universal/v0/e2e-ephemeral-token.mjs
+      - name: Negative security and cross-tenant tests ON EXACT existing private stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          api="$STAGED_URL/api/cerebro-shared-state"
+          test -n "${CEREBRO_E2E_RUNTIME_JWT:-}" || { echo 'BLOCKED_NEW_EPHEMERAL_TOKEN_NOT_PROPAGATED'; exit 2; }
+          for testcase in anonymous tenant write technician; do
+            case "$testcase" in
+              anonymous) suffix='?mode=summary&company_id=fenix'; expected=401; extra=();;
+              tenant) suffix='?mode=summary&company_id=aion'; expected=400; extra=();;
+              write) suffix='?mode=summary&company_id=fenix'; expected=405; extra=(-X POST);;
+              technician) suffix='?mode=summary&company_id=fenix'; expected=403; extra=(-H "Authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY");;
+            esac
+            status="$(vercel curl "$api$suffix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' "${extra[@]}")"
+            test "$status" = "$expected" || { echo "BLOCKED_${testcase}_HTTP_$status"; exit 3; }
+            echo "PASS_${testcase}_HTTP_$status"
+          done
+          echo "PRIVATE_STAGE_SHA=$DEPLOYMENT_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'NO_DOMAIN_UPDATE; NO_CRM_MUTATION; NO_AUTH_POLICY_CHANGE' >> "$GITHUB_STEP_SUMMARY"
+      - name: Owner JWT positive gate — no production promotion if token expired
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$OWNER_E2E_JWT" || { echo 'BLOCKED_EXISTING_OWNER_CI_JWT_MISSING'; exit 4; }
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          api="$STAGED_URL/api/cerebro-shared-state"
+          status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' -H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY")"
+          test "$status" = 200 || { echo "BLOCKED_OWNER_CI_TOKEN_EXPIRED_OR_ACCESS_HTTP_$status"; exit 5; }
+          node - "$body" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(d.status!=='OK'||d.schema!=='CEREBRO_SHARED_STATE_V1'||d.company_id!=='fenix'||d.read_only!==true||d.executed!==false)process.exit(3);
+          if(d.overview?.total_profiles!==2506||d.overview?.departments!==8||d.overview.states.DEFINIDO!==29)process.exit(4);
+          if(d.departments.find(x=>x.department_key==='SOCIAL_FACEBOOK')?.total!==598)process.exit(5);
+          console.log('PASS_OWNER_PINNED_PRIVATE_STAGE_2506');
+          NODE
+          status="$(vercel curl "$api?mode=profiles&company_id=fenix&family=SEO_ENTERPRISE&kind=ALL&offset=0&limit=2" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' -H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY")"
+          test "$status" = 200 || { echo "BLOCKED_OWNER_PROFILES_HTTP_$status"; exit 6; }
+          node - "$body" <<'NODE'
+          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(d.status!=='OK'||d.page?.total!==191||d.records?.length!==2||d.records.some(r=>r.shared_state?.profile_key!==r.kind+':'+r.id||r.shared_state?.department_key!=='SEO_ENTERPRISE'))process.exit(7);
+          console.log('PASS_OWNER_DEPARTMENT_AND_PROFILE_CONTRACT');
+          NODE
+      - name: Always invalidate test JWT and delete client credentials
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${CEREBRO_E2E_RUNTIME_JWT:-}" ]; then
+            curl -sS --max-time 15 -o /dev/null -X POST -H "authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY" 'https://cluhljgonannaafpmblx.supabase.co/auth/v1/logout' || true
+          fi
+          rm -rf "$RUNNER_TEMP/shared-pin-auth"
+          echo 'TOKEN_CLEANUP_DONE; PROD_ALIAS_STILL_NOT_TOUCHED'
