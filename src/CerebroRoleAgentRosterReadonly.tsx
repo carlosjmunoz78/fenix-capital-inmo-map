@@ -54,6 +54,15 @@ export default function CerebroRoleAgentRosterReadonly(){
     s.source+': '+(s.status==='LIVE'?s.visible_count+(s.metric_label==='WORKERS_IN_ACCOUNT'?' Workers inventariados':' registros históricos LAB'):s.status)
    ).join(' · ')}. <b>Esto acredita infraestructura, NO ejecución de perfiles.</b> Los recibos individuales siguen pendientes de conexión.</p>:
    <p className="op3-source-note">Cobertura de ejecutores Cloudflare/Supabase: no acreditada desde este entorno. El catálogo permanece disponible sin inventar estados.</p>}
+  {coverage.kind==='ready'&&coverage.data?
+   <p className="op3-source-note" role="status">
+    Supervisor de fuentes: <b>{coverage.data.supervisor.provider_health==='LIVE'?'lecturas disponibles':'cobertura parcial'}</b>.
+    Supervisión de calidad de los agentes: <b>POR ACREDITAR</b> (exámenes, evaluación, tribunal y recuperación).
+    {coverage.data.verified_profiles.length>0?
+     <span> Ejecución física comprobada: <b>ENG-QA</b> · QA-001 · CI GitHub finalizada;
+      no demuestra agente autónomo ni excelencia. <a href={coverage.data.verified_profiles[0].proof_url} target="_blank" rel="noopener noreferrer">Ver prueba del ejecutor</a>.
+     </span>:<span> Ningún perfil nuevo acreditado por esta fuente todavía.</span>}
+   </p>:null}
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
    <div><strong>{count?.registered_logical_subagent_roles??'—'}</strong><small>Especialistas/subagentes lógicos · ejecución no verificada</small></div>
@@ -64,7 +73,8 @@ export default function CerebroRoleAgentRosterReadonly(){
    <div><strong>{count?.linkedin_source_components??'—'}</strong><small>LinkedIn · definidos, no certificados</small></div>
    <div><strong>{count?.instagram_department_roles??'—'}</strong><small>Instagram · dirección, agentes y tribunal aislados</small></div>
    <div><strong>{count?.subagent_templates_not_instances??'—'}</strong><small>Plantillas de especialidades no instanciadas</small></div>
-   <div><strong>—</strong><small>Agentes y subagentes ejecutándose: NO VERIFICADO</small></div>
+   <div><strong>{coverage.kind==='ready'&&coverage.data?coverage.data.runtime_verified_profiles:'—'}</strong><small>Perfiles con ejecución histórica acreditada por este puente (NO implica autonomía ni actividad actual)</small></div>
+   <div><strong>{coverage.kind==='ready'&&coverage.data?coverage.data.active_recent_profiles:'—'}</strong><small>Perfiles con ejecución activa y heartbeat validado por este puente</small></div>
    <div><strong>PARCIAL</strong><small>Quedan fuentes de CEREBRO por incorporar · sin falso total global</small></div>
   </div>
   <div className="op3-engine-tools">
