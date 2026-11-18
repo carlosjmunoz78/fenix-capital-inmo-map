@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {obtainEphemeralToken,validateEphemeralSession,tokenClaims,E2E_EMAIL} from './e2e-ephemeral-token.mjs';
-const uuid='123e4567-e89b-42d3-a456-426614174000',now=Math.floor(Date.now()/1000);
+import {obtainEphemeralToken,validateEphemeralSession,tokenClaims,E2E_EMAIL,E2E_AUTH_USER_ID} from './e2e-ephemeral-token.mjs';
+const uuid=E2E_AUTH_USER_ID,now=Math.floor(Date.now()/1000);
 const marker={cerebro_e2e_readonly:true,provider:'email'};
 function jwt(change={}){let claims={iss:'https://cluhljgonannaafpmblx.supabase.co/auth/v1',aud:'authenticated',sub:uuid,email:E2E_EMAIL,exp:now+3600,app_metadata:marker,...change};return ['a',Buffer.from(JSON.stringify(claims)).toString('base64url'),'b'].join('.')}
 function response(change={}){return{access_token:jwt(),refresh_token:'rotates-and-must-never-be-stored',user:{id:uuid,email:E2E_EMAIL,email_confirmed_at:new Date().toISOString(),app_metadata:marker},...change}}
@@ -19,9 +19,14 @@ test('no password means no network call',async()=>{
 });
 test('unconfirmed technical email is not accepted',()=>assert.throws(()=>validateEphemeralSession(response({user:{id:uuid,email:E2E_EMAIL,app_metadata:marker}})),/EMAIL_NOT_CONFIRMED/));
 test('email mismatch is denied',()=>assert.throws(()=>validateEphemeralSession(response({user:{id:uuid,email:'owner@example.com',email_confirmed_at:'2026-11-18T11:00:00Z',app_metadata:marker}})),/MISMATCH/));
-test('metadata must be app_metadata, not editable user_metadata',()=>assert.throws(()=>validateEphemeralSession(response({user:{id:uuid,email:E2E_EMAIL,email_confirmed_at:'2026-11-18T11:00:00Z',app_metadata:{provider:'email'},user_metadata:marker}})),/MARKER/));
+test('technical subject ID + server-confirmed email are sufficient with no elevated metadata',()=>{
+ const minimal=response({user:{id:uuid,email:E2E_EMAIL,email_confirmed_at:'2026-11-18T11:00:00Z',app_metadata:{provider:'email'},user_metadata:{actor_code:'CARLOS-ADMIN'}}});
+ assert.equal(validateEphemeralSession(minimal).access_token,minimal.access_token);
+});
+test('different Supabase Auth user ID is denied even if email and label match',()=>assert.throws(()=>validateEphemeralSession(response({user:{id:'a406f1e3-f647-4c68-bc4a-3ccafe109dea',email:E2E_EMAIL,email_confirmed_at:'2026-11-18T11:00:00Z',app_metadata:marker}})),/MISMATCH/));
 test('privileged technical account forbidden',()=>assert.throws(()=>validateEphemeralSession(response({user:{id:uuid,email:E2E_EMAIL,email_confirmed_at:'2026-11-18T11:00:00Z',app_metadata:{...marker,actor_code:'CARLOS-ADMIN'}}})),/PRIVILEGED/));
-test('JWT without signed metadata marker is denied',()=>assert.throws(()=>validateEphemeralSession(response({access_token:jwt({app_metadata:{}})})),/TTL_INVALID/));
+test('JWT without grant marker remains a technical identity, not owner',()=>assert.doesNotThrow(()=>validateEphemeralSession(response({access_token:jwt({app_metadata:{provider:'email'}})})));
+test('privileged JWT app_metadata cannot grant owner power',()=>assert.throws(()=>validateEphemeralSession(response({access_token:jwt({app_metadata:{actor_code:'CARLOS-ADMIN'}})})),/TTL_INVALID/));
 test('wrong issuer, identity or expiring tokens fail',()=>{
  for(const claims of [{iss:'https://evil.example'},{sub:'another-identity'},{exp:now+120},{is_anonymous:true}]){
   assert.throws(()=>validateEphemeralSession(response({access_token:jwt(claims)})),/TTL_INVALID/);

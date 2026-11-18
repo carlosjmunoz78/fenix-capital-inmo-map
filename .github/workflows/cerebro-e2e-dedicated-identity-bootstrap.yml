@@ -27,14 +27,30 @@ jobs:
           set -euo pipefail
           umask 077
           if [ -z "$CEREBRO_E2E_TEST_PASSWORD" ]; then
-            echo 'HUMAN_REQUIRED_DEDICATED_ACCOUNT_AND_GITHUB_SECRET_NOT_YET_CONFIGURED' >> "$GITHUB_STEP_SUMMARY"
-            echo 'GATE_STATUS=PREPARADO_NOT_ACTIVE'
-            exit 0
+            echo 'BLOCKED_CEREBRO_E2E_TEST_PASSWORD_NOT_CONFIGURED' >> "$GITHUB_STEP_SUMMARY"
+            exit 4
           fi
           node cerebro/universal/v0/e2e-ephemeral-token.mjs
-          echo 'PASS_LOGIN_WITH_DEDICATED_SUPABASE_ACCOUNT_NOT_OWNER'
-      - name: Do not confuse QA authentication with owner E2E authorization
+          echo 'PASS_REAL_NEW_TOKEN_DEDICATED_SUPABASE_ACCOUNT'
+      - name: Prove the technical account cannot access owner-only activity or directory
         shell: bash
         run: |
-          echo 'OWNER_PROD_GATE=NOT_REPLACED'
-          echo 'APP_CRM_AUTH=UNCHANGED'
+          set -euo pipefail
+          [ -n "${CEREBRO_E2E_RUNTIME_JWT:-}" ] || { echo 'BLOCKED_NO_RUNTIME_JWT'; exit 4; }
+          umask 077
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          activity='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/'
+          dir='https://app.fenixcapital.es/api/cerebro-agent-directory?company_id=fenix&kind=ALL&limit=1'
+          code="$(curl --max-time 15 -sS -o "$body" -w '%{http_code}' -H "Authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY" "$activity")"
+          case "$code" in 401|403) echo 'PASS_TECH_ACCOUNT_ACTIVITY_OWNER_DENIED';; *) echo "BLOCKED_TECH_ACTIVITY_UNEXPECTED_HTTP_$code"; exit 5;; esac
+          code="$(curl --max-time 15 -sS -o "$body" -w '%{http_code}' -H "Authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY" "$dir")"
+          case "$code" in 401|403) echo 'PASS_TECH_ACCOUNT_DIRECTORY_OWNER_DENIED';; *) echo "BLOCKED_TECH_DIRECTORY_UNEXPECTED_HTTP_$code"; exit 6;; esac
+          echo 'OWNER_PROD_GATE_NOT_REPLACED; APP_CRM_AUTH_UNCHANGED'
+      - name: Revoke ephemeral test session at end of job
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${CEREBRO_E2E_RUNTIME_JWT:-}" ]; then
+            curl --max-time 15 -sS -o /dev/null -X POST -H "Authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY" 'https://cluhljgonannaafpmblx.supabase.co/auth/v1/logout' || true
+          fi

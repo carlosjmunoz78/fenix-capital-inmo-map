@@ -1,5 +1,7 @@
 import {appendFileSync} from 'node:fs';
 export const E2E_EMAIL='cerebro-e2e@fenixcapital.es';
+export const E2E_AUTH_USER_ID='0c71641f-ae5e-44ab-b380-09aef0b44f7f';
+/** Verified against the Supabase admin identity registry on 2026-11-18. */
 const EXPECTED_ISS='https://cluhljgonannaafpmblx.supabase.co/auth/v1';
 const AUTH_ENDPOINT='https://cluhljgonannaafpmblx.supabase.co/auth/v1/token?grant_type=password';
 export const SAFETY_MARGIN_SECONDS=300;
@@ -13,13 +15,16 @@ export function tokenClaims(jwt){
 export function validateEphemeralSession(payload,now=Math.floor(Date.now()/1000)){
  const user=payload?.user,metadata=user?.app_metadata;
  const id=String(user?.id||''),email=String(user?.email||'').toLowerCase();
- if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)||
-    email!==E2E_EMAIL)throw Error('E2E_IDENTITY_MISMATCH');
+ if(id!==E2E_AUTH_USER_ID||email!==E2E_EMAIL)throw Error('E2E_IDENTITY_MISMATCH');
  if(!user?.email_confirmed_at)throw Error('E2E_EMAIL_NOT_CONFIRMED');
- if(metadata?.cerebro_e2e_readonly!==true||metadata?.actor_code==='CARLOS-ADMIN')throw Error('E2E_READONLY_CI_MARKER_MISSING_OR_PRIVILEGED');
+ // Dedicated subject ID + verified email are the allowlist. No app_metadata grant is needed.
+ // Never let a technical user impersonate an owner or an administrator.
+ const privileged=new Set(['CARLOS-ADMIN','admin','owner','service_role','superuser']);
+ if(['actor_code','user_role','role'].some(k=>privileged.has(String(metadata?.[k]??''))))
+  throw Error('E2E_PRIVILEGED_IDENTITY_FORBIDDEN');
  const claims=tokenClaims(payload?.access_token);
- if(claims.iss!==EXPECTED_ISS||claims.aud!=='authenticated'||claims.sub!==id||
-   claims.app_metadata?.cerebro_e2e_readonly!==true||claims.app_metadata?.actor_code==='CARLOS-ADMIN'||
+ if(claims.iss!==EXPECTED_ISS||claims.aud!=='authenticated'||claims.sub!==E2E_AUTH_USER_ID||
+   ['actor_code','user_role','role'].some(k=>privileged.has(String(claims.app_metadata?.[k]??'')))||
    (claims.email&&String(claims.email).toLowerCase()!==E2E_EMAIL)||
    typeof claims.exp!=='number'||claims.exp-now<=SAFETY_MARGIN_SECONDS||
    claims.is_anonymous===true)throw Error('E2E_TOKEN_CLAIMS_OR_TTL_INVALID');
