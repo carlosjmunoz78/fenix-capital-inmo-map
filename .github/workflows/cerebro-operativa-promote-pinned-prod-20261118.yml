@@ -1,0 +1,109 @@
+name: CEREBRO OPERATIVA PINNED PRODUCTION PROMOTION ONLY
+on:
+  push:
+    branches: [cerebro/operativa-promote-prod-only-20261118]
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-operativa-pinned-prod-release-20261118
+  cancel-in-progress: false
+jobs:
+  promote-exact-vetted-deployment:
+    if: contains(github.event.head_commit.message, '[PROMOTE_PINNED_OPERATIVA_PROD]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+      VERCEL_PROJECT_NAME: fenix-capital-preprod
+      DEPLOYMENT_URL: https://fenix-capital-preprod-ijpkwq7fa.vercel.app
+      SOURCE_SHA: 7163dccd962a19fbd5301b14fcacacf08b7245ea
+      ORIGINAL_DEPLOYMENT: dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ
+      ORIGINAL_SHA: a51dd14eac11f02424dce5db426346b041c1824f
+      DOMAIN: app.fenixcapital.es
+    steps:
+      - name: Checkout release control only; no code changes to main or live App
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Setup pinned Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Immutable release scope - candidate code, project and domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/cerebro/operativa-promote-prod-only-20261118
+          test "$VERCEL_ORG_ID" = team_qnh6u1Ofy2WPp0MGEKlyMA50
+          test "$VERCEL_PROJECT_ID" = prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+          test "$DEPLOYMENT_URL" = https://fenix-capital-preprod-ijpkwq7fa.vercel.app
+          test "$SOURCE_SHA" = 7163dccd962a19fbd5301b14fcacacf08b7245ea
+          test "$ORIGINAL_DEPLOYMENT" = dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ
+          test "$DOMAIN" = app.fenixcapital.es
+          git cat-file -e "$SOURCE_SHA^{commit}"
+          test "$(git diff --name-only "$SOURCE_SHA" HEAD)" = ".github/workflows/cerebro-operativa-promote-pinned-prod-20261118.yml"
+          echo 'PINNED_SCOPE_AND_SOURCE_OK'
+      - name: Install Vercel CLI; no rebuild and no source secrets
+        run: npm install --global vercel@65.8.0
+      - name: Authenticate ephemeral Vercel CLI and preflight exact target
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ]; then echo 'BLOCKED: VERCEL_TOKEN_NOT_CONFIGURED'; exit 2; fi
+          export XDG_DATA_HOME="$RUNNER_TEMP/cerebro-prod-promotion-auth"
+          echo "XDG_DATA_HOME=$XDG_DATA_HOME" >> "$GITHUB_ENV"
+          node -e 'const fs=require("node:fs"),p=require("node:path"),d=p.join(process.env.XDG_DATA_HOME,"com.vercel.cli");fs.mkdirSync(d,{recursive:true,mode:0o700});fs.writeFileSync(p.join(d,"auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600})'
+          vercel link --yes --project="$VERCEL_PROJECT_NAME" --scope=carlosjmunozcabeza-2582s-projects > "$RUNNER_TEMP/cerebro-prod-link.log" 2>&1
+          grep -Fq "carlosjmunozcabeza-2582s-projects/fenix-capital-preprod" "$RUNNER_TEMP/cerebro-prod-link.log" || { echo 'BLOCKED: WRONG_VERCEL_PROJECT'; exit 3; }
+          vercel inspect "$DEPLOYMENT_URL" --scope=carlosjmunozcabeza-2582s-projects > "$RUNNER_TEMP/cerebro-prod-inspect.log" 2>&1 || { echo 'BLOCKED: STAGED_DEPLOYMENT_UNAVAILABLE'; exit 4; }
+          status=$(curl --silent --location --max-time 15 --output "$RUNNER_TEMP/cerebro-prod-baseline.html" --write-out '%{http_code}' "https://$DOMAIN/inicio")
+          if [ "$status" != 200 ]; then echo "BLOCKED: PROD_BASELINE_HTTP_$status"; exit 5; fi
+          echo 'VERCEL_PROJECT_AND_DEPLOYMENT_SCOPE_VERIFIED'
+      - name: Promote exact existing deployment and check public read-only smoke
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo 'PROMOTE_SOURCE_SHA=7163dccd962a19fbd5301b14fcacacf08b7245ea' >> "$GITHUB_STEP_SUMMARY"
+          echo 'ROLLBACK_BASELINE=dpl_6n6KMNTWNEqpUUDBwn3V4UccXjPJ' >> "$GITHUB_STEP_SUMMARY"
+          promoted=0
+          restore() {
+            if [ "$promoted" -eq 1 ]; then
+              echo 'SMOKE_FAILED; ATTEMPTING_NATIVE_ROLLBACK_TO_PINNED_BASELINE'
+              if printf 'y\n' | vercel rollback "$ORIGINAL_DEPLOYMENT" --scope=carlosjmunozcabeza-2582s-projects --timeout=120s; then
+                echo 'ROLLBACK_REQUEST_SUCCESS; EXTERNALLY_VERIFY_DOMAIN'
+              else
+                echo 'CRITICAL_HUMAN_REQUIRED: AUTOMATIC_ROLLBACK_FAILED'
+              fi
+            fi
+          }
+          trap restore ERR
+          vercel promote "$DEPLOYMENT_URL" --yes --scope=carlosjmunozcabeza-2582s-projects --timeout=120s
+          promoted=1
+          echo 'PROMOTE_CLI_SUCCESS; CHECKING_PUBLIC_ROUTES'
+          passed=0
+          for attempt in 1 2 3 4; do
+            page=$(curl --silent --location --max-time 15 --output /dev/null --write-out '%{http_code}' "https://$DOMAIN/inicio" || true)
+            agents=$(curl --silent --location --max-time 15 --output "$RUNNER_TEMP/cerebro-anonymous-gate.json" --write-out '%{http_code}' "https://$DOMAIN/api/cerebro-agent-directory?company_id=fenix&kind=ALL&limit=25" || true)
+            tenant=$(curl --silent --location --max-time 15 --output /dev/null --write-out '%{http_code}' "https://$DOMAIN/api/cerebro-agent-directory?company_id=other" || true)
+            if [ "$page" = 200 ] && [ "$agents" = 401 ] && [ "$tenant" = 400 ] && grep -Fq 'OWNER_SESSION_REQUIRED' "$RUNNER_TEMP/cerebro-anonymous-gate.json"; then passed=1; break; fi
+            sleep 4
+          done
+          if [ "$passed" != 1 ]; then echo "SMOKE_FAILED: SPA=$page ANON_API=$agents TENANT_DENY=$tenant"; false; fi
+          promoted=0
+          trap - ERR
+          echo 'PROD_ANONYMOUS_SECURITY_SMOKE=PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD_OPERATIONAL_OWNER_SESSION=REQUIRES_SEPARATE_VALIDATION' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD_CHANGED_BY_PROMOTION=YES' >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove ephemeral Vercel credentials and local linking
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/cerebro-prod-promotion-auth" .vercel
+          rm -f "$RUNNER_TEMP/cerebro-prod-link.log" "$RUNNER_TEMP/cerebro-prod-inspect.log" "$RUNNER_TEMP/cerebro-prod-baseline.html" "$RUNNER_TEMP/cerebro-anonymous-gate.json"
+          echo 'TEMP_AUTH_REMOVED; NO_GIT_MERGE; NO_DNS_EDITS' >> "$GITHUB_STEP_SUMMARY"
