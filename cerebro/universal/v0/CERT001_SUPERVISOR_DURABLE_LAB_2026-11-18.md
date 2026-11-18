@@ -45,3 +45,19 @@ select cron.schedule('cerebro-cert-supervisor-lab-v1',
  '3,18,33,48 * * * *','select cerebro_lab.run_cert_supervisor_v1();');
 ```
 Para reconstrucción, aplicar las migraciones versionadas por orden, no reejecutar los jobs históricos. Conservar la clave firmante dentro de almacén privado y hacer respaldo externo cifrado antes de una migración definitiva. Promoción PROD=HOLD.
+
+## 18/11/2026 · Cierre físico del cron y reversibilidad
+- El programador #77 fue temporalmente configurado en `* * * * *` solo para prueba de ejecución autónoma real.
+- `cron.job_run_details` acreditó runs **SUCCEEDED** a 20:26:00 y 20:27:00 UTC. El verificador privado recuperó **4 informes duraderos**, HMAC verdadero, 5 gates, `health=EVIDENCE_OK_NOT_CERTIFIED`; último informe consultado a las 20:28 UTC (recibo `4b17f182-b1cd-4254-a82b-3a2e7ab76865`).
+- Reestablecido programador #77 a `3,18,33,48 * * * *` y confirmado ACTIVO; QA #74 sigue `*/15 * * * *` ACTIVO.
+- Registro temporal de rollback #76 creado, eliminado y comprobado ausente; **solo prueba reversibilidad del planificador**, no del sistema PROD.
+- Vercel último deployment compilado READY `dpl_FrHvqwa8zWjZN6B9DKW6yjhCkBfj` SHA `4c26bbd562b2e4a13e2833983f96aa559fa510f0`, promovido exclusivamente a alias privado LAB. Opera autenticado muestra `SUPERVISOR AUTÓNOMO LAB`, un informe HMAC verificado, la matriz de 5 fuentes y no-certificación de los demás motores. Tras los runs naturales el historial pasó a 4, validado mediante SQL.
+- Edge `cerebro-cert-supervisor-history-lab-v1` devuelve `OWNER_SESSION_REQUIRED` para GET sin JWT; no contiene claves en la respuesta.
+- Pruebas de firma, permisos y gates VERDES; falta coste monetario, backup independiente y autorización de promoción. Las 17 tareas sociales activas no equivalen a 17 agentes acreditados.
+
+## Changelog
+- v1.0: matriz FACT / CONSOLE / UMS / QA / cron social.
+- v1.0.1: corregido timeout de consulta global de `cron.job_run_details` restringiendo la consulta a las últimas 1200 filas.
+- v1.0.2: corregida alineación del ROWTYPE de la atestación FACT.
+- v1.0.3: supervisor programado, HMAC privado con dominio separado, historial durable, API GET propietaria, panel y prueba de rollback temporal.
+- Manifest: `cerebro/universal/v0/cert-supervisor-lab-v1.manifest.json`; preservado registro de 179 motores: es un componente compartido de supervisión, no un motor adicional contabilizado.
