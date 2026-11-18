@@ -18,6 +18,16 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with: {node-version: '24'}
       - run: node --test cerebro/universal/v0/e2e-ephemeral-token.test.mjs
+      - name: Assert CLI fails closed without a dedicated account
+        shell: bash
+        run: |
+          set -euo pipefail
+          if env -u CEREBRO_E2E_TEST_EMAIL -u CEREBRO_E2E_TEST_PASSWORD -u CEREBRO_E2E_TEST_USER_ID node cerebro/universal/v0/e2e-ephemeral-token.mjs >/dev/null 2>/dev/null; then
+            echo 'FAIL_E2E_CLI_ACCEPTED_MISSING_CREDENTIALS'
+            exit 1
+          fi
+          echo 'PASS_E2E_CLI_REJECTS_ABSENT_CREDENTIALS_WITHOUT_NETWORK'
+
       - run: |
           test -f cerebro/universal/v0/e2e-ephemeral-token.mjs
           echo 'EPHEMERAL_TOKEN_CODE_READY; NO_REAL_LOGIN_ATTEMPT; NOT_YET_AUTOMATED'
