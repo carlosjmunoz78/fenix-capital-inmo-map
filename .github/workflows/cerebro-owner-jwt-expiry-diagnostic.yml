@@ -1,0 +1,41 @@
+name: CEREBRO · Safe diagnostic owner E2E JWT expiry (no secret output)
+on:
+  push:
+    branches: [cerebro/shared-state-all-interfaces-v0-20261118]
+    paths: [.github/workflows/cerebro-owner-jwt-expiry-diagnostic.yml]
+permissions: {contents: read}
+jobs:
+  owner-secret-expiry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      OWNER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      PUBLISHABLE: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Read expiration metadata without printing any JWT or personal identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const jwt=process.env.OWNER_JWT||'';
+          if(!jwt){console.log('BLOCKED_OWNER_SECRET_MISSING');process.exit(2)}
+          try{
+           const claims=JSON.parse(Buffer.from(jwt.split('.')[1],'base64url').toString('utf8'));
+           if(!Number.isSafeInteger(claims.exp)){console.log('OWNER_JWT_EXPIRATION_INVALID');process.exit(3)}
+           const remaining=claims.exp-Math.floor(Date.now()/1000);
+           if(remaining<0)console.log('CONFIRMED_OWNER_CI_JWT_EXPIRED');
+           else console.log('OWNER_CI_JWT_NOT_EXPIRED_LOCAL_CLAIM_CHECK_AUTH_SERVER');
+          }catch{console.log('OWNER_JWT_MALFORMED_NO_SECRET_DISCLOSURE');process.exit(4)}
+          NODE
+      - name: Authenticate only against Supabase Auth endpoint — status, no user data
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PUBLISHABLE" || { echo 'BLOCKED_PUBLISHABLE_KEY_MISSING'; exit 2; }
+          result="$(curl --max-time 15 -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $OWNER_JWT" -H "apikey: $PUBLISHABLE" https://cluhljgonannaafpmblx.supabase.co/auth/v1/user)"
+          case "$result" in
+            200) echo 'OWNER_CI_JWT_ACCEPTED_BY_AUTH_USER_ENDPOINT';;
+            401|403) echo "OWNER_CI_JWT_REJECTED_BY_AUTH_HTTP_$result";;
+            *) echo "OWNER_AUTH_SERVER_UNEXPECTED_HTTP_$result"; exit 5;;
+          esac
+          echo 'NO_TOKEN_USER_DATA_OR_REFRESH_CREDENTIAL_PRINTED'
