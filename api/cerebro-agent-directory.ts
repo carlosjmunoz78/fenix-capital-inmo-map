@@ -225,7 +225,7 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
 /** Runtime is evidence, not a property of a logical role. Fail closed if feed is stale.
  * This is the SAME owner-gated activity source already consumed by JARVIS and NEURONAL.
  */
-type RuntimeFeedRun={run_id?:number;engine_id?:string|null;company_id?:string;status?:string;updated_at?:string;conclusion?:string|null;html_url?:string;environment?:string;version?:string;profile_key?:string;profile_provenance?:string};
+type RuntimeFeedRun={run_id?:number;engine_id?:string|null;company_id?:string;status?:string;updated_at?:string;conclusion?:string|null;html_url?:string;environment?:string;version?:string;profile_key?:string;profile_provenance?:string;quality_gate?:string;required_tests_passed?:boolean;rollback_verified?:boolean};
 type RuntimeFeed={status?:string;source_status?:string;observed_at?:string;runs?:RuntimeFeedRun[];reason?:string};
 const ACTIVITY_SOURCE='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/';
 const VALID_STATES=new Set(['in_progress','queued','waiting','requested','pending','completed']);
@@ -285,7 +285,9 @@ export async function observeExecutors(req:Req,entries:AgentDirectoryEntry[]){
      version:String(match.version??'UNKNOWN'),observed_at:feed.observed_at!,
      last_run:match.updated_at||null,last_run_result:match.conclusion??null,
      source:'CEREBRO_CONSOLE_ACTIVITY_V0' as const,evidence:match.html_url!,status,
-     profile_key:exact?.profile_key??null,profile_provenance:exact?.profile_provenance??null
+     profile_key:exact?.profile_key??null,profile_provenance:exact?.profile_provenance??null,
+     quality_gate:exact?.quality_gate??null,required_tests_passed:exact?.required_tests_passed===true,
+     rollback_verified:exact?.rollback_verified===true
     }
   };
  });

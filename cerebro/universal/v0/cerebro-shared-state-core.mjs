@@ -3,7 +3,7 @@
  * from a deployed Worker/function or from an engine-family association.
  */
 export const CONTRACT='CEREBRO_SHARED_STATE_V1';
-export const STATES=Object.freeze(['ACTIVO','PARCIAL','FALLANDO','DEFINIDO','POR_VERIFICAR']);
+export const STATES=Object.freeze(['ACTIVO','PERFECTO','PARCIAL','FALLANDO','DEFINIDO','POR_VERIFICAR']);
 export const MAX_FEED_AGE_MS=20*60*1000;
 const evidenceUrl=(s)=>typeof s==='string'&&/^https:\/\/github\.com\/carlosjmunoz78\/fenix-capital-inmo-map\/actions\/runs\/[1-9]\d*$/.test(s);
 const times=(v)=>typeof v==='string'?Date.parse(v):NaN;
@@ -25,6 +25,9 @@ export function classifyProfile(profile,source,now=Date.now()){
   return {status:'ACTIVO',reason:'EXACT_RUNNING_PROFILE_ID',evidence:obs.evidence};
  if(obs.last_run_result==='failure'||obs.last_run_result==='timed_out')
   return {status:'FALLANDO',reason:'EXACT_FAILED_RUN_NOT_UNIVERSAL_HEALTH',evidence:obs.evidence};
+ if(obs.last_run_result==='success'&&obs.quality_gate==='TRIBUNAL_GREEN'&&
+    obs.required_tests_passed===true&&obs.rollback_verified===true)
+  return {status:'PERFECTO',reason:'EXACT_QUALITY_TESTS_TRIBUNAL_AND_ROLLBACK_VERIFIED',evidence:obs.evidence};
  if(obs.last_run_result==='success')
   return {status:'PARCIAL',reason:'EXACT_COMPLETED_RUN_UNVERIFIED_QUALITY_GATES',evidence:obs.evidence};
  return {status:'POR_VERIFICAR',reason:'EXACT_RUN_NOT_ENOUGH_PROOF',evidence:obs.evidence};

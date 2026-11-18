@@ -1,6 +1,6 @@
 import {createContext,useContext,useEffect,useState,type ReactNode} from 'react';
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
-export type SharedStateStatus='ACTIVO'|'PARCIAL'|'FALLANDO'|'DEFINIDO'|'POR_VERIFICAR';
+export type SharedStateStatus='ACTIVO'|'PERFECTO'|'PARCIAL'|'FALLANDO'|'DEFINIDO'|'POR_VERIFICAR';
 export type SharedDepartment={department_key:string;total:number;states:Record<SharedStateStatus,number>};
 export type SharedSummary={schema:'CEREBRO_SHARED_STATE_V1';company_id:'fenix';status:'OK';feed_health:'LIVE_EVIDENCE_FEED'|'DEGRADED_EVIDENCE_FEED';source_status:'ACTIVO'|'DEGRADADO';observed_at:string|null;read_only:true;executed:false;
  overview:{total_profiles:number;departments:number;states:Record<SharedStateStatus,number>;verified_running_profiles:number;templates:number;engine_association_is_not_execution:true};
@@ -52,7 +52,7 @@ export function CerebroSharedStateProvider({children}:{children:ReactNode}){
  },[revision]);
  return <Context.Provider value={{status,summary,updatedAt,refresh:()=>setRevision(v=>v+1)}}>{children}</Context.Provider>;
 }
-const labels:Record<SharedStateStatus,string>={ACTIVO:'Activos acreditados',PARCIAL:'Parcial',FALLANDO:'Fallando',DEFINIDO:'Plantillas',POR_VERIFICAR:'Por verificar'};
+const labels:Record<SharedStateStatus,string>={ACTIVO:'Activos acreditados',PERFECTO:'Excelencia verificada',PARCIAL:'Parcial',FALLANDO:'Fallando',DEFINIDO:'Plantillas',POR_VERIFICAR:'Por verificar'};
 export function CerebroSharedStatusBanner(){
  const {status,summary,updatedAt,refresh}=useCerebroSharedState();
  const counts=summary?.overview.states;
@@ -62,7 +62,7 @@ export function CerebroSharedStatusBanner(){
    <strong>ESTADO COMPARTIDO · CEREBRO</strong>
    {status==='ready'&&summary&&counts?<>
     <span>{summary.overview.total_profiles.toLocaleString('es-ES')} perfiles · {summary.overview.departments} áreas registradas</span>
-    {(['ACTIVO','PARCIAL','FALLANDO','POR_VERIFICAR'] as const).map(key=>
+    {(['ACTIVO','PERFECTO','PARCIAL','FALLANDO','POR_VERIFICAR'] as const).map(key=>
      <span key={key}>{labels[key]}: <strong>{counts[key]}</strong></span>)}
     <span>Fuente: {summary.source_status} · {summary.observed_at?new Date(summary.observed_at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'sin datos'}</span>
    </>:<span role="status">{status==='loading'?'Consultando estados…':status==='denied'?'Acceso no autorizado':'Fuente compartida no disponible · sin estados inventados'}</span>}
@@ -72,7 +72,7 @@ export function CerebroSharedStatusBanner(){
     <summary style={{cursor:'pointer'}}>Ver estado de todos los departamentos · sincronización automática cada 30 s</summary>
     <div style={{display:'flex',gap:8,flexWrap:'wrap',paddingTop:8}}>
      {summary.departments.map(dep=><span key={dep.department_key} style={{padding:'6px 9px',border:'1px solid #31516c',borderRadius:6}}>
-      <strong>{dep.department_key}</strong> · {dep.total} · activos {dep.states.ACTIVO} · parciales {dep.states.PARCIAL} · fallos {dep.states.FALLANDO}
+      <strong>{dep.department_key}</strong> · {dep.total} · activos {dep.states.ACTIVO} · excelencia {dep.states.PERFECTO} · parciales {dep.states.PARCIAL} · fallos {dep.states.FALLANDO}
      </span>)}
     </div>
     <small>Los motores compartidos y los perfiles lógicos no se consideran activos sin evidencia exacta. Última consulta local: {updatedAt?new Date(updatedAt).toLocaleTimeString('es-ES'):'—'}.</small>

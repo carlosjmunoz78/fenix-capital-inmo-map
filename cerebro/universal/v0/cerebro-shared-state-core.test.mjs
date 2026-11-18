@@ -38,6 +38,12 @@ test('exact failed and passed job do not claim perfect quality',()=>{
  assert.equal(classifyProfile(x,source,now).status,'PARCIAL');
  assert.equal(classifyProfile({...x,runtime_observation:{...run,last_run_result:'failure'}},source,now).status,'FALLANDO');
 });
+test('PERFECTO requires quality tests, Tribunal GREEN and verified rollback together',()=>{
+ const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,quality_gate:'TRIBUNAL_GREEN',required_tests_passed:true,rollback_verified:true}};
+ assert.equal(classifyProfile(x,source,now).status,'PERFECTO');
+ assert.equal(classifyProfile({...x,runtime_observation:{...x.runtime_observation,rollback_verified:false}},source,now).status,'PARCIAL');
+ assert.equal(classifyProfile({...x,runtime_observation:{...x.runtime_observation,quality_gate:'PENDING'}},source,now).status,'PARCIAL');
+});
 test('stale or degraded sources cannot claim running',()=>{
  const x={...profile('SEO-PF01:DIRECTOR'),runtime_observation:{...run,status:'ACTIVO'},runtime_verified:true};
  assert.equal(classifyProfile(x,{status:'DEGRADADO',observed_at:source.observed_at},now).status,'POR_VERIFICAR');
