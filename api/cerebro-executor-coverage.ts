@@ -246,6 +246,65 @@ async function readDurableSupervisor(auth:string,ownerKey:string,labKey:string):
   gate_count:5,cron_job_id:77,global_autonomy_certified:false};
 }
 
+type DispatchSample={
+ service:'jarvis-work-dispatch-v1-preprod'|'cerebro-browser-work-total-dispatch-v1-preprod'|
+  'cerebro-creative-dispatch-v1'|'cerebro-ums-production-dispatch-v1';
+ engine_id:'CONSOLE-001'|'FACT-001'|'UMS-001';
+ last_checked_at:string;http_status:number|null;
+ health_state:'HEALTH_ENDPOINT_OK'|'HEALTH_ENDPOINT_FAILED'|'NO_RESPONSE';
+ signature_verified:true;recent:boolean;runtime_execution_verified:false;autonomy_certified:false
+};
+type DispatchHealth={
+ status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+ health_status:'HEALTH_ENDPOINTS_RESPOND'|'DEGRADED_OR_NOT_CHECKED'|null;
+ signed_samples:number;healthy_endpoints:number;sources:DispatchSample[];
+ full_engine_certified:false;legacy_jobs_executed:false;github_oidc_required:true
+};
+const DISPATCH_HEALTH_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-dispatch-health-lab-v1?company_id=fenix&environment=LAB';
+const DISPATCH_HEALTH_NAMES=new Set([
+ 'jarvis-work-dispatch-v1-preprod',
+ 'cerebro-browser-work-total-dispatch-v1-preprod',
+ 'cerebro-creative-dispatch-v1',
+ 'cerebro-ums-production-dispatch-v1'
+]);
+async function readDispatchHealth(auth:string,ownerKey:string,labKey:string):Promise<DispatchHealth>{
+ const r=await fetch(DISPATCH_HEALTH_URL,{method:'GET',cache:'no-store',redirect:'error',
+  headers:{authorization:auth,apikey:labKey,'x-cerebro-owner-prod-apikey':ownerKey,accept:'application/json'},
+  signal:AbortSignal.timeout(6500)});
+ if(r.status!==200)throw Error('DISPATCH_HEALTH_DENIED');
+ const txt=await r.text();
+ if(txt.length>14000)throw Error('DISPATCH_HEALTH_TOO_LARGE');
+ const d=JSON.parse(txt);
+ if(d.source!=='CEREBRO_LAB_DISPATCH_HEALTH_SIGNED_V1'||
+  !['HEALTH_ENDPOINTS_RESPOND','DEGRADED_OR_NOT_CHECKED'].includes(d.status)||
+  d.company_id!=='fenix'||d.environment!=='LAB'||
+  d.read_only!==true||d.executed!==false||
+  d.legacy_jobs_executed!==false||d.full_engine_certified!==false||
+  d.prod_execution_enabled!==false||d.certifies_original_executors!==false||
+  d.github_actions_required_to_execute_original_workers!==true||
+  d.signed_by_private_db_key!==true||
+  d.runner_capability!=='HTTP_HEALTH_ONLY'||
+  !Number.isSafeInteger(d.signed_samples)||d.signed_samples<0||d.signed_samples>4||
+  !Number.isSafeInteger(d.healthy_endpoints)||d.healthy_endpoints<0||
+  d.healthy_endpoints>d.signed_samples||
+  !Array.isArray(d.sources)||d.sources.length!==d.signed_samples||
+  new Set(d.sources.map((x:DispatchSample)=>x.service)).size!==d.sources.length||
+  d.sources.some((x:DispatchSample)=>
+   !DISPATCH_HEALTH_NAMES.has(x.service)||
+   !['CONSOLE-001','FACT-001','UMS-001'].includes(x.engine_id)||
+   !['HEALTH_ENDPOINT_OK','HEALTH_ENDPOINT_FAILED','NO_RESPONSE'].includes(x.health_state)||
+   x.signature_verified!==true||x.runtime_execution_verified!==false||
+   x.autonomy_certified!==false||typeof x.recent!=='boolean'||
+   !Number.isFinite(Date.parse(x.last_checked_at)))||
+  (d.status==='HEALTH_ENDPOINTS_RESPOND'&&
+   (d.healthy_endpoints!==4||d.sources.length!==4||
+    d.sources.some((x:DispatchSample)=>x.health_state!=='HEALTH_ENDPOINT_OK'||!x.recent))))
+   throw Error('DISPATCH_HEALTH_CONTRACT');
+ return {status:'LIVE',health_status:d.status,signed_samples:d.signed_samples,
+  healthy_endpoints:d.healthy_endpoints,sources:d.sources,
+  full_engine_certified:false,legacy_jobs_executed:false,github_oidc_required:true};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -277,7 +336,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github,qa,truth,cert,durable]=await Promise.all([
+ const [cf,lab,github,qa,truth,cert,durable,dispatch]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -319,6 +378,15 @@ export default async function handler(req:Req,res:Res){
      health:null,signed:false,recent:false,observed_at:null,history_count:null,gate_count:null,
      cron_job_id:null,global_autonomy_certified:false};
    }
+  })(),
+  (async():Promise<DispatchHealth>=>{
+   if(labKey.length<12)return{status:'NOT_CONFIGURED',health_status:null,
+    signed_samples:0,healthy_endpoints:0,sources:[],full_engine_certified:false,
+    legacy_jobs_executed:false,github_oidc_required:true};
+   try{return await readDispatchHealth(auth,apikey,labKey)}
+   catch{return{status:'UNAVAILABLE',health_status:null,signed_samples:0,
+    healthy_endpoints:0,sources:[],full_engine_certified:false,
+    legacy_jobs_executed:false,github_oidc_required:true}}
   })()
  ]);
  const statuses:Status[]=[
@@ -357,6 +425,7 @@ export default async function handler(req:Req,res:Res){
   engine_truth:truth,
   certification_gates:cert,
   durable_supervisor:durable,
+  dispatch_health:dispatch,
   lab_qa:{
    source:'SUPABASE_PGCRON_QA_LAB_V1',
    status:qa.status,
@@ -384,7 +453,8 @@ export default async function handler(req:Req,res:Res){
     ...(qa.status==='UNAVAILABLE'?['SUPABASE_SQL_QA']:[]),
     ...(truth.status==='UNAVAILABLE'?['SUPABASE_ENGINE_TRUTH']:[]),
     ...(cert.status==='UNAVAILABLE'?['SUPABASE_CERTIFICATION_GATES']:[]),
-    ...(durable.status==='UNAVAILABLE'?['SUPABASE_CERT_SUPERVISOR_HISTORY']:[])
+    ...(durable.status==='UNAVAILABLE'?['SUPABASE_CERT_SUPERVISOR_HISTORY']:[]),
+    ...(dispatch.status==='UNAVAILABLE'?['SUPABASE_DISPATCH_HEALTH']:[])
    ],
    last_observed_at:stamp
   },
