@@ -341,6 +341,35 @@ async function readConsoleProof(auth:string,ownerKey:string,labKey:string):Promi
   full_engine_certified:false,agent_role_identity_verified:false};
 }
 
+type CreativeHoldProof={status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';engines:Array<{
+ engine_id:'FACT-001'|'UMS-001';historical_jobs:number;jobs_on_hold:number;historical_succeeded:number;
+ safe_to_resume:false;autonomy_certified:false;blockers:Array<{state:'HOLD'|'SUCCEEDED';reason_code:string;count:number}>
+ }>;owner_rejection_override:false;paid_generation_enabled:false;all_certified:false};
+const HOLD_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-creative-hold-gates-lab-v1?company_id=fenix&environment=LAB';
+async function readCreativeHolds(auth:string,key:string,labKey:string):Promise<CreativeHoldProof>{
+ const r=await fetch(HOLD_URL,{method:'GET',redirect:'error',cache:'no-store',
+  headers:{authorization:auth,apikey:labKey,'x-cerebro-owner-prod-apikey':key,accept:'application/json'},
+  signal:AbortSignal.timeout(6500)});
+ if(r.status!==200)throw Error('CREATIVE_HOLD_GATE_DENIED');
+ const body=await r.text();if(body.length>16000)throw Error('CREATIVE_HOLD_OVERSIZE');
+ const x=JSON.parse(body);
+ if(x.status!=='OK'||x.source!=='CEREBRO_LAB_CREATIVE_HOLD_GATES_V1'||
+  x.company_id!=='fenix'||x.environment!=='LAB'||x.read_only!==true||x.executed!==false||
+  x.paid_generation_enabled!==false||x.owner_rejection_override!==false||
+  x.external_actions_executed!==false||x.prod_execution_enabled!==false||
+  x.all_certified!==false||!Array.isArray(x.engines)||x.engines.length!==2||
+  !['FACT-001','UMS-001'].every(id=>x.engines.some((e:CreativeHoldProof['engines'][number])=>e.engine_id===id))||
+  x.engines.some((e:CreativeHoldProof['engines'][number])=>e.safe_to_resume!==false||
+    e.autonomy_certified!==false||!Number.isSafeInteger(e.historical_jobs)||
+    !Number.isSafeInteger(e.jobs_on_hold)||!Number.isSafeInteger(e.historical_succeeded)||
+    e.historical_jobs<e.jobs_on_hold+e.historical_succeeded||
+    !Array.isArray(e.blockers)||e.blockers.some(b=>!['HOLD','SUCCEEDED'].includes(b.state)||
+      typeof b.reason_code!=='string'||b.reason_code.length>100||
+      !Number.isSafeInteger(b.count)||b.count<0)))throw Error('CREATIVE_HOLD_GATE_CONTRACT');
+ return{status:'LIVE',engines:x.engines,owner_rejection_override:false,
+  paid_generation_enabled:false,all_certified:false};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -372,7 +401,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github,qa,truth,cert,durable,dispatch,consoleProof]=await Promise.all([
+ const [cf,lab,github,qa,truth,cert,durable,dispatch,consoleProof,creativeHolds]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -434,6 +463,13 @@ export default async function handler(req:Req,res:Res){
     observed_commit_sha:null,last_execution_at:null,completed_job_count:null,
     signature_verified:false,specific_capability_evidenced:false,legacy_worker_executed:false,
     full_engine_certified:false,agent_role_identity_verified:false}}
+  })(),
+  (async():Promise<CreativeHoldProof>=>{
+   if(labKey.length<12)return{status:'NOT_CONFIGURED',engines:[],
+    owner_rejection_override:false,paid_generation_enabled:false,all_certified:false};
+   try{return await readCreativeHolds(auth,apikey,labKey)}
+   catch{return{status:'UNAVAILABLE',engines:[],
+    owner_rejection_override:false,paid_generation_enabled:false,all_certified:false}}
   })()
  ]);
  const statuses:Status[]=[
@@ -474,6 +510,7 @@ export default async function handler(req:Req,res:Res){
   durable_supervisor:durable,
   dispatch_health:dispatch,
   console_job:consoleProof,
+  creative_hold_gates:creativeHolds,
   lab_qa:{
    source:'SUPABASE_PGCRON_QA_LAB_V1',
    status:qa.status,
@@ -503,7 +540,8 @@ export default async function handler(req:Req,res:Res){
     ...(cert.status==='UNAVAILABLE'?['SUPABASE_CERTIFICATION_GATES']:[]),
     ...(durable.status==='UNAVAILABLE'?['SUPABASE_CERT_SUPERVISOR_HISTORY']:[]),
     ...(dispatch.status==='UNAVAILABLE'?['SUPABASE_DISPATCH_HEALTH']:[]),
-    ...(consoleProof.status==='UNAVAILABLE'?['SUPABASE_CONSOLE_PUBLIC_READONLY']:[])
+    ...(consoleProof.status==='UNAVAILABLE'?['SUPABASE_CONSOLE_PUBLIC_READONLY']:[]),
+    ...(creativeHolds.status==='UNAVAILABLE'?['SUPABASE_CREATIVE_HOLD_GATES']:[])
    ],
    last_observed_at:stamp
   },
