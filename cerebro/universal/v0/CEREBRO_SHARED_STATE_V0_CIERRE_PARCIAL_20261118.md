@@ -39,3 +39,16 @@ PROD sigue intacta, por tanto no se necesita rollback. En cualquier promoción f
 - El workflow `cerebro-shared-state-verify-pinned-stage.yml` se fija a este candidato y queda en `workflow_dispatch` explícito para que no se repitan pruebas que dependen de una credencial humana caducada y consuman créditos inútilmente. Cuando el secreto owner se refresque, ejecutar el workflow y verificar sus resultados antes de promover.
 - GitHub Enterprise load 50-job aislada se recuperó satisfactoriamente por reintento del job fallido, sin tocar la prueba ni el runtime.
 - **Ningún cambio en `app.fenixcapital.es`, CRM, DNS, Supabase Auth, main, PR #76/#77 ni servicios de pago.** El alias PROD permanece `dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e` y el anterior despliegue `dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h` sigue registrado como alternativa de restauración.
+
+## Solución de renovación de pruebas CI: sin JWT del propietario (18/11/2026)
+
+La App sigue renovando el JWT del propietario mediante Supabase Auth en el navegador. La tarea CI **no tiene derecho de propietario** y por seguridad no puede generar ese token.
+
+Para eliminar la caducidad del secreto `CEREBRO_E2E_USER_JWT` de este bloque, la verificación automática ahora:
+- inicia sesión en Supabase Auth en cada ejecución como `cerebro-e2e@fenixcapital.es`, mediante el secreto `CEREBRO_E2E_TEST_PASSWORD` existente;
+- usa el JWT efímero únicamente en la URL de deployment aislado, para `mode=ci_summary`, con verificación administrativa del UUID técnico, correo confirmado y host exacto;
+- recibe solo totales del registro y departamentos por fuente, nunca detalles de perfiles, datos de App/CRM ni estados de runtime propietario;
+- comprueba que todos los demás endpoints y `mode=profiles` siguen vetados a esa cuenta;
+- destruye sesión al terminar el workflow. **No almacena refresh token** ni reescribe secretos GitHub.
+
+Esto resuelve la necesidad de renovar el token *de estas pruebas* por ejecución, sin hacer a la cuenta técnica propietaria. **No equivale a certificar E2E real del propietario.** La autorización de la App permanece idéntica.
