@@ -146,6 +146,40 @@ async function collectSqlQa(auth:string,apikey:string,labKey:string):Promise<Sql
   recent:q.recent,signature_verified:true,read_only:true,physical_execution_evidenced:true};
 }
 
+type HistoricalEngineTruth={
+ source:'JARVIS'|'BROWSER'|'CREATIVE';engine_id:string;environment:string;
+ historical_jobs:number;explicit_role_rows:number;recent_metadata_rows:number;
+ last_job_metadata_at:string|null;diagnosis:'NO_RECENT_METADATA'|'RECENT_BUT_ROLE_ID_UNATTRIBUTED'|'RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS';
+ role_activation_verified:false;engine_certified_autonomous:false
+};
+type EngineTruthStatus={status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+ historical_job_rows:number|null;sources:HistoricalEngineTruth[];
+ all_engines_certified:false;autonomy_global_certified:false};
+const ENGINE_TRUTH_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-engine-truth-lab-v1?company_id=fenix&environment=LAB';
+async function readEngineTruth(auth:string,ownerKey:string,labKey:string):Promise<EngineTruthStatus>{
+ const reply=await fetch(ENGINE_TRUTH_URL,{method:'GET',cache:'no-store',redirect:'error',
+  headers:{authorization:auth,apikey:labKey,'x-cerebro-owner-prod-apikey':ownerKey,accept:'application/json'},
+  signal:AbortSignal.timeout(7000)});
+ if(reply.status!==200)throw Error('ENGINE_SOURCE_DENIED');
+ const raw=await reply.text();
+ if(raw.length>28000)throw Error('ENGINE_SOURCE_OVERSIZED');
+ const o=JSON.parse(raw);
+ if(o.status!=='OK'||o.read_only!==true||o.executed!==false||
+  o.company_id!=='fenix'||o.environment!=='LAB'||
+  o.source!=='CEREBRO_LAB_ENGINE_TRUTH_AUDIT_V1'||
+  o.all_engines_certified!==false||o.autonomy_global_certified!==false||
+  !Number.isSafeInteger(o.historical_job_rows)||o.historical_job_rows<0||
+  !Array.isArray(o.sources)||o.sources.length>15||
+  o.sources.some((x:HistoricalEngineTruth)=>!['JARVIS','BROWSER','CREATIVE'].includes(x.source)||
+    !['NO_RECENT_METADATA','RECENT_BUT_ROLE_ID_UNATTRIBUTED','RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS'].includes(x.diagnosis)||
+    x.role_activation_verified!==false||x.engine_certified_autonomous!==false||
+    !Number.isSafeInteger(x.historical_jobs)||x.historical_jobs<0||
+    !Number.isSafeInteger(x.explicit_role_rows)||x.explicit_role_rows<0||
+    !Number.isSafeInteger(x.recent_metadata_rows)||x.recent_metadata_rows<0))throw Error('ENGINE_AUDIT_CONTRACT');
+ return {status:'LIVE',historical_job_rows:o.historical_job_rows,sources:o.sources,
+  all_engines_certified:false,autonomy_global_certified:false};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -177,7 +211,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github,qa]=await Promise.all([
+ const [cf,lab,github,qa,truth]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -193,6 +227,14 @@ export default async function handler(req:Req,res:Res){
    if(labKey.length<12)return{status:'NOT_CONFIGURED' as const,proof:null as SqlQaProof|null};
    try{return{status:'LIVE' as const,proof:await collectSqlQa(auth,apikey,labKey)}}
    catch{return{status:'UNAVAILABLE' as const,proof:null as SqlQaProof|null}}
+  })(),
+  (async():Promise<EngineTruthStatus>=>{
+   if(labKey.length<12)return{status:'NOT_CONFIGURED',historical_job_rows:null,sources:[],
+    all_engines_certified:false,autonomy_global_certified:false};
+   try{return await readEngineTruth(auth,apikey,labKey)}catch{
+    return{status:'UNAVAILABLE',historical_job_rows:null,sources:[],
+     all_engines_certified:false,autonomy_global_certified:false};
+   }
   })()
  ]);
  const statuses:Status[]=[
@@ -228,6 +270,7 @@ export default async function handler(req:Req,res:Res){
   active_executor_count:null,
   receipt_source_status:physicalQa?'SUPABASE_SIGNED_SQL_QA':github.state==='VERIFIED'?'GITHUB_VERIFIED_QA_JOB':'NOT_CONNECTED',
   verified_profiles:verifiedProfiles,
+  engine_truth:truth,
   lab_qa:{
    source:'SUPABASE_PGCRON_QA_LAB_V1',
    status:qa.status,
@@ -252,7 +295,8 @@ export default async function handler(req:Req,res:Res){
    qa_signature_verified:physicalQa,
    source_failure_observations:[
     ...statuses.filter(v=>v.status==='UNAVAILABLE').map(v=>v.source),
-    ...(qa.status==='UNAVAILABLE'?['SUPABASE_SQL_QA']:[])
+    ...(qa.status==='UNAVAILABLE'?['SUPABASE_SQL_QA']:[]),
+    ...(truth.status==='UNAVAILABLE'?['SUPABASE_ENGINE_TRUTH']:[])
    ],
    last_observed_at:stamp
   },
