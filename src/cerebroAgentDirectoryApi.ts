@@ -3,7 +3,7 @@ export type AgentDirectoryRecord={
  id:string;name:string;kind:'AGENT_ROLE'|'SUBAGENT_ROLE'|'SUBAGENT_TEMPLATE';family:string;
  state:string;source:string;purpose_plain:string;purpose_technical:string;
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
- company_scope:string;source_url:string;
+ company_scope:string;source_url:string;department_id?:string|null;
  runtime_status?:'ACTIVO'|'INACTIVO'|'DEGRADADO'|'PREPARADO'|'DEFINIDO'|'POR_VERIFICAR';
  runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR';profile_key?:string|null;profile_provenance?:string|null;quality_gate?:string|null;required_tests_passed?:boolean;rollback_verified?:boolean}|null;
  shared_state?:{status:'ACTIVO'|'PERFECTO'|'PARCIAL'|'FALLANDO'|'DEFINIDO'|'POR_VERIFICAR';reason:string;evidence:string|null;profile_key:string;department_key:string;observed_at:string|null}

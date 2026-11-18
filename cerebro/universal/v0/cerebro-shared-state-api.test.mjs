@@ -49,6 +49,14 @@ test('one shared summary covers all 2506 profiles in their original departments'
  assert.equal(calls.filter(x=>x.includes('cerebro-console-activity-v0')).length,1);
  assert.equal(calls.filter(x=>x.includes('/session/context')).length,1);
 });
+test('source-preserved SEO and UMS departments remain separate from 8 source families',async()=>{
+ fake();const response=res();await handler(req(),response);
+ assert.equal(response.state.status,200);
+ const units=response.state.payload.source_departments;
+ assert.equal(units.filter(x=>x.family==='SEO_ENTERPRISE'&&x.department_key.startsWith('SEO-D')).length,32);
+ assert.equal(units.filter(x=>x.family==='MEDIA_STUDIO'&&x.department_key.startsWith('UMS:')).length,48);
+ assert.equal(units.reduce((n,x)=>n+x.total,0),48+384+175+10); // UMS heads/specialists; SEO defined department rows; engineering IDs
+});
 test('paged shared profile details preserve identifiers, family and original parents',async()=>{
  fake();const response=res();
  await handler(req(q('mode=profiles&company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&offset=0&limit=3')),response);

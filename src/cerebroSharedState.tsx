@@ -4,7 +4,7 @@ export type SharedStateStatus='ACTIVO'|'PERFECTO'|'PARCIAL'|'FALLANDO'|'DEFINIDO
 export type SharedDepartment={department_key:string;total:number;states:Record<SharedStateStatus,number>};
 export type SharedSummary={schema:'CEREBRO_SHARED_STATE_V1';company_id:'fenix';status:'OK';feed_health:'LIVE_EVIDENCE_FEED'|'DEGRADED_EVIDENCE_FEED';source_status:'ACTIVO'|'DEGRADADO';observed_at:string|null;read_only:true;executed:false;
  overview:{total_profiles:number;departments:number;states:Record<SharedStateStatus,number>;verified_running_profiles:number;templates:number;engine_association_is_not_execution:true};
- departments:SharedDepartment[];refresh_interval_seconds:number};
+ departments:SharedDepartment[];source_departments?:Array<SharedDepartment&{family:string;source:string}>;refresh_interval_seconds:number};
 type SharedContext={status:'loading'|'ready'|'denied'|'unavailable';summary:SharedSummary|null;updatedAt:string|null;refresh:()=>void};
 const Context=createContext<SharedContext>({status:'loading',summary:null,updatedAt:null,refresh:()=>{}});
 export const useCerebroSharedState=()=>useContext(Context);
@@ -61,7 +61,7 @@ export function CerebroSharedStatusBanner(){
   <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center',justifyContent:'space-between'}}>
    <strong>ESTADO COMPARTIDO · CEREBRO</strong>
    {status==='ready'&&summary&&counts?<>
-    <span>{summary.overview.total_profiles.toLocaleString('es-ES')} perfiles · {summary.overview.departments} áreas registradas</span>
+    <span>{summary.overview.total_profiles.toLocaleString('es-ES')} perfiles · {summary.overview.departments} familias fuente · {summary.source_departments?.length??'—'} departamentos con ID explícito</span>
     {(['ACTIVO','PERFECTO','PARCIAL','FALLANDO','POR_VERIFICAR'] as const).map(key=>
      <span key={key}>{labels[key]}: <strong>{counts[key]}</strong></span>)}
     <span>Fuente: {summary.source_status} · {summary.observed_at?new Date(summary.observed_at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'sin datos'}</span>
@@ -71,7 +71,7 @@ export function CerebroSharedStatusBanner(){
   {status==='ready'&&summary?<details style={{marginTop:3}}>
     <summary style={{cursor:'pointer'}}>Ver estado de todos los departamentos · sincronización automática cada 30 s</summary>
     <div style={{display:'flex',gap:8,flexWrap:'wrap',paddingTop:8}}>
-     {summary.departments.map(dep=><span key={dep.department_key} style={{padding:'6px 9px',border:'1px solid #31516c',borderRadius:6}}>
+     {(summary.source_departments?.length?summary.source_departments:summary.departments).map(dep=><span key={dep.department_key} style={{padding:'6px 9px',border:'1px solid #31516c',borderRadius:6}}>
       <strong>{dep.department_key}</strong> · {dep.total} · activos {dep.states.ACTIVO} · excelencia {dep.states.PERFECTO} · parciales {dep.states.PARCIAL} · fallos {dep.states.FALLANDO}
      </span>)}
     </div>

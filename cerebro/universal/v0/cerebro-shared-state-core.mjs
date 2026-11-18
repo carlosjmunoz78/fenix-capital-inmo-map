@@ -35,7 +35,7 @@ export function classifyProfile(profile,source,now=Date.now()){
 export function buildSharedState(entries,source,now=Date.now()){
  if(!Array.isArray(entries)||!entries.every(x=>typeof x.id==='string'&&typeof x.kind==='string'&&typeof x.family==='string'&&Array.isArray(x.engine_ids)))
   throw Error('INVALID_PROFILE_REGISTRY');
- const seen=new Set(),departments={},counts=Object.fromEntries(STATES.map(s=>[s,0]));
+ const seen=new Set(),departments={},sourceDepartments={},counts=Object.fromEntries(STATES.map(s=>[s,0]));
  const records=entries.map(x=>{
   const key=x.kind+':'+x.id;
   if(seen.has(key))throw Error('DUPLICATE_PROFILE_ID');
@@ -44,6 +44,11 @@ export function buildSharedState(entries,source,now=Date.now()){
   const department=String(x.family); // SOURCE key: preserve existing family/department and parent_id
   const dep=departments[department]??{department_key:department,total:0,states:Object.fromEntries(STATES.map(s=>[s,0]))};
   dep.total+=1;dep.states[decision.status]+=1;departments[department]=dep;
+  if(typeof x.department_id==='string'&&x.department_id.trim()){
+   const unitKey=department+'/'+x.department_id;
+   const unit=sourceDepartments[unitKey]??{department_key:x.department_id,family:department,total:0,states:Object.fromEntries(STATES.map(s=>[s,0])),source:'EXPLICIT_SOURCE_DEPARTMENT'};
+   unit.total+=1;unit.states[decision.status]+=1;sourceDepartments[unitKey]=unit;
+  }
   counts[decision.status]+=1;
   return {...x,shared_state:{
    ...decision,company_id:'fenix',profile_key:key,department_key:department,
@@ -52,6 +57,9 @@ export function buildSharedState(entries,source,now=Date.now()){
  });
  const total=records.length;
  const fromDepartments=Object.values(departments).reduce((n,d)=>n+d.total,0);
+ const departmentMapped=Object.values(sourceDepartments).reduce((n,d)=>n+d.total,0);
+ const declared=entries.filter(x=>typeof x.department_id==='string'&&x.department_id.trim()).length;
+ if(departmentMapped!==declared)throw Error('SOURCE_DEPARTMENT_DRIFT');
  if(total!==fromDepartments||Object.values(counts).reduce((a,b)=>a+b,0)!==total)throw Error('GROUP_COUNT_DRIFT');
  const verifiedNow=counts.ACTIVO;
  return {schema:CONTRACT,company_id:'fenix',environment:'PROD_READONLY',version:'1.0.0',
@@ -62,5 +70,5 @@ export function buildSharedState(entries,source,now=Date.now()){
   overview:{total_profiles:total,departments:Object.keys(departments).length,
     states:counts,verified_running_profiles:verifiedNow,templates:counts.DEFINIDO,
     engine_association_is_not_execution:true},
-  departments:Object.values(departments),records};
+  departments:Object.values(departments),source_departments:Object.values(sourceDepartments),records};
 }

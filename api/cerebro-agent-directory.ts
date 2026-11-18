@@ -47,6 +47,7 @@ export type AgentDirectoryEntry={
  state:string;source:string;purpose_plain:string;purpose_technical:string;
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
  company_scope:string;source_url:string;
+ department_id?:string|null; // ONLY an explicit source department, never inferred from a family
  runtime_status?:'ACTIVO'|'INACTIVO'|'DEGRADADO'|'PREPARADO'|'DEFINIDO'|'POR_VERIFICAR';
  runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR'}|null;
 };
@@ -59,7 +60,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   state:r.state,source:'GITHUB_CANONICAL_ROLE_REGISTRY',purpose_plain:simple[r.role_id]||'Función pendiente de descripción verificada.',
   purpose_technical:packMap.get(r.role_id)?.mission||'Misión técnica pendiente de verificar.',
   engine_ids:[...r.engines],parent_id:r.reports_to,hierarchy_verified:r.reports_to_state!=='UNRESOLVED',
-  runtime_verified:false,company_scope:r.company_scope,
+  runtime_verified:false,company_scope:r.company_scope,department_id:r.department,
   source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/registry/role-agent-registry.v1.json'
  }));
  const fblist=fbComponents.components;
@@ -85,7 +86,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
      (r.parent_id?' / parent '+r.parent_id:''),
    engine_ids:[], // SOC-001 is a source-associated engine, absent from historical 179; no false link
    parent_id:r.parent_id||null,hierarchy_verified:child,runtime_verified:false,
-   company_scope:'GLOBAL_OR_SCOPED',
+   company_scope:'GLOBAL_OR_SCOPED',department_id:null,
    source_url:'https://github.com/carlosjmunoz78/fenix-capital-cerebro-social/blob/'+
     fbComponents.source_commit_sha+'/families/facebook/financial-real-estate/roles.v1.json'
   };
@@ -95,7 +96,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   state:'TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE',source:'NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT',
   purpose_plain:'Especialidad prevista de subagentes para '+r.name+'. No hay instancia ni ejecución acreditadas.',
   purpose_technical:'Subagent family template: '+r.name,engine_ids:[],parent_id:null,
-  hierarchy_verified:false,runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',
+  hierarchy_verified:false,runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',department_id:null,
   source_url:facebook.source_url
  }));
 
@@ -125,6 +126,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
    engine_ids:[], // UMS-001 is NOT in the 179 historical engine IDs; do not invent a catalog link
    parent_id:parentId?'UMS:'+parentId:null,hierarchy_verified:parentId!==null,
    runtime_verified:false,company_scope:'GLOBAL_MULTI_COMPANY',
+   department_id:r.role_kind==='DEPARTMENT_HEAD'?'UMS:'+r.id:child&&parentId?'UMS:'+parentId:null,
    source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/media-studio/v2/registry/role-registry.mjs'
   };
  });
@@ -145,7 +147,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   purpose_technical:'SEO-001 / '+r.family_id+(r.department_id?' / '+r.department_id:'')+' / '+r.id,
   engine_ids:['SEO-001'], // source: roster engine_id SEO-001; does NOT imply runtime certified
   parent_id:r.parent_id,hierarchy_verified:r.parent_id!==null,
-  runtime_verified:false,company_scope:'fenix',
+  runtime_verified:false,company_scope:'fenix',department_id:r.department_id,
   source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/'+
    seoProfiles.source_head_sha+'/cerebro/seo-enterprise/v2/seo-specialist-role-roster-v2.json'
  }));
@@ -167,7 +169,7 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
    source:'PINNED_SOCIAL_REPO_'+family,purpose_plain:x.purpose_plain,
    purpose_technical:x.purpose_technical,engine_ids:[],
    parent_id:x.parent_id,hierarchy_verified:x.parent_id!==null,runtime_verified:false,
-   company_scope:'fenix-capital',source_url:x.source_url
+   company_scope:'fenix-capital',department_id:null,source_url:x.source_url
   }));
  });
 
