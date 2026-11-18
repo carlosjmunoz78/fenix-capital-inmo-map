@@ -1,0 +1,70 @@
+name: CEREBRO OPERATIVA native rollback STATIC LAB ONLY
+on:
+  push:
+    branches: [cerebro/operativa-native-rollback-drill-only-20261118]
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-operativa-static-native-rollback-20261118
+  cancel-in-progress: false
+jobs:
+  rollback-exclusively-static-lab:
+    if: contains(github.event.head_commit.message, '[EXECUTE_NATIVE_LAB_ROLLBACK_ONLY]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_s7h85hckKPNouow2xin9BFzwS6jn
+      LAB_PROJECT_NAME: cerebro-operativa-rollback-drill-20261118
+      LAB_PREVIOUS_DEPLOYMENT: dpl_Gk8VD7MU31ndVf5P2vrN2Gt5PRHV
+      LAB_CURRENT_B_DEPLOYMENT: dpl_HFzywrJBHWUCLtHMVtcknkhfUbZH
+      LAB_PREVIOUS_DEPLOYMENT_URL: https://cerebro-operativa-rollback-drill-20261118-lu79bwwk7.vercel.app
+      LAB_ALIAS: cerebro-operativa-rollback-drill-20.vercel.app
+    steps:
+      - name: Checkout exact isolated LAB workflow only
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node 24 (no production assets)
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Fail-closed immutable LAB scope preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/cerebro/operativa-native-rollback-drill-only-20261118
+          test "$VERCEL_ORG_ID" = team_qnh6u1Ofy2WPp0MGEKlyMA50
+          test "$VERCEL_PROJECT_ID" = prj_s7h85hckKPNouow2xin9BFzwS6jn
+          test "$VERCEL_PROJECT_ID" != prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+          test "$LAB_PROJECT_NAME" = cerebro-operativa-rollback-drill-20261118
+          test "$LAB_PREVIOUS_DEPLOYMENT" = dpl_Gk8VD7MU31ndVf5P2vrN2Gt5PRHV
+          test "$LAB_CURRENT_B_DEPLOYMENT" = dpl_HFzywrJBHWUCLtHMVtcknkhfUbZH
+          test "$LAB_PREVIOUS_DEPLOYMENT_URL" = https://cerebro-operativa-rollback-drill-20261118-lu79bwwk7.vercel.app
+          test "$LAB_ALIAS" = cerebro-operativa-rollback-drill-20.vercel.app
+      - name: Install pinned Vercel CLI (no project writes)
+        run: npm install --global vercel@65.8.0
+      - name: Link EXACT static LAB and execute one native rollback
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN" || { echo 'BLOCKED: VERCEL_TOKEN_MISSING'; exit 2; }
+          export XDG_DATA_HOME="$RUNNER_TEMP/cerebro-native-rollback-only-auth"
+          echo "XDG_DATA_HOME=$XDG_DATA_HOME" >> "$GITHUB_ENV"
+          node -e 'const fs=require("node:fs"),p=require("node:path"),d=p.join(process.env.XDG_DATA_HOME,"com.vercel.cli");fs.mkdirSync(d,{recursive:true,mode:0o700});fs.writeFileSync(p.join(d,"auth.json"),JSON.stringify({token:process.env.VERCEL_TOKEN}),{mode:0o600})'
+          vercel link --yes --project="$LAB_PROJECT_NAME" --scope=carlosjmunozcabeza-2582s-projects >/dev/null
+          node -e 'const p=require("./.vercel/project.json");if(p.orgId!==process.env.VERCEL_ORG_ID||p.projectId!==process.env.VERCEL_PROJECT_ID)throw Error("BLOCKED: NOT_ISOLATED_LAB_PROJECT")'
+          echo 'LINKED_EXACT_STATIC_LAB_PASS'
+          # Hobby only supports reverting to the immediately previous deployment.
+          # Deployment B was created after A and verified as the current LAB alias.
+          printf 'y\n' | vercel rollback "$LAB_PREVIOUS_DEPLOYMENT_URL" --scope=carlosjmunozcabeza-2582s-projects --timeout=60s
+          echo 'NATIVE_ROLLBACK_CLI_REQUEST_RETURNED_SUCCESS; VERIFY_ALIAS_AND_CONTENT_EXTERNALLY'
+      - name: Remove runner authentication and project link on any outcome
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/cerebro-native-rollback-only-auth" .vercel
+          echo 'EPHEMERAL_AUTH_REMOVED; NO_FENIX_PROD_ALIAS_TOUCHED'
