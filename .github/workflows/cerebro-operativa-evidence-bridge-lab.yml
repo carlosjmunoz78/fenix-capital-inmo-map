@@ -17,7 +17,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: node --experimental-strip-types --test cerebro/universal/v0/agent-evidence-bridge-v1.test.mjs cerebro/universal/v0/agent-receipt-attestor-v1.test.mjs
+      - run: node --experimental-strip-types --test cerebro/universal/v0/agent-evidence-bridge-v1.test.mjs cerebro/universal/v0/agent-receipt-attestor-v1.test.mjs cerebro/universal/v0/agent-receipt-emitter-v1.test.mjs
       - run: node --experimental-strip-types --test cerebro/universal/v0/operativa-executor-coverage-private.acceptance.mjs
       - run: node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs
       - run: npm run build
