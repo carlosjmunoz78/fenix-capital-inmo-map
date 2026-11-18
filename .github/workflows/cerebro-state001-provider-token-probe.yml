@@ -1,0 +1,28 @@
+name: CEREBRO STATE001 · Provider credential presence probe only
+on:
+  push:
+    branches: [cerebro/shared-state-all-interfaces-v0-20261118]
+    paths: [.github/workflows/cerebro-state001-provider-token-probe.yml]
+permissions: {contents: read}
+jobs:
+  names-only-no-secret-value:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      CF_STANDARD: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      CF_ALT: ${{ secrets.CF_API_TOKEN != '' }}
+      CF_GENERIC: ${{ secrets.CLOUDFLARE_TOKEN != '' }}
+      CF_CEREBRO: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN != '' }}
+      SUPA_STANDARD: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
+      SUPA_ALT: ${{ secrets.SUPABASE_MANAGEMENT_TOKEN != '' }}
+      SUPA_CEREBRO: ${{ secrets.CEREBRO_SUPABASE_ACCESS_TOKEN != '' }}
+    steps:
+      - name: Assert only presence booleans without reading secret values
+        run: |
+          set -euo pipefail
+          for key in CF_STANDARD CF_ALT CF_GENERIC CF_CEREBRO SUPA_STANDARD SUPA_ALT SUPA_CEREBRO; do
+            val="${!key}"
+            if [[ "$val" != "true" && "$val" != "false" ]]; then exit 9; fi
+            printf '%s=%s\n' "$key" "$val" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "NO_CREDENTIALS_PRINTED_OR_USED; NO_PROD_MUTATIONS" >> "$GITHUB_STEP_SUMMARY"
