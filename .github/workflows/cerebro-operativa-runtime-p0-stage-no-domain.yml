@@ -67,10 +67,47 @@ jobs:
           set -euo pipefail
           url="$(vercel deploy --prebuilt --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects)"
           case "$url" in https://fenix-capital-preprod-*.vercel.app) ;; *) echo 'BLOCKED_UNEXPECTED_HOST'; exit 4;; esac
+          echo "STAGED_URL=$url" >> "$GITHUB_ENV"
           echo "STAGED_URL=$url" >> "$GITHUB_STEP_SUMMARY"
           echo "SOURCE_SHA=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo 'PROD_DOMAIN_CHANGE=NO' >> "$GITHUB_STEP_SUMMARY"
           echo 'PROD_PROMOTION=HOLD_UNTIL_E2E_AND_ROLLBACK' >> "$GITHUB_STEP_SUMMARY"
+      - name: Owner and tenant live E2E against this SAME pinned deployment
+        shell: bash
+        env:
+          OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [ -n "$OWNER_E2E_JWT" ] || { echo 'BLOCKED_OWNER_CI_SECRET_MISSING'; exit 2; }
+          [ -n "$PROD_PUBLISHABLE_KEY" ] || { echo 'BLOCKED_PUBLISHABLE_KEY_MISSING'; exit 2; }
+          [ -n "$VERCEL_TOKEN" ] || { echo 'BLOCKED_EXISTING_VERCEL_TOKEN_MISSING'; exit 2; }
+          [ -n "${STAGED_URL:-}" ] || { echo 'BLOCKED_PINNED_STAGE_URL_MISSING'; exit 2; }
+          payload="$(mktemp)"
+          trap 'rm -f "$payload"' EXIT
+          api="$STAGED_URL/api/cerebro-agent-directory"
+          headers=(-H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" -H "accept: application/json")
+          status="$(vercel curl "$api?company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$payload" --write-out '%{http_code}' "${headers[@]}")"
+          test "$status" = 200 || { echo "BLOCKED_PINNED_OWNER_STAGE_HTTP_$status"; exit 3; }
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.company_id!=="fenix"||d.read_only!==true||d.records?.length!==1||!d.runtime_source||d.page?.total!==2506)process.exit(4);if(!["ACTIVO","DEGRADADO"].includes(d.runtime_source.status))process.exit(5)' "$payload"
+          echo 'PASS_PINNED_OWNER_DIRECTORY_RUNTIME_EVIDENCE'
+          status="$(vercel curl "$api?company_id=aion&kind=ALL&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$payload" --write-out '%{http_code}' "${headers[@]}")"
+          test "$status" = 400 || { echo "BLOCKED_TENANT_CHECK_HTTP_$status"; exit 5; }
+          echo 'PASS_CROSS_COMPANY_ISOLATION'
+          status="$(vercel curl "$api?company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$payload" --write-out '%{http_code}' -X POST "${headers[@]}")"
+          test "$status" = 405 || { echo "BLOCKED_READ_ONLY_VERB_HTTP_$status"; exit 6; }
+          echo 'PASS_WRITE_DENIED'
+          status="$(curl -sS --output "$payload" --write-out '%{http_code}' --max-time 15 -H "Authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/)"
+          test "$status" = 200 || { echo "BLOCKED_SHARED_SOURCE_HTTP_$status"; exit 7; }
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.source!=="GITHUB_ACTIONS"||!d.observed_at||!Array.isArray(d.runs))process.exit(8)' "$payload"
+          echo 'PASS_COMMON_ACTIVITY_SOURCE'
+          status="$(curl -sS --output "$payload" --write-out '%{http_code}' --max-time 15 -H "apikey: $PROD_PUBLISHABLE_KEY" https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/)"
+          test "$status" = 401 || { echo "BLOCKED_ANONYMOUS_EDGE_HTTP_$status"; exit 9; }
+          echo 'PASS_ANONYMOUS_DENIED'
+          echo "EXACT_PINNED_SOURCE_SHA=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'OWNER_AND_SECURITY_GATES=PASS; NO_DOMAIN_CHANGE' >> "$GITHUB_STEP_SUMMARY"
       - name: Purge runner credentials and generated local Vercel metadata
         if: always()
         shell: bash
