@@ -305,6 +305,42 @@ async function readDispatchHealth(auth:string,ownerKey:string,labKey:string):Pro
   full_engine_certified:false,legacy_jobs_executed:false,github_oidc_required:true};
 }
 
+type ConsoleJobProof={status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+ execution_state:'SUCCEEDED'|null;job_id:string|null;
+ observed_commit_sha:string|null;last_execution_at:string|null;completed_job_count:number|null;
+ signature_verified:boolean;specific_capability_evidenced:boolean;
+ legacy_worker_executed:false;full_engine_certified:false;agent_role_identity_verified:false};
+const CONSOLE_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-console-readonly-lab-v1?company_id=fenix&environment=LAB';
+async function readConsoleProof(auth:string,ownerKey:string,labKey:string):Promise<ConsoleJobProof>{
+ const r=await fetch(CONSOLE_URL,{method:'GET',cache:'no-store',redirect:'error',
+  headers:{authorization:auth,apikey:labKey,'x-cerebro-owner-prod-apikey':ownerKey,accept:'application/json'},
+  signal:AbortSignal.timeout(7000)});
+ if(r.status!==200)throw Error('CONSOLE_READER_DENIED');
+ const raw=await r.text();if(raw.length>12000)throw Error('CONSOLE_READER_TOO_LARGE');
+ const d=JSON.parse(raw);
+ if(d.status!=='OK'||d.source!=='CEREBRO_CONSOLE_READONLY_LAB_V1'||
+  d.company_id!=='fenix'||d.environment!=='LAB'||d.engine_id!=='CONSOLE-001'||
+  d.capability_id!=='repo.sandbox.public.readonly.v0'||
+  d.repository!=='carlosjmunoz78/fenix-capital-inmo-map'||d.branch!=='main'||
+  d.read_only!==true||d.executed_job!==true||d.github_actions_used!==false||
+  d.original_dispatcher_unchanged!==true||d.legacy_worker_executed!==false||
+  d.agent_role_identity_verified!==false||d.full_engine_certified!==false||
+  d.autonomy_certified!==false||d.external_actions_executed!==false||
+  d.prod_execution_enabled!==false||d.marginal_cost_eur_measured!==false||
+  d.specific_capability_evidenced!==true||d.signed!==true||
+  d.execution_state!=='SUCCEEDED'||d.http_status!==200||
+  !Number.isSafeInteger(d.completed_job_count)||d.completed_job_count<1||
+  typeof d.job_id!=='string'||!/^[a-f0-9-]{36}$/.test(d.job_id)||
+  !/^[a-f0-9]{40}$/.test(d.observed_commit_sha||'')||
+  !Number.isFinite(Date.parse(d.last_execution_at)))
+   throw Error('CONSOLE_PROOF_CONTRACT');
+ return {status:'LIVE',execution_state:'SUCCEEDED',job_id:d.job_id,
+  observed_commit_sha:d.observed_commit_sha,last_execution_at:d.last_execution_at,
+  completed_job_count:d.completed_job_count,signature_verified:true,
+  specific_capability_evidenced:true,legacy_worker_executed:false,
+  full_engine_certified:false,agent_role_identity_verified:false};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -336,7 +372,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github,qa,truth,cert,durable,dispatch]=await Promise.all([
+ const [cf,lab,github,qa,truth,cert,durable,dispatch,consoleProof]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -387,6 +423,17 @@ export default async function handler(req:Req,res:Res){
    catch{return{status:'UNAVAILABLE',health_status:null,signed_samples:0,
     healthy_endpoints:0,sources:[],full_engine_certified:false,
     legacy_jobs_executed:false,github_oidc_required:true}}
+  })(),
+  (async():Promise<ConsoleJobProof>=>{
+   if(labKey.length<12)return{status:'NOT_CONFIGURED',execution_state:null,job_id:null,
+    observed_commit_sha:null,last_execution_at:null,completed_job_count:null,
+    signature_verified:false,specific_capability_evidenced:false,legacy_worker_executed:false,
+    full_engine_certified:false,agent_role_identity_verified:false};
+   try{return await readConsoleProof(auth,apikey,labKey)}
+   catch{return{status:'UNAVAILABLE',execution_state:null,job_id:null,
+    observed_commit_sha:null,last_execution_at:null,completed_job_count:null,
+    signature_verified:false,specific_capability_evidenced:false,legacy_worker_executed:false,
+    full_engine_certified:false,agent_role_identity_verified:false}}
   })()
  ]);
  const statuses:Status[]=[
@@ -426,6 +473,7 @@ export default async function handler(req:Req,res:Res){
   certification_gates:cert,
   durable_supervisor:durable,
   dispatch_health:dispatch,
+  console_job:consoleProof,
   lab_qa:{
    source:'SUPABASE_PGCRON_QA_LAB_V1',
    status:qa.status,
@@ -454,7 +502,8 @@ export default async function handler(req:Req,res:Res){
     ...(truth.status==='UNAVAILABLE'?['SUPABASE_ENGINE_TRUTH']:[]),
     ...(cert.status==='UNAVAILABLE'?['SUPABASE_CERTIFICATION_GATES']:[]),
     ...(durable.status==='UNAVAILABLE'?['SUPABASE_CERT_SUPERVISOR_HISTORY']:[]),
-    ...(dispatch.status==='UNAVAILABLE'?['SUPABASE_DISPATCH_HEALTH']:[])
+    ...(dispatch.status==='UNAVAILABLE'?['SUPABASE_DISPATCH_HEALTH']:[]),
+    ...(consoleProof.status==='UNAVAILABLE'?['SUPABASE_CONSOLE_PUBLIC_READONLY']:[])
    ],
    last_observed_at:stamp
   },
