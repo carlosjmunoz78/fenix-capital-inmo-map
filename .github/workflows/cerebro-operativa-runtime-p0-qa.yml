@@ -15,6 +15,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run build
       - run: node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs
+      - run: node --experimental-strip-types --test cerebro/universal/v0/operativa-runtime-p0-bridge.test.mjs
       - run: |
           node --input-type=module -e '
             import {readFileSync} from "node:fs";
