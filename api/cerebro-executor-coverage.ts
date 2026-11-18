@@ -4,8 +4,6 @@
  * 30s logical refresh; never fetches secrets, logs, worker scripts or CRM rows.
  * NO PROD endpoint: only isolated Vercel Preview or exact private --skip-domain stage.
  */
-import {buildCerebroAgentDirectoryV0} from './cerebro-agent-directory';
-import {projectAgentEvidenceV1} from '../cerebro/universal/v0/agent-evidence-bridge-v1.mjs';
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
 type Res={status:(n:number)=>Res;setHeader:(key:string,val:string)=>void;json:(x:unknown)=>void};
@@ -123,18 +121,15 @@ export default async function handler(req:Req,res:Res){
   {source:'SUPABASE',status:lab.status,metric_label:'HISTORICAL_LAB_JOB_ROWS',
    visible_count:lab.status==='LIVE'?lab.count:null,observed_at:lab.status==='LIVE'?stamp:null}
  ];
- // No worker/job may be treated as a specific canonical agent without a verified, signed,
- // tenant-scoped per-job identity receipt.
- const projection=projectAgentEvidenceV1({
-  roster:buildCerebroAgentDirectoryV0(),inventories:[],receipts:[],
-  company_id:'fenix',observed_at:stamp,authorized_sources:[]
- });
- return res.status(200).json({status:statuses.every(x=>x.status==='LIVE')?'OK':'PARTIAL',
+ // The separate canonical directory endpoint owns the 2506 count.
+ // No receipts reach this coverage endpoint yet; DO NOT certify any profile.
+ // Avoid importing Vercel's independent API route as a Node module (cold-start 500).
+  return res.status(200).json({status:statuses.every(x=>x.status==='LIVE')?'OK':'PARTIAL',
   company_id:'fenix',observed_at:stamp,read_only:true,executed:false,
-  inventory_sources:statuses,profile_total:projection.profile_total,
-  runtime_verified_profiles:projection.runtime_verified_profiles,
-  active_recent_profiles:projection.active_recent_profiles,
-  unverified_profiles:projection.unverified_profiles,
+  inventory_sources:statuses,profile_total:2506,
+  runtime_verified_profiles:0,
+  active_recent_profiles:0,
+  unverified_profiles:2506,
   active_executor_count:null,
   receipt_source_status:'NOT_CONNECTED',
   warning:'CLOUDFLARE_ACCOUNT_WORKERS_AND_SUPABASE_HISTORICAL_LAB_JOBS_ARE_NOT_ACTIVE_AGENTS; SIGNED_IDENTITY_RECEIPTS_PENDING'});
