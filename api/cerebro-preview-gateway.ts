@@ -8,6 +8,11 @@ type Req={method?:string;url?:string;headers:Record<string,H>;query?:Record<stri
 type Res={status:(code:number)=>Res;setHeader:(key:string,value:string)=>void;json:(value:unknown)=>void};
 function hdr(v:H){return Array.isArray(v)?v[0]||'':v||''}
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const PINNED_PRIVATE_DEPLOYMENT=/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/;
+export function verifiedPrivateGatewayHost(host:string,env:string|undefined,uniqueHost:string|undefined){
+ if(!HOST.test(host))return false;
+ return env==='preview'||(env==='production'&&PINNED_PRIVATE_DEPLOYMENT.test(host)&&uniqueHost===host);
+}
 const BASE='https://cluhljgonannaafpmblx.supabase.co/functions/v1/';
 const RESOURCES:Record<string,{path:string;method:'GET'|'POST'}>={
  health:{path:'cerebro-console-gateway-v0/health',method:'GET'},
@@ -26,7 +31,7 @@ export default async function handler(req:Req,res:Res){
  res.setHeader('Vary','Authorization');
  res.setHeader('X-Content-Type-Options','nosniff');
  const host=hdr(req.headers.host).toLowerCase();
- if(process.env.VERCEL_ENV!=='preview'||!HOST.test(host))
+ if(!verifiedPrivateGatewayHost(host,process.env.VERCEL_ENV,process.env.VERCEL_URL))
   return res.status(403).json({status:'CLOSED',reason:'PREVIEW_ONLY'});
  const origin=hdr(req.headers.origin);
  if(origin&&origin!=='https://'+host)

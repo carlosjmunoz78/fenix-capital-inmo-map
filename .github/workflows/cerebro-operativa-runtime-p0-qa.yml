@@ -1,0 +1,27 @@
+name: CEREBRO OPERATIVA · Runtime P0 isolated QA
+on:
+  push:
+    branches: [cerebro/operativa-runtime-p0-fix-20261118]
+permissions: {contents: read}
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24', cache: npm}
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - run: node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs
+      - run: node --experimental-strip-types --test cerebro/universal/v0/operativa-runtime-p0-bridge.test.mjs
+      - run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const s=readFileSync("api/cerebro-agent-directory.ts","utf8");
+            const c=readFileSync("src/cerebroAgentDirectoryApi.ts","utf8");
+            if(!s.includes("observeExecutors")||!s.includes("ACTIVITY_EVIDENCE_STALE_OR_INVALID")||!c.includes("runtime_observation"))process.exit(1);
+            if(!s.includes("const verified=Boolean(exact&&active"))process.exit(2);
+            console.log("RUNTIME_EVIDENCE_GATE_OK");
+          '

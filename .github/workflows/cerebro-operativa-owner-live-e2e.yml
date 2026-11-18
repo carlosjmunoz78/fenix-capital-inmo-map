@@ -1,0 +1,75 @@
+name: CEREBRO OPERATIVA · Owner live E2E guarded preview
+on:
+  push:
+    branches: [cerebro/operativa-runtime-p0-fix-20261118]
+permissions: {contents: read}
+jobs:
+  owner-live-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      STAGE_URL: https://fenix-capital-preprod-ng0bal2fd.vercel.app
+      ACTIVITY_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/
+    steps:
+      - name: Verify existing owner-only test prerequisites (never print secrets)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$OWNER_E2E_JWT" ]; then echo 'BLOCKED_EXISTING_OWNER_E2E_JWT_NOT_CONFIGURED'; exit 2; fi
+          if [ -z "$PROD_PUBLISHABLE_KEY" ]; then echo 'BLOCKED_EXISTING_PUBLISHABLE_KEY_NOT_CONFIGURED'; exit 2; fi
+      - name: Distinguish Supabase owner token from Vercel preview protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          result="$(mktemp)"
+          trap 'rm -f "$result"' EXIT
+          status="$(curl -sS -o "$result" -w '%{http_code}' --max-time 15 -H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" "$ACTIVITY_URL")"
+          if [ "$status" != 200 ]; then echo "BLOCKED_EXISTING_OWNER_JWT_OR_SCOPE_HTTP_$status"; exit 7; fi
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.source!=="GITHUB_ACTIONS")process.exit(8)' "$result"
+          echo 'PASS_EXISTING_OWNER_JWT_AND_SHARED_ACTIVITY'
+      - name: Prepare existing Vercel CLI for authenticated protected-stage tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$VERCEL_TOKEN" ]; then echo 'BLOCKED_EXISTING_VERCEL_TOKEN_MISSING'; exit 2; fi
+          npm install --global vercel@65.8.0 --no-audit --no-fund >/dev/null
+          vercel --version
+      - name: Live backend read/denied/tenant/verb gates (no private payload in logs)
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          resp="$(mktemp)"
+          trap 'rm -f "$resp"' EXIT
+          headers=(-H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" -H "accept: application/json")
+          # Vercel CLI uses existing VERCEL_TOKEN to pass Deployment Protection.
+          # The application still checks owner JWT and tenant itself.
+          api="$STAGE_URL/api/cerebro-agent-directory"
+          status="$(vercel curl "$api?company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$resp" --write-out '%{http_code}' "${headers[@]}")"
+          if [ "$status" != 200 ]; then echo "BLOCKED_OWNER_LIVE_PREVIEW_HTTP_$status"; exit 3; fi
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.company_id!=="fenix"||d.read_only!==true||d.records.length!==1||!d.runtime_source)process.exit(4);if(!["ACTIVO","DEGRADADO"].includes(d.runtime_source.status))process.exit(5)' "$resp"
+          echo 'PASS_OWNER_PREVIEW_READ_ONLY_WITH_RUNTIME_EVIDENCE'
+          status="$(vercel curl "$api?company_id=aion&kind=ALL&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$resp" --write-out '%{http_code}' "${headers[@]}")"
+          test "$status" = 400
+          echo 'PASS_TENANT_DENIED'
+          status="$(vercel curl "$api?company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$resp" --write-out '%{http_code}' -X POST "${headers[@]}")"
+          test "$status" = 405
+          echo 'PASS_WRITE_DENIED'
+          status="$(curl -sS -o "$resp" -w '%{http_code}' --max-time 15 -H "apikey: $PROD_PUBLISHABLE_KEY" "$ACTIVITY_URL")"
+          test "$status" = 401
+          echo 'PASS_EDGE_ANONYMOUS_DENIED'
+      - name: Live other-interface activity contract (same protected source)
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          resp="$(mktemp)"
+          trap 'rm -f "$resp"' EXIT
+          status="$(curl -sS -o "$resp" -w '%{http_code}' --max-time 15 -H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" "$ACTIVITY_URL")"
+          test "$status" = 200 || { echo "BLOCKED_SHARED_ACTIVITY_HTTP_$status"; exit 4; }
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(d.status!=="OK"||d.source!=="GITHUB_ACTIONS"||!d.observed_at||!Array.isArray(d.runs))process.exit(5)' "$resp"
+          echo 'PASS_SHARED_ACTIVITY_SOURCE_USED_BY_JARVIS_NEURONAL_OPERATIVA'
