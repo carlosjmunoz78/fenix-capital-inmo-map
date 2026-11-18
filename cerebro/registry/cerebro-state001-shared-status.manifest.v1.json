@@ -1,0 +1,102 @@
+{
+  "schema": "CEREBRO_ENGINE_MANIFEST_V1",
+  "company_id": "fenix",
+  "engine_id": "STATE-001",
+  "name": "CEREBRO Universal Shared Status & Profile Evidence",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "state": "PARCIAL_STAGE_CANDIDATE_OWNER_E2E_BLOCKED",
+  "sources": {
+    "profiles": "api/cerebro-agent-directory.ts (sourced pinned registries)",
+    "activity": "Supabase Edge Function cerebro-console-activity-v0",
+    "canonical_state": "api/cerebro-shared-state.ts",
+    "state_core": "cerebro/universal/v0/cerebro-shared-state-core.mjs"
+  },
+  "consumers": [
+    "JARVIS",
+    "OPERATIVA",
+    "NEURONAL",
+    "NAVEGADOR",
+    "V0",
+    "FUTURE_GATEWAY_INTERFACE"
+  ],
+  "contract": {
+    "schema": "CEREBRO_SHARED_STATE_V1",
+    "summary": "GET /api/cerebro-shared-state?mode=summary&company_id=fenix",
+    "profiles": "GET /api/cerebro-shared-state?mode=profiles&company_id=fenix&family=ALL&kind=ALL&offset=0&limit=25",
+    "refresh_seconds": 30,
+    "group_semantics": "eight source families, preserve existing department hierarchy and parent_id",
+    "profile_identity": "kind:id",
+    "event_identity": "EXPLICIT_EXECUTOR_ATTESTATION with exact profile_key",
+    "event_dimensions": [
+      "company_id",
+      "engine_id",
+      "profile_key",
+      "runtime_id",
+      "environment",
+      "version",
+      "observed_at",
+      "last_run",
+      "last_run_result",
+      "evidence"
+    ],
+    "state_levels": [
+      "ACTIVO",
+      "PERFECTO",
+      "PARCIAL",
+      "FALLANDO",
+      "DEFINIDO",
+      "POR_VERIFICAR"
+    ],
+    "perfect_only_if": [
+      "last_run_result=success",
+      "quality_gate=TRIBUNAL_GREEN",
+      "required_tests_passed=true",
+      "rollback_verified=true"
+    ],
+    "source_degraded": "DEGRADADO is source health, never synthetic profile failure"
+  },
+  "governance": {
+    "permissions": "OWNER_READ_ONLY",
+    "allow_company": [
+      "fenix"
+    ],
+    "methods": [
+      "GET"
+    ],
+    "old_paths_unchanged": true,
+    "preserves_app_crm": true,
+    "external_clients": "must use same CEREBRO Gateway and owner auth; never open wildcard CORS",
+    "human_exception": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "runtime": {
+    "frontend_shared_provider": "src/cerebroSharedState.tsx",
+    "no_per_profile_connection": true,
+    "no_per_profile_worker": true,
+    "shared_runtime": true,
+    "no_new_subscriptions": true,
+    "prod_promotion": false,
+    "draft_pr": 79,
+    "prod_baseline_deployment": "dpl_HfPBticPdGX2fjhyqvvQrbYT8E4e",
+    "earlier_restore_deployment": "dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h",
+    "stage_sample_deployment": "dpl_Hw6YreN9cs84VXEHx3o3pMrFFJcT"
+  },
+  "test_sources": [
+    "cerebro/universal/v0/cerebro-shared-state-core.test.mjs",
+    "cerebro/universal/v0/cerebro-shared-state-api.test.mjs",
+    ".github/workflows/cerebro-shared-state-all-interfaces-qa.yml",
+    ".github/workflows/cerebro-shared-state-stage-no-domain.yml"
+  ],
+  "rollout_rule": "No PROD alias changes until exact-SHA live owner 200, security negatives, OLD vs NEW, CRM smoke, backup and rollback GREEN.",
+  "documentation": "cerebro/universal/v0/CEREBRO_SHARED_STATE_ALL_INTERFACES_V0_20261118.md",
+  "created_at": "2026-11-18"
+}

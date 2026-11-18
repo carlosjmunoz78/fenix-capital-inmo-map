@@ -76,9 +76,21 @@ jobs:
           status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' -X POST)"
           test "$status" = 405 || { echo "BLOCKED_POST_HTTP_$status"; exit 7; }
           echo 'PASS_ALL_WRITES_DENIED'
+      - name: Obtain ephemeral technical JWT for the following step
+        shell: bash
+        run: |
+          set -euo pipefail
           test -n "$CEREBRO_E2E_TEST_PASSWORD" || { echo 'BLOCKED_TECHNICAL_IDENTITY_MISSING'; exit 8; }
           node cerebro/universal/v0/e2e-ephemeral-token.mjs
-          test -n "${CEREBRO_E2E_RUNTIME_JWT:-}"
+      - name: Verify technical identity is not an owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "${CEREBRO_E2E_RUNTIME_JWT:-}" || { echo 'BLOCKED_EPHEMERAL_TOKEN_NOT_PROPAGATED'; exit 8; }
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          api="$STAGED_URL/api/cerebro-shared-state"
           status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' -H "authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY")"
           test "$status" = 403 || { echo "BLOCKED_NON_OWNER_HTTP_$status"; exit 9; }
           echo 'PASS_TECHNICAL_USER_DENIED'
