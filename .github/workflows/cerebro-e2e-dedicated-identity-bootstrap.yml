@@ -1,0 +1,40 @@
+name: CEREBRO · Dedicated E2E identity bootstrap (NO OWNER PRIVILEGE)
+on:
+  push:
+    branches: [cerebro/operativa-runtime-p0-handoff-20261118]
+    paths:
+      - cerebro/universal/v0/e2e-ephemeral-token.mjs
+      - cerebro/universal/v0/e2e-ephemeral-token.test.mjs
+      - .github/workflows/cerebro-e2e-dedicated-identity-bootstrap.yml
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  auth-contract-and-negative-scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
+      PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - run: node --test cerebro/universal/v0/e2e-ephemeral-token.test.mjs
+      - name: Validate dedicated account only when provisioned; no owner privilege
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          if [ -z "$CEREBRO_E2E_TEST_PASSWORD" ]; then
+            echo 'HUMAN_REQUIRED_DEDICATED_ACCOUNT_AND_GITHUB_SECRET_NOT_YET_CONFIGURED' >> "$GITHUB_STEP_SUMMARY"
+            echo 'GATE_STATUS=PREPARADO_NOT_ACTIVE'
+            exit 0
+          fi
+          node cerebro/universal/v0/e2e-ephemeral-token.mjs
+          echo 'PASS_LOGIN_WITH_DEDICATED_SUPABASE_ACCOUNT_NOT_OWNER'
+      - name: Do not confuse QA authentication with owner E2E authorization
+        shell: bash
+        run: |
+          echo 'OWNER_PROD_GATE=NOT_REPLACED'
+          echo 'APP_CRM_AUTH=UNCHANGED'
