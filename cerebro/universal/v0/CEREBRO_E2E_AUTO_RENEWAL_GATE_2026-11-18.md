@@ -23,3 +23,6 @@
 **Alternativa inmediata actual:** la App sí renueva la sesión del usuario en navegador, pero CI sigue usando `CEREBRO_E2E_USER_JWT` que caducará. No afirmar renovación autónoma ya en funcionamiento.
 
 Coste adicional de subscripciones: 0 €. No hay cambios en PROD ni en Supabase Auth.
+
+## Progreso posterior: cuenta E2E dedicada
+Código simplificado a un secreto, tras aprobación del correo. Ver [bootstrapping de cuenta técnica](CEREBRO_E2E_DEDICATED_ACCOUNT_BOOTSTRAP_2026-11-18.md). **No activado:** cuenta aún no creada en Auth, primer login real no probado, CEREBRO_E2E_USER_JWT fijo sigue usado por CI. No cambiar tiempos de sesión globales.
