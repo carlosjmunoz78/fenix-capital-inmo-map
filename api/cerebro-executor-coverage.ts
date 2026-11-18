@@ -218,6 +218,34 @@ async function readCertification(auth:string,ownerKey:string,labKey:string):Prom
   global_autonomy_certified:false,global_excellence_certified:false,cost_measured:false};
 }
 
+type DurableSupervisor={status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+ receipt_id:string|null;health:'EVIDENCE_OK_NOT_CERTIFIED'|'GATE_HOLD'|null;
+ signed:boolean;recent:boolean;observed_at:string|null;history_count:number|null;
+ gate_count:number|null;cron_job_id:77|null;global_autonomy_certified:false};
+const DURABLE_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-cert-supervisor-history-lab-v1?company_id=fenix&environment=LAB';
+async function readDurableSupervisor(auth:string,ownerKey:string,labKey:string):Promise<DurableSupervisor>{
+ const response=await fetch(DURABLE_URL,{method:'GET',cache:'no-store',redirect:'error',
+  headers:{authorization:auth,apikey:labKey,'x-cerebro-owner-prod-apikey':ownerKey,accept:'application/json'},
+  signal:AbortSignal.timeout(7500)});
+ if(response.status!==200)throw Error('SUPERVISOR_HISTORY_DENIED');
+ const raw=await response.text();if(raw.length>12000)throw Error('SUPERVISOR_HISTORY_TOO_LARGE');
+ const d=JSON.parse(raw);
+ if(d.status!=='OK'||d.source!=='CEREBRO_CERT_SUPERVISOR_DURABLE_LAB_V1'||
+  d.company_id!=='fenix'||d.environment!=='LAB'||d.read_only!==true||
+  d.executed!==false||d.signed!==true||
+  d.global_autonomy_certified!==false||d.excellence_certified!==false||
+  d.prod_execution_enabled!==false||d.cost_measured!==false||
+  d.actual_engine_promotion!==false||d.cron_job_id!==77||
+  d.gate_count!==5||!Number.isSafeInteger(d.history_count)||d.history_count<1||
+  !['EVIDENCE_OK_NOT_CERTIFIED','GATE_HOLD'].includes(d.health)||
+  typeof d.recent!=='boolean'||!Number.isFinite(Date.parse(d.observed_at))||
+  typeof d.receipt_id!=='string'||!/^[a-f0-9-]{36}$/.test(d.receipt_id))
+   throw Error('SUPERVISOR_HISTORY_INVALID');
+ return {status:'LIVE',receipt_id:d.receipt_id,health:d.health,
+  signed:true,recent:d.recent,observed_at:d.observed_at,history_count:d.history_count,
+  gate_count:5,cron_job_id:77,global_autonomy_certified:false};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -249,7 +277,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github,qa,truth,cert]=await Promise.all([
+ const [cf,lab,github,qa,truth,cert,durable]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -280,6 +308,16 @@ export default async function handler(req:Req,res:Res){
    try{return await readCertification(auth,apikey,labKey)}catch{
     return{status:'UNAVAILABLE',evidence_categories:[],
      global_autonomy_certified:false,global_excellence_certified:false,cost_measured:false};
+   }
+  })(),
+  (async():Promise<DurableSupervisor>=>{
+   if(labKey.length<12)return{status:'NOT_CONFIGURED',receipt_id:null,
+    health:null,signed:false,recent:false,observed_at:null,history_count:null,gate_count:null,
+    cron_job_id:null,global_autonomy_certified:false};
+   try{return await readDurableSupervisor(auth,apikey,labKey)}catch{
+    return{status:'UNAVAILABLE',receipt_id:null,
+     health:null,signed:false,recent:false,observed_at:null,history_count:null,gate_count:null,
+     cron_job_id:null,global_autonomy_certified:false};
    }
   })()
  ]);
@@ -318,6 +356,7 @@ export default async function handler(req:Req,res:Res){
   verified_profiles:verifiedProfiles,
   engine_truth:truth,
   certification_gates:cert,
+  durable_supervisor:durable,
   lab_qa:{
    source:'SUPABASE_PGCRON_QA_LAB_V1',
    status:qa.status,
@@ -344,7 +383,8 @@ export default async function handler(req:Req,res:Res){
     ...statuses.filter(v=>v.status==='UNAVAILABLE').map(v=>v.source),
     ...(qa.status==='UNAVAILABLE'?['SUPABASE_SQL_QA']:[]),
     ...(truth.status==='UNAVAILABLE'?['SUPABASE_ENGINE_TRUTH']:[]),
-    ...(cert.status==='UNAVAILABLE'?['SUPABASE_CERTIFICATION_GATES']:[])
+    ...(cert.status==='UNAVAILABLE'?['SUPABASE_CERTIFICATION_GATES']:[]),
+    ...(durable.status==='UNAVAILABLE'?['SUPABASE_CERT_SUPERVISOR_HISTORY']:[])
    ],
    last_observed_at:stamp
   },
