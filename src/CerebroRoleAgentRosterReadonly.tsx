@@ -92,6 +92,22 @@ export default function CerebroRoleAgentRosterReadonly(){
     )}</ul>
    </section>:
    <p className="op3-source-note">Auditoría de actividad real por motor: lectura no disponible ahora; no equivale a motores operativos.</p>}
+  {coverage.kind==='ready'&&coverage.data?.creative_hold_gates.status==='LIVE'?
+   <section className="op3-source-note" aria-label="Bloqueos reales de la productora">
+    <strong>FACT-001 y UMS-001 · Bloqueos físicos de producción (LAB)</strong>
+    <p>Se han leído los motivos originales sin modificar las colas ni ejecutar trabajo retenido.</p>
+    <ul>{coverage.data.creative_hold_gates.engines.map(e=>
+     <li key={e.engine_id}>
+      <b>{e.engine_id}</b>: {e.historical_jobs} trabajos históricos,
+      <b> {e.jobs_on_hold} retenidos</b>, {e.historical_succeeded} finalizados;
+      {e.blockers.filter(x=>x.state==='HOLD').map(x=>
+       <span key={x.reason_code}> <code>{x.reason_code}</code> ({x.count}).</span>)}
+      <b> No reactivar sin superar el gate correspondiente.</b>
+     </li>
+    )}</ul>
+    <p>Rechazo del propietario respetado; generación de pago deshabilitada; certificación autónoma: <b>NO</b>.</p>
+   </section>:
+   <p className="op3-source-note">Bloqueos de FACT/UMS: sin lectura verificable; no reactivar trabajos.</p>}
   {coverage.kind==='ready'&&coverage.data?.console_job.status==='LIVE'?
    <section className="op3-source-note" aria-label="Trabajo real de lectura pública de CONSOLE-001">
     <strong>CONSOLE-001 · CAPACIDAD DE REPOSITORIO EJECUTADA EN LAB</strong>
