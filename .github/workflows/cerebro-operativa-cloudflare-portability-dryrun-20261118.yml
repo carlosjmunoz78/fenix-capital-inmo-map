@@ -38,6 +38,32 @@ jobs:
           npm run build
       - name: Real source catalog smoke without network or credentials
         run: node --experimental-strip-types cerebro/universal/cloudflare-portability-lab/smoke.mjs
+      - name: Real workerd localhost SPA and denied API HTTP smoke (no remote deployment)
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.164.0 dev --local --ip 127.0.0.1 --port 8788 --config cerebro/universal/cloudflare-portability-lab/wrangler.jsonc > "$RUNNER_TEMP/cerebro-workerd-local.log" 2>&1 &
+          local_pid=$!
+          trap 'kill "$local_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for n in $(seq 1 30); do
+            if curl -fsS --max-time 3 http://127.0.0.1:8788/inicio -o "$RUNNER_TEMP/cerebro-local-index.html" 2>/dev/null; then ready=1; break; fi
+            if ! kill -0 "$local_pid" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then tail -60 "$RUNNER_TEMP/cerebro-workerd-local.log"; echo 'WORKERD_LOCAL_SPA_UNAVAILABLE'; exit 2; fi
+          grep -qi '<html' "$RUNNER_TEMP/cerebro-local-index.html"
+          status=$(curl --silent --show-error --max-time 10 --output "$RUNNER_TEMP/cerebro-api-denied.json" --write-out '%{http_code}' 'http://127.0.0.1:8788/api/cerebro-agent-directory?company_id=fenix')
+          test "$status" = 503
+          grep -Fq 'CLOUDFLARE_PORTABILITY_LAB_API_DISABLED' "$RUNNER_TEMP/cerebro-api-denied.json"
+          status=$(curl --silent --show-error --max-time 10 --output /dev/null --write-out '%{http_code}' -H 'Authorization: Bearer SYNTHETIC_NO_LIVE_CREDENTIAL' 'http://127.0.0.1:8788/api/cerebro-agent-directory?company_id=fenix')
+          test "$status" = 503
+          status=$(curl --silent --show-error --max-time 10 --output /dev/null --write-out '%{http_code}' -X POST 'http://127.0.0.1:8788/api/cerebro-agent-directory')
+          test "$status" = 405
+          status=$(curl --silent --show-error --max-time 10 --output /dev/null --write-out '%{http_code}' 'http://127.0.0.1:8788/api/cerebro-preview-owner')
+          test "$status" = 503
+          echo 'WORKERD_LOCAL_RUNTIME_SPA_AND_FAIL_CLOSED_API=PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'LOCAL_ONLY_127.0.0.1_NO_REMOTE_DEPLOYMENT' >> "$GITHUB_STEP_SUMMARY"
       - name: Cloudflare bundling via Wrangler dry run only
         shell: bash
         run: |
