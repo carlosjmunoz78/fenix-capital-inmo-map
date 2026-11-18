@@ -83,3 +83,31 @@ test('cross-company receipts, engine mismatch and template IDs cannot claim exec
  ]});
  assert.equal(result.runtime_verified_profiles,0);
 });
+
+test('a verified recent terminal receipt revokes ACTIVE for that same completed job',()=>{
+ const result=project({receipts:[
+  receipt({receipt_id:'start-1',event:'STARTED',emitted_at:'2026-11-18T17:59:05.000Z'}),
+  receipt({receipt_id:'heartbeat-1',event:'HEARTBEAT',emitted_at:'2026-11-18T17:59:20.000Z'}),
+  receipt({receipt_id:'finish-1',event:'SUCCEEDED',emitted_at:'2026-11-18T17:59:50.000Z'})
+ ]});
+ assert.equal(result.runtime_verified_profiles,2);
+ assert.equal(result.active_recent_profiles,0);
+ assert.equal(result.profiles.find(p=>p.id===pair.agent.id).last_event,'SUCCEEDED');
+});
+test('a different live job can keep its profile active after another job terminated',()=>{
+ const result=project({receipts:[
+  receipt({receipt_id:'start-job-1',job_id:'job-one',event:'STARTED',emitted_at:'2026-11-18T17:59:00.000Z'}),
+  receipt({receipt_id:'done-job-1',job_id:'job-one',event:'SUCCEEDED',emitted_at:'2026-11-18T17:59:20.000Z'}),
+  receipt({receipt_id:'beat-job-2',job_id:'job-two',event:'HEARTBEAT',emitted_at:'2026-11-18T17:59:30.000Z'})
+ ]});
+ assert.equal(result.runtime_verified_profiles,2);
+ assert.equal(result.active_recent_profiles,2);
+});
+test('out-of-order older heartbeat cannot reactivate a completed job',()=>{
+ const result=project({receipts:[
+  receipt({receipt_id:'terminal-first',job_id:'job-same',event:'FAILED',emitted_at:'2026-11-18T17:59:50.000Z'}),
+  receipt({receipt_id:'older-beat',job_id:'job-same',event:'HEARTBEAT',emitted_at:'2026-11-18T17:59:30.000Z'})
+ ]});
+ assert.equal(result.active_recent_profiles,0);
+ assert.equal(result.profiles.find(p=>p.id===pair.agent.id).last_event,'FAILED');
+});
