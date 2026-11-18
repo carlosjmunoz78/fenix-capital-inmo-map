@@ -7,6 +7,12 @@ export type ExecutorCoverage={
  runtime_verified_profiles:number;active_recent_profiles:number;unverified_profiles:number;
  active_executor_count:null;receipt_source_status:'NOT_CONNECTED'|'GITHUB_VERIFIED_QA_JOB'|'SUPABASE_SIGNED_SQL_QA';warning:string;
  verified_profiles:Array<{id:string;engine_id:string;state:'EXECUTION_EVIDENCED_NOT_AUTONOMOUS';proof_id:string;proof_url:string|null;observed_at:string|null;quality:'CI_TESTS_PASS_NO_TRIBUNAL'|'QA_METADATA_PROBES_PASSED_NO_TRIBUNAL'|'QA_METADATA_PROBES_FAILED_NO_TRIBUNAL';tribunal_passed:false;proof_source:'GITHUB_ACTIONS'|'SUPABASE_PGCRON'}>;
+ engine_truth:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';historical_job_rows:number|null;
+  all_engines_certified:false;autonomy_global_certified:false;
+  sources:Array<{source:'JARVIS'|'BROWSER'|'CREATIVE';engine_id:string;environment:string;
+   historical_jobs:number;explicit_role_rows:number;recent_metadata_rows:number;
+   last_job_metadata_at:string|null;diagnosis:'NO_RECENT_METADATA'|'RECENT_BUT_ROLE_ID_UNATTRIBUTED'|'RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS';
+   role_activation_verified:false;engine_certified_autonomous:false}>};
  lab_qa:{source:'SUPABASE_PGCRON_QA_LAB_V1';status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';signature_verified:boolean;execution_status:'SUCCEEDED'|'FAILED'|null;tests_passed:number|null;tests_total:number|null;runs_count:number|null;observed_at:string|null;recent:boolean;first_party_scheduled:true;extra_subscriptions_required:false;operational_autonomy_certified:false;excellence_certified:false};
  supervisor:{provider_health:'LIVE'|'PARTIAL';github_qa_attestation:'VERIFIED'|'NOT_VERIFIED'|'UNAVAILABLE';agent_quality:'NOT_ATTESTED_GLOBAL';excellence_verified:0;qa_metadata_check:'PASS'|'HOLD_OR_FAIL';qa_execution_attributed:boolean;qa_signature_verified:boolean;source_failure_observations:string[];last_observed_at:string};
 };
@@ -49,6 +55,14 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
     !(p.proof_source==='GITHUB_ACTIONS'&&typeof p.proof_url==='string'&&p.proof_url.startsWith('https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/')||
       p.proof_source==='SUPABASE_PGCRON'&&p.proof_url===null&&/^[a-f0-9-]{36}$/.test(p.proof_id)))||
    (data.runtime_verified_profiles===1&&!['GITHUB_VERIFIED_QA_JOB','SUPABASE_SIGNED_SQL_QA'].includes(data.receipt_source_status))||
+   !data.engine_truth||!['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.engine_truth.status)||
+   data.engine_truth.all_engines_certified!==false||data.engine_truth.autonomy_global_certified!==false||
+   !Array.isArray(data.engine_truth.sources)||data.engine_truth.sources.length>15||
+   (data.engine_truth.status==='LIVE'&&(!Number.isSafeInteger(data.engine_truth.historical_job_rows)||Number(data.engine_truth.historical_job_rows)<0))||
+   data.engine_truth.sources.some(x=>!['JARVIS','BROWSER','CREATIVE'].includes(x.source)||
+    !['NO_RECENT_METADATA','RECENT_BUT_ROLE_ID_UNATTRIBUTED','RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS'].includes(x.diagnosis)||
+    x.engine_certified_autonomous!==false||x.role_activation_verified!==false||
+    !Number.isSafeInteger(x.historical_jobs)||!Number.isSafeInteger(x.explicit_role_rows)||!Number.isSafeInteger(x.recent_metadata_rows))||
    !data.lab_qa||data.lab_qa.source!=='SUPABASE_PGCRON_QA_LAB_V1'||
    !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.lab_qa.status)||
    data.lab_qa.operational_autonomy_certified!==false||data.lab_qa.excellence_certified!==false||
