@@ -77,3 +77,11 @@ No se han creado nuevas cuotas, Workers, D1 ni funciones Edge. Ninguna ejecució
 **Salud Supabase v8:** consulta posterior a logs por GET v8: 108 respuestas 200, 24 respuestas 403 (autoridad denegada/no atribuidas aún), 2 respuestas 401 y **0 respuestas 503** en la ventana disponible hasta 09:51:56Z. No interpretar los 403 sin inspeccionar actor; no equivalen a fallos de disponibilidad.
 
 **NO-GO aún:** faltan prueba duradera de la sesión en preview, dos interfaces autorizadas consultando el mismo backend con fechas comparables, E2E automático corregido y rollback funcional. No promover PR #78 ni cambiar dominio.
+
+## 18/11/2026 · Segunda comprobación real Opera, 10:57 Madrid
+
+**PASÓ E2E CROSS-INTERFACE (lectura visual real):** en la misma sesión del mismo preview `dpl_HosSkpwg9czo4jQ5QEB6suSmNB5Q`, pestaña OPERATIVA `/cerebro?section=operativa&visual_lab=cockpit-v3` devolvió directorio de 2506 perfiles y fuente `CEREBRO_CONSOLE_ACTIVITY_V0`, `observed_at=2026-11-18T09:41:04.395Z`, cero instancias por perfil de identidad exacta. Pestaña NEURONAL `/cerebro?section=neuronal` se mostró **autenticada**, etiqueta `CACHED`, observación `10:41` Madrid y runs auténticos de GitHub `44278180313` y `44277776584`; ambos reportan la misma fuente de datos de actividad. La observación es un snapshot, no confirma SLA futura. También se observó `/inicio` con sesión activa en el preview. Esto resuelve el anterior bloqueo de comprobar físicamente dos interfaces autorizadas.
+
+**Sigue BLOQUEADO:** GitHub CI `CEREBRO_E2E_USER_JWT` no es válido; acciones `44278139673` HTTP 401 contra Supabase; la autorización del navegador no repara por sí sola un secreto cifrado persistente. No se han expuesto tokens ni ampliado permisos. Resto de workflow QA específicos 27 éxitos, 1 skip, 1 E2E failure (última consulta PR #78). No promover sin resolver la identidad CI y prueba de rollback.
+
+**Supabase Activity V8:** 126 GET 200, 80 GET 403, 2 GET 401, cero 503 en ventana de observación hasta 09:59:36Z. El 403 indica autorización denegada, no disponibilidad 503. Rollback y App originales intactos.
