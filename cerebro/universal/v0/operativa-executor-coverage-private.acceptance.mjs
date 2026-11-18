@@ -73,6 +73,15 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
     read_only:true,request_executed_job:false
    })
   };
+  if(String(url).includes('cerebro-cert-supervisor-history-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
+   status:'OK',source:'CEREBRO_CERT_SUPERVISOR_DURABLE_LAB_V1',read_only:true,
+   executed:false,company_id:'fenix',environment:'LAB',receipt_id:'aaaaaaa1-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+   observed_at:new Date().toISOString(),health:'EVIDENCE_OK_NOT_CERTIFIED',
+   signed:true,history_count:2,recent:true,gate_count:5,
+   global_autonomy_certified:false,excellence_certified:false,
+   cost_measured:false,prod_execution_enabled:false,
+   actual_engine_promotion:false,cron_job_id:77
+  })};
   if(String(url).includes('cerebro-certification-gates-lab-v1'))return{status:200,ok:true,text:async()=>JSON.stringify({
    status:'OK',source:'CEREBRO_LAB_CERTIFICATION_GATES_V1',read_only:true,executed:false,
    company_id:'fenix',environment:'LAB',prod_execution_enabled:false,
@@ -151,7 +160,11 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.certification_gates.global_autonomy_certified,false);
   assert.equal(x.body.certification_gates.evidence_categories.find(v=>v.id==='SOCIAL_LAB_SCHEDULES').active_schedules,17);
   assert.equal(x.body.certification_gates.evidence_categories.find(v=>v.id==='UMS-001').full_engine_certified,false);
-  assert.equal(urls.length,8);
+  assert.equal(x.body.durable_supervisor.status,'LIVE');
+  assert.equal(x.body.durable_supervisor.signed,true);
+  assert.equal(x.body.durable_supervisor.cron_job_id,77);
+  assert.equal(x.body.durable_supervisor.global_autonomy_certified,false);
+  assert.equal(urls.length,9);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
