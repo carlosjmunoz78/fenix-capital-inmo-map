@@ -54,3 +54,12 @@ No se han creado nuevas cuotas, Workers, D1 ni funciones Edge. Ninguna ejecució
 **PROD alias intacto**: comprobación Vercel `get_alias(app.fenixcapital.es)` → `dpl_CQuh9UYH68JYHkTcaGcvXEq7fz5h` SHA `7163dccd962a19fbd5301b14fcacacf08b7245ea`, no preview `dpl_HosSkpwg9czo4jQ5QEB6suSmNB5Q`.
 
 **NEXT BLOCK:** prueba owner positiva sobre el preview protegido, smoke de dos interfaces sobre mismo origen, recuperación probada y promoción exacta del candidato únicamente si pasan gates. Sin privilegios nuevos, sin solicitudes repetidas.
+
+## Gate de autenticación propietario · bloqueado con prueba física
+
+- CI protegido en rama candidata `cerebro/operativa-runtime-p0-fix-20261118`; `CEREBRO_E2E_USER_JWT` existe como referencia de secreto en Actions, pero su valor **no logra autenticar** en Supabase.
+- Workflow `44278050023`: petición GET propietario a preview devuelve `HTTP 401`.
+- Segundo y último diagnóstico, distinto enfoque, workflow `44278139673`: petición de solo lectura al servicio Supabase `cerebro-console-activity-v0` con **el mismo JWT propietario de Actions** devuelve también `HTTP 401`. Queda distinguido de un posible bloqueo exclusivo Vercel. No se consultaron ni registraron valores del secreto.
+- Conclusión: `OWNER_CI_JWT_INVALID_OR_EXPIRED` / `OWNER_E2E_POSITIVE=BLOCKED`. Renovación legítima del secreto E2E usando una sesión real autorizada; NO aflojar Auth, RBAC, RLS, SSO, CORS ni enmascarar fallos con mocks.
+- **HUMAN_REQUIRED · LOW_CONFIDENCE** exclusivamente para obtener un JWT de prueba propietario válido o completar el login protegido y certificar el E2E. No exigir otros permisos ya concedidos. Tras ello repetir E2E, rollback y comparación antes de promoción.
+- PR #78 comentario de bloqueo: `https://github.com/carlosjmunoz78/fenix-capital-inmo-map/pull/78#issuecomment-6974750925`.
