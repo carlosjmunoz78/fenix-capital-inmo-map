@@ -1,28 +1,30 @@
-# CEREBRO OPERATIVA · P0 puntos 1 y 2 · continuidad exacta · 18/11/2026
+# CEREBRO OPERATIVA · P0 Puntos 1 y 2 · Continuidad técnica 18/11/2026
 
-## Estado
-- **HECHO LAB / PR #81 DRAFT:** proyección de evidencias por ID del registro de 2.506 perfiles, sin asignación manual.
-- **HECHO LAB:** lector owner-only para inventario de Cloudflare Workers y Supabase Edge Functions; se consulta desde pantalla existente con intervalo 30 s, solo host privado y sin mutaciones.
-- **HECHO CI:** workflow `CEREBRO Operativa verified evidence bridge LAB` y `CEREBRO Governed Main Integration V0` con SUCCESS en HEAD de implementación. Compilación TypeScript/Vite y pruebas de identidad/caducidad/duplicación/tenant.
-- **HECHO verificación externa solo lectura:** 45 Workers listados por Cloudflare; 120 Edge Functions listadas por Supabase PROD. **No son 165 agentes ni 165 motores activos.**
-- **PARCIAL:** ni la cobertura de todos los ejecutores ni los recibos individuales están conectados a PROD. No se marca ningún perfil activo a partir de inventario o de jobs sin identidad.
-- **PROD sin cambios:** App, CRM, WordPress, Supabase, DNS, Worker, dominios, permisos, cuotas y secretos.
+## BASELINE - NO REINICIAR
+- Interfaz real publicada; inventario de 2.506 entradas, de las que 2.477 son roles acreditables y 29 son plantillas sin instancia.
+- 179 motores y 82 departamentos documentados. Producción muestra por separado inventario de Cloudflare y Supabase.
+- PR #75, #76 y #77 intactas. Esta intervención vive en PR #81 DRAFT, basada sobre #75.
 
-## Barrera técnica única para completar integración
-La lectura del proyecto Vercel aislado `prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc` muestra cuatro variables Preview actuales: `CEREBRO_PREPROD_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_FENIX_ENV`. No están configuradas allí `CEREBRO_CF_READ_TOKEN_PREVIEW` ni `CEREBRO_SUPABASE_MGMT_READ_TOKEN_PREVIEW`. La API responde explícitamente `NOT_CONFIGURED` por proveedor hasta tener credenciales **de solo lectura** custodias, sin intentar usar credenciales personales ni promover a PROD.
+## HECHO EN LAB, VERIFICADO
+1. Evidencia por ID del agente/subagente: agent-evidence-bridge-v1.mjs y agent-receipt-attestor-v1.mjs. HMAC-SHA256, prueba de fuente/empresa/jerarquía/caducidad, sin acreditar inventarios como trabajo real.
+2. Cloudflare: token limitado a Workers Metadata Read-Only, único account e39a57e1ac42650ca5a6d5307cf0ac8e, ID no secreto 86270861da2b8d0945f1af52ccdf33b9, activo hasta 2027-02-18. Se guardó cifrado como CEREBRO_CF_READ_TOKEN_PREVIEW en Vercel LAB exclusivamente Preview. No mostrar valor del token.
+3. Supabase: reutilizada la Edge Function existente cerebro-operativa-job-telemetry-lab-v0 y la clave publishable LAB ya vinculada; muestra resúmenes históricos de JARVIS, BROWSER y CREATIVE, no trabajadores activos. Eliminada necesidad de PAT administrativa.
+4. GET propietario y solo lectura api/cerebro-executor-coverage.ts, con control CARLOS-ADMIN, validación empresa, host privado, origin y scopes. UI lee cobertura cada 30 segundos y diferencia Workers inventariados de registros históricos de jobs.
+5. CI GREEN sobre código SHA 88cad06ba650609013f4b2825ca1366f9a0f1b3e: workflow CEREBRO Operativa verified evidence bridge LAB y Governed Main Integration V0. Regresiones HMAC y npm run build.
+6. Vercel PREVIEW privado READY: dpl_GFZuPsjg5PmdveW2qfyRh6sGLBtp, https://fenix-capital-preprod-oc51s798v.vercel.app, target null, sin alias PROD.
+7. E2E físico en Opera sin token: endpoint privado devuelve OWNER_SESSION_REQUIRED con executed false y no devuelve 500. Fallo previo de importación ESM localizado y corregido.
+8. SQL real de Supabase LAB: 0 de 6 trabajos JARVIS y 0 de 201 trabajos Browser poseen agent_role_id/subagent_role_id en los campos inspeccionados. No se ha realizado ninguna escritura.
 
-En Supabase LAB, las tablas de jobs JARVIS y Browser conservan `engine_id`, `worker_id/leased_by`, estado y heartbeat, **pero no asignan de modo universal un `agent_role_id` ni `subagent_role_id` del directorio**. No deducir identidades a partir del nombre del Worker, `engine_id` ni actor genérico CEREBRO.
+## QUEDA ABIERTO, NO DECLARAR CERRADO
+- P0-1: Candidato LAB conectado a Cloudflare y telemetría Supabase mediante credenciales de lectura. Falta E2E positivo con sesión CARLOS-ADMIN dentro de PREVIEW para confirmar fuente LIVE en Vercel. El inventario de infraestructura NO significa ejecución de motores.
+- P0-2: Receptor/proyector de recibos firmados probado, pero no se ha instrumentado ningún emisor real. No existen identidades por trabajo en los 207 jobs inspeccionados: **0 roles acreditados de 2.477; 29 plantillas excluidas**.
+- PROD_PROMOTION=HOLD. App/CRM/WordPress/Supabase PROD/Cloudflare Workers/DNS/main sin modificaciones.
+- Coste: ninguna suscripción nueva, coste marginal de builds/runtime no acreditado como cero.
 
-## Próximo bloque único
-1. Reutilizar o emitir credenciales restringidas de lectura para ambos proveedores en el **proyecto Vercel LAB aislado**; sin mostrar su valor ni contratar servicios. Comprobar que los dos estados pasan a LIVE mediante owner real; si un proveedor carece de API apropiada, declararlo PARTIAL.
-2. Añadir un único hook de recibo por **runtime compartido** (no 2.477 integraciones): `company_id, engine_id, environment, version, executor_id, job_id, receipt_id, agent_role_id, subagent_role_id?, event, emitted_at`. La prueba de integridad/firma y vínculo con el servicio emisor debe verificarse en backend ANTES de proyectar el recibo. Un rol solo queda activo con STARTED/HEARTBEAT reciente y recibo auténtico; SUCCEEDED/FAILED acredita histórico, no ejecución presente.
-3. Pasar E2E real y OLD vs NEW aislado + rollback físico y coste medido; conectar el contrato de lectura al Gateway común JARVIS/OPERATIVA/NEURONAL. No cambiar `app.fenixcapital.es` antes del gate.
+## NEXT_BLOCK UNICO
+1. En el Preview privado exacto, iniciar sesión de propietario y comprobar Cloudflare LIVE y Supabase LAB LIVE, OLD vs NEW de la pantalla, rollback de un despliegue privado y coste observado. No compartir tokens en el chat.
+2. Añadir un solo hook compartido en los ejecutores reales, no 2.477 conexiones. Cada recibo necesita company_id, engine_id, environment, version, executor_id, job_id, receipt_id, agent_role_id, subagent_role_id opcional, event, emitted_at y firma verificable en servidor.
+3. Una ejecución física firmada debe acreditar el agente ID correcto, su subagente si procede y pasar a ACTIVE_RECENT solo con evento auténtico de los últimos 120 segundos. No extrapolar al resto de perfiles.
+4. Reutilizar el contrato común en JARVIS, OPERATIVA y NEURONAL solo después de verificaciones de seguridad, integridad, dependencias y rollback.
 
-## Siguiente estado permitido
-- Fuente instalada/Worker desplegado: `INVENTORY_LIVE`, **no** `AGENT_ACTIVE`.
-- Recibo íntegro de ID existente: `EXECUTION_EVIDENCED`.
-- STARTED/HEARTBEAT auténtico reciente (<120 s): `ACTIVE_RECENT`.
-- Sin recibo: `NOT_VERIFIED`; jamás `INACTIVE` por ausencia de evidencia.
-- `HUMAN_REQUIRED` solo para excepciones previstas; de lo contrario seguir LAB autónomo.
-
-Regla invariable: conservar los 2.506 registros, preservar los 179 motores/82 departamentos del snapshot actual sin inventar instancias ni modificar App/CRM.
+Regla: CONSERVAR - ENTENDER - ENVOLVER - PROBAR - MEJORAR - MIGRAR.
