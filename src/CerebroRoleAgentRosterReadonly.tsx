@@ -92,6 +92,30 @@ export default function CerebroRoleAgentRosterReadonly(){
     )}</ul>
    </section>:
    <p className="op3-source-note">Auditoría de actividad real por motor: lectura no disponible ahora; no equivale a motores operativos.</p>}
+  {coverage.kind==='ready'&&coverage.data?.certification_gates.status==='LIVE'?
+   <section className="op3-source-note" aria-label="Matriz de preparación para certificación por motor">
+    <strong>Preparación para certificación · 5 fuentes examinadas · LAB</strong>
+    <p>Las pruebas individuales no certifican automáticamente el motor completo. Cada motor debe superar permisos,
+     contratos, pruebas funcionales, tribunal, coste, rollback y evidencias de actividad.</p>
+    <ul>{coverage.data.certification_gates.evidence_categories.map(e=>
+     <li key={e.id}>
+      <b>{e.id}</b> · {e.id==='QA-001'?
+       <span>ejecución firmada de QA, {e.tests_passed}/{e.tests_total} pruebas, {e.signed_runs} recibos.</span>:
+       e.id==='FACT-001'?
+       <span>{e.specific_capability_evidenced?'registro de la fábrica comprobado en LAB (histórico)':'atestación del registro sin verificar'}; no demuestra producción autónoma.</span>:
+       e.id==='CONSOLE-001'?
+       <span>{e.historical_rows??0} trabajos antiguos; sin identidad de agente verificable ni ejecución reciente acreditada.</span>:
+       e.id==='UMS-001'?
+       <span>{e.historical_rows??0} trabajo histórico en HOLD; no reactivado.</span>:
+       <span>{e.active_schedules??0} programaciones sociales activas de {e.scheduled_jobs_total??0};
+        {e.active_schedules_succeeded_within_48h??0} con última ejecución correcta observada en una muestra limitada
+        de registros, sin certificar resultados comerciales.</span>}
+      <b> · Certificación autónoma: NO</b>
+     </li>
+    )}</ul>
+    <p>Excelencia global: <b>NO CERTIFICADA</b>. Coste marginal: <b>PENDIENTE DE MEDIR</b>.</p>
+   </section>:
+   <p className="op3-source-note">Matriz de certificación por motor: no disponible. No se mostrarán estados aprobados sin pruebas.</p>}
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
    <div><strong>{count?.registered_logical_subagent_roles??'—'}</strong><small>Especialistas/subagentes lógicos · ejecución no verificada</small></div>
