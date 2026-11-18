@@ -13,6 +13,16 @@ export type ExecutorCoverage={
    historical_jobs:number;explicit_role_rows:number;recent_metadata_rows:number;
    last_job_metadata_at:string|null;diagnosis:'NO_RECENT_METADATA'|'RECENT_BUT_ROLE_ID_UNATTRIBUTED'|'RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS';
    role_activation_verified:false;engine_certified_autonomous:false}>};
+ certification_gates:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  global_autonomy_certified:false;global_excellence_certified:false;cost_measured:false;
+  evidence_categories:Array<{id:'QA-001'|'FACT-001'|'CONSOLE-001'|'UMS-001'|'SOCIAL_LAB_SCHEDULES';
+   kind:string;full_engine_certified:false;business_quality_certified?:false;
+   specific_capability_evidenced?:boolean;receipt_id?:string|null;last_execution_at?:string|null;
+   signed_runs?:number;tests_passed?:number;tests_total?:number;
+   historical_rows?:number;active_schedules?:number;scheduled_jobs_total?:number;
+   active_schedules_succeeded_within_48h?:number;last_schedule_run_at?:string|null;
+   last_schedule_status?:string|null;run_history_sampling?:string;
+   business_outcome_verified?:false;agent_identity_verified?:false}>};
  lab_qa:{source:'SUPABASE_PGCRON_QA_LAB_V1';status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';signature_verified:boolean;execution_status:'SUCCEEDED'|'FAILED'|null;tests_passed:number|null;tests_total:number|null;runs_count:number|null;observed_at:string|null;recent:boolean;first_party_scheduled:true;extra_subscriptions_required:false;operational_autonomy_certified:false;excellence_certified:false};
  supervisor:{provider_health:'LIVE'|'PARTIAL';github_qa_attestation:'VERIFIED'|'NOT_VERIFIED'|'UNAVAILABLE';agent_quality:'NOT_ATTESTED_GLOBAL';excellence_verified:0;qa_metadata_check:'PASS'|'HOLD_OR_FAIL';qa_execution_attributed:boolean;qa_signature_verified:boolean;source_failure_observations:string[];last_observed_at:string};
 };
@@ -63,6 +73,23 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
     !['NO_RECENT_METADATA','RECENT_BUT_ROLE_ID_UNATTRIBUTED','RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS'].includes(x.diagnosis)||
     x.engine_certified_autonomous!==false||x.role_activation_verified!==false||
     !Number.isSafeInteger(x.historical_jobs)||!Number.isSafeInteger(x.explicit_role_rows)||!Number.isSafeInteger(x.recent_metadata_rows))||
+   !data.certification_gates||!['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.certification_gates.status)||
+   data.certification_gates.global_autonomy_certified!==false||
+   data.certification_gates.global_excellence_certified!==false||
+   data.certification_gates.cost_measured!==false||
+   !Array.isArray(data.certification_gates.evidence_categories)||data.certification_gates.evidence_categories.length>5||
+   (data.certification_gates.status==='LIVE'&&(
+      data.certification_gates.evidence_categories.length!==5||
+      new Set(data.certification_gates.evidence_categories.map(x=>x.id)).size!==5||
+      !['QA-001','FACT-001','CONSOLE-001','UMS-001','SOCIAL_LAB_SCHEDULES'].every(
+       id=>data.certification_gates.evidence_categories.some(x=>x.id===id))
+   ))||
+   data.certification_gates.evidence_categories.some(x=>x.full_engine_certified!==false||
+      x.id!=='SOCIAL_LAB_SCHEDULES'&&x.business_quality_certified!==false||
+      x.id==='SOCIAL_LAB_SCHEDULES'&&(
+       x.agent_identity_verified!==false||x.business_outcome_verified!==false||
+       !Number.isSafeInteger(x.active_schedules)||Number(x.active_schedules)<0||
+       !Number.isSafeInteger(x.scheduled_jobs_total)||Number(x.scheduled_jobs_total)<Number(x.active_schedules)))||
    !data.lab_qa||data.lab_qa.source!=='SUPABASE_PGCRON_QA_LAB_V1'||
    !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.lab_qa.status)||
    data.lab_qa.operational_autonomy_certified!==false||data.lab_qa.excellence_certified!==false||
