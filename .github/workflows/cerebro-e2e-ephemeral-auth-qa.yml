@@ -1,0 +1,23 @@
+name: CEREBRO · E2E ephemeral session bootstrap QA (no user secrets)
+on:
+  push:
+    branches: [cerebro/operativa-runtime-p0-handoff-20261118]
+    paths:
+      - cerebro/universal/v0/e2e-ephemeral-token.mjs
+      - cerebro/universal/v0/e2e-ephemeral-token.test.mjs
+      - .github/workflows/cerebro-e2e-ephemeral-auth-qa.yml
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - run: node --test cerebro/universal/v0/e2e-ephemeral-token.test.mjs
+      - run: |
+          test -f cerebro/universal/v0/e2e-ephemeral-token.mjs
+          echo 'EPHEMERAL_TOKEN_CODE_READY; NO_REAL_LOGIN_ATTEMPT; NOT_YET_AUTOMATED'
