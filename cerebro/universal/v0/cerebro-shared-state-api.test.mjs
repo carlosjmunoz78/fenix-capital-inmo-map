@@ -1,7 +1,7 @@
 import test,{after} from 'node:test';
 import assert from 'node:assert/strict';
 import handler,{validateSharedQuery} from '../../../api/cerebro-shared-state.ts';
-const prev=process.env.VERCEL_ENV,oldFetch=globalThis.fetch;
+const prev=process.env.VERCEL_ENV,oldUrl=process.env.VERCEL_URL,oldFetch=globalThis.fetch;
 process.env.VERCEL_ENV='production';
 const auth='Bearer '+'X'.repeat(45);
 const apikey='sb_publishable_contract_test';
@@ -28,6 +28,45 @@ function fake({owner=true,feed='LIVE',running=false,attested=false,failed=false}
  };
  return calls;
 }
+test('isolated CI summary accepts only authenticated technical identity on exact stage',async()=>{
+ const stage='fenix-capital-preprod-test999.vercel.app';
+ process.env.VERCEL_URL=stage;
+ const calls=[];
+ const tech='0c71641f-ae5e-44ab-b380-09aef0b44f7f';
+ globalThis.fetch=async url=>{
+  calls.push(String(url));
+  assert.equal(String(url),'https://cluhljgonannaafpmblx.supabase.co/auth/v1/user');
+  return{status:200,json:async()=>({id:tech,email:'cerebro-e2e@fenixcapital.es',email_confirmed_at:'2026-11-18T12:00:00Z',app_metadata:{provider:'email'}})};
+ };
+ const technical=req(q('mode=ci_summary&company_id=fenix'),'GET',{host:stage});
+ const r=res();await handler(technical,r);
+ assert.equal(r.state.status,200);
+ assert.equal(r.state.payload.overview.total_profiles,2506);
+ assert.equal(r.state.payload.access,'TECHNICAL_CI_READONLY_SUMMARY_ONLY');
+ assert.equal(r.state.payload.overview.states.ACTIVO,0);
+ assert.equal(r.state.payload.overview.states.POR_VERIFICAR,2477);
+ assert.equal(r.state.payload.source_departments.filter(x=>x.family==='SEO_ENTERPRISE'&&x.department_key.startsWith('SEO-D')).length,32);
+ assert.equal(calls.length,1);
+ const production=res();await handler(req(q('mode=ci_summary&company_id=fenix')),production);
+ assert.equal(production.state.status,403);
+ assert.equal(calls.length,1);
+ const unexpected=res();await handler(req(q('mode=ci_summary&company_id=fenix'),'POST',{host:stage}),unexpected);
+ assert.equal(unexpected.state.status,405);
+ const data=res();await handler(req(q('mode=profiles&company_id=fenix&limit=1&kind=ALL&family=ALL'),'GET',{host:stage}),data);
+ assert.equal(data.state.status,403);
+ assert.equal(calls.length,2); // Second request attempts original owner resolver, never grants CI access.
+ delete process.env.VERCEL_URL;
+});
+test('CI summary rejects user with a different UUID or unconfirmed email',async()=>{
+ const stage='fenix-capital-preprod-test999.vercel.app';process.env.VERCEL_URL=stage;
+ for(const user of [{id:'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',email:'cerebro-e2e@fenixcapital.es',email_confirmed_at:'2026-11-18'},
+  {id:'0c71641f-ae5e-44ab-b380-09aef0b44f7f',email:'cerebro-e2e@fenixcapital.es',email_confirmed_at:null}]){
+  globalThis.fetch=async()=>({status:200,json:async()=>user});
+  const r=res();await handler(req(q('mode=ci_summary&company_id=fenix'),'GET',{host:stage}),r);
+  assert.equal(r.state.status,403);
+ }
+ delete process.env.VERCEL_URL;
+});
 test('invalid tenants, unknown fields and duplicate queries are fail-closed',()=>{
  for(const params of ['mode=summary&company_id=aion','mode=summary&company_id=fenix&evil=1',
   'mode=summary&company_id=fenix&company_id=fenix','mode=execute&company_id=fenix',
@@ -117,4 +156,4 @@ test('anonymous, technician, cross-tenant, write and foreign origin denied befor
  assert.equal(calls.filter(x=>x.includes('/session/context')).length,1);
  assert.equal(calls.filter(x=>x.includes('cerebro-console-activity-v0')).length,0);
 });
-after(()=>{globalThis.fetch=oldFetch;if(prev===undefined)delete process.env.VERCEL_ENV;else process.env.VERCEL_ENV=prev});
+after(()=>{globalThis.fetch=oldFetch;if(prev===undefined)delete process.env.VERCEL_ENV;else process.env.VERCEL_ENV=prev;if(oldUrl===undefined)delete process.env.VERCEL_URL;else process.env.VERCEL_URL=oldUrl});

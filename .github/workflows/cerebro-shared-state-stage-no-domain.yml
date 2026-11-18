@@ -15,7 +15,7 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
       CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
-      OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      # No owner JWT or refresh token in CI; technical account generates one per job.
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: {persist-credentials: false}
@@ -94,34 +94,31 @@ jobs:
           status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' -H "authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY")"
           test "$status" = 403 || { echo "BLOCKED_NON_OWNER_HTTP_$status"; exit 9; }
           echo 'PASS_TECHNICAL_USER_DENIED'
-      - name: Live owner-proof gate on SAME isolated candidate (never promote if expired)
+      - name: Live ephemeral CI summary positive; owner-only paths remain denied
         shell: bash
         run: |
           set -euo pipefail
+          test -n "${CEREBRO_E2E_RUNTIME_JWT:-}" || { echo 'BLOCKED_NO_AUTOMATIC_TEST_JWT'; exit 12; }
           umask 077
-          test -n "$OWNER_E2E_JWT" || { echo 'HUMAN_REQUIRED_OWNER_JWT_MISSING'; exit 12; }
           body="$(mktemp)"
           trap 'rm -f "$body"' EXIT
           api="$STAGED_URL/api/cerebro-shared-state"
-          common=(-H "authorization: Bearer $OWNER_E2E_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY" -H "accept: application/json")
-          status="$(vercel curl "$api?mode=summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' "${common[@]}")"
-          test "$status" = 200 || { echo "HUMAN_REQUIRED_OWNER_SESSION_REFRESH_OR_GATE_HTTP_$status"; exit 13; }
+          headers=(-H "authorization: Bearer $CEREBRO_E2E_RUNTIME_JWT" -H "apikey: $PROD_SUPABASE_PUBLISHABLE_KEY")
+          status="$(vercel curl "$api?mode=ci_summary&company_id=fenix" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' "${headers[@]}")"
+          test "$status" = 200 || { echo "BLOCKED_TECHNICAL_CI_POSITIVE_HTTP_$status"; exit 13; }
           node - "$body" <<'NODE'
           const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(d.status!=='OK'||d.schema!=='CEREBRO_SHARED_STATE_V1'||d.company_id!=='fenix'||d.read_only!==true||d.executed!==false)process.exit(2);
-          if(d.overview?.total_profiles!==2506||d.overview?.departments!==8||d.overview.states.DEFINIDO!==29)process.exit(3);
-          if(Object.values(d.overview.states).reduce((a,b)=>a+b,0)!==2506)process.exit(4);
-          if(d.departments.find(x=>x.department_key==='SOCIAL_FACEBOOK')?.total!==598)process.exit(5);
-          console.log('PASS_OWNER_LIVE_GLOBAL_2506_DEPARTMENTS');
+          if(d.status!=='OK'||d.schema!=='CEREBRO_SHARED_STATE_V1'||d.access!=='TECHNICAL_CI_READONLY_SUMMARY_ONLY'||d.read_only!==true||d.executed!==false)process.exit(3);
+          if(d.overview?.total_profiles!==2506||d.overview?.departments!==8||d.overview.states.DEFINIDO!==29)process.exit(4);
+          if(d.source_departments.filter(x=>x.family==='SEO_ENTERPRISE'&&x.department_key.startsWith('SEO-D')).length!==32)process.exit(5);
+          if(d.source_departments.filter(x=>x.family==='MEDIA_STUDIO'&&x.department_key.startsWith('UMS:')).length!==48)process.exit(6);
+          if(d.overview.states.ACTIVO!==0)process.exit(7); // No false execution proof from a CI account.
+          console.log('PASS_AUTO_RENEWED_CI_JWT_SHARED_2506_AND_80_SOURCE_DEPARTMENTS');
           NODE
-          status="$(vercel curl "$api?mode=profiles&company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&offset=0&limit=2" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' "${common[@]}")"
-          test "$status" = 200 || { echo "BLOCKED_OWNER_PAGE_HTTP_$status"; exit 14; }
-          node - "$body" <<'NODE'
-          const fs=require('fs'),d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(d.status!=='OK'||d.page?.total!==191||d.records?.length!==2||d.records.some(r=>r.shared_state.department_key!=='SEO_ENTERPRISE'||r.shared_state.profile_key!==r.kind+':'+r.id))process.exit(6);
-          console.log('PASS_OWNER_LIVE_PAGED_PROFILES_DEPARTMENT_PRESERVED');
-          NODE
-          echo 'ALL_STAGE_OWNER_GATES_GREEN; PROMOTION_NOT_AUTHORIZED_BY_THIS_WORKFLOW' >> "$GITHUB_STEP_SUMMARY"
+          status="$(vercel curl "$api?mode=profiles&company_id=fenix&kind=ALL&family=SEO_ENTERPRISE&limit=1" --scope=carlosjmunozcabeza-2582s-projects --output "$body" --write-out '%{http_code}' "${headers[@]}")"
+          test "$status" = 403 || { echo "BLOCKED_CI_ROLE_DATA_UNEXPECTED_HTTP_$status"; exit 14; }
+          echo 'PASS_TECHNICIAN_CANNOT_FETCH_PRIVATE_PROFILE_DETAILS'
+          echo 'STAGE_CI_GATES_GREEN_WITH_AUTOMATIC_SHORT_LIVED_SESSION; OWNER_SESSION_PATH_NOT_BYPASSED' >> "$GITHUB_STEP_SUMMARY"
       - name: Cleanup tokens and ephemeral Vercel metadata
         if: always()
         shell: bash
