@@ -40,7 +40,7 @@ jobs:
         run: node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs
       - name: Diff + protected App CRM Auth recovery contract
         run: node cerebro/universal/v0/operativa-app-crm-recovery-check.mjs
-      - name: Seal result: source gate only, no production promotion
+      - name: Seal result - source gate only, no production promotion
         run: |
           echo 'SOURCE_RECOVERY_CONTRACT=PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'APP_CRM_RUNTIME_E2E=NOT_TESTED' >> "$GITHUB_STEP_SUMMARY"
