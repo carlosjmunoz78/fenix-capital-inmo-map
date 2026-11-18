@@ -234,7 +234,7 @@ const VALID_STATES=new Set(['in_progress','queued','waiting','requested','pendin
 const FRESH_MS=20*60_000;
 function acceptedFeedRun(x:RuntimeFeedRun){
  return Number.isSafeInteger(x.run_id)&&Number(x.run_id)>0&&
-  x.company_id==='fenix'&&typeof x.engine_id==='string'&&/^[A-Z][A-Z0-9-]{2,25}$/.test(x.engine_id)&&
+  x.company_id==='fenix'&&typeof x.engine_id==='string'&&/^[A-Z0-9][A-Z0-9-]{2,25}$/.test(x.engine_id)&&
   VALID_STATES.has(String(x.status))&&
   String(x.html_url??'').startsWith('https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/')&&
   Number.isFinite(Date.parse(x.updated_at??''));
