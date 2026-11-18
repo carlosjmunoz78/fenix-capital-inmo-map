@@ -15,6 +15,7 @@ export default function CerebroRoleAgentRosterReadonly(){
  const [offset,setOffset]=useState(0);
  const [loading,setLoading]=useState(true);
  const [refresh,setRefresh]=useState(0);
+ useEffect(()=>{const timer=window.setInterval(()=>{if(document.visibilityState==='visible')setRefresh(v=>v+1)},30_000);return()=>window.clearInterval(timer)},[]);
  useEffect(()=>{
   let open=true;const controller=new AbortController();
   setLoading(true);
@@ -95,7 +96,9 @@ export default function CerebroRoleAgentRosterReadonly(){
       <details><summary>Ficha técnica y procedencia</summary>
        <p><b>Función técnica:</b> {item.purpose_technical}</p>
        <p><b>Tipo:</b> {item.kind==='AGENT_ROLE'?'Agente lógico / rol':item.kind==='SUBAGENT_ROLE'?'Especialista/subagente lógico':'Plantilla conceptual de subagente'}</p>
-       <p><b>Estado declarado:</b> {item.state}. <b>Runtime de este perfil:</b> {item.runtime_verified?'ACTIVO VERIFICADO':'POR VERIFICAR'}.</p>
+       <p><b>Estado declarado:</b> {item.state}. <b>Estado de este perfil:</b> {item.shared_state?.status??(item.runtime_verified?'ACTIVO':'POR_VERIFICAR')}.</p>
+       <p><b>Motivo de evaluación:</b> {item.shared_state?.reason??'NO_EXACT_PROFILE_RUNTIME_EVIDENCE'}.</p>
+       {item.shared_state?.evidence?<a href={item.shared_state.evidence} target="_blank" rel="noreferrer">Ver ejecución acreditada</a>:null}
        {item.runtime_observation?<p><b>Motor relacionado observado:</b> {item.runtime_observation.engine_id} · {item.runtime_observation.status}
         · {item.runtime_observation.provider} · {item.runtime_observation.observed_at}
         · <a href={item.runtime_observation.evidence} target="_blank" rel="noreferrer">Evidencia GitHub</a>.
@@ -105,7 +108,7 @@ export default function CerebroRoleAgentRosterReadonly(){
       </details>
      </div>
      <div className="op3-agent-controls">
-      <span className={item.runtime_verified?'is-ok':'is-amber'}>{item.kind==='SUBAGENT_TEMPLATE'?'NO INSTANCIADO':item.runtime_verified?'ACTIVO VERIFICADO':'POR VERIFICAR'}</span>
+      <span className={item.shared_state?.status==='ACTIVO'?'is-ok':'is-amber'} title={item.shared_state?.reason??'Sin prueba individual'}>{item.shared_state?.status??(item.kind==='SUBAGENT_TEMPLATE'?'DEFINIDO':item.runtime_verified?'ACTIVO':'POR_VERIFICAR')}</span>
       {item.engine_ids.length?<details><summary>Motores documentados ({item.engine_ids.length})</summary>
         {item.engine_ids.map(id=><code key={id} style={{display:'inline-block',margin:'4px'}}>{id}</code>)}
        </details>:
@@ -120,7 +123,7 @@ export default function CerebroRoleAgentRosterReadonly(){
     <button type="button" disabled={loading||page?.next_offset==null} onClick={()=>setOffset(page!.next_offset!)}>Siguiente →</button>
    </div>
   </>}
-  <p className="op3-source-note">SIN VERIFICAR: no se ha localizado todavía un directorio completo de miles de instancias
+  <p className="op3-source-note">Estados sincronizados automáticamente cada 30 segundos desde CEREBRO compartido. SIN VERIFICAR: no se ha localizado todavía un directorio completo de miles de instancias
    con <code>agent_id</code>, <code>subagent_id</code>, vínculos y latidos actuales. Las plantillas no se cuentan como agentes instalados.</p>
  </section>;
 }

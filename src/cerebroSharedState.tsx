@@ -44,7 +44,9 @@ export function CerebroSharedStateProvider({children}:{children:ReactNode}){
   void refresh();
   const interval=window.setInterval(()=>{if(document.visibilityState==='visible')void refresh()},30_000);
   const visible=()=>{if(document.visibilityState==='visible')void refresh()};
-  const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{setRevision(v=>v+1)});
+  const {data:{subscription}}=supabase.auth.onAuthStateChange(event=>{
+   if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'||event==='SIGNED_OUT')setRevision(v=>v+1);
+  });
   document.addEventListener('visibilitychange',visible);
   return()=>{active=false;window.clearInterval(interval);document.removeEventListener('visibilitychange',visible);subscription.unsubscribe()};
  },[revision]);

@@ -5,7 +5,8 @@ export type AgentDirectoryRecord={
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
  company_scope:string;source_url:string;
  runtime_status?:'ACTIVO'|'INACTIVO'|'DEGRADADO'|'PREPARADO'|'DEFINIDO'|'POR_VERIFICAR';
- runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR'}|null
+ runtime_observation?:{provider:'GITHUB_ACTIONS';runtime_id:string;engine_id:string;company_id:'fenix';environment:string;version:string;observed_at:string;last_run:string|null;last_run_result:string|null;source:'CEREBRO_CONSOLE_ACTIVITY_V0';evidence:string;status:'ACTIVO'|'PREPARADO'|'POR_VERIFICAR'}|null;
+ shared_state?:{status:'ACTIVO'|'PARCIAL'|'FALLANDO'|'DEFINIDO'|'POR_VERIFICAR';reason:string;evidence:string|null;profile_key:string;department_key:string;observed_at:string|null}
 };
 export type AgentDirectoryResponse={
  status:'OK';company_id:'fenix';coverage:'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS';
@@ -34,8 +35,10 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
   if(!session?.access_token)return unavailable('denied','OWNER_SESSION_REQUIRED');
   const args=new URLSearchParams({company_id:'fenix',offset:String(filters.offset),limit:String(filters.limit),
    kind:filters.kind,family:filters.family,q:filters.q});
-  const r=await fetch('/api/cerebro-agent-directory?'+args.toString(),{method:'GET',cache:'no-store',signal,
-   headers:{authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,accept:'application/json'}});
+  const headers={authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,accept:'application/json'};
+  // Canonical shared-state contract; retain old owner-only directory if shared stage is unavailable.
+  let r=await fetch('/api/cerebro-shared-state?mode=profiles&'+args.toString(),{method:'GET',cache:'no-store',signal,headers});
+  if([404,503].includes(r.status))r=await fetch('/api/cerebro-agent-directory?'+args.toString(),{method:'GET',cache:'no-store',signal,headers});
   if(r.status===401||r.status===403)return unavailable('denied','OWNER_DENIED');
   if(r.status!==200)return unavailable('unavailable','DIRECTORY_SOURCE_UNAVAILABLE');
   const data=await r.json() as AgentDirectoryResponse;
@@ -50,7 +53,9 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
      !['AGENT_ROLE','SUBAGENT_ROLE','SUBAGENT_TEMPLATE'].includes(x.kind)||!Array.isArray(x.engine_ids)||
      typeof x.runtime_verified!=='boolean'||typeof x.hierarchy_verified!=='boolean'||
      (x.runtime_verified===true&&(!x.runtime_observation||x.runtime_observation.engine_id!==x.id||
-      x.runtime_observation.status!=='ACTIVO'||x.runtime_observation.provider!=='GITHUB_ACTIONS'))))
+      x.runtime_observation.status!=='ACTIVO'||x.runtime_observation.provider!=='GITHUB_ACTIONS'))||
+     (x.shared_state&&(!['ACTIVO','PARCIAL','FALLANDO','DEFINIDO','POR_VERIFICAR'].includes(x.shared_state.status)||
+      x.shared_state.department_key!==x.family||x.shared_state.profile_key!==x.kind+':'+x.id))))
     return unavailable('unavailable','DIRECTORY_CONTRACT_INVALID');
   return {kind:'ready',data,reason:''};
  }catch{
