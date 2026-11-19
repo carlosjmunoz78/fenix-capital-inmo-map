@@ -75,7 +75,8 @@ export default function CerebroOperativeCockpitV3({
  const[view,setView]=useState<View>(()=>{
   if(typeof window==='undefined')return 'resumen';
   const p=new URLSearchParams(window.location.search);
-  return p.get('section')==='operativa'&&p.get('op3_panel')==='agentes'?'agentes':'resumen';
+  const next=p.get('section')==='operativa'?p.get('op3_panel'):null;
+  return (['resumen','entidades','proyectos','motores','agentes','trabajos','evidencias','decisiones'] as string[]).includes(next||'')?next as View:'resumen';
  });
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
  const queued=useMemo(()=>runs.reduce((n,r)=>n+realPending(r),0),[runs]);
