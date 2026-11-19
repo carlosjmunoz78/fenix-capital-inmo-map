@@ -370,6 +370,67 @@ async function readCreativeHolds(auth:string,key:string,labKey:string):Promise<C
   paid_generation_enabled:false,all_certified:false};
 }
 
+/**
+ * FACT-001 P5 is a DIFFERENT existing runtime scope: company_id "fenix-capital".
+ * Do not silently count its jobs as canonical company_id "fenix" or as agents.
+ * This request is a fixed aggregate SELECT, with no identifiers or payload rows.
+ */
+type FactCloudRecovery={
+ status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+ source:'CLOUDFLARE_D1_FACT_RECOVERY_LAB';
+ d1_runtime_company_id:'fenix-capital';canonical_registry_company_id:'fenix';
+ company_id_match:false;
+ runner_ticks:number|null;runner_completed:number|null;latest_runner_tick_at:string|null;
+ p5_completed:number|null;latest_p5_completed_at:string|null;
+ last_24h_nonempty_ticks:number|null;
+ results_are_signed_agent_receipts:false;full_engine_certified:false;
+ legacy_jobs_reactivated:false;external_action_triggered:false;
+};
+async function readFactCloudRecovery(token:string):Promise<FactCloudRecovery>{
+ const url='https://api.cloudflare.com/client/v4/accounts/'+ACCOUNT+
+  '/d1/database/1305f791-7c44-47f9-946b-f330a09c88aa/query';
+ const sql="SELECT "+
+  "(SELECT COUNT(*) FROM fact001_runner_ticks_v1) AS runner_ticks,"+
+  "(SELECT COUNT(*) FROM fact001_runner_ticks_v1 WHERE outcome='COMPLETED') AS runner_completed,"+
+  "(SELECT MAX(started_at) FROM fact001_runner_ticks_v1) AS latest_runner_tick_at,"+
+  "(SELECT COUNT(*) FROM fact001_p5_jobs_v1 WHERE company_id='fenix-capital' "+
+  "AND engine_id='FACT-001' AND environment='LAB' AND "+
+  "operation='providers.five.inventory.read' AND state='COMPLETED') AS p5_completed,"+
+  "(SELECT MAX(completed_at_ms) FROM fact001_p5_jobs_v1 WHERE company_id='fenix-capital' "+
+  "AND engine_id='FACT-001' AND environment='LAB' AND "+
+  "operation='providers.five.inventory.read' AND state='COMPLETED') AS latest_p5_completed_ms,"+
+  "(SELECT COUNT(*) FROM fact001_runner_ticks_v1 WHERE outcome<>'EMPTY' "+
+  "AND started_at>=datetime('now','-1 day')) AS last_24h_nonempty_ticks";
+ const r=await fetch(url,{method:'POST',cache:'no-store',redirect:'error',
+  headers:{authorization:'Bearer '+token,'content-type':'application/json',accept:'application/json'},
+  body:JSON.stringify({sql}),signal:AbortSignal.timeout(7500)});
+ if(r.status!==200)throw Error('FACT_D1_READ_DENIED');
+ const raw=await r.text();if(raw.length>18000)throw Error('FACT_D1_OVERSIZE');
+ const out=JSON.parse(raw);
+ if(out.success!==true||!Array.isArray(out.result)||out.result.length!==1||
+    !Array.isArray(out.result[0]?.results)||out.result[0].results.length!==1)
+    throw Error('FACT_D1_RESULT_INVALID');
+ const o=out.result[0].results[0];
+ for(const field of ['runner_ticks','runner_completed','p5_completed','last_24h_nonempty_ticks']){
+  if(!Number.isSafeInteger(o[field])||o[field]<0||o[field]>10000000)
+   throw Error('FACT_D1_AGGREGATE_INVALID');
+ }
+ if(o.runner_completed>o.runner_ticks||o.last_24h_nonempty_ticks>o.runner_ticks||
+   typeof o.latest_runner_tick_at!=='string'||
+   !Number.isFinite(Date.parse(o.latest_runner_tick_at))||
+   !Number.isSafeInteger(o.latest_p5_completed_ms)||o.latest_p5_completed_ms<0)
+   throw Error('FACT_D1_DATES_INVALID');
+ return {status:'LIVE',source:'CLOUDFLARE_D1_FACT_RECOVERY_LAB',
+  d1_runtime_company_id:'fenix-capital',canonical_registry_company_id:'fenix',
+  company_id_match:false,
+  runner_ticks:o.runner_ticks,runner_completed:o.runner_completed,
+  latest_runner_tick_at:o.latest_runner_tick_at,p5_completed:o.p5_completed,
+  latest_p5_completed_at:new Date(o.latest_p5_completed_ms).toISOString(),
+  last_24h_nonempty_ticks:o.last_24h_nonempty_ticks,
+  results_are_signed_agent_receipts:false,full_engine_certified:false,
+  legacy_jobs_reactivated:false,external_action_triggered:false};
+}
+
 export const config={maxDuration:25};
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','private,no-store,max-age=0');res.setHeader('Vary','Authorization');
@@ -401,7 +462,7 @@ export default async function handler(req:Req,res:Res){
  const stamp=new Date().toISOString();
  const cfKey=process.env.CEREBRO_CF_READ_TOKEN_PREVIEW||'';
  const labKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY||'';
- const [cf,lab,github,qa,truth,cert,durable,dispatch,consoleProof,creativeHolds]=await Promise.all([
+ const [cf,lab,github,qa,truth,cert,durable,dispatch,consoleProof,creativeHolds,factRecovery]=await Promise.all([
   (async()=>{
    if(cfKey.length<24)return{source:'CLOUDFLARE' as const,status:'NOT_CONFIGURED' as const,rows:[] as Entry[]};
    try{return{source:'CLOUDFLARE' as const,status:'LIVE' as const,rows:await collectCloudflare(cfKey,stamp)}}
@@ -470,6 +531,16 @@ export default async function handler(req:Req,res:Res){
    try{return await readCreativeHolds(auth,apikey,labKey)}
    catch{return{status:'UNAVAILABLE',engines:[],
     owner_rejection_override:false,paid_generation_enabled:false,all_certified:false}}
+  })(),
+  (async():Promise<FactCloudRecovery>=>{
+   const empty:FactCloudRecovery={status:'NOT_CONFIGURED',source:'CLOUDFLARE_D1_FACT_RECOVERY_LAB',
+    d1_runtime_company_id:'fenix-capital',canonical_registry_company_id:'fenix',company_id_match:false,
+    runner_ticks:null,runner_completed:null,latest_runner_tick_at:null,p5_completed:null,
+    latest_p5_completed_at:null,last_24h_nonempty_ticks:null,results_are_signed_agent_receipts:false,
+    full_engine_certified:false,legacy_jobs_reactivated:false,external_action_triggered:false};
+   if(cfKey.length<24)return empty;
+   try{return await readFactCloudRecovery(cfKey)}
+   catch{return{...empty,status:'UNAVAILABLE'}}
   })()
  ]);
  const statuses:Status[]=[
@@ -511,6 +582,7 @@ export default async function handler(req:Req,res:Res){
   dispatch_health:dispatch,
   console_job:consoleProof,
   creative_hold_gates:creativeHolds,
+  fact_p5_recovery:factRecovery,
   lab_qa:{
    source:'SUPABASE_PGCRON_QA_LAB_V1',
    status:qa.status,
@@ -541,7 +613,8 @@ export default async function handler(req:Req,res:Res){
     ...(durable.status==='UNAVAILABLE'?['SUPABASE_CERT_SUPERVISOR_HISTORY']:[]),
     ...(dispatch.status==='UNAVAILABLE'?['SUPABASE_DISPATCH_HEALTH']:[]),
     ...(consoleProof.status==='UNAVAILABLE'?['SUPABASE_CONSOLE_PUBLIC_READONLY']:[]),
-    ...(creativeHolds.status==='UNAVAILABLE'?['SUPABASE_CREATIVE_HOLD_GATES']:[])
+    ...(creativeHolds.status==='UNAVAILABLE'?['SUPABASE_CREATIVE_HOLD_GATES']:[]),
+    ...(factRecovery.status==='UNAVAILABLE'?['CLOUDFLARE_FACT_D1_READ_SCOPE']:[])
    ],
    last_observed_at:stamp
   },
