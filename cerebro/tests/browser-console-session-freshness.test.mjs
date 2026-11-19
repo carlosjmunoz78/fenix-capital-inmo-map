@@ -24,3 +24,15 @@ test('old heartbeat is not an active session',()=>{
 test('invalid timestamps fail closed',()=>{
  assert.equal(isActionableBrowserSession({...baseline,updated_at:'invalid',opened_at:'invalid'},now),false);
 });
+
+
+test('stale owner session is visibly recoverable without faking a live frame',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const source=await readFile(new URL('../../src/CerebroBrowserConsole.tsx',import.meta.url),'utf8');
+ assert.match(source,/staleBrowserSession=.*TERMINAL\.has/);
+ assert.match(source,/visualStateLabel=staleBrowserSession\?'SESIÓN CADUCADA'/);
+ assert.match(source,/const live=Boolean\(freshBrowserSession&&browserSession\?\.worker_alive/);
+ assert.match(source,/className="cerebro-browser-start-cta" onClick=\{startBrowser\}/);
+ assert.match(source,/const canStart=Boolean\(selectedCompany\)&&!hasActiveSession/);
+ assert.match(source,/const humanControl=Boolean\(freshBrowserSession&&/);
+});
