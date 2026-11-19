@@ -45,3 +45,22 @@
 - Interfaz Vercel Preview: **PENDIENTE VERIFICACIÓN VISUAL**.
 - App/CRM y PROD: **INTACTOS; NO PROMOCIÓN**.
 - Nuevas suscripciones: **0 €**; uso marginal de servicios existentes pendiente de medir.
+
+## 19/11/2026 · Pruebas adicionales y aprobación parcial
+
+- Ensayo directo SQL `CERT-001 RUN_ONCE` recibo `20261119-1000-4000-8000-000000000007`: `APPLIED`, `SUCCEEDED`, `result_status=PERSISTED`, sin pago, certificado global NO.
+- Intento de ejecución `UMS-001 RUN_ONCE`: **RECHAZADO** `OPSCTRL_INVALID_SCOPE`. No se ha quitado el rechazo de su propietario.
+- Reutilización de UUID `...0001` con otro `engine_id`: **RECHAZADO** `OPSCTRL_IDEMPOTENCY_CONFLICT`.
+- `GET` de API Vercel nueva sin sesión: **401 OWNER_SESSION_REQUIRED**, verificado navegando a URL de la Preview.
+- Despliegue Vercel Preview `dpl_DuBLvQFdCzBL1eusMrA9DkSMNwxU`, commit compilado READY `0eaa680acf7be273a65e870efe1c3ea86c4beab4`; alias `fenix-capital-preprod-operativa.vercel.app` actualizado. **Vista Motores verificada físicamente en Opera con sesión propietaria**: dos módulos, `PROGRAMADO`, botones `Ejecutar ahora` / `Pausar` habilitados, histórico de órdenes SQL. Vista Trabajos verificada con los mismos mandos.
+- Rollback de alias **PROBADO FÍSICAMENTE en LAB**: alias restituido temporalmente a `dpl_AVetCsC8dm5kERWTzVHGNYZDp9GR` (READY, SHA anterior), comprobado; devuelto a `dpl_DuBLvQFdCzBL1eusMrA9DkSMNwxU` (READY, SHA de mandos). No se ha probado rollback de PRODUCCIÓN.
+- Cliente `src/cerebroOperativaControlsApi.ts` endurecido después de ese build para exigir `audit_persisted=true`, `executed` coherente y estado final de pausa/reanudación antes de admitir éxito. **Este endurecimiento debe recompilarse en nuevo deployment**, no declararlo ya en producción ni en Preview anterior.
+- Los dos crons LAB #74 y #77 continúan `active=true`. La evidencia corresponde a mandos diagnósticos; `CONSOLE-001`, `FACT-001` y `UMS-001` no reciben nuevas autorizaciones.
+- **Gate PROD BLOQUEADO por acceso insuficiente al proyecto Vercel real:** el conector `CEREBRO · Vercel Universal` ve únicamente cinco proyectos LAB y devuelve 403 para `fenixcapital.es`. Cloudflare DNS `app.fenixcapital.es` apunta a `cname.vercel-dns.com` (no modificado). Sin el proyecto PROD correcto, no hay snapshot, pruebas de compatibilidad ni rollback de ese dominio. Prohibido cambiar DNS o asignar alias de PROD a Vercel LAB.
+
+### Estado de cierre
+- SQL mandos, permisos, historial e idempotencia: **HECHO LAB**.
+- Edge propietario y API Preview con GET owner: **HECHO LAB**.
+- UI y recuperación de versión Preview: **HECHO LAB**, pendiente de republicar el endurecimiento final.
+- Pulsación efectiva POST desde Opera autenticado: **POR VERIFICAR** (el conector Opera de esta sesión permite navegación/lectura, no pulsar controles).
+- PROD: **NO PROMOVIDO**. Se requiere que el conector Vercel tenga acceso al equipo/proyecto que hospeda el dominio y que pasen pruebas OLD/NEW, controles de acceso y rollback.
