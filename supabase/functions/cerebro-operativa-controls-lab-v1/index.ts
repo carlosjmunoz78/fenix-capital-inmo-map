@@ -48,7 +48,16 @@ Deno.serve(async(req)=>{
        !Number.isSafeInteger(r.cron_job_id)||!ENGINES.has(r.engine_id))||
      !Array.isArray(data.commands)||data.commands.length>15)
     return err(503,"OPERATOR_STATE_INVALID");
-   return ok(200,{...data,executed:false,control_scope:"TWO_LAB_DIAGNOSTIC_ENGINES",
+   const {data:consoleState,error:consoleError}=await db.rpc("cerebro_lab_console_control_state_v1");
+   if(consoleError||!consoleState||consoleState.status!=="OK"||
+    consoleState.company_id!=="fenix"||consoleState.engine_id!=="CONSOLE-001"||
+    consoleState.environment!=="LAB"||consoleState.read_only!==true||
+    consoleState.prod_execution_enabled!==false||consoleState.executed!==false||
+    consoleState.capability!=="PUBLIC_REPO_READ_ONCE_ONLY"||
+    consoleState.collector_schedules_active!==true||
+    !Array.isArray(consoleState.requests)||consoleState.requests.length>10)
+     return err(503,"CONSOLE_CONTROL_STATE_INVALID");
+   return ok(200,{...data,console_readonly:consoleState,executed:false,control_scope:"TWO_LAB_DIAGNOSTIC_ENGINES",
     other_engines:"DENIED_NOT_ACCREDITED"});
   }catch{return err(503,"OPERATOR_STATE_UNAVAILABLE")}
  }
@@ -60,11 +69,32 @@ Deno.serve(async(req)=>{
  if(!body||typeof body!=="object"||Array.isArray(body)||
     Object.keys(body).sort().join(",")!=="command,company_id,engine_id,environment,request_id"||
     body.company_id!=="fenix"||body.environment!=="LAB"||
-    !ENGINES.has(body.engine_id)||!COMMANDS.has(body.command)||
+    !(ENGINES.has(body.engine_id)||body.engine_id==='CONSOLE-001')||!COMMANDS.has(body.command)||
+    (body.engine_id==='CONSOLE-001'&&body.command!=='RUN_ONCE')||
     typeof body.request_id!=="string"||
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.request_id))
   return err(400,"COMMAND_CONTRACT_DENIED");
  try{
+  if(body.engine_id==='CONSOLE-001'){
+   const {data:queued,error:queueError}=await db.rpc("cerebro_lab_console_run_once_v1",{
+    p_request_id:body.request_id
+   });
+   if(queueError){
+    const msg=String(queueError.message||"");
+    return err(/OPSCTRL_CONSOLE_RATE_LIMIT/.test(msg)?429:409,
+     /OPSCTRL_CONSOLE_RATE_LIMIT/.test(msg)?"RATE_LIMIT_60S":
+     /OPSCTRL_CONSOLE_CRON_CONTRACT_DRIFT/.test(msg)?"CRON_CONTRACT_DRIFT":
+     "CONSOLE_READ_ENQUEUE_DENIED");
+   }
+   if(!queued||!["QUEUED","ALREADY_QUEUED"].includes(queued.status)||
+     queued.company_id!=="fenix"||queued.engine_id!=="CONSOLE-001"||
+     queued.environment!=="LAB"||queued.command!=="RUN_ONCE"||
+     queued.audit_persisted!==true||queued.executed!==false||
+     queued.prod_execution_enabled!==false||
+     !/^[0-9a-f-]{36}$/i.test(String(queued.job_id||"")))
+      return err(503,"CONSOLE_QUEUE_RECEIPT_INVALID");
+   return ok(200,queued);
+  }
   const {data,error}=await db.rpc("cerebro_lab_operator_command_v1",{
    p_request_id:body.request_id,p_engine_id:body.engine_id,p_command:body.command});
   if(error){
