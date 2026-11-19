@@ -4,6 +4,7 @@ import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import {decryptBrowserFrame,encryptBrowserInput,fetchBrowserInteractiveApi,importBrowserSessionKey,type BrowserCompanyV3,type BrowserSessionV3} from './cerebroBrowserInteractive';
 import {evaluateBrowserPostcondition,parseBrowserCommand,type BrowserPostcondition} from '../cerebro/runtime/browser-command-parser-v3';
+import {isActionableBrowserSession} from './cerebroBrowserSessionFreshness';
 import './cerebro-browser-console.css';
 
 type ViewName='V0'|'OPERATIVA'|'NAVEGADOR';
@@ -94,7 +95,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    if(cancelled||result.status===0)return;
    if(result.status!==200||!result.data?.ok){setBrowserError(result.data?.error||'No se pudo cargar el historial de sesiones');return;}
    const list=Array.isArray(result.data.sessions)?result.data.sessions:[];setSessionOptions(list);
-   setSelectedSessionId(current=>current&&list.some(item=>item.session_id===current)?current:(list.find(item=>!TERMINAL.has(item.state))?.session_id||list[0]?.session_id||''));
+   setSelectedSessionId(current=>current&&list.some(item=>item.session_id===current&&isActionableBrowserSession(item))?current:(list.find(item=>isActionableBrowserSession(item))?.session_id||list[0]?.session_id||''));
   };
   void refreshSessions();const interval=window.setInterval(()=>{void refreshSessions()},2500);return()=>{cancelled=true;window.clearInterval(interval)};
  },[selectedCompany]);
@@ -132,7 +133,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
 
  function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.cerebro-host-v0 .cerebro-voice-main');if(button&&!button.disabled)button.click();}
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* already stopped */}}setDictating(false);}
- function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('Dictado no disponible en este navegador.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1];const transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
+ function toggleDictation(){if(dictating){stopDictation();return}if(snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('Dictado no disponible en este navegador.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1];const transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}}
  async function browserAction(path:string,body:Record<string,unknown>={}){if(!selectedCompany){setBrowserError('No hay empresa autorizada disponible');return false}setBrowserBusy(true);setBrowserError('');try{const result=await fetchBrowserInteractiveApi<BrowserActionResponse>(path,{company_id:selectedCompany,...body});if(result.status!==200||!result.data?.ok)throw new Error(result.data?.error||`Browser 1 respondió ${result.status}`);return true}catch(error){setBrowserError(String((error as Error)?.message||error));return false}finally{setBrowserBusy(false)}}
  async function startBrowser(){const ok=await browserAction('/owner/start');if(ok){setSelectedSessionId('');resetVisualSession();}}
@@ -170,7 +171,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const canTakeover=Boolean(browserSession?.worker_alive&&((browserSession.state==='CEREBRO_CONTROLLED'&&browserSession.control_owner==='CEREBRO')||(browserSession.state==='HUMAN_REQUIRED'&&browserSession.control_owner==='NONE'))&&!browserSession.emergency_stop);
  const humanControl=Boolean(browserSession?.worker_alive&&browserSession.state==='HUMAN_CONTROLLED'&&browserSession.control_owner==='HUMAN'&&browserSession.human_lease_id);
  const canStop=Boolean(browserSession?.worker_alive&&!TERMINAL.has(browserSession.state));
- const hasActiveSession=sessionOptions.some(item=>!TERMINAL.has(item.state));
+ const hasActiveSession=sessionOptions.some(item=>isActionableBrowserSession(item));
  const canStart=Boolean(selectedCompany)&&!hasActiveSession;
  const tabs=browserSession?.tabs||[];
  const activeTab=tabs.find(tab=>tab.active)||tabs.find(tab=>tab.index===browserSession?.active_tab_index)||tabs[0];
@@ -221,7 +222,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    <label htmlFor="browser-order">¿Qué quieres que haga?</label>
    <form onSubmit={submit} className="cerebro-browser-form" style={{minWidth:0,maxWidth:'100%'}}>
     <button type="button" className="cerebro-browser-icon" disabled title="Adjuntos permanecen bloqueados hasta contrato de transferencia verificado" aria-label="Adjuntar archivo"><Paperclip size={19}/></button>
-    <button type="button" className={`cerebro-browser-action ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()}>{dictating?<Square size={16}/>:<Mic size={18}/>}<span>{dictating?'Parar dictado':'Dictar'}</span></button>
+    <button type="button" className={`cerebro-browser-action ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={snapshot.sending||snapshot.voiceActive||commandBusy||!voiceRecognitionSupported()}>{dictating?<Square size={16}/>:<Mic size={18}/>}<span>{dictating?'Parar dictado':'Dictar'}</span></button>
     <button type="button" className={`cerebro-browser-action ${snapshot.voiceActive?'is-active':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating}>{snapshot.voiceActive?<Square size={16}/>:<MessageSquareText size={18}/>}<span>{snapshot.voiceActive?'Finalizar':'Hablar'}</span></button>
     <textarea id="browser-order" ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={commandBusy} rows={1} placeholder={snapshot.ready?'Escribe, habla o da una orden a CEREBRO…':'Esperando conexión segura con CEREBRO…'} aria-label="Escribe una orden para CEREBRO"/>
     <button type="submit" className="cerebro-browser-send" disabled={commandBusy||!composer.trim()} title="Enviar · Enter" aria-label="Enviar a CEREBRO"><Send size={19}/><span>Enviar</span></button>
