@@ -1,10 +1,25 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 export type LabEngineId='QA-001'|'CERT-001';
 export type LabCommand='RUN_ONCE'|'PAUSE_SCHEDULE'|'RESUME_SCHEDULE';
+export type LabConsoleControlState={
+ status:'OK';source:'CEREBRO_CONSOLE_OPSCTRL_LAB_V1';company_id:'fenix';
+ engine_id:'CONSOLE-001';environment:'LAB';version:'1.0.0';
+ read_only:true;executed:false;prod_execution_enabled:false;
+ collector_schedules_active:true;capability:'PUBLIC_REPO_READ_ONCE_ONLY';
+ signed_receipt_cryptographically_verified:false;observed_at:string;
+ requests:Array<{request_id:string;job_id:string;state:string;
+  created_at:string;completed_at:string|null;http_status:number|null;
+  signed_receipt_present:boolean}>;
+};
+export type LabConsoleReceipt={status:'QUEUED'|'ALREADY_QUEUED';
+ company_id:'fenix';engine_id:'CONSOLE-001';environment:'LAB';version:'1.0.0';
+ command:'RUN_ONCE';request_id:string;job_id:string;outcome:'QUEUED';
+ executed:false;audit_persisted:true;prod_execution_enabled:false};
 export type LabControlState={
  status:'OK';source:'CEREBRO_OPERATIVA_OPERATOR_LAB_V1';company_id:'fenix';
  environment:'LAB';prod_execution_enabled:false;read_only:true;executed:false;
  observed_at:string;control_scope:'TWO_LAB_DIAGNOSTIC_ENGINES';
+ console_readonly:LabConsoleControlState;
  engines:Array<{engine_id:LabEngineId;cron_job_id:74|77;schedule_active:boolean;
   schedule:string;control_capability:'RUN_ONCE_PAUSE_RESUME_LAB_ONLY'}>;
  commands:Array<{request_id:string;engine_id:LabEngineId;command:LabCommand;
@@ -38,6 +53,22 @@ function validity(x:any):x is LabControlState{
   x.company_id==='fenix'&&x.environment==='LAB'&&x.read_only===true&&
   x.executed===false&&x.prod_execution_enabled===false&&
   x.control_scope==='TWO_LAB_DIAGNOSTIC_ENGINES'&&
+  x.console_readonly?.status==='OK'&&
+  x.console_readonly?.source==='CEREBRO_CONSOLE_OPSCTRL_LAB_V1'&&
+  x.console_readonly?.engine_id==='CONSOLE-001'&&
+  x.console_readonly?.company_id==='fenix'&&
+  x.console_readonly?.environment==='LAB'&&
+  x.console_readonly?.capability==='PUBLIC_REPO_READ_ONCE_ONLY'&&
+  x.console_readonly?.read_only===true&&
+  x.console_readonly?.executed===false&&
+  x.console_readonly?.prod_execution_enabled===false&&
+  x.console_readonly?.collector_schedules_active===true&&
+  x.console_readonly?.signed_receipt_cryptographically_verified===false&&
+  Array.isArray(x.console_readonly?.requests)&&x.console_readonly.requests.length<=10&&
+  x.console_readonly.requests.every((r:any)=>typeof r.job_id==='string'&&
+   typeof r.request_id==='string'&&
+   ['QUEUED','SUCCEEDED','FAILED','NO_RESPONSE'].includes(r.state)&&
+   typeof r.signed_receipt_present==='boolean')&&
   Array.isArray(x.engines)&&x.engines.length===2&&
   new Set(x.engines.map((e:any)=>e.engine_id)).size===2&&
   x.engines.every((e:any)=>ids.has(e.engine_id)&&
@@ -83,4 +114,24 @@ export async function sendOperativaLabCommand(engine_id:LabEngineId,command:LabC
   (command==='RESUME_SCHEDULE'&&x.final_active!==true))
   throw Error('RECIBO_NO_VERIFICADO');
  return x as LabControlReceipt;
+}
+
+export async function sendOperativaConsoleReadOnce(request_id:string):Promise<LabConsoleReceipt>{
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(request_id))
+  throw Error('ORDEN_NO_AUTORIZADA');
+ const headers=await authorization();
+ const res=await fetch(ENDPOINT,{method:'POST',cache:'no-store',
+  headers:{...headers,'content-type':'application/json'},
+  body:JSON.stringify({company_id:'fenix',environment:'LAB',
+    engine_id:'CONSOLE-001',command:'RUN_ONCE',request_id})});
+ const x=await decode(res);
+ if(!['QUEUED','ALREADY_QUEUED'].includes(x?.status)||
+  x?.company_id!=='fenix'||x?.environment!=='LAB'||
+  x?.engine_id!=='CONSOLE-001'||x?.command!=='RUN_ONCE'||
+  x?.request_id!==request_id||x?.outcome!=='QUEUED'||
+  x?.executed!==false||x?.prod_execution_enabled!==false||
+  x?.audit_persisted!==true||typeof x?.job_id!=='string'||
+  !/^[a-f0-9-]{36}$/i.test(x.job_id))
+  throw Error('RECIBO_NO_VERIFICADO');
+ return x as LabConsoleReceipt;
 }
