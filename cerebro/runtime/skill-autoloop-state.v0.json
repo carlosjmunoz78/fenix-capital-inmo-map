@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-19T02:50:15.500Z",
+  "updated_at": "2026-11-19T03:38:26.450Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -2601,39 +2601,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44403408141,
       "checkpointed_at": "2026-11-18T21:38:13.148Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:d5e35924da9135adb96a": {
-      "candidate_id": "github-wide-skills:d5e35924da9135adb96a",
-      "name": "api-and-interface-design",
-      "human_alias": "Api And Interface Design",
-      "wrapper_id": "skillwrap:df5d8c992618ad8e4ade",
-      "domain": "data-database-supabase",
-      "engine_bindings": [
-        "DATA-001",
-        "DBOFF-001",
-        "STOROFF-001",
-        "API-001",
-        "CRM-001"
-      ],
-      "value_score": 90.12,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "runecraftai/skills",
-        "upstream_head_commit": "046cf86fe00613d0f81a25ede4f48fedd9eb8b99",
-        "manifest_sha256": "aceed3059d77f2ba92df9728aa39260276531a9f11b2579f9ed6302e063b8ce1",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 44447122813,
-      "checkpointed_at": "2026-11-19T02:50:15.500Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -30319,6 +30286,54 @@
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:d5e35924da9135adb96a": {
+      "candidate_id": "github-wide-skills:d5e35924da9135adb96a",
+      "name": "api-and-interface-design",
+      "human_alias": "Api And Interface Design",
+      "wrapper_id": "skillwrap:df5d8c992618ad8e4ade",
+      "domain": "data-database-supabase",
+      "engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "value_score": 90.12,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "runecraftai/skills",
+        "upstream_head_commit": "046cf86fe00613d0f81a25ede4f48fedd9eb8b99",
+        "manifest_sha256": "aceed3059d77f2ba92df9728aa39260276531a9f11b2579f9ed6302e063b8ce1",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 44447122813,
+      "checkpointed_at": "2026-11-19T02:50:15.500Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:e0c9baa9b5b7d775579a363a",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-11-19T03:38:26.450Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:1c1c37d6c2b4482ef47e8d7f",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -33932,7 +33947,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -51439,6 +51454,44 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-11-16T13:05:23.382Z"
+    },
+    "github-wide-skills:d5e35924da9135adb96a": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:1c1c37d6c2b4482ef47e8d7f",
+      "decision_id": "skill-autonomy:e0c9baa9b5b7d775579a363a",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:d5e35924da9135adb96a",
+      "skill_version": "skillwrap:df5d8c992618ad8e4ade",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "CRM-001",
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-11-19T03:38:26.450Z"
     }
   },
   "autonomy_action_queue": {},
