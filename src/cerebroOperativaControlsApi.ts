@@ -76,6 +76,11 @@ export async function sendOperativaLabCommand(engine_id:LabEngineId,command:LabC
   x?.engine_id!==engine_id||x?.command!==command||x?.request_id!==request_id||
   !['SUCCEEDED','NO_CHANGE'].includes(x?.outcome)||
   typeof x?.final_active!=='boolean'||typeof x?.previous_active!=='boolean'||
-  typeof x?.executed!=='boolean')throw Error('RECIBO_NO_VERIFICADO');
+  typeof x?.executed!=='boolean'||
+  (x.status==='APPLIED'&&x.audit_persisted!==true)||
+  (x.status==='APPLIED'&&x.executed!==(x.outcome==='SUCCEEDED'))||
+  (command==='PAUSE_SCHEDULE'&&x.final_active!==false)||
+  (command==='RESUME_SCHEDULE'&&x.final_active!==true))
+  throw Error('RECIBO_NO_VERIFICADO');
  return x as LabControlReceipt;
 }
