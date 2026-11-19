@@ -74,7 +74,8 @@ export default function CerebroOperativeCockpitV3({
  const[view,setView]=useState<View>(()=>{
   if(typeof window==='undefined')return 'resumen';
   const p=new URLSearchParams(window.location.search);
-  return p.get('section')==='operativa'&&p.get('op3_panel')==='agentes'?'agentes':'resumen';
+  const requested=p.get('section')==='operativa'?p.get('op3_panel'):null;
+   return (['resumen','entidades','proyectos','motores','agentes','trabajos','evidencias','decisiones'] as string[]).includes(requested||'')?requested as View:'resumen';
  });
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
  const queued=useMemo(()=>runs.reduce((n,r)=>n+realPending(r),0),[runs]);
@@ -232,6 +233,16 @@ export default function CerebroOperativeCockpitV3({
      decisiones:'Fallos observados; las aprobaciones humanas requieren su propia fuente.',
      resumen:''
     } as Record<View,string>)[view]}</p>
+    {(view==='motores'||view==='trabajos')&&company==='fenix'&&scopeCanExecute?
+     <aside className="op3-lab-access" aria-label="Acceso a mandos diagnósticos LAB">
+      <div><strong>Mandos reales de LAB</strong>
+       <p>QA-001, CERT-001 y CONSOLE-001. Control exclusivo de laboratorio, separado de producción.</p>
+      </div>
+      <a href="https://fenix-capital-preprod-operativa.vercel.app/cerebro?section=operativa&op3_panel=motores"
+       target="_blank" rel="noopener noreferrer" aria-label="Abrir mandos LAB de CEREBRO en nueva pestaña">
+       Abrir mandos LAB <ExternalLink size={15}/>
+      </a>
+     </aside>:null}
     {(view==='entidades'||view==='proyectos'||view==='motores')?
       <CerebroOperativaUniverseViews section={view} scope={company} result={ownerUniverse}
        onCompanyChange={onCompanyChange} onNavigate={selectPanel}

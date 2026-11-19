@@ -288,3 +288,15 @@
  .op3-navigation button{padding:9px 6px;gap:5px}
  .op3-footer{padding:9px 0}
 }
+
+/* OPERATIVA · LAB-only operator access. Navigation, not production execution. */
+.op3-lab-access{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+ margin:12px 0 18px;padding:15px 17px;border:1px solid rgba(116,195,224,.3);border-radius:13px;
+ background:rgba(45,92,124,.11);color:#dceef5}
+.op3-lab-access strong{font-size:13px;letter-spacing:.01em}
+.op3-lab-access p{font-size:12px;line-height:1.5;margin:5px 0 0;color:#a6c9dc}
+.op3-lab-access a{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(121,214,240,.55);
+ border-radius:10px;padding:10px 13px;color:#a8e9fc;text-decoration:none;font-size:12px;
+ font-weight:650;white-space:nowrap}
+.op3-lab-access a:hover,.op3-lab-access a:focus-visible{background:rgba(102,195,220,.15)}
+@media(max-width:600px){.op3-lab-access{align-items:stretch}.op3-lab-access a{justify-content:center;width:100%}}
