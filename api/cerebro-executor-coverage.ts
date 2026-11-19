@@ -400,7 +400,7 @@ async function readFactCloudRecovery(token:string):Promise<FactCloudRecovery>{
   "AND engine_id='FACT-001' AND environment='LAB' AND "+
   "operation='providers.five.inventory.read' AND state='COMPLETED') AS latest_p5_completed_ms,"+
   "(SELECT COUNT(*) FROM fact001_runner_ticks_v1 WHERE outcome<>'EMPTY' "+
-  "AND started_at>=datetime('now','-1 day')) AS last_24h_nonempty_ticks";
+  "AND julianday(started_at)>=julianday('now')-1) AS last_24h_nonempty_ticks";
  const r=await fetch(url,{method:'POST',cache:'no-store',redirect:'error',
   headers:{authorization:'Bearer '+token,'content-type':'application/json',accept:'application/json'},
   body:JSON.stringify({sql}),signal:AbortSignal.timeout(7500)});
