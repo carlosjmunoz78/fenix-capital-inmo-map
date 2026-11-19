@@ -6,7 +6,7 @@ import handler,{privateEvidenceHost} from '../../../api/cerebro-executor-coverag
 const host='fenix-capital-preprod-abc123.vercel.app';
 const env={...process.env},originalFetch=globalThis.fetch;
 const clean=()=>{
- for(const k of ['VERCEL_ENV','VERCEL_URL','CEREBRO_CF_READ_TOKEN_PREVIEW','CEREBRO_PREPROD_PUBLISHABLE_KEY']){
+ for(const k of ['VERCEL_ENV','VERCEL_URL','CEREBRO_CF_READ_TOKEN_PREVIEW','CEREBRO_PREPROD_PUBLISHABLE_KEY','CEREBRO_CF_D1_READ_ENABLED']){
   if(env[k]===undefined)delete process.env[k];else process.env[k]=env[k];
  }
  globalThis.fetch=originalFetch;
@@ -32,6 +32,7 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
  process.env.VERCEL_ENV='preview';
  process.env.CEREBRO_CF_READ_TOKEN_PREVIEW='c'.repeat(60);
  process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY='sb_publishable_'+'d'.repeat(28);
+ process.env.CEREBRO_CF_D1_READ_ENABLED='true';
  const urls=[];
  globalThis.fetch=async (url)=>{
   urls.push(String(url));
