@@ -16,6 +16,7 @@ const ERROR:Record<string,string>={
  OWNER_DENIED:'La sesión no dispone de permisos de propietario.',
  CRON_CONTRACT_DRIFT:'La programación ha cambiado: operación bloqueada.',
  RATE_LIMIT_60S:'Ya se ha ejecutado recientemente. Revisa el recibo antes de repetir.',
+ ULTIMO_SUPERVISOR_PROTEGIDO:'No se puede pausar el último supervisor activo; se mantiene la vigilancia.',
  COMMAND_EXECUTION_FAILED:'La ejecución no se ha podido confirmar.',
  LAB_OPERATOR_UNAVAILABLE:'No se puede verificar el ejecutor LAB.',
  SESION_PROPETARIO_REQUERIDA:'Inicia sesión como propietario.',
