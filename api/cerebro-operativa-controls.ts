@@ -44,7 +44,8 @@ export default async function handler(req:Req,res:Res){
   const x=body as Record<string,unknown>;
   if(Object.keys(x).sort().join(',')!=='command,company_id,engine_id,environment,request_id'||
     x.company_id!=='fenix'||x.environment!=='LAB'||
-    !['QA-001','CERT-001'].includes(String(x.engine_id))||
+    !['QA-001','CERT-001','CONSOLE-001'].includes(String(x.engine_id))||
+    (x.engine_id==='CONSOLE-001'&&x.command!=='RUN_ONCE')||
     !['RUN_ONCE','PAUSE_SCHEDULE','RESUME_SCHEDULE'].includes(String(x.command))||
     typeof x.request_id!=='string'||
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x.request_id))
@@ -73,9 +74,15 @@ export default async function handler(req:Req,res:Res){
      typeof data?.reason==='string'&&/^[A-Z0-9_]{2,60}$/.test(data.reason)?data.reason:'UPSTREAM_UNAVAILABLE');
   if(data?.company_id!=='fenix'||data?.environment!=='LAB'||
     data?.prod_execution_enabled!==false||
-    req.method==='GET'&&(data?.status!=='OK'||data?.read_only!==true||data?.executed!==false)||
-    req.method==='POST'&&(!['APPLIED','ALREADY_APPLIED'].includes(data?.status)||
-      !['QA-001','CERT-001'].includes(data?.engine_id)||
+    req.method==='GET'&&(data?.status!=='OK'||data?.read_only!==true||data?.executed!==false||
+      data?.console_readonly?.status!=='OK'||data?.console_readonly?.engine_id!=='CONSOLE-001'||
+      data?.console_readonly?.collector_schedules_active!==true||
+      data?.console_readonly?.prod_execution_enabled!==false)||
+    req.method==='POST'&&(!['APPLIED','ALREADY_APPLIED','QUEUED','ALREADY_QUEUED'].includes(data?.status)||
+      !['QA-001','CERT-001','CONSOLE-001'].includes(data?.engine_id)||
+      (data?.engine_id==='CONSOLE-001'&&(data?.command!=='RUN_ONCE'||
+       !['QUEUED','ALREADY_QUEUED'].includes(data?.status)||data?.outcome!=='QUEUED'||
+       data?.executed!==false||data?.audit_persisted!==true))||
       !['RUN_ONCE','PAUSE_SCHEDULE','RESUME_SCHEDULE'].includes(data?.command)))
    return denied(res,502,'UPSTREAM_CONTRACT_INVALID');
   return res.status(200).json(data);
