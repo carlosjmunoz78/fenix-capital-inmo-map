@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {isActionableBrowserSession} from '../../src/cerebroBrowserSessionFreshness.ts';
+import {isActionableBrowserSession} from '../runtime/browser-session-freshness-v3.ts';
 
 const now=Date.parse('2026-11-19T18:00:00Z');
 const ago=minutes=>new Date(now-minutes*60_000).toISOString();

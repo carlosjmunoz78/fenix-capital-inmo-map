@@ -15,7 +15,7 @@ on:
       - 'src/cerebroBrowserWorkTotalDock.ts'
       - 'src/cerebroBrowserInteractive.ts'
       - 'src/CerebroBrowserConsole.tsx'
-      - 'src/cerebroBrowserSessionFreshness.ts'
+      - 'cerebro/runtime/browser-session-freshness-v3.ts'
       - 'cerebro/tests/browser-console-session-freshness.test.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - 'cerebro/runtime/browser-session-bundle-v1.mjs'
@@ -61,7 +61,7 @@ jobs:
           set -euo pipefail
           git diff --name-only "$(git merge-base HEAD origin/main)" HEAD | while IFS= read -r file; do
             case "$file" in
-              src/CerebroBrowserConsole.tsx|src/cerebroBrowserSessionFreshness.ts|cerebro/tests/browser-console-session-freshness.test.mjs|cerebro/runtime/browser-work-total-v1-contract.test.mjs|cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs|cerebro/runtime/browser-ergonomics-p0.test.mjs|.github/workflows/cerebro-browser-work-total-v1-validate.yml) echo "ALLOWED $file" ;;
+              src/CerebroBrowserConsole.tsx|src/cerebroBrowserSessionFreshness.ts|cerebro/runtime/browser-session-freshness-v3.ts|cerebro/tests/browser-console-session-freshness.test.mjs|cerebro/runtime/browser-work-total-v1-contract.test.mjs|cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs|cerebro/runtime/browser-ergonomics-p0.test.mjs|.github/workflows/cerebro-browser-work-total-v1-validate.yml) echo "ALLOWED $file" ;;
               *) echo "UNEXPECTED_CHANGE $file"; exit 1 ;;
             esac
           done

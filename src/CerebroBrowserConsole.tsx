@@ -4,7 +4,7 @@ import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import {decryptBrowserFrame,encryptBrowserInput,fetchBrowserInteractiveApi,importBrowserSessionKey,type BrowserCompanyV3,type BrowserSessionV3} from './cerebroBrowserInteractive';
 import {evaluateBrowserPostcondition,parseBrowserCommand,type BrowserPostcondition} from '../cerebro/runtime/browser-command-parser-v3';
-import {isActionableBrowserSession} from './cerebroBrowserSessionFreshness';
+import {isActionableBrowserSession} from '../cerebro/runtime/browser-session-freshness-v3';
 import './cerebro-browser-console.css';
 
 type ViewName='V0'|'OPERATIVA'|'NAVEGADOR';
