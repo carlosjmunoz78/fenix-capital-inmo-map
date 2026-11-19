@@ -15,14 +15,14 @@ const paths={
  migration:'supabase/migrations/20261024223500_browser_workspace_v1_contracts.sql'
 };
 
-test('Work Total 3.5.4 keeps realtime interaction without post-human-input frame capture',async()=>{
+test('Work Total 3.5.7 keeps realtime interaction without post-human-input frame capture',async()=>{
  const runtime=await read(paths.runtime);
  for(const token of ['FRAME_INTERVAL_MS','POLL_INTERVAL_MS','processedCommand','immediate_post_action_frame:false','privacy_frame_suppression_during_human_input:true'])assert.match(runtime,new RegExp(token));
  assert.match(runtime,/CEREBRO_BROWSER_INTERACTIVE_FRAME_MS\|\|1400/);
  assert.match(runtime,/CEREBRO_BROWSER_INTERACTIVE_POLL_MS\|\|35/);
  assert.match(runtime,/else if\(!processedCommand&&Date\.now\(\)-lastFrameAt>=FRAME_INTERVAL_MS\)/);
  assert.match(runtime,/if\(processedCommand\)continue/);
- assert.match(runtime,/schema_version:'3\.5\.4'/);
+ assert.match(runtime,/schema_version:'3\.5\.7'/);
  assert.doesNotMatch(runtime,/immediate_post_action_frame:true/);
  assert.doesNotMatch(runtime,/ACTIVE_FRAME_INTERVAL_MS/);
 });
