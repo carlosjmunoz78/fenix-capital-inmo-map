@@ -73,3 +73,21 @@ jobs:
         run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
       - name: Build App with Work Total dock mounted
         run: npm run build
+      - name: Install isolated Chromium for read-only physical canary
+        if: github.ref_name == 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
+        run: npx playwright install --with-deps chromium
+      - name: Physical browser canary · public website read-only
+        if: github.ref_name == 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
+        env:
+          CEREBRO_BROWSER_CANARY_URL: https://fenixcapital.es/
+          CEREBRO_BROWSER_PROFILES_ROOT: .cerebro/browser-profiles
+          CEREBRO_BROWSER_ARTIFACTS_ROOT: .cerebro/browser-artifacts
+        run: node cerebro/canary/cloud-browser-prod-observe-v0.mjs
+      - name: Preserve physical canary evidence
+        if: always() && github.ref_name == 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-navegador-p0-readonly-canary
+          path: .cerebro/browser-artifacts/prod-canary-summary/**
+          if-no-files-found: ignore
+          retention-days: 7
