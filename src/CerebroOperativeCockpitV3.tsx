@@ -9,6 +9,7 @@ import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
 import CerebroAudioDiagnostics from './CerebroAudioDiagnostics';
 import CerebroRoleAgentRosterReadonly from './CerebroRoleAgentRosterReadonly';
+import CerebroOperativaControlsLab from './CerebroOperativaControlsLab';
 import './cerebro-operative-cockpit-v3.css';
 
 type VoiceSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
@@ -237,6 +238,9 @@ export default function CerebroOperativeCockpitV3({
        onCompanyChange={onCompanyChange} onNavigate={selectPanel}
        observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
       />:null}
+    {(view==='motores'||view==='trabajos')&&company==='fenix'&&
+     typeof window!=='undefined'&&/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(window.location.hostname)?
+     <CerebroOperativaControlsLab/>:null}
     {view==='agentes'?(company==='fenix'?<CerebroRoleAgentRosterReadonly/>:
       <p className="op3-source-empty">Directorio limitado a Fénix. Seleccionar otra empresa no concede permisos.</p>):null}
     {(view==='trabajos'||view==='evidencias'||view==='decisiones')?
