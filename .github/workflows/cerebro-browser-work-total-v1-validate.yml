@@ -73,6 +73,35 @@ jobs:
         run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
       - name: Build App with Work Total dock mounted
         run: npm run build
+      - name: Owner gateway E2E identity check · read-only, no secret disclosure
+        if: github.ref_name == 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
+        env:
+          CEREBRO_E2E_OWNER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          CEREBRO_E2E_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          node --input-type=module <<'NODE'
+          const jwt=process.env.CEREBRO_E2E_OWNER_JWT||'';
+          const key=process.env.CEREBRO_E2E_PUBLISHABLE_KEY||'';
+          let result='OWNER_IDENTITY_PROOF_UNAVAILABLE';
+          let status=null;
+          if(jwt&&key){
+            try{
+              const response=await fetch('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-gateway-v1/owner/status',{
+                method:'POST',
+                headers:{authorization:`Bearer ${jwt}`,apikey:key,'content-type':'application/json',origin:'https://app.fenixcapital.es'},
+                body:JSON.stringify({company_id:'fenix',list:true}),
+                redirect:'error',signal:AbortSignal.timeout(12000)
+              });
+              status=response.status;
+              const body=await response.json().catch(()=>null);
+              result=response.status===200&&body?.ok===true&&Array.isArray(body?.sessions)
+                ?'OWNER_IDENTITY_VERIFIED_READ_ONLY':'OWNER_IDENTITY_NOT_VERIFIED';
+            }catch{result='OWNER_GATEWAY_UNREACHABLE';}
+          }
+          const evidence={check:'BROWSER_1_OWNER_GATEWAY',result,http_status:status,prod_mutation:false,secret_material_logged:false,owner_login_bypassed:false};
+          console.log(JSON.stringify(evidence));
+          await import('node:fs').then(fs=>fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,`### Browser 1 owner E2E preflight\\n\\n${result}; no production mutation.\\n`));
+          NODE
       - name: Install isolated Chromium for read-only physical canary
         if: github.ref_name == 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
         run: npx playwright install --with-deps chromium
