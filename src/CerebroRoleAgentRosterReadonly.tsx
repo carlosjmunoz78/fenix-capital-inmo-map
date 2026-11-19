@@ -92,6 +92,23 @@ export default function CerebroRoleAgentRosterReadonly(){
     )}</ul>
    </section>:
    <p className="op3-source-note">Auditoría de actividad real por motor: lectura no disponible ahora; no equivale a motores operativos.</p>}
+  {coverage.kind==='ready'&&coverage.data?.fact_p5_recovery.status==='LIVE'?
+   <section className="op3-source-note" aria-label="FACT P5 inventario real Cloudflare D1">
+    <strong>FACT-001 · Cloudflare D1 · recuperación y P5 (solo lectura)</strong>
+    <p>Comprobaciones del recuperador: <b>{coverage.data.fact_p5_recovery.runner_ticks}</b>,
+     trabajos del recuperador completados: <b>{coverage.data.fact_p5_recovery.runner_completed}</b>,
+     exploraciones P5 completadas: <b>{coverage.data.fact_p5_recovery.p5_completed}</b>.
+     Último P5: <b>{coverage.data.fact_p5_recovery.latest_p5_completed_at?
+       new Date(coverage.data.fact_p5_recovery.latest_p5_completed_at).toLocaleString('es-ES'):'—'}</b>.
+    </p>
+    <p>Identidad del runtime: <code>fenix-capital</code>;
+      identidad canónica del registro: <code>fenix</code>.
+      <b> Equivalencia no acreditada. Sin atribución automática a agentes ni certificación PROD.</b>
+      Se han consultado agregados de D1; no se han ejecutado sus trabajos.
+    </p>
+   </section>:
+   <p className="op3-source-note">FACT-001 · lectura D1 adicional: no disponible con el permiso actual;
+    los trabajos P5 no se consideran agentes acreditados ni se normaliza `fenix-capital` como `fenix`.</p>}
   {coverage.kind==='ready'&&coverage.data?.creative_hold_gates.status==='LIVE'?
    <section className="op3-source-note" aria-label="Bloqueos reales de la productora">
     <strong>FACT-001 y UMS-001 · Bloqueos físicos de producción (LAB)</strong>
