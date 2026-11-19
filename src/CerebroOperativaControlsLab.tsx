@@ -1,8 +1,8 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {CircleAlert,CheckCircle2,Pause,Play,RefreshCw,RotateCcw,ShieldCheck} from 'lucide-react';
 import {
- readOperativaLabControl,sendOperativaLabCommand,
- type LabControlState,type LabControlReceipt,type LabEngineId,type LabCommand
+ readOperativaLabControl,sendOperativaLabCommand,sendOperativaConsoleReadOnce,
+ type LabControlState,type LabControlReceipt,type LabEngineId,type LabCommand,type LabConsoleReceipt
 } from './cerebroOperativaControlsApi';
 import './cerebro-operativa-controls-lab.css';
 
@@ -26,10 +26,12 @@ const explain=(e:unknown)=>ERROR[String(e instanceof Error?e.message:e)]||
  'No se ha confirmado la acción. Comprueba la actividad antes de volver a intentarla.';
 export default function CerebroOperativaControlsLab(){
  const [state,setState]=useState<State>(EMPTY);
- const [busy,setBusy]=useState<LabEngineId|null>(null);
+ const [busy,setBusy]=useState<LabEngineId|'CONSOLE-001'|null>(null);
  const [receipt,setReceipt]=useState<LabControlReceipt|null>(null);
+ const [consoleReceipt,setConsoleReceipt]=useState<LabConsoleReceipt|null>(null);
  const [message,setMessage]=useState('');
  const heldRequest=useRef<{engine:LabEngineId;command:LabCommand;id:string}|null>(null);
+ const heldConsole=useRef<string|null>(null);
  const active=useRef(true);
  const refresh=useCallback(async(signal?:AbortSignal)=>{
   try{
@@ -63,6 +65,21 @@ export default function CerebroOperativaControlsLab(){
     command==='RUN_ONCE'?'Ejecución real completada y auditada.':
     command==='PAUSE_SCHEDULE'?'Programación detenida y comprobada.':
     'Programación reanudada y comprobada.');
+   await refresh();
+  }catch(e){if(active.current)setMessage(explain(e))}
+  finally{if(active.current)setBusy(null)}
+ }
+ async function invokeConsole(){
+  if(busy||state.kind!=='ready'||!state.data?.console_readonly?.collector_schedules_active)return;
+  const id=heldConsole.current??crypto.randomUUID();heldConsole.current=id;
+  setBusy('CONSOLE-001');setMessage('Solicitando lectura pública desde CONSOLE LAB…');
+  try{
+   const result=await sendOperativaConsoleReadOnce(id);
+   if(!active.current)return;
+   heldConsole.current=null;setConsoleReceipt(result);
+   setMessage(result.status==='ALREADY_QUEUED'?
+    'Lectura previamente solicitada. No se ha enviado una segunda vez.':
+    'Lectura solicitada y registrada EN COLA. Se comprobará el resultado del recolector.');
    await refresh();
   }catch(e){if(active.current)setMessage(explain(e))}
   finally{if(active.current)setBusy(null)}
@@ -107,8 +124,34 @@ export default function CerebroOperativaControlsLab(){
     </article>;
    })}
   </div>
+  <div className="opctrl-grid">
+   <article className="opctrl-engine" aria-label="CONSOLE-001 lectura pública controlada">
+    <div className="opctrl-title"><strong>CONSOLE · Lectura pública de repositorio</strong>
+     <span className={state.data?.console_readonly?.collector_schedules_active?'opctrl-running':'opctrl-paused'}>
+      {state.kind==='loading'?'Consultando…':state.kind!=='ready'?'SIN VERIFICAR':
+       state.data?.console_readonly?.collector_schedules_active?'PROGRAMADO':'BLOQUEADO'}
+     </span>
+    </div>
+    <p>ID: <code>CONSOLE-001</code> · Solo lectura pública de GitHub, en LAB; no escribe código.</p>
+    <div className="opctrl-actions">
+     <button type="button" disabled={state.kind!=='ready'||busy!==null||
+       !state.data?.console_readonly?.collector_schedules_active} onClick={()=>{void invokeConsole()}}>
+      <Play size={16}/> Solicitar lectura
+     </button>
+    </div>
+    {consoleReceipt?<p className="opctrl-proof">Orden CONSOLE registrada: <b>EN COLA</b> ·
+     <code>{consoleReceipt.job_id}</code>. Pendiente de respuesta del recolector; no es éxito confirmado.</p>:null}
+    {(state.data?.console_readonly?.requests?.length??0)>0?
+     <div className="opctrl-audit"><strong>Lecturas ordenadas desde OPERATIVA</strong>
+      <ul>{state.data!.console_readonly.requests.slice(0,5).map(x=>
+       <li key={x.request_id}><code>{x.job_id}</code> · {x.state} ·
+        {x.http_status??'sin HTTP'} · firma almacenada: {x.signed_receipt_present?'sí':'no'}
+       </li>)}</ul>
+     </div>:null}
+   </article>
+  </div>
   <div className="opctrl-locked">
-   <strong>Otros motores:</strong> FACT-001, CONSOLE-001 y UMS-001 mantienen sus
+   <strong>Otros motores:</strong> FACT-001 y UMS-001 mantienen sus
    permisos actuales. No se muestran botones de ejecución sin contrato verificado.
   </div>
   {message?<p role="status" className="opctrl-result">
