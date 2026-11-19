@@ -6,6 +6,7 @@ on:
       - 'promote/browser-work-total-main-final-20261025'
       - 'fix/browser-realtime-fullsize-20261026'
       - 'main'
+      - 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
     paths:
       - '.github/workflows/cerebro-browser-work-total-v1-validate.yml'
       - 'public/browser-ergonomics-v1.css'
@@ -14,6 +15,8 @@ on:
       - 'src/cerebroBrowserWorkTotalDock.ts'
       - 'src/cerebroBrowserInteractive.ts'
       - 'src/CerebroBrowserConsole.tsx'
+      - 'src/cerebroBrowserSessionFreshness.ts'
+      - 'cerebro/tests/browser-console-session-freshness.test.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - 'cerebro/runtime/browser-session-bundle-v1.mjs'
       - 'cerebro/runtime/browser-session-bundle-v1.test.mjs'
@@ -38,6 +41,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -49,6 +54,19 @@ jobs:
         run: node --test cerebro/runtime/browser-work-total-v1-contract.test.mjs
       - name: Test Work Total PROD contracts
         run: node --test cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs
+      - name: Verify isolated NAVEGADOR changes only
+        if: github.ref_name == 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "$(git merge-base HEAD origin/main)" HEAD | while IFS= read -r file; do
+            case "$file" in
+              src/CerebroBrowserConsole.tsx|src/cerebroBrowserSessionFreshness.ts|cerebro/tests/browser-console-session-freshness.test.mjs|.github/workflows/cerebro-browser-work-total-v1-validate.yml) echo "ALLOWED $file" ;;
+              *) echo "UNEXPECTED_CHANGE $file"; exit 1 ;;
+            esac
+          done
+      - name: Test browser session freshness P0
+        run: node --test cerebro/tests/browser-console-session-freshness.test.mjs
       - name: Test browser P0 ergonomics
         run: node --test cerebro/runtime/browser-ergonomics-p0.test.mjs
       - name: Syntax-check interactive runtime
