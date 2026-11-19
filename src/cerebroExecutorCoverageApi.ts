@@ -36,6 +36,14 @@ export type ExecutorCoverage={
    health_state:'HEALTH_ENDPOINT_OK'|'HEALTH_ENDPOINT_FAILED'|'NO_RESPONSE';
    signature_verified:true;recent:boolean;runtime_execution_verified:false;
    autonomy_certified:false}>};
+ fact_p5_recovery:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  source:'CLOUDFLARE_D1_FACT_RECOVERY_LAB';
+  d1_runtime_company_id:'fenix-capital';canonical_registry_company_id:'fenix';
+  company_id_match:false;
+  runner_ticks:number|null;runner_completed:number|null;latest_runner_tick_at:string|null;
+  p5_completed:number|null;latest_p5_completed_at:string|null;last_24h_nonempty_ticks:number|null;
+  results_are_signed_agent_receipts:false;full_engine_certified:false;
+  legacy_jobs_reactivated:false;external_action_triggered:false};
  creative_hold_gates:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
   owner_rejection_override:false;paid_generation_enabled:false;all_certified:false;
   engines:Array<{engine_id:'FACT-001'|'UMS-001';historical_jobs:number;jobs_on_hold:number;
@@ -147,6 +155,25 @@ export async function readExecutorCoverage(signal?:AbortSignal):Promise<Executor
      x.signature_verified!==true||x.autonomy_certified!==false||
      x.runtime_execution_verified!==false||typeof x.recent!=='boolean'||!Number.isFinite(Date.parse(x.last_checked_at)))))||
    (data.dispatch_health.status!=='LIVE'&&data.dispatch_health.health_status!==null)||
+   !data.fact_p5_recovery||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.fact_p5_recovery.status)||
+   data.fact_p5_recovery.source!=='CLOUDFLARE_D1_FACT_RECOVERY_LAB'||
+   data.fact_p5_recovery.d1_runtime_company_id!=='fenix-capital'||
+   data.fact_p5_recovery.canonical_registry_company_id!=='fenix'||
+   data.fact_p5_recovery.company_id_match!==false||
+   data.fact_p5_recovery.results_are_signed_agent_receipts!==false||
+   data.fact_p5_recovery.full_engine_certified!==false||
+   data.fact_p5_recovery.legacy_jobs_reactivated!==false||
+   data.fact_p5_recovery.external_action_triggered!==false||
+   (data.fact_p5_recovery.status==='LIVE'&&(
+      !Number.isSafeInteger(data.fact_p5_recovery.runner_ticks)||
+      !Number.isSafeInteger(data.fact_p5_recovery.runner_completed)||
+      !Number.isSafeInteger(data.fact_p5_recovery.p5_completed)||
+      !Number.isSafeInteger(data.fact_p5_recovery.last_24h_nonempty_ticks)||
+      Number(data.fact_p5_recovery.runner_ticks)<Number(data.fact_p5_recovery.runner_completed)||
+      Number(data.fact_p5_recovery.runner_ticks)<Number(data.fact_p5_recovery.last_24h_nonempty_ticks)||
+      !Number.isFinite(Date.parse(data.fact_p5_recovery.latest_runner_tick_at??''))||
+      !Number.isFinite(Date.parse(data.fact_p5_recovery.latest_p5_completed_at??''))))||
    !data.creative_hold_gates||
    !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.creative_hold_gates.status)||
    data.creative_hold_gates.owner_rejection_override!==false||
