@@ -538,7 +538,9 @@ export default async function handler(req:Req,res:Res){
     runner_ticks:null,runner_completed:null,latest_runner_tick_at:null,p5_completed:null,
     latest_p5_completed_at:null,last_24h_nonempty_ticks:null,results_are_signed_agent_receipts:false,
     full_engine_certified:false,legacy_jobs_reactivated:false,external_action_triggered:false};
-   if(cfKey.length<24)return empty;
+   // Opt-in only. The existing CF Workers-read token may lack D1 Query scope;
+   // never retry a denied query every 30 seconds or expand permissions here.
+   if(cfKey.length<24||process.env.CEREBRO_CF_D1_READ_ENABLED!=='true')return empty;
    try{return await readFactCloudRecovery(cfKey)}
    catch{return{...empty,status:'UNAVAILABLE'}}
   })()
