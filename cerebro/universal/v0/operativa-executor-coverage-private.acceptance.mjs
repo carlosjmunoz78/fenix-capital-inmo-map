@@ -57,6 +57,13 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
    }]})};
   }
   if(String(url).includes('fenix-app-gateway/session/context'))return{status:200,json:async()=>({ok:true,context:{actor_code:'CARLOS-ADMIN'}})};
+  if(String(url).includes('/d1/database/1305f791-7c44-47f9-946b-f330a09c88aa/query'))return{
+   status:200,ok:true,text:async()=>JSON.stringify({success:true,result:[{results:[{
+     runner_ticks:2548,runner_completed:3,
+     latest_runner_tick_at:'2026-11-19T06:05:44.227Z',
+     p5_completed:8,latest_p5_completed_ms:1795046448698,last_24h_nonempty_ticks:0
+   }]}]})
+  };
   if(String(url).includes('cloudflare.com'))return{status:200,ok:true,text:async()=>JSON.stringify({
    success:true,result:[{id:'worker-one'},{id:'worker-two'}],result_info:{total_pages:1}
   })};
@@ -225,7 +232,13 @@ test('owner-authenticated sources are separate inventories and historical LAB jo
   assert.equal(x.body.creative_hold_gates.engines[0].jobs_on_hold,10);
   assert.equal(x.body.creative_hold_gates.engines[1].blockers[0].reason_code,'CREATIVE_REJECTED_BY_OWNER');
   assert.equal(x.body.creative_hold_gates.owner_rejection_override,false);
-  assert.equal(urls.length,12);
+  assert.equal(x.body.fact_p5_recovery.status,'LIVE');
+  assert.equal(x.body.fact_p5_recovery.runner_ticks,2548);
+  assert.equal(x.body.fact_p5_recovery.p5_completed,8);
+  assert.equal(x.body.fact_p5_recovery.company_id_match,false);
+  assert.equal(x.body.fact_p5_recovery.full_engine_certified,false);
+  assert.equal(x.body.fact_p5_recovery.results_are_signed_agent_receipts,false);
+  assert.equal(urls.length,13);
  }finally{clean();}
 });
 test('no session, wrong company or other host fail before provider fetch',async()=>{
