@@ -1,0 +1,68 @@
+name: CEREBRO IAM004 Fresh Technical JWT E2E LAB
+# Exact isolated branch; no PROD deployments or write permissions.
+on:
+  push:
+    branches: [cerebro/operativa-live-evidence-bridge-lab-20261118]
+    paths: [.github/workflows/cerebro-iam004-ephemeral-e2e-lab.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fresh-jwt-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      PROD_URL: https://cluhljgonannaafpmblx.supabase.co
+      PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      CEREBRO_E2E_TEST_EMAIL: ${{ secrets.CEREBRO_E2E_TEST_EMAIL || 'cerebro-e2e@fenixcapital.es' }}
+      CEREBRO_E2E_TEST_PASSWORD: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD }}
+    steps:
+      - name: Checkout isolated candidate, no persisted token
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Acquire FRESH short-lived technical JWT, never stored owner JWT
+        shell: bash
+        run: bash scripts/cerebro-e2e-ephemeral-session.sh
+      - name: Verify fresh technical identity through Supabase Auth, no role escalation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${CEREBRO_E2E_AUTH_MODE:-}" = EPHEMERAL_PASSWORD_GRANT
+          : "${CEREBRO_E2E_USER_JWT:?Ephemeral login missing}"
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          code="$(curl --silent --show-error --max-time 20 \
+            -o "$body" -w '%{http_code}' \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            -H "authorization: Bearer ${CEREBRO_E2E_USER_JWT}" \
+            -H 'accept: application/json' \
+            "${PROD_URL}/auth/v1/user")"
+          if [ "$code" != 200 ]; then
+            echo "IAM004_E2E_FAIL_AUTH_USER_HTTP_${code}" >&2
+            exit 41
+          fi
+          jq -e --arg expected "$CEREBRO_E2E_TEST_EMAIL" \
+            '(.email | ascii_downcase)==($expected | ascii_downcase) and
+              (.role=="authenticated") and (.id|type=="string" and length>8)' "$body" >/dev/null
+          echo 'IAM004_EPHEMERAL_AUTH_IDENTITY=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'IAM004_EPHEMERAL_AUTH_IDENTITY=GREEN'
+
+      - name: Owner-only gateway rejects dedicated E2E account (negative E2E)
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          code="$(curl --silent --show-error --max-time 20 \
+            -o "$body" -w '%{http_code}' \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            -H "authorization: Bearer ${CEREBRO_E2E_USER_JWT}" \
+            -H 'accept: application/json' \
+            "${PROD_URL}/functions/v1/fenix-app-gateway/session/context")"
+          if [ "$code" != 401 ] && [ "$code" != 403 ]; then
+            echo "IAM004_E2E_FAIL_OWNER_GATE_NOT_DENIED_HTTP_${code}" >&2
+            exit 41
+          fi
+          echo 'IAM004_OWNER_GATE_FAIL_CLOSED=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'IAM004_OWNER_GATE_FAIL_CLOSED=GREEN'

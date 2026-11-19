@@ -1,0 +1,224 @@
+import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
+export type ExecutorCoverageSource={source:'CLOUDFLARE'|'SUPABASE';
+ status:'LIVE'|'NOT_CONFIGURED'|'UNAVAILABLE';visible_count:number|null;observed_at:string|null;metric_label:'WORKERS_IN_ACCOUNT'|'HISTORICAL_LAB_JOB_ROWS'};
+export type ExecutorCoverage={
+ status:'OK'|'PARTIAL';company_id:'fenix';observed_at:string;read_only:true;executed:false;
+ inventory_sources:ExecutorCoverageSource[];profile_total:number;templates_not_instances:number;accreditable_profiles:number;
+ runtime_verified_profiles:number;active_recent_profiles:number;unverified_profiles:number;
+ active_executor_count:null;receipt_source_status:'NOT_CONNECTED'|'GITHUB_VERIFIED_QA_JOB'|'SUPABASE_SIGNED_SQL_QA';warning:string;
+ verified_profiles:Array<{id:string;engine_id:string;state:'EXECUTION_EVIDENCED_NOT_AUTONOMOUS';proof_id:string;proof_url:string|null;observed_at:string|null;quality:'CI_TESTS_PASS_NO_TRIBUNAL'|'QA_METADATA_PROBES_PASSED_NO_TRIBUNAL'|'QA_METADATA_PROBES_FAILED_NO_TRIBUNAL';tribunal_passed:false;proof_source:'GITHUB_ACTIONS'|'SUPABASE_PGCRON'}>;
+ engine_truth:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';historical_job_rows:number|null;
+  all_engines_certified:false;autonomy_global_certified:false;
+  sources:Array<{source:'JARVIS'|'BROWSER'|'CREATIVE';engine_id:string;environment:string;
+   historical_jobs:number;explicit_role_rows:number;recent_metadata_rows:number;
+   last_job_metadata_at:string|null;diagnosis:'NO_RECENT_METADATA'|'RECENT_BUT_ROLE_ID_UNATTRIBUTED'|'RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS';
+   role_activation_verified:false;engine_certified_autonomous:false}>};
+ certification_gates:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  global_autonomy_certified:false;global_excellence_certified:false;cost_measured:false;
+  evidence_categories:Array<{id:'QA-001'|'FACT-001'|'CONSOLE-001'|'UMS-001'|'SOCIAL_LAB_SCHEDULES';
+   kind:string;full_engine_certified:false;business_quality_certified?:false;
+   specific_capability_evidenced?:boolean;receipt_id?:string|null;last_execution_at?:string|null;
+   signed_runs?:number;tests_passed?:number;tests_total?:number;
+   historical_rows?:number;active_schedules?:number;scheduled_jobs_total?:number;
+   active_schedules_succeeded_within_48h?:number;last_schedule_run_at?:string|null;
+   last_schedule_status?:string|null;run_history_sampling?:string;
+   business_outcome_verified?:false;agent_identity_verified?:false}>};
+ durable_supervisor:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  receipt_id:string|null;health:'EVIDENCE_OK_NOT_CERTIFIED'|'GATE_HOLD'|null;
+  signed:boolean;recent:boolean;observed_at:string|null;history_count:number|null;
+  gate_count:number|null;cron_job_id:77|null;global_autonomy_certified:false};
+ dispatch_health:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  health_status:'HEALTH_ENDPOINTS_RESPOND'|'DEGRADED_OR_NOT_CHECKED'|null;
+  signed_samples:number;healthy_endpoints:number;full_engine_certified:false;
+  legacy_jobs_executed:false;github_oidc_required:true;
+  sources:Array<{service:string;engine_id:'CONSOLE-001'|'FACT-001'|'UMS-001';
+   last_checked_at:string;http_status:number|null;
+   health_state:'HEALTH_ENDPOINT_OK'|'HEALTH_ENDPOINT_FAILED'|'NO_RESPONSE';
+   signature_verified:true;recent:boolean;runtime_execution_verified:false;
+   autonomy_certified:false}>};
+ fact_p5_recovery:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  source:'CLOUDFLARE_D1_FACT_RECOVERY_LAB';
+  d1_runtime_company_id:'fenix-capital';canonical_registry_company_id:'fenix';
+  company_id_match:false;
+  runner_ticks:number|null;runner_completed:number|null;latest_runner_tick_at:string|null;
+  p5_completed:number|null;latest_p5_completed_at:string|null;last_24h_nonempty_ticks:number|null;
+  results_are_signed_agent_receipts:false;full_engine_certified:false;
+  legacy_jobs_reactivated:false;external_action_triggered:false};
+ creative_hold_gates:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  owner_rejection_override:false;paid_generation_enabled:false;all_certified:false;
+  engines:Array<{engine_id:'FACT-001'|'UMS-001';historical_jobs:number;jobs_on_hold:number;
+   historical_succeeded:number;safe_to_resume:false;autonomy_certified:false;
+   blockers:Array<{state:'HOLD'|'SUCCEEDED';reason_code:string;count:number}>}>};
+ console_job:{status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';
+  execution_state:'SUCCEEDED'|null;job_id:string|null;observed_commit_sha:string|null;
+  last_execution_at:string|null;completed_job_count:number|null;
+  signature_verified:boolean;specific_capability_evidenced:boolean;
+  legacy_worker_executed:false;full_engine_certified:false;agent_role_identity_verified:false};
+ lab_qa:{source:'SUPABASE_PGCRON_QA_LAB_V1';status:'LIVE'|'UNAVAILABLE'|'NOT_CONFIGURED';signature_verified:boolean;execution_status:'SUCCEEDED'|'FAILED'|null;tests_passed:number|null;tests_total:number|null;runs_count:number|null;observed_at:string|null;recent:boolean;first_party_scheduled:true;extra_subscriptions_required:false;operational_autonomy_certified:false;excellence_certified:false};
+ supervisor:{provider_health:'LIVE'|'PARTIAL';github_qa_attestation:'VERIFIED'|'NOT_VERIFIED'|'UNAVAILABLE';agent_quality:'NOT_ATTESTED_GLOBAL';excellence_verified:0;qa_metadata_check:'PASS'|'HOLD_OR_FAIL';qa_execution_attributed:boolean;qa_signature_verified:boolean;source_failure_observations:string[];last_observed_at:string};
+};
+export type ExecutorCoverageResult={kind:'ready'|'unavailable'|'denied';data:ExecutorCoverage|null};
+export async function readExecutorCoverage(signal?:AbortSignal):Promise<ExecutorCoverageResult>{
+ const missing=(kind:'unavailable'|'denied'):ExecutorCoverageResult=>({kind,data:null});
+ if(typeof window==='undefined')return missing('denied');
+ const host=window.location.hostname;
+ if(!/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(host))return missing('denied');
+ try{
+  const {data:{session}}=await supabase.auth.getSession();
+  if(!session?.access_token)return missing('denied');
+  const r=await fetch('/api/cerebro-executor-coverage?company_id=fenix',{
+   method:'GET',cache:'no-store',signal,headers:{
+    authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,accept:'application/json'
+   }});
+  if(r.status===401||r.status===403)return missing('denied');
+  if(r.status!==200)return missing('unavailable');
+  const data=await r.json() as ExecutorCoverage;
+  const sources=data.inventory_sources;
+  if(!['OK','PARTIAL'].includes(data.status)||data.company_id!=='fenix'||
+   data.read_only!==true||data.executed!==false||
+   data.active_executor_count!==null||!['NOT_CONNECTED','GITHUB_VERIFIED_QA_JOB','SUPABASE_SIGNED_SQL_QA'].includes(data.receipt_source_status)||
+   !Number.isFinite(Date.parse(data.observed_at))||!Array.isArray(sources)||sources.length!==2||
+   sources.some(s=>!['CLOUDFLARE','SUPABASE'].includes(s.source)||
+    (s.source==='CLOUDFLARE'&&s.metric_label!=='WORKERS_IN_ACCOUNT')||
+    (s.source==='SUPABASE'&&s.metric_label!=='HISTORICAL_LAB_JOB_ROWS')||
+    !['LIVE','NOT_CONFIGURED','UNAVAILABLE'].includes(s.status)||
+    (s.status==='LIVE'&&(!Number.isSafeInteger(s.visible_count)||Number(s.visible_count)<0))||
+    (s.status!=='LIVE'&&s.visible_count!==null))||
+   !Number.isSafeInteger(data.profile_total)||data.profile_total!==2506||
+   data.templates_not_instances!==29||data.accreditable_profiles!==2477||
+   data.active_recent_profiles!==0||
+   !Number.isSafeInteger(data.runtime_verified_profiles)||data.runtime_verified_profiles>1||
+   data.runtime_verified_profiles<0||
+   data.unverified_profiles!==data.accreditable_profiles-data.runtime_verified_profiles||
+   !Array.isArray(data.verified_profiles)||data.verified_profiles.length!==data.runtime_verified_profiles||
+   data.verified_profiles.some(p=>p.id!=='ENG-QA'||p.engine_id!=='QA-001'||
+    p.state!=='EXECUTION_EVIDENCED_NOT_AUTONOMOUS'||p.tribunal_passed!==false||
+    !(p.proof_source==='GITHUB_ACTIONS'&&typeof p.proof_url==='string'&&p.proof_url.startsWith('https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/')||
+      p.proof_source==='SUPABASE_PGCRON'&&p.proof_url===null&&/^[a-f0-9-]{36}$/.test(p.proof_id)))||
+   (data.runtime_verified_profiles===1&&!['GITHUB_VERIFIED_QA_JOB','SUPABASE_SIGNED_SQL_QA'].includes(data.receipt_source_status))||
+   !data.engine_truth||!['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.engine_truth.status)||
+   data.engine_truth.all_engines_certified!==false||data.engine_truth.autonomy_global_certified!==false||
+   !Array.isArray(data.engine_truth.sources)||data.engine_truth.sources.length>15||
+   (data.engine_truth.status==='LIVE'&&(!Number.isSafeInteger(data.engine_truth.historical_job_rows)||Number(data.engine_truth.historical_job_rows)<0))||
+   data.engine_truth.sources.some(x=>!['JARVIS','BROWSER','CREATIVE'].includes(x.source)||
+    !['NO_RECENT_METADATA','RECENT_BUT_ROLE_ID_UNATTRIBUTED','RECENT_JOBS_REQUIRE_SIGNED_RECEIPTS'].includes(x.diagnosis)||
+    x.engine_certified_autonomous!==false||x.role_activation_verified!==false||
+    !Number.isSafeInteger(x.historical_jobs)||!Number.isSafeInteger(x.explicit_role_rows)||!Number.isSafeInteger(x.recent_metadata_rows))||
+   !data.certification_gates||!['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.certification_gates.status)||
+   data.certification_gates.global_autonomy_certified!==false||
+   data.certification_gates.global_excellence_certified!==false||
+   data.certification_gates.cost_measured!==false||
+   !Array.isArray(data.certification_gates.evidence_categories)||data.certification_gates.evidence_categories.length>5||
+   (data.certification_gates.status==='LIVE'&&(
+      data.certification_gates.evidence_categories.length!==5||
+      new Set(data.certification_gates.evidence_categories.map(x=>x.id)).size!==5||
+      !['QA-001','FACT-001','CONSOLE-001','UMS-001','SOCIAL_LAB_SCHEDULES'].every(
+       id=>data.certification_gates.evidence_categories.some(x=>x.id===id))
+   ))||
+   data.certification_gates.evidence_categories.some(x=>x.full_engine_certified!==false||
+      x.id!=='SOCIAL_LAB_SCHEDULES'&&x.business_quality_certified!==false||
+      x.id==='SOCIAL_LAB_SCHEDULES'&&(
+       x.agent_identity_verified!==false||x.business_outcome_verified!==false||
+       !Number.isSafeInteger(x.active_schedules)||Number(x.active_schedules)<0||
+       !Number.isSafeInteger(x.scheduled_jobs_total)||Number(x.scheduled_jobs_total)<Number(x.active_schedules)))||
+   !data.durable_supervisor||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.durable_supervisor.status)||
+   data.durable_supervisor.global_autonomy_certified!==false||
+   (data.durable_supervisor.status==='LIVE'&&(
+     data.durable_supervisor.signed!==true||
+     data.durable_supervisor.cron_job_id!==77||
+     data.durable_supervisor.gate_count!==5||
+     !['EVIDENCE_OK_NOT_CERTIFIED','GATE_HOLD'].includes(String(data.durable_supervisor.health))||
+     !Number.isSafeInteger(data.durable_supervisor.history_count)||
+     Number(data.durable_supervisor.history_count)<1||
+     !Number.isFinite(Date.parse(data.durable_supervisor.observed_at??''))||
+     !/^[a-f0-9-]{36}$/.test(data.durable_supervisor.receipt_id??'')))||
+   (data.durable_supervisor.status!=='LIVE'&&data.durable_supervisor.signed!==false)||
+   !data.dispatch_health||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.dispatch_health.status)||
+   data.dispatch_health.full_engine_certified!==false||
+   data.dispatch_health.legacy_jobs_executed!==false||
+   data.dispatch_health.github_oidc_required!==true||
+   !Number.isSafeInteger(data.dispatch_health.signed_samples)||
+   data.dispatch_health.signed_samples<0||data.dispatch_health.signed_samples>4||
+   !Number.isSafeInteger(data.dispatch_health.healthy_endpoints)||
+   data.dispatch_health.healthy_endpoints<0||
+   data.dispatch_health.healthy_endpoints>data.dispatch_health.signed_samples||
+   !Array.isArray(data.dispatch_health.sources)||
+   data.dispatch_health.sources.length!==data.dispatch_health.signed_samples||
+   new Set(data.dispatch_health.sources.map(x=>x.service)).size!==data.dispatch_health.sources.length||
+   (data.dispatch_health.status==='LIVE'&&(
+    !['HEALTH_ENDPOINTS_RESPOND','DEGRADED_OR_NOT_CHECKED'].includes(String(data.dispatch_health.health_status))||
+    data.dispatch_health.sources.some(x=>
+     !['CONSOLE-001','FACT-001','UMS-001'].includes(x.engine_id)||
+     !['HEALTH_ENDPOINT_OK','HEALTH_ENDPOINT_FAILED','NO_RESPONSE'].includes(x.health_state)||
+     x.signature_verified!==true||x.autonomy_certified!==false||
+     x.runtime_execution_verified!==false||typeof x.recent!=='boolean'||!Number.isFinite(Date.parse(x.last_checked_at)))))||
+   (data.dispatch_health.status!=='LIVE'&&data.dispatch_health.health_status!==null)||
+   !data.fact_p5_recovery||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.fact_p5_recovery.status)||
+   data.fact_p5_recovery.source!=='CLOUDFLARE_D1_FACT_RECOVERY_LAB'||
+   data.fact_p5_recovery.d1_runtime_company_id!=='fenix-capital'||
+   data.fact_p5_recovery.canonical_registry_company_id!=='fenix'||
+   data.fact_p5_recovery.company_id_match!==false||
+   data.fact_p5_recovery.results_are_signed_agent_receipts!==false||
+   data.fact_p5_recovery.full_engine_certified!==false||
+   data.fact_p5_recovery.legacy_jobs_reactivated!==false||
+   data.fact_p5_recovery.external_action_triggered!==false||
+   (data.fact_p5_recovery.status==='LIVE'&&(
+      !Number.isSafeInteger(data.fact_p5_recovery.runner_ticks)||
+      !Number.isSafeInteger(data.fact_p5_recovery.runner_completed)||
+      !Number.isSafeInteger(data.fact_p5_recovery.p5_completed)||
+      !Number.isSafeInteger(data.fact_p5_recovery.last_24h_nonempty_ticks)||
+      Number(data.fact_p5_recovery.runner_ticks)<Number(data.fact_p5_recovery.runner_completed)||
+      Number(data.fact_p5_recovery.runner_ticks)<Number(data.fact_p5_recovery.last_24h_nonempty_ticks)||
+      !Number.isFinite(Date.parse(data.fact_p5_recovery.latest_runner_tick_at??''))||
+      !Number.isFinite(Date.parse(data.fact_p5_recovery.latest_p5_completed_at??''))))||
+   !data.creative_hold_gates||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.creative_hold_gates.status)||
+   data.creative_hold_gates.owner_rejection_override!==false||
+   data.creative_hold_gates.paid_generation_enabled!==false||
+   data.creative_hold_gates.all_certified!==false||
+   !Array.isArray(data.creative_hold_gates.engines)||data.creative_hold_gates.engines.length>2||
+   (data.creative_hold_gates.status==='LIVE'&&(
+    data.creative_hold_gates.engines.length!==2||
+    !['FACT-001','UMS-001'].every(id=>data.creative_hold_gates.engines.some(x=>x.engine_id===id))))||
+   data.creative_hold_gates.engines.some(x=>!['FACT-001','UMS-001'].includes(x.engine_id)||
+    x.safe_to_resume!==false||x.autonomy_certified!==false||
+    !Number.isSafeInteger(x.historical_jobs)||!Number.isSafeInteger(x.jobs_on_hold)||
+    !Number.isSafeInteger(x.historical_succeeded)||
+    x.historical_jobs<x.jobs_on_hold+x.historical_succeeded||!Array.isArray(x.blockers)||
+    x.blockers.some(b=>!['HOLD','SUCCEEDED'].includes(b.state)||
+     typeof b.reason_code!=='string'||b.reason_code.length>100||
+     !Number.isSafeInteger(b.count)))||
+   !data.console_job||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.console_job.status)||
+   data.console_job.legacy_worker_executed!==false||
+   data.console_job.full_engine_certified!==false||
+   data.console_job.agent_role_identity_verified!==false||
+   (data.console_job.status==='LIVE'&&(
+     data.console_job.execution_state!=='SUCCEEDED'||
+     data.console_job.signature_verified!==true||
+     data.console_job.specific_capability_evidenced!==true||
+     !/^[a-f0-9-]{36}$/.test(data.console_job.job_id??'')||
+     !/^[a-f0-9]{40}$/.test(data.console_job.observed_commit_sha??'')||
+     !Number.isFinite(Date.parse(data.console_job.last_execution_at??''))||
+     !Number.isSafeInteger(data.console_job.completed_job_count)||
+     Number(data.console_job.completed_job_count)<1))||
+   (data.console_job.status!=='LIVE'&&data.console_job.signature_verified!==false)||
+   !data.lab_qa||data.lab_qa.source!=='SUPABASE_PGCRON_QA_LAB_V1'||
+   !['LIVE','UNAVAILABLE','NOT_CONFIGURED'].includes(data.lab_qa.status)||
+   data.lab_qa.operational_autonomy_certified!==false||data.lab_qa.excellence_certified!==false||
+   data.lab_qa.first_party_scheduled!==true||data.lab_qa.extra_subscriptions_required!==false||
+   (data.lab_qa.status==='LIVE'&&(
+    data.lab_qa.signature_verified!==true||data.lab_qa.tests_total!==6||
+    !Number.isSafeInteger(data.lab_qa.tests_passed)||Number(data.lab_qa.tests_passed)>6||
+    !Number.isSafeInteger(data.lab_qa.runs_count)||Number(data.lab_qa.runs_count)<1))||
+   (data.receipt_source_status==='SUPABASE_SIGNED_SQL_QA'&&
+    (data.lab_qa.status!=='LIVE'||data.lab_qa.signature_verified!==true))||
+   !data.supervisor||data.supervisor.excellence_verified!==0||
+   data.supervisor.agent_quality!=='NOT_ATTESTED_GLOBAL'||
+   !['LIVE','PARTIAL'].includes(data.supervisor.provider_health))return missing('unavailable');
+  return {kind:'ready',data};
+ }catch{return missing('unavailable')}
+}

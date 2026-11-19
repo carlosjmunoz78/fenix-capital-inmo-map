@@ -41,8 +41,10 @@ export default function CerebroConsoleHost(){
  // The owner-only V3 is the production Operativa default. Legacy remains reversible.
  const realProduction=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
  const legacyRequested=params.get('operativa_legacy')==='1';
- const showPremiumV3=(realProduction||visualPreview)&&!legacyRequested;
- const previewOwnerGate=Boolean(isCerebroPath&&previewHost&&visualPreview);
+ // On this isolated private-preview host, owner-verified Operativa is the default,
+ // so existing /cerebro links never silently fall back to the generic Fénix shell.
+ const showPremiumV3=(realProduction||previewHost||visualPreview)&&!legacyRequested;
+ const previewOwnerGate=Boolean(isCerebroPath&&previewHost);
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
  const[previewLogged,setPreviewLogged]=useState(false);
