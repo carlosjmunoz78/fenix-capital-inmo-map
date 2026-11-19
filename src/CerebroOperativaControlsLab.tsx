@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {CircleAlert,CheckCircle2,Pause,Play,RefreshCw,RotateCcw,ShieldCheck} from 'lucide-react';
+import {CircleAlert,CheckCircle2,Clock3,Pause,Play,RefreshCw,RotateCcw,ShieldCheck} from 'lucide-react';
 import {
  readOperativaLabControl,sendOperativaLabCommand,sendOperativaConsoleReadOnce,
  type LabControlState,type LabControlReceipt,type LabEngineId,type LabCommand,type LabConsoleReceipt
@@ -72,7 +72,8 @@ export default function CerebroOperativaControlsLab(){
  async function invokeConsole(){
   if(busy||state.kind!=='ready'||!state.data?.console_readonly?.collector_schedules_active)return;
   const id=heldConsole.current??crypto.randomUUID();heldConsole.current=id;
-  setBusy('CONSOLE-001');setMessage('Solicitando lectura pública desde CONSOLE LAB…');
+  setBusy('CONSOLE-001');setReceipt(null);setConsoleReceipt(null);
+  setMessage('Solicitando lectura pública desde CONSOLE LAB…');
   try{
    const result=await sendOperativaConsoleReadOnce(id);
    if(!active.current)return;
@@ -155,7 +156,8 @@ export default function CerebroOperativaControlsLab(){
    permisos actuales. No se muestran botones de ejecución sin contrato verificado.
   </div>
   {message?<p role="status" className="opctrl-result">
-    {receipt&&heldRequest.current===null?<CheckCircle2 size={17}/>:<CircleAlert size={17}/>} {message}
+    {consoleReceipt?<Clock3 size={17}/>:receipt&&heldRequest.current===null?
+     <CheckCircle2 size={17}/>:<CircleAlert size={17}/>} {message}
    </p>:null}
   {receipt?<p className="opctrl-proof">Última orden: {receipt.engine_id} · {receipt.command} ·
     {receipt.outcome} · <code>{receipt.request_id}</code> · LAB</p>:null}
