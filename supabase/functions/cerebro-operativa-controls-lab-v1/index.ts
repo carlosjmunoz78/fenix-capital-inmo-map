@@ -70,6 +70,7 @@ Deno.serve(async(req)=>{
   if(error){
    const message=String(error.message||"");
    if(/OPSCTRL_RATE_LIMIT/.test(message))return err(429,"RATE_LIMIT_60S");
+   if(/OPSCTRL_LAST_MONITOR_PROTECTED/.test(message))return err(409,"ULTIMO_SUPERVISOR_PROTEGIDO");
    if(/OPSCTRL_CRON_CONTRACT_DRIFT/.test(message))return err(409,"CRON_CONTRACT_DRIFT");
    if(/OPSCTRL_IDEMPOTENCY_CONFLICT/.test(message))return err(409,"IDEMPOTENCY_CONFLICT");
    return err(503,"COMMAND_EXECUTION_FAILED");
