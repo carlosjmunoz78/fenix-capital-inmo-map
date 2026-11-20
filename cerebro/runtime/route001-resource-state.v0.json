@@ -5,8 +5,8 @@
   "engine_id": "ROUTE-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.2.0",
-  "updated_at": "2026-11-19T20:55:12.000Z",
-  "source_run_id": 44613477194,
+  "updated_at": "2026-11-20T07:40:43.000Z",
+  "source_run_id": 44696698080,
   "source_head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7",
   "repository_visibility": "public",
   "resources": [
@@ -28,8 +28,8 @@
       "quota_state": "NOT_APPLICABLE",
       "current_observation": true,
       "evidence_refs": [
-        "runtime:node:v24.22.2",
-        "github-run:44613477194"
+        "runtime:node:v24.22.3",
+        "github-run:44696698080"
       ],
       "reason": null
     },
@@ -51,7 +51,7 @@
       "current_observation": true,
       "evidence_refs": [
         "runtime:python:Python 3.12.16",
-        "github-run:44613477194"
+        "github-run:44696698080"
       ],
       "reason": null
     },
@@ -76,8 +76,8 @@
       "current_observation": true,
       "evidence_refs": [
         "repo:visibility:public",
-        "runtime:gh:gh version 2.103.3 (2026-10-26)",
-        "github-run:44613477194"
+        "runtime:gh:gh version 2.104.0 (2026-11-12)",
+        "github-run:44696698080"
       ],
       "reason": null
     },
@@ -211,8 +211,8 @@
     "selected_resource_class": "DETERMINISTIC_LOCAL",
     "actual_runtime": "node",
     "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
-    "observed_at": "2026-11-19T20:55:12.000Z",
-    "duration_ms": 0.428726,
+    "observed_at": "2026-11-20T07:40:43.000Z",
+    "duration_ms": 0.601082,
     "learning_events": 3,
     "business_execution": false
   },
@@ -225,9 +225,8 @@
   "multicompany_continuation": false,
   "additional_cost_eur": 0,
   "repeatability": {
-    "consecutive_live_green_cycles": 112,
+    "consecutive_live_green_cycles": 113,
     "recent_live_green_run_ids": [
-      43688224042,
       43750216253,
       43821845318,
       43970269008,
@@ -236,10 +235,11 @@
       44262288185,
       44395337628,
       44482575937,
-      44613477194
+      44613477194,
+      44696698080
     ],
     "last_rehearsal_status": "REPEATABILITY_REHEARSAL_GREEN",
-    "last_rehearsal_observed_at": "2026-11-19T20:55:12.000Z",
+    "last_rehearsal_observed_at": "2026-11-20T07:40:43.000Z",
     "fallback_rehearsal_green": true,
     "restoration_green": true,
     "full_loss_hold_green": true,
