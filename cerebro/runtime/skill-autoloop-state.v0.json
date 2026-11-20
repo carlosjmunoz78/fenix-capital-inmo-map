@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-20T20:41:19.369Z",
+  "updated_at": "2026-11-20T20:49:15.827Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -2743,42 +2743,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44720263692,
       "checkpointed_at": "2026-11-20T10:34:09.726Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:ca2740bc287415847f3f": {
-      "candidate_id": "github-wide-skills:ca2740bc287415847f3f",
-      "name": "ai-photo-studio",
-      "human_alias": "Ai Photo Studio",
-      "wrapper_id": "skillwrap:1db9a8ab109c24e72e9c",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 89.42,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "deusbr/ai-photo-studio",
-        "upstream_head_commit": "bcb6cc03ce16d87c1fe61ce96784c9a47b84be50",
-        "manifest_sha256": "baf82e63c3b53849a1b772fa411675fb1a8b7057874c0cc22a51591e57bddd0c",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 44796717395,
-      "checkpointed_at": "2026-11-20T18:52:06.720Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -30548,6 +30512,57 @@
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:ca2740bc287415847f3f": {
+      "candidate_id": "github-wide-skills:ca2740bc287415847f3f",
+      "name": "ai-photo-studio",
+      "human_alias": "Ai Photo Studio",
+      "wrapper_id": "skillwrap:1db9a8ab109c24e72e9c",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 89.42,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "deusbr/ai-photo-studio",
+        "upstream_head_commit": "bcb6cc03ce16d87c1fe61ce96784c9a47b84be50",
+        "manifest_sha256": "baf82e63c3b53849a1b772fa411675fb1a8b7057874c0cc22a51591e57bddd0c",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 44796717395,
+      "checkpointed_at": "2026-11-20T18:52:06.720Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:e365b968a347b2efe3d8c2bb",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-11-20T20:49:15.827Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:ec10c38353c6a944982f1e59",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -34161,7 +34176,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34174,7 +34189,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 44809346362,
+  "last_discovery_run_id": 44809350239,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
@@ -51706,6 +51721,47 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-11-19T03:38:26.450Z"
+    },
+    "github-wide-skills:ca2740bc287415847f3f": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:ec10c38353c6a944982f1e59",
+      "decision_id": "skill-autonomy:e365b968a347b2efe3d8c2bb",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:ca2740bc287415847f3f",
+      "skill_version": "skillwrap:1db9a8ab109c24e72e9c",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "ARCH-001",
+        "DEP-001",
+        "DOCS-001",
+        "FACT-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-11-20T20:49:15.827Z"
     }
   },
   "autonomy_action_queue": {},
