@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-20T18:50:23.903Z",
+  "updated_at": "2026-11-20T18:52:06.720Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -572,7 +572,8 @@
     "github-wide-skills:771dfacd9c6a1cd2aa36",
     "github-wide-skills:8e3cdaeb86785d1ad6bc",
     "github-wide-skills:633a040fa270f98c9838",
-    "github-wide-skills:2e3062d8925e80b10e75"
+    "github-wide-skills:2e3062d8925e80b10e75",
+    "github-wide-skills:ca2740bc287415847f3f"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2741,6 +2742,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44720263692,
       "checkpointed_at": "2026-11-20T10:34:09.726Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:ca2740bc287415847f3f": {
+      "candidate_id": "github-wide-skills:ca2740bc287415847f3f",
+      "name": "ai-photo-studio",
+      "human_alias": "Ai Photo Studio",
+      "wrapper_id": "skillwrap:1db9a8ab109c24e72e9c",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 89.42,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "deusbr/ai-photo-studio",
+        "upstream_head_commit": "bcb6cc03ce16d87c1fe61ce96784c9a47b84be50",
+        "manifest_sha256": "baf82e63c3b53849a1b772fa411675fb1a8b7057874c0cc22a51591e57bddd0c",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 44796717395,
+      "checkpointed_at": "2026-11-20T18:52:06.720Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34087,7 +34124,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34100,7 +34137,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 44748841722,
+  "last_discovery_run_id": 44796717395,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
