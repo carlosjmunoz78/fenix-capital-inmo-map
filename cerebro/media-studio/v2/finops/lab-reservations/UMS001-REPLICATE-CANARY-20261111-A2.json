@@ -1,0 +1,16 @@
+{
+  "request_id": "UMS001-REPLICATE-CANARY-20261111-A2",
+  "concept_id": "UMS-CRE-1111-A",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "provider": "replicate",
+  "max_provider_spend_usd": 0.06,
+  "status": "SUBMITTED",
+  "publication_approved": false,
+  "qa_human_realism": "PENDING",
+  "private_drive_persistence": "PENDING_TRANSFER",
+  "paid_prediction_count": 1,
+  "prediction_id": "gzsa4g1dc9rmr0d1s00te4ej84"
+}

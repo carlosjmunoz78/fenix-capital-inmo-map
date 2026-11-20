@@ -1,0 +1,55 @@
+name: UMS001 IGC202601 Flux Redux visual learning cover R03 once
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R03_ORDER.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igc202601-redux-r03-one-shot
+  cancel-in-progress: false
+jobs:
+  redux-real:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Validate target and model source before paid call
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py
+          python3 - <<'PY'
+          import json,importlib.util
+          from pathlib import Path
+          p=Path('cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py')
+          spec=importlib.util.spec_from_file_location('r03',p)
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          order=json.loads(m.ORDER.read_text());ref=json.loads(m.REF.read_text())
+          prompt,image=m.validate(order,ref)
+          assert order['max_cost_usd']==0.06 and order['max_predictions']==1 and order['publish'] is False
+          assert len(image)<150000
+          print('OFFLINE_R03_QA_GREEN')
+          PY
+      - name: One authentic Replicate Flux Redux prediction (prepaid only)
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_REDUX_R03_PREPAID_GATE: OWNER_APPROVED_PREPAID_20261111
+        run: python3 cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py
+      - name: Preserve output plus idempotency receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202601-flux-redux-r03
+          path: ${{ runner.temp }}/ums001-igc202601-redux-r03/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: No publication or retries
+        if: always()
+        run: echo 'One prediction at most, $0.06 estimate prepaid, publishing disabled, QR QA pending.'

@@ -1,0 +1,17 @@
+{
+  "request_id": "UMS001-IGC202603-CLOUDFLARE-LLAMA-REPLICATE-R03-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "concept_id": "IGC-2026-03-S00",
+  "image_model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "language_model_id": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "max_predictions": 1,
+  "max_cost_usd": 0.06,
+  "max_new_subscription_cost_eur": 0,
+  "budget": "EXISTING_PREPAID_ONLY",
+  "publish": false,
+  "image_reference_strength": 0.26,
+  "approval_state": "OWNER_APPROVED_REASONED_PROMPT_RETAKE_LAB"
+}

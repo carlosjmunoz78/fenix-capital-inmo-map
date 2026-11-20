@@ -1,0 +1,17 @@
+{
+  "request_id": "UMS001-IGC202601-REDUX-R03-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-01",
+  "slide_id": "S00",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_predictions": 1,
+  "max_cost_usd": 0.06,
+  "budget": "EXISTING_PREPAID_ONLY",
+  "publish": false,
+  "approval_state": "OWNER_ACCEPTED_REFERENCE_GUIDED_LAB",
+  "raw": false,
+  "image_prompt_strength": 0.38,
+  "prompt": "Premium award-winning SURREAL editorial PHOTOGRAPH for a very high-quality Spanish real-estate mortgage education Instagram carousel cover. Use the attached cropped visual reference only for its polished warm-orange cinematic atmosphere, multi-person photography, and effective composition; create different faces, outfits, and artwork, not a duplicate. Bright naturally sunny whitewashed Andalusian Córdoba courtyard, sophisticated warm photoreal commercial lighting and magical orange #FF5F00 and golden #FFB71B highlights. In the LEFT FOREGROUND a real Spanish professional woman adviser around 43 and an authentic Spanish adult couple around 36-40 are seated at a sunlit table; heads, faces and realistic human hands are large, visible, unoccluded, natural pores and varied expressions of intelligent curiosity. On the RIGHT lower middle and back table a compact beautiful translucent glowing bright orange open document folder and five floating blank ivory sheets elegantly rise in a simple artistic wave toward a small bronze home key, like a physically plausible art installation. The warm orange magical effect is spectacular but all visual effects remain behind or below human faces, with believable reflections and shadows; deep visual appeal, immediately arresting premium glossy ad art. Keep all three faces unmistakably visible and naturally lit, not obscured by documents. Excellent rich orange and warm sunlight with cool visual balance, never dim grey-brown. The bottom 25 percent should be unobstructed orange/luminous desk and clean space to add a large hook afterward using a controlled compositor. 4:5 vertical portrait framing, magazine cover quality. No logos, no visible text, no artificial watermarks, no stamps, no identification cards, no fictitious financial documents, no government insignia, no claims of guaranteed bank loans, no floating papers across faces, no giant folders eclipsing anyone, no oversized hardcover books. The authentic Fénix logo and Spanish headline will be added separately in postproduction using verified official source assets."
+}

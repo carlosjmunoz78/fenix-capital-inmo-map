@@ -1,0 +1,44 @@
+name: UMS-001 Replicate one-shot Ultra LAB prepaid creative retake 20261111 A2
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/REPLICATE_CANARY_ONE_SHOT_20261111_A2.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-replicate-canary-20261111-a1
+  cancel-in-progress: false
+jobs:
+  one-shot-canary:
+    if: false # Already executed successfully; permanent stop prevents duplicate prepaid spending
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/ums-replicate-flux-paid-lab-v0-20261108
+          persist-credentials: false
+      - name: Syntax validation of bounded one-shot LAB job
+        run: python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-one-shot-canary-lab-20261111.py
+      - name: Submit at most ONE prepaid Replicate Ultra RAW prediction after durable GH reservation
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_ONE_SHOT_PREPAID_GATE: CONFIRMED_20261111_ONLY
+          UMS001_CANARY_REQUEST_FILE: cerebro/media-studio/v2/requests/REPLICATE_CANARY_ONE_SHOT_20261111_A2.json
+        run: python3 cerebro/media-studio/v2/runtime/replicate-one-shot-canary-lab-20261111.py
+      - name: Preserve LAB image and receipt for prompt secure transfer to Drive
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-replicate-ultra-canary-20261111
+          path: ${{ runner.temp }}/ums001-replicate-canary/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Cost and no-publication receipt
+        if: always()
+        run: |
+          echo 'Maximum predictions: 1'
+          echo 'Estimated model usage: $0.06 from existing prepaid credits'
+          echo 'Auto retry: disabled; publication: disabled; environment: LAB'

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "panel_id": "IGC-2026-03-S00",
+  "trial": "CLOUDFLARE_LLAMA70B_CREATIVE_PILOT_R01",
+  "model_router": "CLOUDFLARE_WORKERS_AI_FREE_PILOT",
+  "creative_completion_id": "chatcmpl-a3646ef2-b4d0-444d-89b3-db67e41aeb59",
+  "replicate_prediction_id": "05agyfx5mnrmy0d1s9mtxqd438",
+  "replicate_model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "source_sha256": "4c822aba66d510569554de0ceca67e0dd7a027c683baa0c8f003604d58544be0",
+  "image_drive_file_id": "1_TaKfcMmda8vXCfgoQ73bN8YzSEiUikn",
+  "receipt_drive_file_id": "14lvLL6skuIaOd2VEZOd32suZrbwn-Woc",
+  "measured_creative_model_neurons": 78.08322143554688,
+  "charged_creative_model_additional_eur": 0,
+  "estimated_replicate_credit_usd": 0.06,
+  "visual_QA": "PARTIAL_PASS__HOLD_FOR_BRAND_AND_CLAIMS",
+  "pass": [
+    "Two adult human characters now clearly dominate foreground, genuine visible faces, hands and emotions",
+    "Spectacular large glowing orange architecture integrates with photographic Andalusian scene and realistic natural lighting",
+    "Strong orange art direction, squarely better people scale than deterministic Prompt Forge V0.1 and V0.2"
+  ],
+  "fail": [
+    "Nonsense/unintended micro-lettering appears on male jacket cuff; synthetic brand-looking lettering forbidden",
+    "Central neon checkmark suggests verified/approved transaction and is misleading for checklist prior to deposit; needs visual metaphor not approval symbol",
+    "Some brand-like shapes on architecture and prop top need independent manual review as non-official marks",
+    "Creative model was called via Cloudflare operator connector, not by autonomous production Gateway"
+  ],
+  "corrective_action": [
+    "Remove all symbolic checkmarks, stamps, coats of arms and logo-shaped shapes from visual prompt",
+    "Forbid visible text on clothes, jewelry, fabrics, keys, architecture and surfaces; enforce pixel QA or retouch by compositing before publish",
+    "Keep close-up double human composition with orange architectural art in BACKGROUND",
+    "Transfer Cloudflare Workers AI model access into isolated private CEREBRO runtime only after establishing auth and FINOPS; not a secret extraction from connector"
+  ],
+  "autonomy_status": "CREATIVE_MODEL_PILOT_AND_REPLICATE_IMAGE_PROVEN__PERMANENT_CEREBRO_GATEWAY_NOT_YET_CONNECTED",
+  "publish_enabled": false,
+  "owner_review": "NOT_YET",
+  "next_gate": "Optional single controlled revision with creative AI+image model and then deterministic official brand overlay, human/visual QA"
+}

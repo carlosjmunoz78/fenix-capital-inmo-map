@@ -1,0 +1,32 @@
+name: UMS001 IGC202601 Learn QA dry-run
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-igc202601-learn-qa-v1.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_igc202601_replicate_cover_canary_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_igc202601_canary_v1.py'
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202601_LEARNING_REFERENCE_V1.json'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-igc202601-learn-qa-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  learn-contract:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Syntax and learning contract tests
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202601_replicate_cover_canary_v1.py
+          python3 cerebro/media-studio/v2/tests/test_ums001_igc202601_canary_v1.py -v
+      - name: Explicit no-purchase receipt
+        run: |
+          echo 'Cost 0; no Replicate prediction calls; no publication; LAB only'

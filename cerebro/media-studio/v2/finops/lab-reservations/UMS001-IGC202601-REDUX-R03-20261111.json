@@ -1,0 +1,19 @@
+{
+  "request_id": "UMS001-IGC202601-REDUX-R03-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "slide_id": "S00",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "provider": "replicate",
+  "reference_source": "ChatGPT_APPROVED_TOP_CROP",
+  "reference_sha256": "962234ceee5cc42f108fbe911238e892bdbc77213f80d6b53dbf5d5922cbd8bd",
+  "reference_strength": 0.38,
+  "raw_mode": false,
+  "prompt_sha256": "651e44966ba5ff8519939cfbdee76fa218cf953b8edcf9d808e5a7604d398a6a",
+  "prediction_id": "cgar073jjhrmw0d1s878hrqn98",
+  "estimated_cost_usd": 0.06,
+  "status": "SUBMITTED",
+  "publication_approved": false,
+  "qa_status": "PENDING"
+}

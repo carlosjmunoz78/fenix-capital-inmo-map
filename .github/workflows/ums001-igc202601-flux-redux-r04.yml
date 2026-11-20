@@ -1,0 +1,58 @@
+name: UMS001 IGC202601 Flux Redux R04 no text one shot
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R04_ORDER.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igc202601-redux-r04-one-shot
+  cancel-in-progress: false
+jobs:
+  real-r04:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Enforce R03 verdict and validate R04 input
+        env:
+          UMS001_REDUX_ORDER_FILE: cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R04_ORDER.json
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py
+          python3 - <<'PY'
+          import importlib.util,json
+          from pathlib import Path
+          p=Path('cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py')
+          sp=importlib.util.spec_from_file_location('r04',p)
+          x=importlib.util.module_from_spec(sp);sp.loader.exec_module(x)
+          j=json.loads(x.ORDER.read_text());ref=json.loads(x.REF.read_text())
+          prompt,source=x.validate(j,ref)
+          assert j['max_predictions']==1 and j['max_cost_usd']==0.06 and j['publish'] is False
+          assert j['image_prompt_strength']==0.22 and j['raw'] is False
+          print('IGC202601_R04_PREFLIGHT_PASS')
+          PY
+      - name: Real Replicate R04 image (no model-generated text/logo intended)
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_REDUX_R03_PREPAID_GATE: OWNER_APPROVED_PREPAID_20261111
+          UMS001_REDUX_ORDER_FILE: cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R04_ORDER.json
+        run: python3 cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py
+      - name: Save one image and receipt for independent quality gate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202601-flux-redux-r04
+          path: ${{ runner.temp }}/ums001-igc202601-redux-r03/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: No publication, no subscription
+        if: always()
+        run: echo 'One prepaid prediction estimate $0.06; no retries or publication.'

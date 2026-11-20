@@ -1,0 +1,65 @@
+name: UMS-001 LAB Social Five Replicate Originals One Shot
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - '.github/workflows/cerebro-ums-replicate-social-five-20261111.yml'
+      - 'cerebro/media-studio/v2/requests/REPLICATE_SOCIAL_5_PREPAID_20261111.json'
+  push:
+    branches:
+      - cerebro/ums-replicate-flux-paid-lab-v0-20261108
+    paths:
+      - 'cerebro/media-studio/v2/requests/REPLICATE_SOCIAL_5_PREPAID_20261111.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-social-five-20261111-single
+  cancel-in-progress: false
+jobs:
+  social-five:
+    if: >-
+      (github.ref_name == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108' || github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108') &&
+      github.repository == 'carlosjmunoz78/fenix-capital-inmo-map'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Confirm triggering commit modifies only intended request or workflow
+        id: change
+        run: |
+          if git show --format= --name-only HEAD | grep -Fqx 'cerebro/media-studio/v2/requests/REPLICATE_SOCIAL_5_PREPAID_20261111.json'; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          elif git show --format= --name-only HEAD | grep -Fqx '.github/workflows/cerebro-ums-replicate-social-five-20261111.yml'; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Validate fixed script before paid calls
+        if: steps.change.outputs.eligible == 'true'
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-one-shot-canary-lab-20261111.py
+          python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-social-five-originals-lab-20261111.py
+      - name: Run maximum five distinct prepaid-only FLUX Ultra images
+        if: steps.change.outputs.eligible == 'true'
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_SOCIAL5_PREPAID_GATE: CONFIRMED_20261111_ONLY
+        run: python3 cerebro/media-studio/v2/runtime/replicate-social-five-originals-lab-20261111.py
+      - name: Preserve private imagery and receipts for Drive transfer
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-social-five-originals-20261111
+          path: ${{ runner.temp }}/ums001-replicate-social-5/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Audit safe boundary
+        if: always()
+        run: |
+          echo 'Max predictions 5. Max estimated prepaid provider usage USD 0.30.'
+          echo 'No retries, no social API mutation, no publication, LAB only.'

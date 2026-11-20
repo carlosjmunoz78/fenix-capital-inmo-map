@@ -1,0 +1,49 @@
+name: UMS001 IGC202601 carousel compositor rerender without paid AI
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/runtime/ums001_igc202601_brand_carousel_compositor_v1.py'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ums001-igc202601-recomposer-v2
+  cancel-in-progress: true
+jobs:
+  rerender-no-spend:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Install local open-source image compositor
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Retrieve six exact original Replicate image bytes
+        uses: actions/download-artifact@v4
+        with:
+          name: ums001-igc202601-six-replicate-originals
+          run-id: 43002156297
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/ums001-igc202601-five
+      - name: Verify originals and regenerate finished six cards without inference
+        run: >-
+          python3 cerebro/media-studio/v2/runtime/ums001_igc202601_brand_carousel_compositor_v1.py
+          "${{ runner.temp }}/ums001-igc202601-five"
+          "${{ runner.temp }}/ums001-igc202601-final-v2"
+          337ab92430498151d315e13044547395c7b710e9db986adb3d9630c8b6fb0e94
+      - name: Upload final V2, keep original V1 archived
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202601-six-finished-lab-carousel-v2-no-spend
+          path: ${{ runner.temp }}/ums001-igc202601-final-v2/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Recomposer audit
+        run: echo 'Zero new Replicate predictions. Original logo SHA verified. Publish disabled.'

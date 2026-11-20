@@ -1,0 +1,23 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "request_id": "UMS001-IGC202603-CLOUDFLARE-QWEN-REPLICATE-20261111-01",
+  "content_id": "IGC-2026-03",
+  "language_model": "@cf/qwen/qwen3-30b-a3b-fp8",
+  "language_provider": "cloudflare_workers_ai",
+  "creative_llm_called_by": "CEREBRO_Cloudflare_Universal_connector",
+  "creative_model_called_in_same_runner": false,
+  "creative_model_neurons_reported": 11.159221649169922,
+  "image_model": "black-forest-labs/flux-1.1-pro-ultra",
+  "image_provider": "replicate",
+  "reference_sha256": "c6341224d5e02ae7bf79e2d7b4effc59566d2aaa7028f2ad129f2045b79dcfe2",
+  "reference_strength": 0.3,
+  "prompt_sha256": "a24c1a36086200149f3a3323fd2f53b0880a389d5759a0482fa586d0fda32ea1",
+  "prediction_id": "c7gydkpzgdrmr0d1s928gn2we0",
+  "status": "SUBMITTED",
+  "estimated_provider_usd": 0.06,
+  "estimated_language_extra_cost_eur": 0,
+  "social_publication": false,
+  "qa": "PENDING"
+}

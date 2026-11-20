@@ -1,0 +1,59 @@
+name: UMS001 IGC202601 Flux Redux final clean reference R05 one shot
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R05_ORDER.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igc202601-redux-r05-one-shot
+  cancel-in-progress: false
+jobs:
+  real-r05:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: QA reference and one-shot plan before spend
+        env:
+          UMS001_REDUX_ORDER_FILE: cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R05_ORDER.json
+          UMS001_REDUX_REFERENCE_FILE: cerebro/media-studio/v2/references/IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py
+          python3 - <<'PY'
+          import importlib.util,json
+          from pathlib import Path
+          sp=importlib.util.spec_from_file_location('r05',Path('cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py'))
+          m=importlib.util.module_from_spec(sp);sp.loader.exec_module(m)
+          order=json.loads(m.ORDER.read_text()); ref=json.loads(m.REF.read_text())
+          p,src=m.validate(order,ref)
+          assert order['max_predictions']==1 and order['max_cost_usd']==0.06
+          assert order['image_prompt_strength']==0.34 and order['raw'] is False
+          print('R05_CLEAN_INPUT_QA_GREEN')
+          PY
+      - name: Generate R05 via actual Replicate model, no paid retry
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_REDUX_R03_PREPAID_GATE: OWNER_APPROVED_PREPAID_20261111
+          UMS001_REDUX_ORDER_FILE: cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R05_ORDER.json
+          UMS001_REDUX_REFERENCE_FILE: cerebro/media-studio/v2/references/IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json
+        run: python3 cerebro/media-studio/v2/runtime/ums001_igc202601_redux_r03_once.py
+      - name: Preserve R05 original and hashed receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202601-flux-redux-r05
+          path: ${{ runner.temp }}/ums001-igc202601-redux-r03/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: No publishing or retries
+        if: always()
+        run: echo 'One prepaid prediction $0.06 estimate. No publication. No subscription.'

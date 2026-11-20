@@ -1,0 +1,47 @@
+name: UMS-001 Replicate credential · read-only account and model check · once
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-replicate-readonly-auth-canary-20261108.yml'
+permissions:
+  contents: read
+jobs:
+  replicate-identity-get-only:
+    if: false # one authenticated GET-only canary already started, never rerun on PR edits
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Authenticate read-only with existing secret; no model inference, no account identifiers in logs
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,urllib.request,urllib.error,json
+          token=os.environ.get("REPLICATE_API_TOKEN","")
+          if len(token)<16 or token.strip()!=token:
+              print("REPLICATE_AUTH=SECRET_NOT_PRESENT_OR_FORMAT_INVALID")
+              raise SystemExit(1)
+          def probe(endpoint):
+              request=urllib.request.Request(
+                "https://api.replicate.com/v1/"+endpoint,
+                headers={"Authorization":"Bearer "+token,
+                         "Accept":"application/json",
+                         "User-Agent":"CEREBRO-UMS-001-LAB/1.0"},method="GET")
+              try:
+                  with urllib.request.urlopen(request,timeout=12) as resp:
+                      result=json.loads(resp.read(600000))
+                  return resp.status,result
+              except urllib.error.HTTPError as ex:
+                  return ex.code,{}
+              except Exception:
+                  return 0,{}
+          code,acct=probe("account")
+          print("REPLICATE_ACCOUNT_HTTP="+str(code))
+          print("REPLICATE_ACCOUNT_TYPE_VALID="+str(acct.get("type") in ("user","organization")))
+          model_code,model=probe("models/black-forest-labs/flux-1.1-pro")
+          print("REPLICATE_FLUX_MODEL_HTTP="+str(model_code))
+          print("REPLICATE_FLUX_MODEL_MATCH="+str(model.get("owner")=="black-forest-labs" and model.get("name")=="flux-1.1-pro"))
+          print("PREDICTION_CALLS=0")
+          print("SPEND_REQUESTED_EUR=0")
+          if code!=200 or model_code!=200:raise SystemExit(2)
+          PY

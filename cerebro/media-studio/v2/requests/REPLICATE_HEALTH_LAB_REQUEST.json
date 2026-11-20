@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "request_id": "UMS001-REPLICATE-HEALTH-20261111-02",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "requested_by": "CEREBRO",
+  "operation": "HEALTH_GET_ONLY",
+  "provider": "replicate",
+  "model": "black-forest-labs/flux-1.1-pro",
+  "paid_execution_enabled": false,
+  "allow_inference": false,
+  "publish": false,
+  "note": "CEREBRO request-file probe 02: repeatable repo-to-encrypted-secret GET health lane, no billable inference or publishing."
+}

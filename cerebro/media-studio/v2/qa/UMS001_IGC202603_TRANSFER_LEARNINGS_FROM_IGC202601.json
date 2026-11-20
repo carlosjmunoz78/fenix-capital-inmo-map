@@ -1,0 +1,29 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "content_id": "IGC-2026-03",
+  "source_content_id": "IGC-2026-01",
+  "source_run_id": 43002156297,
+  "source_quality_evidence": [
+    "IGC202601_CANARY_S00_R01_VERDICT",
+    "IGC202601_S00_R03_REDUX_VERDICT",
+    "IGC202601_S00_R04_REDUX_VERDICT",
+    "IGC202601_RECOMPOSER_V2",
+    "UMS001_IGC202603_AUTOPROMPT_CANARY_R01_QA_FAIL"
+  ],
+  "quality_defects": [
+    "FACE_OCCLUSION",
+    "ILLEGIBLE_TEXT",
+    "DARK_MUDDY",
+    "REPEATED_SCENE",
+    "PLASTIC_PEOPLE",
+    "BRAND_FABRICATED",
+    "OVERLAY_CONFLICT",
+    "HUMAN_MISSING",
+    "SURREAL_WEAK",
+    "SCENE_GENERIC"
+  ],
+  "transfer_status": "CONFIRMED_WITH_IGC202603_REAL_REPLICATE_CANDIDATE_R01",
+  "cost_usd": 0,
+  "change_reason": "Rules proven useful for previous carousel can guide the next creative series; visual quality still requires separate review."
+}

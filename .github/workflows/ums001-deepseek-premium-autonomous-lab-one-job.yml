@@ -1,0 +1,91 @@
+name: UMS001 DeepSeek premium creative autonomous image LAB one-job
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-02.json'
+  push:
+    branches: [cerebro/ums-replicate-flux-paid-lab-v0-20261108]
+    paths:
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001-*.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-deepseek-image-lab-single-worker
+  cancel-in-progress: false
+jobs:
+  autonomous-creative-canary:
+    if: >-
+      (github.event_name == 'push' &&
+       github.ref_name == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108') ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108')
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Detect exactly one unique, isolated LAB image job
+        id: requested
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff-tree --no-commit-id --name-only -r HEAD | grep -E '^cerebro/media-studio/v2/requests/deepseek-auto/UMS001-[A-Za-z0-9-]+[.]json$' || true)
+          if [ "${#changed[@]}" -ne 1 ]; then
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+            echo 'No exactly-one-job LAB trigger. No paid calls.'
+            exit 0
+          fi
+          echo "LAB_JOB_FILE=${changed[0]}" >> "$GITHUB_ENV"
+          echo 'eligible=true' >> "$GITHUB_OUTPUT"
+      - name: Install pinned open-source pixel cropper for trusted reference
+        if: steps.requested.outputs.eligible == 'true'
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Compile and verify premium photography contract before paid calls
+        if: steps.requested.outputs.eligible == 'true'
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py
+          python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job "$LAB_JOB_FILE" --validate-only
+      - name: Verify already-configured encrypted DeepSeek and Replicate credentials
+        if: steps.requested.outputs.eligible == 'true'
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+        run: |
+          if [ -z "$DEEPSEEK_API_KEY" ]; then
+            echo 'BLOCKED: isolated UMS-001 DeepSeek secret is not configured in this LAB repository.'
+            exit 3
+          fi
+          if [ -z "$REPLICATE_API_TOKEN" ]; then
+            echo 'BLOCKED: Replicate LAB secret is not configured.'
+            exit 3
+          fi
+          echo 'LAB provider secrets present, values never printed.'
+      - name: Execute CEREBRO DeepSeek prompt -> Replicate -> DeepSeek Vision QA only
+        if: steps.requested.outputs.eligible == 'true'
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_DEEPSEEK_AUTOMATION_GATE: OWNER_AUTHORIZED_LAB_20261111
+        run: python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job "$LAB_JOB_FILE"
+      - name: Preserve all generated files and QA audit for independent visual evaluation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-deepseek-autonomous-premium-lab
+          path: ${{ runner.temp }}/ums001-deepseek-autonomous/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Safety and cost receipt
+        if: always()
+        run: |
+          echo 'LAB only, no social publication, no PROD, no Cloudflare AI.'
+          echo 'Two Replicate predictions maximum: $0.12 existing credit estimate.'
+          echo 'Four DeepSeek Flash calls maximum and conservative $0.05 usage cap.'
+          echo 'If credentials unavailable: no paid calls; mark blocked, not GREEN.'

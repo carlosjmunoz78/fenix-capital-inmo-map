@@ -1,0 +1,49 @@
+name: CEREBRO UMS-001 Replicate credential health LAB
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/cerebro-ums-replicate-connection-health-lab-v0.yml'
+      - 'cerebro/media-studio/v2/runtime/replicate-credential-health-lab-v0.py'
+      - 'cerebro/media-studio/v2/tests/replicate-credential-health-lab-v0.test.py'
+      - 'cerebro/media-studio/v2/requests/REPLICATE_HEALTH_LAB_REQUEST.json'
+  push:
+    branches:
+      - cerebro/ums-replicate-flux-paid-lab-v0-20261108
+    paths:
+      - 'cerebro/media-studio/v2/requests/REPLICATE_HEALTH_LAB_REQUEST.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-ums001-replicate-health-lab
+  cancel-in-progress: true
+jobs:
+  read-only-auth:
+    if: >-
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108') ||
+      (github.event_name == 'push' &&
+       github.ref_name == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108' &&
+       github.repository == 'carlosjmunoz78/fenix-capital-inmo-map') ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.ref_name == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108')
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline tests (no network or secrets)
+        run: python3 cerebro/media-studio/v2/tests/replicate-credential-health-lab-v0.test.py
+      - name: Replicate health (GET only; no predictions)
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+        run: python3 cerebro/media-studio/v2/runtime/replicate-credential-health-lab-v0.py
+      - name: No-spend guarantee
+        if: always()
+        run: |
+          echo 'REPLICATE_PREDICTIONS_SUBMITTED=0'
+          echo 'REPLICATE_PAID_EXECUTION_ENABLED=false'
+          echo 'REPLICATE_PUBLISH_ENABLED=false'

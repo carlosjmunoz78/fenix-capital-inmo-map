@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "consumer_company_id": "fenix-capital",
+  "company_mapping_verified": false,
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "v0.1",
+  "date": "2026-11-08",
+  "consumer_engine_id": "SOC-IG-FINANCIAL-REAL-ESTATE-V1",
+  "social_repo": "carlosjmunoz78/fenix-capital-cerebro-social",
+  "social_pr": 8,
+  "intended_consumer_manifest": "families/instagram/financial-real-estate/replicate-ums001-exclusive-creative-route-20261108.v1.json",
+  "intended_consumer_factory": "scripts/instagram_replicate_media_factory_lab.py",
+  "canonical_replicate_adapter": "cerebro/media-studio/v2/runtime/replicate-provider-lab-v0.mjs",
+  "policy": "NO_SECOND_AUDIOVISUAL_PRODUCER_OR_PUBLISHER",
+  "existing_compositor": "UMS-001 FFMPEG",
+  "required_producer_secret": "REPLICATE_API_TOKEN",
+  "secret_available_in_github_actions_list": true,
+  "verified_readonly_probe": {
+    "github_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42478667128",
+    "account_get_http": 200,
+    "model_get_http": 200,
+    "model": "black-forest-labs/flux-1.1-pro",
+    "prediction_calls": 0
+  },
+  "models": {
+    "IMAGE": {
+      "model_key": "FLUX_1_1_PRO",
+      "model_id": "black-forest-labs/flux-1.1-pro",
+      "account_paid_inference_enabled": false
+    },
+    "REEL_VIDEO": {
+      "model_key": "RUNWAY_GEN_4_5",
+      "model_id": "runwayml/gen-4.5",
+      "account_paid_inference_enabled": false
+    }
+  },
+  "known_production_job_request": {
+    "planned_posts": 7,
+    "planned_reels": 3,
+    "planned_carousels": 3,
+    "planned_story": 1,
+    "planned_image_predictions": 24,
+    "planned_video_clip_predictions": 6,
+    "source_job_status": "PLAN_ONLY_NO_POST"
+  },
+  "budget": {
+    "user_reported_prepaid_initial_eur": 100,
+    "current_live_balance_verified": false,
+    "ongoing_monthly_limit_eur": 40,
+    "combined_budget_images_eur": 10,
+    "combined_budget_video_eur": 30,
+    "existing_old_registry_envelopes_total_eur": 60,
+    "strict_overlay_less_than_old_proposal": true,
+    "atomic_finops_reservation_deployed": false,
+    "auto_reload_allowed": false,
+    "fx_vat_reserve_verified": false,
+    "no_auto_retry": true
+  },
+  "trusted_pipeline": {
+    "studio_gateway_authenticated_and_deployed": false,
+    "company_identity_mapping_verified": false,
+    "webhook_signature_verifier_deployed": false,
+    "webhook_replay_protection_deployed": false,
+    "private_media_storage_end_to_end_tested": false,
+    "callback_to_instagram_verified": false,
+    "ffmpeg_reel_assembly_e2e_tested": false,
+    "old_vs_new_shadows_tested": false,
+    "rollback_drill_tested": false,
+    "real_paid_asset_created": false
+  },
+  "release": {
+    "instagram_publish_enabled": false,
+    "buffer_queue_changes_allowed": false,
+    "credentials_shared_with_consumer": false,
+    "developer_or_new_subscription_needed": false,
+    "production_autonomy_granted": false
+  },
+  "gates": [
+    "TRUSTED_TENANT_MAPPING",
+    "REAL_ATOMIC_FINOPS",
+    "SIGNED_REPLICATE_WEBHOOK_REPLAY_PROTECTION",
+    "PERSISTED_MEDIA_SHA256",
+    "LICENSED_OUTPUT_AND_BRAND_QA",
+    "NARRATION_SUBTITLES_VIDEO_QA",
+    "INDEPENDENT_TRIBUNAL",
+    "BUFFERSENT_NOT_NATIVE_PROOF",
+    "HUMAN_REQUIRED_WHERE_LAW_OR_RISK_MANDATES",
+    "OLD_NEW_AND_ROLLBACK"
+  ],
+  "status": "CONSUMER_CONTRACT_ADDED_NOT_CONNECTED_TO_LIVE_RUNTIME"
+}

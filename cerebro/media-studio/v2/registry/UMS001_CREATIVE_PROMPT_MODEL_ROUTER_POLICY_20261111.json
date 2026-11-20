@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "2026-11-11-v0.5-DEEPSEEK-PRIMARY-PREMIUM-QA",
+  "policy_id": "UMS001_CREATIVE_PROMPT_MODEL_ROUTER",
+  "goal": "For every social/SEO image request CEREBRO generates, validates and iterates its OWN image prompts, never depends on ChatGPT writing them by hand.",
+  "current_evidence": {
+    "prompt_factory_workflow": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005104029",
+    "autoprompt_real_prediction_workflows": [
+      "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005514833",
+      "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43006213353"
+    ],
+    "last_real_candidate_qa": "REJECTED_CREATIVE_QA",
+    "image_model": "black-forest-labs/flux-1.1-pro-ultra",
+    "prompt_llm_api_calls": 0,
+    "manual_prompt_writing_for_canary": false
+  },
+  "routing_preference": [
+    {
+      "priority": 1,
+      "engine": "DEEPSEEK_FLASH",
+      "type": "paid_existing_credit",
+      "status": "OWNER_AUTHORIZED__SECRETS_NOT_YET_VERIFIED",
+      "use_for": "autonomous prompt creation, correction and visual QA"
+    },
+    {
+      "priority": 2,
+      "engine": "DETERMINISTIC_CONTRACT_VALIDATOR",
+      "type": "local_zero_cost",
+      "status": "EXISTING",
+      "use_for": "validation, financial caps, original logo, provenance, no-touch environments"
+    },
+    {
+      "priority": 3,
+      "engine": "MANUAL_EDITORIAL_EXCEPTION",
+      "type": "human",
+      "status": "ONLY_IF_QA_FAILS_OR_LEGAL_RISK",
+      "use_for": "actual human exception"
+    }
+  ],
+  "image_provider": "REPLICATE",
+  "image_provider_not_prompt_reasoner": "FLUX consumes prompts and images; the prompt composer and image evaluation remain independent logical motor components.",
+  "critical_learnings": [
+    "Two fully autonomous templates produced real model images but missed owner taste: first no humans, second tiny people among monumental architecture",
+    "Do not infer success from valid prompt JSON or successful provider HTTP call",
+    "High-quality image-conditioned reference must preserve foreground human scale while permitting novel scenes",
+    "Independent actual-image vision QA and editorial acceptance must confirm person scale, gaze, no invented text, brand provenance"
+  ],
+  "go_no_go_requirements": [
+    "independent_visual_QA_on_real_pixels",
+    "official_logo_sha256_postcompositing",
+    "no text/logo SEO",
+    "social short noticeable hook not tiny",
+    "sufficient creative diversity",
+    "accurate Spanish local professional scene",
+    "text/information legally reviewed",
+    "FINOPS atomic idempotence, cost and archive",
+    "successful network handoff receipt and duplicate prevention",
+    "PREPROD isolated, rollback and acceptance evidence"
+  ],
+  "deepseek_is_required": true,
+  "deepseek_is_useful_for_creative_reasoning": true,
+  "deepseek_cost_not_authorized_or_activated_by_this_manifest": false,
+  "next_action": "Blocked on DeepSeek secret availability in this isolated GitHub LAB repo. Photo premium prompts and visual rubric code physically tested. Reconnect existing secret securely without exposing API key in issue/chat/code.",
+  "publication_enabled": false,
+  "prod_promotion_allowed": false,
+  "no_touch": [
+    "App PROD",
+    "CRM PROD",
+    "Supabase PROD",
+    "WordPress PROD",
+    "SEO PROD",
+    "main",
+    "Buffer/Meta publication"
+  ],
+  "cloudflare_free_llm_pilot": {
+    "provider": "Cloudflare Workers AI",
+    "model_requested": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "additional_cost_eur": 0,
+    "first_inference_measured_neurons": 48.156036376953125,
+    "creative_inference_measured_neurons": [
+      78.08322143554688,
+      71.288330078125,
+      64.8113784790039
+    ],
+    "first_real_replicate_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43013984477",
+    "second_real_replicate_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43015439003",
+    "image_credit_estimate_usd": 0.12,
+    "qualitative_result": "FIRST_PARTIAL_PASS_SECOND_REJECTED",
+    "first_hard_fail": "unintended jacket lettering, floating approval checkmark and logo-like key shape",
+    "second_hard_fail": "fake bottom watermark/URLs, two male-presenting models instead of intended couple, embroidery mark, lower visual impact",
+    "runnable_adapter": "cerebro/media-studio/v2/runtime/ums001_cloudflare_creative_router_lab_v1.py",
+    "offline_tests_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43014702789",
+    "manual_cloudflare_connector_called": true,
+    "github_action_replicate_called": true,
+    "persistent_automated_ai_creative_router_operational": false,
+    "private_auth_secret_for_gateway": "NOT_VERIFIED_OR_CONFIGURED",
+    "quality_gate": "VISUAL_QA_REQUIRED",
+    "next_safe_step": "wire scoped Workers AI secret to isolated LAB/worker once available; compare 2+ model creative candidates and run independent image vision QA before payment; no direct social posting"
+  },
+  "prompt_router_policy": {
+    "company_id": "fenix",
+    "engine_id": "UMS-001",
+    "environment": "LAB",
+    "version": "0.4",
+    "primary_prompt_model": "deepseek-flash",
+    "deepseek_endpoint": "https://api.deepseek.com/chat/completions",
+    "creative_reasoner": "DEEPSEEK_PRIMARY",
+    "quality_vision_model": "deepseek-flash",
+    "image_generation_model": "black-forest-labs/flux-1.1-pro-ultra",
+    "cloudflare_workers_ai_creative": "DISABLED_BY_OWNER_CHOICE",
+    "cloudflare_infra_unaffected": true,
+    "deterministic_rules": "MANDATORY_CONTRACT_AND_FALLBACK_FOR_NO_COST_DRY_RUN_ONLY",
+    "official_logo_source": "MR_BOGART_SHA256_VERIFIED_POSTPROCESS_ONLY",
+    "feature_status": "LAB_AUTOMATIC_REQUEST_TRIGGER_CREATED__OFFLINE_QA_GREEN__DEEPSEEK_SECRET_UNAVAILABLE",
+    "production_autonomous": "BLOCKED",
+    "deepseek_calls_per_image_cap": 4,
+    "replicate_predictions_per_image_cap": 2,
+    "cost_cap_usd_per_image": 0.3,
+    "negative_prompt": "No logos, text, false watermarks or financial guarantees",
+    "no_contact_data_to_external_models": true,
+    "publish_on_acceptance": false,
+    "human_exception_only": "LOW_CONFIDENCE_OR_HIGH_RISK_OR_POLICY_CONFLICT",
+    "backup": "Preserve all prior source, evidence, variant, receipt, and historical Cloudflare experiments.",
+    "premium_prompt_contract_path": "cerebro/media-studio/v2/registry/UMS001_PREMIUM_CINEMATOGRAPHY_PROMPT_CONTRACT_V1.json",
+    "quality_dimensions": [
+      "casting",
+      "camera_angle",
+      "focal_length",
+      "aperture",
+      "lighting_key_fill_rim",
+      "contrast",
+      "depth_of_field",
+      "orange_brand_color",
+      "surreal_composition",
+      "natural_human_realism",
+      "text_and_logo_integrity"
+    ],
+    "qa_score_min": 88,
+    "photography_premium_test_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43023964942",
+    "photography_premium_regression": "16/16 PASS",
+    "automatic_lab_canary_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43023964854",
+    "automatic_lab_canary_result": "BLOCKED_BEFORE_ANY_PAID_API_CALL",
+    "blocked_dependency": "DEEPSEEK_API_KEY missing from secrets available to PR #39 branch LAB GitHub Action. REPLICATE_API_TOKEN confirmed present; do not export or hardcode secrets.",
+    "required_next_gate": "Set or grant existing DeepSeek API key in the repository Actions secret DEEPSEEK_API_KEY via secure administrator UI, then initiate a NEW isolated paid canary request ID (do not reuse idempotency key after any reserved run).",
+    "was_replicate_charged_in_latest_failed_run": false,
+    "was_deepseek_charged_in_latest_failed_run": false,
+    "visual_learning_global_rollout": "NOT_PERMITTED_UNTIL_REAL_VISUAL_QA_AND_REVIEW"
+  }
+}

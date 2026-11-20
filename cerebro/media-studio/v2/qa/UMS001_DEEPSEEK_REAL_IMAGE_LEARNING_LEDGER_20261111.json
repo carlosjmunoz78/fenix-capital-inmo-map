@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "lesson_source": "SEVEN_REAL_REPLICATE_IMAGES_DEEPSEEK_VISION_QA",
+  "status": "LEARNED_BLOCKED_FOR_AUTONOMOUS_PUBLICATION",
+  "runs": [
+    {
+      "run_id": 43029151754,
+      "request_id": "UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-05",
+      "predictions": 2,
+      "qa_scores": [
+        58,
+        null
+      ],
+      "drive_archive": "1Lm76GVCLvOUW7KQL6gob3yXDjm8wcGk6",
+      "note": "Second QA arithmetic inconsistency; candidate rejected"
+    },
+    {
+      "run_id": 43030184634,
+      "request_id": "UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-06",
+      "predictions": 3,
+      "qa_scores": [
+        52,
+        44,
+        38
+      ],
+      "drive_archive": "19dhBzYVqTwm-qwy5A7x9wD11m-n8LR7C",
+      "note": "Fake approval checkmark repeated from source image; all rejected"
+    },
+    {
+      "run_id": 43031579487,
+      "request_id": "UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-07",
+      "predictions": 2,
+      "qa_scores": [
+        52,
+        48
+      ],
+      "drive_archive": "19kwZwA3hjfkte1PRYVB_1NVGYHvWrK3x",
+      "note": "Checkmark source cropped by pixel verified SHA, but art still generic with fake marks"
+    }
+  ],
+  "rules": [
+    {
+      "code": "GENERIC_SCENE",
+      "instruction": "Actual failures: no bright empty orange wall, generic photo background or boring portrait. The orange glass architecture must be original, physically integrated and visible behind subjects, with cinematic story and believable shadows."
+    },
+    {
+      "code": "INVENTED_TEXT",
+      "instruction": "Actual failures: reject pseudo-URLs, watermark-like lettering, embroidery/garment characters and writing on props or walls. Do not publish; model output requires pixel QA."
+    },
+    {
+      "code": "INVENTED_LOGO",
+      "instruction": "Actual failures: any false brand icon, mark on wristwatch, jacket or architecture is a hard rejection. Only SHA-verified Mr Bogart official Fénix logo in deterministic postproduction."
+    },
+    {
+      "code": "MISLEADING_FINANCE",
+      "instruction": "Actual failures: no glowing approval tick, seals or symbolic loan acceptance. Before-deposit educational imagery must never imply that a legal or mortgage transaction has been approved."
+    },
+    {
+      "code": "BAD_ANATOMY",
+      "instruction": "Actual failures: fused extra fingers, melted hands, odd arm poses. Keep hands naturally positioned with realistic five-finger geometry and avoid dominant artificial hand gestures."
+    },
+    {
+      "code": "COMPOSITION_WEAK",
+      "instruction": "Actual failures: no one-person-dominates-while-other-tiny, cut-off subjects or all people staring blankly. Compose intentional two-person portrait in believable local environment, eye-level medium shot, faces clear."
+    },
+    {
+      "code": "FLAT_CONTRAST",
+      "instruction": "Actual failures: orange slab backgrounds and flat studio-like illumination are insufficient. Require nuanced key/fill, true Mediterranean directional sunlight, readable shadows and premium controlled cinematic color."
+    }
+  ],
+  "policy": {
+    "publish_enabled": false,
+    "prod_promotion_allowed": false,
+    "deepseek_primary": true,
+    "replicate_image_generation": true,
+    "quality_threshold": 88,
+    "low_confidence_requires_human": true,
+    "source_reference_crop_verified": true,
+    "cost_estimate_replicate_usd": 0.42,
+    "estimated_usage_only": true
+  },
+  "next_gate": "Design stronger safe cinematic source without approval-like icons, build brand postprocessor and comprehensive visual QA before enabling automatic publication or next video phase."
+}

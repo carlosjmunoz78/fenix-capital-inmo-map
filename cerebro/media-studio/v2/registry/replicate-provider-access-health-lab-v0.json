@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "provider_id": "REPLICATE",
+  "environment": "LAB",
+  "version": "v0.2",
+  "status": "AUTH_VERIFIED_ROUTER_NOT_CONNECTED",
+  "secret_source": "GITHUB_ACTIONS_ENCRYPTED_SECRET",
+  "secret_name": "REPLICATE_API_TOKEN",
+  "secret_value_recorded": false,
+  "last_observed_auth_at": "2026-11-11",
+  "authentication_evidence": {
+    "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42927197709",
+    "test_results": "5/5 PASS",
+    "account_http": 200,
+    "model_http": 200,
+    "model": "black-forest-labs/flux-1.1-pro",
+    "paid_predictions": 0,
+    "api_cost_eur": 0
+  },
+  "capability_status": {
+    "healthcheck": "VERIFIED_REUSABLE_FROM_BRANCH_REQUEST",
+    "persistent_secret": "GITHUB_ACTIONS_ONLY",
+    "producer_runtime_access": "BLOCKED_NOT_WIRED",
+    "atomic_finops": "NOT_VERIFIED",
+    "provider_webhook": "NOT_DEPLOYED",
+    "private_asset_retention": "NOT_VERIFIED",
+    "production_publishing": "DISABLED",
+    "inference": "DISABLED"
+  },
+  "access_goals": [
+    "Single encrypted source of truth; do not copy token into WordPress, Notion, browser, chat, KV or repository files.",
+    "UMS-001 may always request a health probe from a trusted path without paid inference.",
+    "Provider-side rate limit, downtime, revoked or expired tokens require recovery; never assert 100% external uptime.",
+    "Do not allow paid prediction unless FINOPS and durable asset pipeline are green.",
+    "Run model access check and structured redacted status on demand; errors should route HUMAN_REQUIRED only on SECURITY_INCIDENT or persistent auth failure.",
+    "Disable provider call without deleting the underlying credential, branch or existing render fallback."
+  ],
+  "no_change": {
+    "app": true,
+    "crm": true,
+    "supabase_prod": true,
+    "wordpress": true,
+    "seo_prod": true,
+    "instagram_prod": true,
+    "facebook_prod": true
+  },
+  "rollback": "Delete/disable the isolated LAB health workflow without removing the existing Replicate credential or production provider path.",
+  "next_gate": "Integrate UMS-001 trusted runtime with same encrypted Replicate account credential via secure secret injection; FINOPS reservations; trusted callback; durable asset store; preprod OLD_vs_NEW before publication.",
+  "owner": "CEREBRO UMS-001 / FACT-001",
+  "repeated_request_evidence": {
+    "request_file": "cerebro/media-studio/v2/requests/REPLICATE_HEALTH_LAB_REQUEST.json",
+    "request_id": "UMS001-REPLICATE-HEALTH-20261111-02",
+    "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42927922906",
+    "event": "pull_request branch synchronize following request-file update",
+    "conclusion": "success",
+    "authenticated_get_only": true,
+    "paid_prediction_count": 0
+  }
+}

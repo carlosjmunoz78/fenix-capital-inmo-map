@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "request_id": "UMS001-IGC202603-PROMPTFORGE-S00-20261111-01",
+  "content_id": "IGC-2026-03",
+  "concept_id": "IGC-2026-03-S00",
+  "provider": "replicate",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "prompt_generator": "UMS001-PROMPT-FORGE-V0.1",
+  "prompt_generated_by": "CEREBRO_DETERMINISTIC_RULE_ENGINE",
+  "deepseek_api_called": false,
+  "llm_api_calls": 0,
+  "prompt_sha256": "f8aa4001019e95d809d79be0d327386ae8f5878776cffb9e5e81d686ae1e404d",
+  "prediction_id": "tmg80tceyxrmr0d1s8rsvgwrfr",
+  "estimated_provider_usage_usd": 0.06,
+  "status": "SUBMITTED",
+  "publication_approved": false,
+  "qa": "PENDING"
+}

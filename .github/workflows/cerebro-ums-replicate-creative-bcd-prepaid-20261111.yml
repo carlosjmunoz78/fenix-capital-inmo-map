@@ -1,0 +1,58 @@
+name: UMS-001 Replicate three original surreal portraits BCD LAB prepaid
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/REPLICATE_BCD_PREPAID_THREE_20261111.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-replicate-bcd-20261111-single
+  cancel-in-progress: false
+jobs:
+  three-creative-images:
+    if: false # Paid BCD batch completed once; hard stop prevents accidental resubmission
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.after }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Check this event actually changed the one-shot request (not another PR file)
+        id: changed
+        env:
+          EVENT_SHA: ${{ github.event.after }}
+        run: |
+          if git show --format= --name-only "$EVENT_SHA" | grep -Fxq 'cerebro/media-studio/v2/requests/REPLICATE_BCD_PREPAID_THREE_20261111.json'; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Verify generation code before paid calls
+        if: steps.changed.outputs.eligible == 'true'
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-one-shot-canary-lab-20261111.py
+          python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-three-creative-images-lab-20261111.py
+      - name: Run THREE Replicate Ultra RAW images with one time prepaid reservation
+        if: steps.changed.outputs.eligible == 'true'
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_BCD_PREPAID_GATE: CONFIRMED_20261111_ONLY
+        run: python3 cerebro/media-studio/v2/runtime/replicate-three-creative-images-lab-20261111.py
+      - name: Preserve images plus manifests for private Drive transfer
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-replicate-creative-bcd-20261111
+          path: ${{ runner.temp }}/ums001-replicate-bcd/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Price and safety receipt
+        if: always()
+        run: |
+          echo 'Maximum predictions: 3'
+          echo 'Estimated usage max: $0.18 from existing prepaid credits'
+          echo 'No retries, no production publication, LAB only'

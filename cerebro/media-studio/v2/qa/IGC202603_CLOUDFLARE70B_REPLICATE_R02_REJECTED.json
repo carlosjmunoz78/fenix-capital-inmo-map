@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "panel_id": "IGC-2026-03-S00",
+  "experiment": "CLOUDFLARE_LLAMA70B_CREATIVE_R02_TO_REPLICATE",
+  "run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43015439003",
+  "prediction_id": "h7zbb835f1rmw0d1s9stsk4x1m",
+  "image_sha256": "b839687398a3025fd5cb550b2622d6674e9c76114a4307c529cd3ec9840b5001",
+  "source_provider": "replicate",
+  "prompt_provider": "cloudflare-workers-ai",
+  "creative_model": "@cf/meta/llama-3.3-70b-instruct-sd",
+  "creative_completion_id": "chatcmpl-1bd8f641-7c40-4b0f-908f-a6879c18130e",
+  "creative_free_neurons": 64.8113784790039,
+  "estimated_replicate_credit_usd": 0.06,
+  "original_drive_file_id": "1aoWEtM01KV5aSMwaHaiR-jDRk5b8zvad",
+  "original_zip_drive_file_id": "1QYy-8mkGPm7tErafrcLOQ0rQHD4nESs-",
+  "creative_verdict": "REJECTED_AFTER_VISUAL_QA",
+  "passes": [
+    "Large realistic-looking adult people in foreground",
+    "Warm orange architectural arc and housing motif present",
+    "No new subscription, no DeepSeek, actual Cloudflare free inference and Replicate prediction receipts"
+  ],
+  "hard_fails": [
+    "Subjects are two male-presenting adults even though brief intended a woman and man; character consistency broken",
+    "Model fabricated tiny copyright-like footer and nonsense web URL at bottom of image, completely unacceptable for publishing",
+    "Model produced logo-like decorative embroidery on cuff despite explicit plain-unbranded-clothing guard",
+    "Scene too generic and surreal effect weak compared to owner's approved artistic standard; no unique human story",
+    "Photo would need significant rework; do not mark as finished or send to social scheduler"
+  ],
+  "learning": [
+    "Real photographic input pixel QA is mandatory; LLM's own hard_reject list alone cannot guarantee correctness",
+    "Need dedicated visual language model/vision QA or human approval to detect invented writing, model deviation and gender/casting direction before delivery",
+    "Use no problematic reference with possible logo/cuff text; source design matters",
+    "When model outputs contradictory instructions or insufficient creative detail, reject and revise before Replicate POST, rather than rerun blindly",
+    "Do not update permanent full autonomous gate until consecutive end-to-end visual QA passes with owner-approved imagery"
+  ],
+  "auto_retry_allowed": false,
+  "additional_image_generation_authorized_by_this_record": false,
+  "publish_enabled": false,
+  "owner_review_pending": true,
+  "delivery_status": "LAB_REJECTED_NEVER_PUBLISH",
+  "ops_context": "Cloudflare connector manually produced creative response for lab pilot; GitHub Action consumed its saved proposal, not a permanent Gateway service. Cloudflare router code passed offline tests, separate scoped token not provisioned for GitHub runtime."
+}

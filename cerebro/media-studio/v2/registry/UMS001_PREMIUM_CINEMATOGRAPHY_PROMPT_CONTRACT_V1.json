@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "UMS001-PREMIUM-CINEMATOGRAPHY-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "priority": "HARD_REQUIREMENT_FOR_EVERY_DEEPSEEK_IMAGE_PROMPT",
+  "director": "DEEPSEEK_FLASH_PRIMARY",
+  "brand": {
+    "dominant_campaign_orange": "#FF5F00",
+    "secondary_yellow": "#FFB71B",
+    "neutral": "#222222",
+    "purple_outside_original_logo": "MINIMAL",
+    "logo_policy": "NEVER_IN_REPLICATE_IMAGE_PIXELS; ORIGINAL_MR_BOGART_SHA256_VERIFIED_IN_POST",
+    "website_logo_source": "OFFICIAL_BRAND_REGISTRY_ONLY"
+  },
+  "artistic_standard": {
+    "visual_goal": "Premium cinematic editorial photography that immediately stops scroll, visually authentic Spanish/Andalusian people, surreal architecture physically grounded, never generic AI stock",
+    "unique_idea": "Specific imaginative storytelling metaphor for the subject, not a stock house, floating papers, icon clutter or repeated glass spiral",
+    "casting": "Adult Spanish/Andalusian human protagonist(s), authentic local context and age variation, faces unobstructed; if requested adult woman+man actually show two adults with intended presentation; no tiny human silhouettes.",
+    "camera": {
+      "shot_scale": "Waist-up medium close-up; subjects dominate 55-70% height for social people-led scenes",
+      "angle": "Specify eye-level as default; choose deliberately low three-quarter view for empowerment or elevated for top-down still-life SEO only; justify any deviation by story",
+      "lens": "Choose one appropriate equivalent: 35mm environmental, 50mm natural cinematic, 85mm portrait; avoid wide-angle facial distortion",
+      "aperture": "f/2.8–f/4 as visual intent where both faces stay in focus; don't blur required props",
+      "framing": "Thirds and depth layers: human foreground, surreal sculpture in mid/background, authentic architectural context in far background; avoid cropping heads and hands",
+      "aspect_ratios": {
+        "social": "4:5 1080×1350 output",
+        "seo": "landscape hero ratio determined by receiving URL; no overlays"
+      }
+    },
+    "lighting": {
+      "source": "Specify source and direction: Andalusian natural sunlight / large diffused window softbox; do not mix conflicting shadows",
+      "key": "Soft key at about 30–45° from side, diffuse highlight on facial features with skin microtexture",
+      "fill": "Subtle negative fill or diffuse bounce maintaining readable eyes, target visual key-to-fill ~2:1 to 4:1 not dark",
+      "rim": "Optional subtle controlled golden rim/edge light separating subject from background",
+      "shadow": "All human/object cast shadows coherent to one directional physical light source, realistic bounce and specular responses",
+      "contrast": "Deep but readable blacks; luminous highlights with no clipping or muddy underexposure; skin midtones intact",
+      "time_of_day": "Golden hour or bright Mediterranean morning depending narrative; don't make every slide identical"
+    },
+    "color_grade": {
+      "dominant": "Warm vivid Fénix orange #FF5F00 for artistic construction and highlights, not orange skin",
+      "support": "Honey golden #FFB71B accents, cream plaster, warm sandstone, charcoal where needed, restrained green plants as visual foil",
+      "purple": "Very little outside ORIGINAL untouched logo",
+      "grading": "Luxury cinematic color separation with restrained saturation, no flat corporate gradient, natural skin hues"
+    },
+    "texture_and_materials": "Photographic real human pores, hair strands, hands and clothing; cinematic tactile ceramic, brass, glass with refraction and plausible shadows; avoid beauty plastic or malformed hands",
+    "surreal_direction": "One hero art-installation metaphor per image, sculptural and bold, anchored in realistic location; never blocks faces, no fabricated financial approval marks, no paper or pseudo-letters",
+    "typography": "ALL model images have zero lettering/URLs/watermarks/labels; for social, 1 short bold Spanish hook composed separately in deterministic stage, legible with safe margins; for SEO, final image has no text or logo",
+    "brand_compositing": "Official Mr Bogart colored PNG/SVG original from immutable hash verified registry; choose by contrast; never request generative model to redraw or recolor it",
+    "quality_threshold": "No pass unless premium design, correct casting and context, no logos or invented pseudo-text, verified visual evidence, independent vision QA plus legal/brand gates"
+  },
+  "prompt_required_order": [
+    "WHO: adult human subjects, roles, emotion and face scale, wardrobe without logos/letters",
+    "WHAT: specific action relating to user benefit and property/finance subject",
+    "WHERE: authentic Córdoba/Andalusia architectural and cultural context",
+    "CAMERA: chosen shot distance, eye-line angle, focal length, aperture/depth, thirds and layers",
+    "LIGHT: sunlight/window source, key direction/softness, fill/rim, shadow consistency",
+    "CONTRAST: dynamic range, subject visibility, bright blacks/whites control",
+    "COLOR: orange #FF5F00 campaign accent, gold #FFB71B, purple minimal, natural skin",
+    "SURREAL: bold unique physically integrated installation BEHIND faces with one clear narrative",
+    "QUALITY: real optical textures, correct anatomy, skin pores, hand count, material shading",
+    "POSTPROCESS: empty footer safe area 20-25% for social short hook and official logo",
+    "NEGATIVES: no logos, lettering, papers, emblems, watermarks, checks, bank approval claims, malformed people"
+  ],
+  "variation_rules": [
+    "Never reuse same model portrait, lens+light arrangement, architectural location and metaphor across adjacent slides",
+    "Use distinct role/age/setting/angle/story where editorial context supports it",
+    "Keep unified orange premium art identity without repeating identical generated compositions"
+  ],
+  "qa_dimensions": {
+    "human_presence_and_cast": 20,
+    "camera_and_composition": 15,
+    "lighting_and_realism": 15,
+    "contrast_and_color": 10,
+    "surreal_creativity": 15,
+    "typography_and_brand_integrity": 15,
+    "context_and_claims": 10
+  },
+  "hard_stop_codes": [
+    "INVENTED_TEXT",
+    "INVENTED_LOGO",
+    "FACE_MISSING",
+    "FACE_TINY",
+    "FACE_OBSCURED",
+    "CAST_MISMATCH",
+    "BAD_ANATOMY",
+    "MISLEADING_FINANCE"
+  ],
+  "acceptance": {
+    "min_score": 88,
+    "zero_hard_stop_failures": true,
+    "after_completion_checks": [
+      "original logo SHA-256, correct typographic fit, no overlaps",
+      "export layout, resolution and safe area",
+      "SEO text/logos absent",
+      "social source and destination publish gates"
+    ],
+    "production_enabled": false
+  },
+  "training_rule": "Record exact prompt, scene, camera, light, contrast, color, QA violation, finished source hash, version, cost. A single successful image is evidence for that style, NOT permanent autonomous perfection.",
+  "cost_policy": {
+    "new_subscription_eur": 0,
+    "existing_deepseek_credit_allowed": true,
+    "existing_replicate_credit_allowed": true,
+    "per_job_spend_capped": true
+  },
+  "non_invasive": true,
+  "no_touch": [
+    "App PROD",
+    "CRM PROD",
+    "Supabase PROD",
+    "WordPress PROD",
+    "SEO PROD",
+    "Cloudflare AI configuration",
+    "GitHub main",
+    "social publication"
+  ]
+}

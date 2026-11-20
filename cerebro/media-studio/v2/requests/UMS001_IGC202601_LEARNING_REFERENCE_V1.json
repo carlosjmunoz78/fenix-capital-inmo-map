@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "request_id": "UMS001-IGC202601-LEARNING-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "source_network": "INSTAGRAM",
+  "content_id": "IGC-2026-01",
+  "source_generated_by": "CHATGPT",
+  "source_reference_owner_approval": "APPROVED_VISUAL_NOT_PUBLISHED",
+  "reference_drive_zip": "1nQjd0o9aXbv3wpdEWfEPRs6OyTPJmBWG",
+  "reference_contact_sheet": "1vTBA6w9Gxa4tP7bipmUF08JNyplARRIL",
+  "original_logo_source_registry": "https://github.com/carlosjmunoz78/cerebro-assets-autonomous-lab/blob/cerebro/ums001-producer-format-output-lab-v0-20261110/producer_lab/brand_assets/fenix/official_20251020/BRAND_CANONICAL_REGISTRY_V1.json",
+  "brand": {
+    "orange": "#FF5F00",
+    "yellow": "#FFB71B",
+    "purple": "#870064",
+    "style": "ORANGE_DOMINANT_PHOTOGRAPHIC_SURREAL_CINEMATIC_HUMANS",
+    "logo_source": "MR_BOGART_OFFICIAL_SVG_SHA_VERIFIED_POSTPROCESS_ONLY",
+    "no_generated_logo": true
+  },
+  "reference_is_style_not_source": "Do not claim Replicate made accepted ChatGPT samples. Make independent variations. Avoid copying wrong document typography or repeated model/background.",
+  "images": [
+    {
+      "id": "IGC-2026-01-S00",
+      "title": "Portada: prepara tu carpeta",
+      "prompt": "Bright high-end CINEMATIC editorial PHOTOGRAPH of ONE real Spanish Andalusian woman aged 39 with authentically human skin pores, olive complexion, subtle wrinkles, imperfect loose natural brown hair, correct hands and friendly confident expression. She is large, waist-up in the LEFT FOREGROUND occupying at least 65 percent of the image height, face perfectly unobstructed and warmly lit. This scene is an extraordinary but beautiful SURREAL concept advertisement about preparing a mortgage file: a large elegant luminous orange art-gallery folder sculpture is opening on the RIGHT side of a real sunlit outdoor Córdoba whitewashed courtyard table; behind her shoulder just five beautifully composed blank sheets of ivory paper and two solid brass home keys levitate gently in a wide flowing cinematic arc, all behind the person and NEVER across her face or hands. The folder is the brilliant orange #FF5F00 visual centerpiece, warm yellow-gold reflections #FFB71B. Clean sunlight, delicate natural shadows and Mediterranean green leaves, white stucco arch, warm terracotta, luxury premium film-advertising light, vibrant orange color contrast and depth of field. Surreal architectural kinetic sculpture in the BACKGROUND, person is 100 percent photographic and recognizably a real adult human, stylish believable clothing. Image is vertical 4:5. Reserve lower 25 percent as aesthetically rich clean darker warm-orange foreground table space, suitable for a large title added by another application. No dark brown murky grading, no underexposed portrait, no excessive documents, no hanging strings or small dangling items, no paper, key, or object in front of the face, no computer desk brown office. No repeated subjects across carousel. NO text, no letters, no fake identification cards, no made-up government documents, no financial number claims, no logos, no brand marks, no official stamps, no watermarks, no image model generated typography. Never generate the Fénix logo: a separate trusted compositor must overlay the exact official Mr Bogart original SVG after the image is generated.",
+      "reference_sha_prefix": "146154a36e419af7",
+      "prompt_revision": "R02_AFTER_CANARY_QA_FAIL",
+      "rejected_prediction_id": "t98s6preh9rmy0d1s82b2da5mg",
+      "qa_feedback_path": "cerebro/media-studio/v2/qa/IGC202601_CANARY_S00_R01_VERDICT.json"
+    },
+    {
+      "id": "IGC-2026-01-S01",
+      "title": "Identidad",
+      "prompt": "Premium cinematic commercial PHOTOGRAPH, 4:5 vertical with realistically photographed Spanish adults situated in a contemporary Córdoba or Andalusian working/living context. The person has natural pores, irregular realistic hair, realistic eyes, physically plausible five-finger hands and believable body proportions. Glowing ORANGE kinetic art installations, suspended paper folders, sculptural house and key metaphors, arresting sophisticated SURREAL architectural elements seamlessly composited into an otherwise real 50mm photo, motivated sunlight and grounded realistic shadows. Preserve open lower composition for a short visible headline added later. Every page has an independent original photorealistic creative concept. No text, no visible words, no letters, no real ID cards, no identifiable documents, no bank emblems, no logos, no fabricated official seals, no watermarks, no AI-generated lettering, no glowing text. Do NOT draw the Fénix brand; an external compositor adds the original official vector logo after generation. Orange #FF5F00 is the dominant branded mood without altering natural human colors; yellow-gold highlights; minimize purple. One Spanish woman in her late thirties looking thoughtfully at a simple unmarked orange document folder in a comfortable real Córdoba home office, hair up loosely, beautiful believable hands and skin texture. Levitate two or three blank abstract geometric information cards with no ID photographs, no coat of arms and no official document formatting, like pieces of an elegant surreal modern art installation. Morning sunlight and orange-yellow glimmer. Face prominent, different camera angle from cover; leave lower 35% gracefully readable for postproduction.",
+      "reference_sha_prefix": "2ae0ec16a3a6cde5"
+    },
+    {
+      "id": "IGC-2026-01-S02",
+      "title": "Ingresos y estabilidad",
+      "prompt": "Premium cinematic commercial PHOTOGRAPH, 4:5 vertical with realistically photographed Spanish adults situated in a contemporary Córdoba or Andalusian working/living context. The person has natural pores, irregular realistic hair, realistic eyes, physically plausible five-finger hands and believable body proportions. Glowing ORANGE kinetic art installations, suspended paper folders, sculptural house and key metaphors, arresting sophisticated SURREAL architectural elements seamlessly composited into an otherwise real 50mm photo, motivated sunlight and grounded realistic shadows. Preserve open lower composition for a short visible headline added later. Every page has an independent original photorealistic creative concept. No text, no visible words, no letters, no real ID cards, no identifiable documents, no bank emblems, no logos, no fabricated official seals, no watermarks, no AI-generated lettering, no glowing text. Do NOT draw the Fénix brand; an external compositor adds the original official vector logo after generation. Orange #FF5F00 is the dominant branded mood without altering natural human colors; yellow-gold highlights; minimize purple. One Spanish self-employed craftsman man aged forty five, with natural short beard and worn apron, seated next to an unmarked accounting folder in an authentic Andalusian ceramic workshop. Behind him a sophisticated surreal sculpture of stacked translucent amber steps and kinetic transparent ledger-like abstract shapes without numbers, representing steady income; no floating euro money, no bank stamps. Natural face and precise fingers, cool daylight, orange highlights; composition unlike all other slides. Leave lower 35% darker orange image space.",
+      "reference_sha_prefix": "70a8ba354554cf49"
+    },
+    {
+      "id": "IGC-2026-01-S03",
+      "title": "Gastos, deudas y ahorros",
+      "prompt": "Premium cinematic commercial PHOTOGRAPH, 4:5 vertical with realistically photographed Spanish adults situated in a contemporary Córdoba or Andalusian working/living context. The person has natural pores, irregular realistic hair, realistic eyes, physically plausible five-finger hands and believable body proportions. Glowing ORANGE kinetic art installations, suspended paper folders, sculptural house and key metaphors, arresting sophisticated SURREAL architectural elements seamlessly composited into an otherwise real 50mm photo, motivated sunlight and grounded realistic shadows. Preserve open lower composition for a short visible headline added later. Every page has an independent original photorealistic creative concept. No text, no visible words, no letters, no real ID cards, no identifiable documents, no bank emblems, no logos, no fabricated official seals, no watermarks, no AI-generated lettering, no glowing text. Do NOT draw the Fénix brand; an external compositor adds the original official vector logo after generation. Orange #FF5F00 is the dominant branded mood without altering natural human colors; yellow-gold highlights; minimize purple. One authentic Spanish young adult woman freelancer aged thirty three at her kitchen table, gently holding an ordinary little ceramic home-shaped savings box, in an interior with fresh Sevilla/Córdoba contemporary styling. Her natural face and realistic hands are large in photo. An imaginative physical SURREAL arrangement of tiny bronze rings, balanced household budget columns and orange translucent sculptural spheres rises from a book on the table, suggesting economic balance and reserves; no legible labels, no bank document, no generic floating coins. Warm cinematic orange against cream stone and subtle green plants; distinct framing. Leave lower 35% for overlaid slide heading.",
+      "reference_sha_prefix": "4fd52d26c11888fb"
+    },
+    {
+      "id": "IGC-2026-01-S04",
+      "title": "Documentación de la vivienda",
+      "prompt": "Premium cinematic commercial PHOTOGRAPH, 4:5 vertical with realistically photographed Spanish adults situated in a contemporary Córdoba or Andalusian working/living context. The person has natural pores, irregular realistic hair, realistic eyes, physically plausible five-finger hands and believable body proportions. Glowing ORANGE kinetic art installations, suspended paper folders, sculptural house and key metaphors, arresting sophisticated SURREAL architectural elements seamlessly composited into an otherwise real 50mm photo, motivated sunlight and grounded realistic shadows. Preserve open lower composition for a short visible headline added later. Every page has an independent original photorealistic creative concept. No text, no visible words, no letters, no real ID cards, no identifiable documents, no bank emblems, no logos, no fabricated official seals, no watermarks, no AI-generated lettering, no glowing text. Do NOT draw the Fénix brand; an external compositor adds the original official vector logo after generation. Orange #FF5F00 is the dominant branded mood without altering natural human colors; yellow-gold highlights; minimize purple. Real Spanish adult couple in their thirties examining an elegant handcrafted miniature Andalusian home with a brass key in front on an authentic Córdoba patio table. Behind them a surreal architectural model unfolds from perfectly blank white technical drafting paper into a luminous house facade and courtyard, with a gently twisting orange ribbon connecting floorplans to a physical key. Documentary believable skin and hands, professional cinematographic 35mm camera, subtle morning daylight, not a real home listing and not a bank seal. New unique composition and people unlike any other panel. Lower area left open for short caption.",
+      "reference_sha_prefix": "1310c1936383f36f"
+    },
+    {
+      "id": "IGC-2026-01-S05",
+      "title": "Revisión antes de pedir financiación",
+      "prompt": "Premium cinematic commercial PHOTOGRAPH, 4:5 vertical with realistically photographed Spanish adults situated in a contemporary Córdoba or Andalusian working/living context. The person has natural pores, irregular realistic hair, realistic eyes, physically plausible five-finger hands and believable body proportions. Glowing ORANGE kinetic art installations, suspended paper folders, sculptural house and key metaphors, arresting sophisticated SURREAL architectural elements seamlessly composited into an otherwise real 50mm photo, motivated sunlight and grounded realistic shadows. Preserve open lower composition for a short visible headline added later. Every page has an independent original photorealistic creative concept. No text, no visible words, no letters, no real ID cards, no identifiable documents, no bank emblems, no logos, no fabricated official seals, no watermarks, no AI-generated lettering, no glowing text. Do NOT draw the Fénix brand; an external compositor adds the original official vector logo after generation. Orange #FF5F00 is the dominant branded mood without altering natural human colors; yellow-gold highlights; minimize purple. A professional Spanish adult mortgage adviser woman around fifty with salt-and-pepper hair and authentic skin and expressive face, seated in an airy Córdoba advisory office, looking over a closed orange folder with a thoughtful satisfied smile. Behind her suspended brass circular sculptures and an abstract glowing orange checkmark sculpture, suggesting a careful personal review before submission, with no guaranteed loan approval implied. Surreal but physically believable, no check marks on an official signed file, photoreal cinematic fashion editorial, unusual asymmetric composition, no repeated subjects. Leave lower 35% for finishing overlay.",
+      "reference_sha_prefix": "0997ef793a3d43d6"
+    }
+  ],
+  "steps": {
+    "canary_first": "S00",
+    "all_other_slides": "S01..S05 after QA",
+    "provider": "REPLICATE",
+    "model": "black-forest-labs/flux-1.1-pro-ultra",
+    "price_estimate_per_prediction_usd": 0.06,
+    "publication_enabled": false
+  },
+  "postprocess": {
+    "official_logo_variant": "FENIX_OFFICIAL_01/02/06 depending on background",
+    "cover": "Antes de pedir hipoteca / Prepara tu carpeta",
+    "body_slides": [
+      {
+        "id": "S01",
+        "title": "1. Identidad",
+        "bullets": [
+          "Identificación vigente",
+          "Situación personal"
+        ]
+      },
+      {
+        "id": "S02",
+        "title": "2. Ingresos",
+        "bullets": [
+          "Justificantes según tu actividad",
+          "Estabilidad laboral"
+        ]
+      },
+      {
+        "id": "S03",
+        "title": "3. Ahorros",
+        "bullets": [
+          "Aportación inicial",
+          "Gastos y compromisos"
+        ]
+      },
+      {
+        "id": "S04",
+        "title": "4. Vivienda",
+        "bullets": [
+          "Datos del inmueble",
+          "Documentación disponible"
+        ]
+      },
+      {
+        "id": "S05",
+        "title": "5. Revisión",
+        "bullets": [
+          "Todo claro y al día",
+          "Cada entidad puede pedir más"
+        ]
+      }
+    ],
+    "disclaimer": "Guía orientativa. Los requisitos los determina cada entidad y operación."
+  },
+  "qa_requirements": [
+    "six unique photographically believable humans/settings",
+    "no text in FLUX output",
+    "no incorrect ID or official document formats",
+    "orange dominant, purple minimal",
+    "official SVG only after generation, verified SHA256",
+    "image asset SHA/prediction ID/cost",
+    "Spanish-language legible typography postprocessing",
+    "no publication until social scheduling rights and QA gates"
+  ],
+  "quality_gate_status": "REVISED_AFTER_QA_FAIL__R02_PREPAID_CANARY_ONLY"
+}

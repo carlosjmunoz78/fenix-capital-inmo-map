@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-01",
+  "slide_id": "S00",
+  "iteration": "R04",
+  "prediction_id": "19hnh7gr7drmy0d1s898gc072r",
+  "sha256": "27d4e378b8a2c63e13a3648199a92abbacdcf8806329e14e6bec96020f7a3aa0",
+  "estimated_cost_usd": 0.06,
+  "verdict": "ARTISTIC_COMPOSITION_PASS__GEN_AI_TEXT_FAIL",
+  "observations": [
+    "Bright photo and real-looking Spanish adults with attractive orange folder and gold glowing keys",
+    "Several white sheets with nonsense text generated even after explicit NO PAPERS and low image prompt strength",
+    "bottom-right pseudo-watermark; no guarantee it will never recur"
+  ],
+  "root_cause_hypothesis": "Unwanted floating paper and handwriting strongly present in source reference, despite weak 0.22 image_prompt_strength; Flux Redux reproduces source motif",
+  "fix": "Change source reference to another owner-approved photo with NO flying papers or text in crop, not merely prompt words. Use upper part of original review slide showing man/orange folder/glow without the text panel.",
+  "next_gate": "Fifth and FINAL bounded canary on cover before deciding whether manual QA/video model alternative needed; no batch until clean.",
+  "publication_approved": false
+}

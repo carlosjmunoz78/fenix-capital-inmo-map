@@ -1,0 +1,26 @@
+name: UMS Replicate FLUX Cinematic LAB Offline Gate
+on:
+  push:
+    branches:
+      - cerebro/ums-replicate-flux-paid-lab-v0-20261108
+    paths:
+      - 'cerebro/media-studio/v2/runtime/replicate-provider-lab-v0.mjs'
+      - 'cerebro/media-studio/v2/runtime/cinematic-model-router-lab-v0.mjs'
+      - 'cerebro/media-studio/v2/tests/replicate-provider-lab-v0.test.mjs'
+      - 'cerebro/media-studio/v2/tests/cinematic-model-router-lab-v0.test.mjs'
+      - '.github/workflows/cerebro-ums-replicate-lab-contract-v0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static contract tests (no token, no Replicate API calls)
+        run: |
+          node --test cerebro/media-studio/v2/tests/replicate-provider-lab-v0.test.mjs cerebro/media-studio/v2/tests/cinematic-model-router-lab-v0.test.mjs
+      - name: Verify no paid provider enabled
+        run: |
+          node -e "import('./cerebro/media-studio/v2/registry/replicate-flux-rollout-lab-v0.json',{with:{type:'json'}}).then(x=>{if(x.default.execute_enabled||x.default.publish_enabled)process.exit(1)})"

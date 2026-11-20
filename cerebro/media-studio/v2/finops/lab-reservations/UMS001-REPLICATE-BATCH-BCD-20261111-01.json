@@ -1,0 +1,45 @@
+{
+  "request_id": "UMS001-REPLICATE-BATCH-BCD-20261111-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "provider": "replicate",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "cost_cap_usd": 0.18,
+  "predictions_submitted": 3,
+  "publication_approved": false,
+  "status": "RUNNING",
+  "qa_human_realism": "PENDING",
+  "drive_persistence": "PENDING_TRANSFER",
+  "outputs": [
+    {
+      "concept_id": "UMS-CRE-1111-B",
+      "prediction_id": "qhvj165qm5rmr0d1s038knth1m",
+      "status": "IMAGE_DOWNLOADED_QA_PENDING",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false,
+      "sha256": "30a41520d6f9c72465f2abad3eada6b9bc27dad32464f4f25e6afa651024537e",
+      "prompt_sha256": "a50ef8b363cd1871250f40e85071e573efd7594f9f7a6394542fd6d05db54cd1",
+      "bytes": 1296825,
+      "filename": "UMS-CRE-1111-B_REPLICATE_ULTRA_RAW.jpg"
+    },
+    {
+      "concept_id": "UMS-CRE-1111-C",
+      "prediction_id": "qy5gfmywtdrmr0d1s03argevw8",
+      "status": "IMAGE_DOWNLOADED_QA_PENDING",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false,
+      "sha256": "6f5bb17be5dc3878a241cbf526c5e8dff5cb5ee8979dcadc94a54e77e8441585",
+      "prompt_sha256": "a556c1a07e2e18af26877576e16d4b7ba7125480b78ab41c7d38484bb57859ee",
+      "bytes": 2552047,
+      "filename": "UMS-CRE-1111-C_REPLICATE_ULTRA_RAW.jpg"
+    },
+    {
+      "concept_id": "UMS-CRE-1111-D",
+      "prediction_id": "g2mrp6fyedrmt0d1s039da1cmg",
+      "status": "SUBMITTED",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false
+    }
+  ]
+}

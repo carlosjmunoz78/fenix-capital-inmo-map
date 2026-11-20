@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-01",
+  "revision": "R02",
+  "provider": "replicate",
+  "model": "black-forest-labs/flux-1.1-pro-ultra",
+  "prediction_id": "c788hs62f5rmr0d1s84taqr5yw",
+  "sha256": "57452ba9a26b942e7abc330fa1219f5c62fed1a5231ae086add83db02f3e99a2",
+  "estimated_prepaid_usd": 0.06,
+  "verdict": "FAIL_HUMAN_OCCLUDED",
+  "evidence": "Even improved prompt produced a gigantic flat orange paper/folder obscuring much of central woman's face; weak premium fantasy contrast, photograph doesn't match owner-approved sample.",
+  "followup_method": "SWITCH_TO_VISUAL_REFERENCE_GUIDANCE",
+  "technical_reason": "Provider supports image_prompt URI and image_prompt_strength Flux Redux; raw false can yield more processed style. See official model schema https://replicate.com/black-forest-labs/flux-1.1-pro-ultra/api/schema",
+  "training_correction": [
+    "Use cropped upper 60% from approved ChatGPT cover (without AI text/logo) as temporary reference image",
+    "image_prompt_strength=0.35, raw=false, separate original new-person photo prompt",
+    "Keep faces clearly in 40% front; no gigantic solid folder blocking face",
+    "No model-generated logo, text, official documents. Compositor handles authentic logo and text",
+    "One paid canary only, maximum USD 0.06 prepaid; fail closed"
+  ],
+  "promote_rule": "Only if third image passes independent visual QA; do not automatically assume success",
+  "publication_approved": false
+}

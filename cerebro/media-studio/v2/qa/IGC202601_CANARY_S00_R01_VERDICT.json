@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "brief_id": "IGC-2026-01",
+  "asset_id": "IGC-2026-01-S00-CANARY-01",
+  "producer": "CEREBRO_UMS001",
+  "provider": "replicate",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "prediction_id": "t98s6preh9rmy0d1s82b2da5mg",
+  "sha256": "f86d31a77952e7df14a1a51469cb8ff69fb2920fd0e7f5abe2980b7e2530aa47",
+  "original_drive_file_id": "1CKwPSatFXJfdjHfMnRSuJ7hE_LracYM_",
+  "original_receipt_drive_id": "1AT8t-adKwjVTtPJ9ZeZQBvj260HoVDl2",
+  "estimated_prepaid_cost_usd": 0.06,
+  "evaluation": "CREATIVE_QA_FAIL_KEEP_FOR_TRAINING",
+  "hard_fail_reasons": [
+    "human main character too small and partially occluded by hanging paper and keys",
+    "background is dark and muddy; lacks vibrant orange and bright Andalusian cinematic brand direction",
+    "paper strings and fake document typography dominate; feels like conceptual exhibition rather than engaging advertisement",
+    "no room for strong readable social headline without obscuring face or subject",
+    "not similar enough in lighting/impact to owner-approved six reference slides"
+  ],
+  "pass_reasons": [
+    "authentic Replicate provider prediction proved with ID and SHA256",
+    "single realistic-looking adult",
+    "surreal paperwork theme visible",
+    "no generated Fénix logo on final raw"
+  ],
+  "corrective_actions": [
+    "one foreground adult face large >= 30% of image height and clearly unobstructed",
+    "authentic bright Andalusian white plaster and sunlit wood space, not dim office or brown grading",
+    "magical folder and paper forms in middle and background behind subjects, no dangling items crossing faces",
+    "vivid luminous orange #FF5F00 and gold #FFB71B shapes with clean premium shadows",
+    "restrain to 4-8 blank physically plausible documents and a large single orange sculptural folder",
+    "free lower third for deterministic official font/type and logo compositor",
+    "all source graphics neutral, no icons imitating ID cards, logos, brands or official document stamps"
+  ],
+  "learning_effect": {
+    "new_primary_prompt_revision": "R02",
+    "scope": "IGC-2026-01-S00 only",
+    "promote_to_global_style": false,
+    "confidence": "one visual failure -> local corrective rule only",
+    "next_gate": "retry one paid canary capped USD 0.06 on separate idempotency key"
+  },
+  "publish_enabled": false
+}

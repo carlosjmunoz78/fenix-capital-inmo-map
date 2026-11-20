@@ -1,0 +1,1 @@
+{"request_id": "UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-06", "environment": "LAB", "company_id": "fenix", "engine_id": "UMS-001", "status": "RESERVED_FAIL_CLOSED", "max_image_budget_usd": 0.18, "max_deepseek_budget_usd": 0.05, "max_attempts": 3, "publication_enabled": false, "run_id": "43030184634"}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "request_id": "UMS001-IGC202603-PROMPT-FORGE-LAB-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "platform": "INSTAGRAM",
+  "asset_type": "CAROUSEL",
+  "topic": "Compraventa: qué comprobar antes de entregar una señal",
+  "audience": "Personas adultas que compran vivienda en Córdoba y Andalucía, información general sin sustituir consejo jurídico",
+  "publish_enabled": false,
+  "max_additional_cost_eur": 0,
+  "legal_scope": "Checklist orientativo sujeto a documentación real, verificación registral y asesoramiento profesional; no inventar plazos ni garantías legales",
+  "source_plan": "fenix-capital-cerebro-social/companies/fenix-capital/instagram/financial-real-estate/editorial-ideas-2026w46.v1.json#IGC-2026-03",
+  "creative_strategy": "6 unique photographic people and scenes, orange premium surreal world, no logos/text from AI, one short hook per social slide",
+  "panels": [
+    {
+      "panel_id": "IGC-2026-03-S00",
+      "subject_profession": "independent home buyer comparing options",
+      "human_action": "discussing a possible housing purchase with a trusted adviser",
+      "scene_context": "sunny patio table in Córdoba with olive greenery and contemporary ceramics",
+      "surreal_symbolism": "a glowing translucent orange miniature house gently suspended inside a brass key ring",
+      "educational_focus": "consider what must be checked before committing a deposit",
+      "mood": "curiosity and focused optimism"
+    },
+    {
+      "panel_id": "IGC-2026-03-S01",
+      "subject_profession": "professional property buyer",
+      "human_action": "examining a realistic handcrafted wooden residential model",
+      "scene_context": "elegant sunlit Spanish architectural consultation office",
+      "surreal_symbolism": "a bright amber glass house sculpture emerging from balanced brass hoops",
+      "educational_focus": "identify the property and understand who can legally sell it",
+      "mood": "careful concentration and practical clarity"
+    },
+    {
+      "panel_id": "IGC-2026-03-S02",
+      "subject_profession": "experienced independent property consultant",
+      "human_action": "explaining the importance of reviewing public property information without showing documents",
+      "scene_context": "open limestone terrace overlooking Andalusian whitewashed houses",
+      "surreal_symbolism": "copper architectural layers separate gently to show hidden structural supports",
+      "educational_focus": "check registered information and possible charges with a professional",
+      "mood": "serious professional curiosity"
+    },
+    {
+      "panel_id": "IGC-2026-03-S03",
+      "subject_profession": "Spanish woman evaluating a home purchase",
+      "human_action": "noticing building features and natural light in a spacious real apartment",
+      "scene_context": "authentic airy Córdoba apartment interior with warm terracotta and green plants",
+      "surreal_symbolism": "orange sculptural ribbons form a delicate three dimensional home outline",
+      "educational_focus": "observe actual condition and verify practical property details",
+      "mood": "thoughtful and analytical optimism"
+    },
+    {
+      "panel_id": "IGC-2026-03-S04",
+      "subject_profession": "careful home buyer meeting a housing specialist",
+      "human_action": "discussing purchase conditions and possible financing in person",
+      "scene_context": "contemporary bright Andalusian real estate advisory table",
+      "surreal_symbolism": "two impossible suspended house keys linked by an amber sculptural bridge",
+      "educational_focus": "understand conditions, deadlines and financing dependencies before paying a signal",
+      "mood": "confident care and nuanced attention"
+    },
+    {
+      "panel_id": "IGC-2026-03-S05",
+      "subject_profession": "mature independent property professional",
+      "human_action": "confidently closing a private meeting after explaining the next steps",
+      "scene_context": "sunlit modern local professional office with stone walls",
+      "surreal_symbolism": "a kinetic orange crystal home installation balances atop elegant circular bronze shapes",
+      "educational_focus": "review questions and obtain appropriate independent advice before any commitment",
+      "mood": "clear composed trustworthiness"
+    }
+  ]
+}
