@@ -1,0 +1,350 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_EVENT_BATCH",
+  "batch_id": "lrn-batch:9666bd7baa73c8703aa76489",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.6.0",
+  "source": {
+    "workflow": "CEREBRO Skill Discovery Scout",
+    "run_id": 44740475716,
+    "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+  },
+  "source_event_count": 8,
+  "events_total": 8,
+  "events": [
+    {
+      "event_id": "evt:lrn:05e1aa61493b76987d2d0aba",
+      "event_type": "SECURITY_ADVISORY",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:9c0db36b91ed5310497b",
+      "target_engine_bindings": [
+        "MKT-001",
+        "MKT-002",
+        "MKTBOOT-001",
+        "SOCAUD-001",
+        "SOCBOOT-001",
+        "COM-001",
+        "CAP-001"
+      ],
+      "reason": "QUARANTINE_SECURITY_REVIEW",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/higgsfield-ai/higgsfield-product-photoshoot",
+        "upstream_full_name": "higgsfield-ai/skills",
+        "upstream_head_commit": "27000402070db19d958789d05b3b52b6f4718d7c",
+        "manifest_path": "higgsfield-product-photoshoot/SKILL.md",
+        "manifest_sha256": "89c9e289318a8a6ede6b8bd61bb4b330353a97528aa3869bf51977220e88ae38"
+      },
+      "payload": {
+        "static_flags": [
+          "SHELL_PIPE_EXEC",
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:51d791f83eded0ec6fd4d067",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:0d3141e1aeeef9cb0c42b5e1",
+      "event_type": "SKILL_LICENSE_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:dc91c64ee7e4f8930cfc",
+      "target_engine_bindings": [
+        "VOICE-001",
+        "VOICEUI-001",
+        "COM-001",
+        "MKT-001",
+        "WEB-001"
+      ],
+      "reason": "LICENSE_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/anthropic/frontend-design",
+        "upstream_full_name": "anthropics/skills",
+        "upstream_head_commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+        "manifest_path": "skills/frontend-design/SKILL.md",
+        "manifest_sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+      },
+      "payload": {
+        "repo_license_spdx": null
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:88997fcfae1631a318dbce6f",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:10693829c32c492af5317801",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:90e8b7419678e502ccf0",
+      "target_engine_bindings": [
+        "AUTO-001",
+        "AUTBOOT-001",
+        "QA-001",
+        "WEB-001",
+        "SCAN-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/scrapegraphai/just-scrape",
+        "upstream_full_name": "ScrapeGraphAI/just-scrape",
+        "upstream_head_commit": "a3d179ffe2695c5bb7aacffec2c6018d3d9f056e",
+        "manifest_path": "skills/just-scrape/SKILL.md",
+        "manifest_sha256": "28b2d87fe0b5bc267ba9b8dae1592c4d74fe84b2a5f88b2b805c86b4010bb847"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:67673083b8b381b7036726b5",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:1962e40e553e33b4392b45bc",
+      "event_type": "SKILL_CANDIDATE_STATIC_LAB_HOLD",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:157e52d4ac5038d53c1a",
+      "target_engine_bindings": [
+        "AUTO-001",
+        "AUTBOOT-001",
+        "QA-001",
+        "WEB-001",
+        "SCAN-001"
+      ],
+      "reason": "STATIC_LAB_POLICY_OR_COVERAGE_HOLD",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/vercel/agent-browser",
+        "upstream_full_name": "vercel-labs/agent-browser",
+        "upstream_head_commit": "4605d82cfc20dbd051f57a631b5b7130e32141a5",
+        "manifest_path": "skills/agent-browser/SKILL.md",
+        "manifest_sha256": "7d46deeb0101e84f8d70fd2e5cd18e3b6017edfb973607ff23e95e22c92ce73e"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:f76fdcf200ca5e1800ae",
+        "domain": "browser-automation-scraping",
+        "value_score": 88.53,
+        "coverage_score": 88.89,
+        "policy_alignment_score": 75
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:ad5a5088176ea3dd14b26fe4",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:42d196c68ae7f54150cf35c7",
+      "event_type": "CAPABILITY_GAP_DETECTED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:5e34cd75e98ad9e6e7f5",
+      "target_engine_bindings": [],
+      "reason": "NO_EXISTING_DOMAIN_MATCH_CONFIRMED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/mattpocock/grill-me",
+        "upstream_full_name": "mattpocock/skills",
+        "upstream_head_commit": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+        "manifest_path": "skills/productivity/grill-me/SKILL.md",
+        "manifest_sha256": "caaf8b8de1684f96e26b28f3c29189db5c89cce4b73e1c93d86164f66ef88637"
+      },
+      "payload": {
+        "top_domain": null,
+        "overlap_state": "CAPABILITY_GAP_CANDIDATE"
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:ca518b5ece8a25a88de71be4",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:5e4f6eeb6035c1ac33db4e61",
+      "event_type": "SKILL_CANDIDATE_LOW_OPERATIONAL_FIT",
+      "severity": "LOW",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:b3b3ee85f48e8b2c3469",
+      "target_engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "reason": "VALUE_GATE_LOW_OPERATIONAL_FIT",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/juliusbrussee/caveman-help",
+        "upstream_full_name": "JuliusBrussee/caveman",
+        "upstream_head_commit": "a192894723a8f47e7f504c7b5041967ff1f18e55",
+        "manifest_path": "skills/caveman-help/SKILL.md",
+        "manifest_sha256": "0bf9ee3fc8a9258b2d5f6b8bf24ac21f0bf2e4b9b4641dbc426b74f18186f81d"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:675d6830423c4e729978",
+        "domain": "agent-ai-orchestration",
+        "value_score": 75.64,
+        "operational_fit": 15
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:87ab0dabe3a9ca8054c1c5bd",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:d5a346f7467a4c2c48c96aa7",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:28679c06c77906722ed4",
+      "target_engine_bindings": [
+        "OBSERV-001",
+        "INC-001",
+        "SUP-001",
+        "QA-001",
+        "REG-001",
+        "DR-001",
+        "RBLD-001",
+        "BCP-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/juliusbrussee/caveman-compress",
+        "upstream_full_name": "JuliusBrussee/caveman",
+        "upstream_head_commit": "a192894723a8f47e7f504c7b5041967ff1f18e55",
+        "manifest_path": "plugins/caveman/skills/caveman-compress/SKILL.md",
+        "manifest_sha256": "788d6fd86a35007845fd709fbcb788c7eda3c7dc51e63c67e276b0964d77faec"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:e644afb832f1733ba1fd8ff9",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:f2fe4867ff90ae0a0a774e83",
+      "event_type": "SKILL_CANDIDATE_STATIC_LAB_GREEN",
+      "severity": "INFO",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:4c2b2478f8fe3bed14df",
+      "target_engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "reason": "STATIC_LAB_GREEN",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/supabase/postgres-best-practices",
+        "upstream_full_name": "supabase/agent-skills",
+        "upstream_head_commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+        "manifest_path": "skills/supabase-postgres-best-practices/SKILL.md",
+        "manifest_sha256": "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:65bb409d1f80db28298f",
+        "domain": "data-database-supabase",
+        "skill_class": "SHARED",
+        "value_score": 89.7,
+        "coverage_score": 100,
+        "policy_alignment_score": 100,
+        "next_gate": "BEHAVIORAL_LAB_ON_SYNTHETIC_FIXTURES"
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:db817d584ca5279991307884",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    }
+  ],
+  "local_validation_required": true,
+  "persistent_publish_authorized": false,
+  "rsi_publish_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
