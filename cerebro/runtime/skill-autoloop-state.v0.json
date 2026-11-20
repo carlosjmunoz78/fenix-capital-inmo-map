@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-20T10:29:56.708Z",
+  "updated_at": "2026-11-20T10:34:09.726Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -571,7 +571,8 @@
     "github-wide-skills:d5e35924da9135adb96a",
     "github-wide-skills:771dfacd9c6a1cd2aa36",
     "github-wide-skills:8e3cdaeb86785d1ad6bc",
-    "github-wide-skills:633a040fa270f98c9838"
+    "github-wide-skills:633a040fa270f98c9838",
+    "github-wide-skills:2e3062d8925e80b10e75"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2706,6 +2707,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44662283467,
       "checkpointed_at": "2026-11-20T02:39:28.934Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:2e3062d8925e80b10e75": {
+      "candidate_id": "github-wide-skills:2e3062d8925e80b10e75",
+      "name": "davinci-resolve-color-grading",
+      "human_alias": "Davinci Resolve Color Grading",
+      "wrapper_id": "skillwrap:6965ecf6e26ec76f9c0c",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.41,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "dhiraj-verhelm/agent-skills",
+        "upstream_head_commit": "9f5cbde29c5312906803c5bd7f3924bd3085d954",
+        "manifest_sha256": "1cb98551d342e74c7ccd5e61bab91bac1d0bba3114a64deb04ae5f6da5354c6a",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 44720263692,
+      "checkpointed_at": "2026-11-20T10:34:09.726Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34052,7 +34087,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34065,7 +34100,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 44666011113,
+  "last_discovery_run_id": 44720263692,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
