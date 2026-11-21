@@ -1,0 +1,432 @@
+{
+  "schema": "cerebro-actions-feed-v1",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "generated_at": "2026-11-21T15:32:29.104Z",
+  "method": "AUTHENTICATED_GITHUB_ACTIONS",
+  "in_progress": {
+    "total_count": 3,
+    "workflow_runs": [
+      {
+        "id": 44919696035,
+        "name": "CEREBRO Activity · Authenticated GitHub metadata feed",
+        "path": ".github/workflows/cerebro-activity-feed-v1.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44919696035",
+        "created_at": "2026-11-21T15:32:14Z",
+        "run_started_at": "2026-11-21T15:32:14Z",
+        "updated_at": "2026-11-21T15:32:16Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44919686821,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44919686821",
+        "created_at": "2026-11-21T15:32:08Z",
+        "run_started_at": "2026-11-21T15:32:08Z",
+        "updated_at": "2026-11-21T15:32:13Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      }
+    ]
+  },
+  "queued": {
+    "total_count": 0,
+    "workflow_runs": []
+  },
+  "history": {
+    "workflow_runs": [
+      {
+        "id": 44919610158,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44919610158",
+        "created_at": "2026-11-21T15:31:14Z",
+        "run_started_at": "2026-11-21T15:31:14Z",
+        "updated_at": "2026-11-21T15:32:10Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44919292342,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44919292342",
+        "created_at": "2026-11-21T15:27:41Z",
+        "run_started_at": "2026-11-21T15:27:41Z",
+        "updated_at": "2026-11-21T15:32:10Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44919164941,
+        "name": "CEREBRO Activity · Authenticated GitHub metadata feed",
+        "path": ".github/workflows/cerebro-activity-feed-v1.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44919164941",
+        "created_at": "2026-11-21T15:26:10Z",
+        "run_started_at": "2026-11-21T15:26:10Z",
+        "updated_at": "2026-11-21T15:26:26Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44918915475,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44918915475",
+        "created_at": "2026-11-21T15:23:19Z",
+        "run_started_at": "2026-11-21T15:23:19Z",
+        "updated_at": "2026-11-21T15:27:43Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44918719339,
+        "name": "STATE001 · Cloudflare inventory refresh (zero provider writes)",
+        "path": ".github/workflows/cerebro-state001-provider-refresh.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44918719339",
+        "created_at": "2026-11-21T15:21:09Z",
+        "run_started_at": "2026-11-21T15:21:09Z",
+        "updated_at": "2026-11-21T15:21:21Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44918517483,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44918517483",
+        "created_at": "2026-11-21T15:18:59Z",
+        "run_started_at": "2026-11-21T15:18:59Z",
+        "updated_at": "2026-11-21T15:23:22Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44918306185,
+        "name": "CEREBRO Scheduled Soak Reconciler V1",
+        "path": ".github/workflows/cerebro-scheduled-soak-reconciler-v1.yml",
+        "status": "completed",
+        "conclusion": "failure",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44918306185",
+        "created_at": "2026-11-21T15:16:35Z",
+        "run_started_at": "2026-11-21T15:16:35Z",
+        "updated_at": "2026-11-21T15:17:26Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44918132938,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44918132938",
+        "created_at": "2026-11-21T15:14:35Z",
+        "run_started_at": "2026-11-21T15:14:35Z",
+        "updated_at": "2026-11-21T15:19:01Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44917728859,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44917728859",
+        "created_at": "2026-11-21T15:10:07Z",
+        "run_started_at": "2026-11-21T15:10:07Z",
+        "updated_at": "2026-11-21T15:14:38Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44917327306,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44917327306",
+        "created_at": "2026-11-21T15:05:41Z",
+        "run_started_at": "2026-11-21T15:05:41Z",
+        "updated_at": "2026-11-21T15:10:10Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44916917468,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44916917468",
+        "created_at": "2026-11-21T15:01:13Z",
+        "run_started_at": "2026-11-21T15:01:13Z",
+        "updated_at": "2026-11-21T15:05:43Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44916550813,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44916550813",
+        "created_at": "2026-11-21T14:56:55Z",
+        "run_started_at": "2026-11-21T14:56:55Z",
+        "updated_at": "2026-11-21T15:01:15Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44916180992,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44916180992",
+        "created_at": "2026-11-21T14:52:31Z",
+        "run_started_at": "2026-11-21T14:52:31Z",
+        "updated_at": "2026-11-21T14:56:57Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44915796856,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44915796856",
+        "created_at": "2026-11-21T14:48:03Z",
+        "run_started_at": "2026-11-21T14:48:03Z",
+        "updated_at": "2026-11-21T14:52:34Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44915419226,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44915419226",
+        "created_at": "2026-11-21T14:43:40Z",
+        "run_started_at": "2026-11-21T14:43:40Z",
+        "updated_at": "2026-11-21T14:48:06Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44915040293,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44915040293",
+        "created_at": "2026-11-21T14:39:16Z",
+        "run_started_at": "2026-11-21T14:39:16Z",
+        "updated_at": "2026-11-21T14:43:43Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44914657016,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44914657016",
+        "created_at": "2026-11-21T14:34:45Z",
+        "run_started_at": "2026-11-21T14:34:45Z",
+        "updated_at": "2026-11-21T14:39:20Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44914269989,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44914269989",
+        "created_at": "2026-11-21T14:30:25Z",
+        "run_started_at": "2026-11-21T14:30:25Z",
+        "updated_at": "2026-11-21T14:34:48Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44913895560,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44913895560",
+        "created_at": "2026-11-21T14:25:55Z",
+        "run_started_at": "2026-11-21T14:25:55Z",
+        "updated_at": "2026-11-21T14:30:28Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44913519998,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44913519998",
+        "created_at": "2026-11-21T14:21:36Z",
+        "run_started_at": "2026-11-21T14:21:36Z",
+        "updated_at": "2026-11-21T14:25:57Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44913136727,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44913136727",
+        "created_at": "2026-11-21T14:17:13Z",
+        "run_started_at": "2026-11-21T14:17:13Z",
+        "updated_at": "2026-11-21T14:21:38Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44912747159,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44912747159",
+        "created_at": "2026-11-21T14:12:45Z",
+        "run_started_at": "2026-11-21T14:12:45Z",
+        "updated_at": "2026-11-21T14:17:15Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44912376073,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44912376073",
+        "created_at": "2026-11-21T14:08:27Z",
+        "run_started_at": "2026-11-21T14:08:27Z",
+        "updated_at": "2026-11-21T14:12:48Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      },
+      {
+        "id": 44911990240,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/44911990240",
+        "created_at": "2026-11-21T14:04:01Z",
+        "run_started_at": "2026-11-21T14:04:01Z",
+        "updated_at": "2026-11-21T14:08:29Z",
+        "head_sha": "902022f5d4dcc4aab29e6d35411a63c38fe438e7"
+      }
+    ]
+  },
+  "details": {
+    "44919696035": [
+      {
+        "name": "publish",
+        "status": "in_progress",
+        "conclusion": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Fetch authenticated public Actions status with ephemeral token",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "name": "Verify source, age, JSON size and documented schema",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Publish only isolated feed branch with ref lease",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+            "status": "pending",
+            "conclusion": null
+          }
+        ]
+      }
+    ],
+    "44919686821": [
+      {
+        "name": "Watch Browser 1 PROD queue",
+        "status": "in_progress",
+        "conclusion": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Reject stale workflow reruns",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Wait for governed PROD work",
+            "status": "in_progress",
+            "conclusion": null
+          }
+        ]
+      }
+    ]
+  }
+}
