@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-21T22:10:16.897Z",
+  "updated_at": "2026-11-21T22:26:37.133Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -577,7 +577,8 @@
     "github-wide-skills:b67b5ac9def8d6274072",
     "github-wide-skills:81e648a1e73bdc76a40d",
     "github-wide-skills:5f55ee65378fdb260f65",
-    "github-wide-skills:520ee3244e14453e7347"
+    "github-wide-skills:520ee3244e14453e7347",
+    "github-wide-skills:96f4eca40df8f300536d"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2814,6 +2815,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44886542049,
       "checkpointed_at": "2026-11-21T08:48:22.667Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:96f4eca40df8f300536d": {
+      "candidate_id": "github-wide-skills:96f4eca40df8f300536d",
+      "name": "aeroflow-add-endpoint",
+      "human_alias": "Aeroflow Add Endpoint",
+      "wrapper_id": "skillwrap:50a8531fbac752e5dabf",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.81,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "aeroflow-air/agent-skills",
+        "upstream_head_commit": "325c47c149875728b833b30bad6e7b8a8c1a8c71",
+        "manifest_sha256": "4e0d417de31a1a9dba3dda097eb917ac636d362ce6f41d4632ab77a474791f64",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 44956714086,
+      "checkpointed_at": "2026-11-21T22:26:37.133Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34307,7 +34342,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34320,7 +34355,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 44955280930,
+  "last_discovery_run_id": 44956714086,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
