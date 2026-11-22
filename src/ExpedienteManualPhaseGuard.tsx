@@ -10,6 +10,9 @@ import './expediente-manual-phase.css';
 type Row=Record<string,any>;
 type Ctx={role?:string;display_name?:string};
 const phases=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
+const visiblePhases=['Entrada','Documentación','Banco','Tasación','FEIN','Notaría','Firma','Cierre'];
+// Contrato actualizado y comprobado en Supabase PROD (2026-11-09).
+const writableStages=new Set(['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Banco','Tasación','Oferta','Pre-OK + Tasación realizada','Tasación realizada','FEIN','Notaría','Firma','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado']);
 const aliases=[['entrada','nuevo','inicial'],['document','doc'],['análisis','analisis','estudio'],['banco','banc'],['tasación','tasacion'],['oferta','aprob'],['fein'],['notar'],['firma'],['cierre','cerrado','final']];
 function text(row:Row|null,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim()}return''}
 function phaseIndex(raw:string){const s=raw.toLowerCase();const i=aliases.findIndex(group=>group.some(x=>s.includes(x)));return i>=0?i:0}
@@ -23,7 +26,7 @@ export default function ExpedienteManualPhaseGuard(){
  const current=text(row,['stage','fase','estado'])||'Entrada';const currentIndex=phaseIndex(current);const selectedIndex=selected?phases.indexOf(selected):-1;
  const canEdit=ctx?.role==='Direccion'||ctx?.role==='Financiero';
  const movement=useMemo(()=>selectedIndex<0?'':selectedIndex<currentIndex?'retroceso':selectedIndex>currentIndex+1?'salto':'avance',[selectedIndex,currentIndex]);
- const canSave=canEdit&&Boolean(selected)&&selected!==current&&Boolean(reason.trim())&&!busy;
+ const canSave=canEdit&&Boolean(selected)&&writableStages.has(selected)&&selected!==current&&Boolean(reason.trim())&&!busy;
 
  async function reloadData(){const[c,r]=await Promise.all([fetchAppApi<Ctx>('/session/context'),fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`)]);setCtx(c.status===200?c.data:null);setRow(r.status===200?detailItem(r.data):null)}
  useEffect(()=>{if(!code)return;void reloadData()},[code]);
@@ -38,17 +41,50 @@ export default function ExpedienteManualPhaseGuard(){
    if(!portal&&journey.parentElement){portal=document.createElement('div');portal.className='manual-phase-host';journey.insertAdjacentElement('afterend',portal)}
    if(portal)setHost(portal);
    const cells=Array.from(journey.querySelectorAll('.detail-phase-track > div')) as HTMLElement[];
-   cells.forEach((cell,i)=>{cell.classList.add('manual-phase-cell');cell.setAttribute('role','button');cell.setAttribute('tabindex','0');cell.setAttribute('aria-label',`Cambiar manualmente a fase ${phases[i]}`);cell.onclick=()=>{if(!canEdit)return;setSelected(phases[i]);setReason('');setMsg('')};cell.onkeydown=e=>{if(!canEdit)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();setSelected(phases[i]);setReason('');setMsg('')}}});
+   cells.forEach((cell,i)=>{cell.classList.add('manual-phase-cell');cell.setAttribute('role','button');cell.setAttribute('tabindex','0');cell.setAttribute('aria-label',`Cambiar manualmente a fase ${visiblePhases[i]}`);cell.onclick=()=>{if(!canEdit)return;setSelected(visiblePhases[i]);setReason('');setMsg('')};cell.onkeydown=e=>{if(!canEdit)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();setSelected(visiblePhases[i]);setReason('');setMsg('')}}});
   };wire();const obs=new MutationObserver(wire);obs.observe(document.body,{subtree:true,childList:true});return()=>{mounted=false;obs.disconnect();const journey=document.querySelector('[data-testid="expediente-phase-line"]') as HTMLElement|null;journey?.classList.remove('manual-phase-enabled');document.querySelectorAll('.manual-phase-save-host,.manual-phase-host').forEach(n=>n.remove())}
  },[code,canEdit]);
- useEffect(()=>{const journey=document.querySelector('[data-testid="expediente-phase-line"]');if(!journey)return;const cells=Array.from(journey.querySelectorAll('.detail-phase-track > div'));cells.forEach((cell,i)=>cell.classList.toggle('manual-phase-selected',selected===phases[i]))},[selected]);
+ useEffect(()=>{const journey=document.querySelector('[data-testid="expediente-phase-line"]');if(!journey)return;const cells=Array.from(journey.querySelectorAll('.detail-phase-track > div'));cells.forEach((cell,i)=>cell.classList.toggle('manual-phase-selected',selected===visiblePhases[i]))},[selected]);
 
  function close(){setSelected('');setReason('');setMsg('')}
- async function commit(){if(!canEdit||!row||!selected||selected===current||!reason.trim()||busy)return;setBusy(true);setMsg('');
-  const fresh=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);const item=fresh.status===200?detailItem(fresh.data):row;const version=Number(item?.version||row.version||0);const oldNotes=text(item,['notas']);const actor=ctx?.display_name||ctx?.role||'Usuario';const stamp=new Date().toISOString();const audit=`[CAMBIO MANUAL DE FASE] ${current} → ${selected} · Motivo: ${reason.trim()} · Usuario: ${actor} · Fecha: ${stamp}`;const notes=oldNotes?`${oldNotes}\n${audit}`:audit;
-  let status=500;let data:any=null;
-  if(IS_PRODUCTION){const r=await gatewayRpc<any>('fenix_prod_exp_update',{p_code:code,p_expected_version:version,p_cliente_alias:null,p_stage:selected,p_inmobiliaria_code:null,p_notas:notes,p_proxima_accion:null});data=r.data;status=r.error?500:Number(r.data?.status||200)}else{const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token){setBusy(false);setMsg('La sesión no permite guardar el cambio.');return}const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(code)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes:{stage:selected,notas:notes}})});status=r.status;try{data=await r.json()}catch{}}
-  setBusy(false);if(status===200&&data?.ok!==false){setMsg(`Fase actualizada a ${selected}.`);await reloadData();window.setTimeout(()=>window.location.reload(),700)}else if(status===409){setMsg('El expediente cambió mientras lo revisabas. Recarga y vuelve a intentarlo.')}else if(status===403){setMsg('Tu perfil no puede cambiar la fase.')}else setMsg(`No se pudo cambiar la fase (${data?.error||status}).`)
+ async function commit(){
+  if(!canEdit||!row||!selected||selected===current||!reason.trim()||busy)return;
+  setBusy(true);setMsg('');
+  try{
+   // No sobrescribir una fase ajena con el estado/vista anterior.
+   const fresh=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);
+   const item=fresh.status===200?detailItem(fresh.data):null;
+   if(!item){setMsg('No se pudo verificar el expediente. No se ha guardado nada.');return;}
+   const latest=text(item,['stage','fase','estado'])||'Entrada';
+   if(latest!==current){setMsg('El expediente ha cambiado. Actualiza antes de guardar.');await reloadData();return;}
+   const version=Number(item.version);
+   if(!Number.isInteger(version)||version<0){setMsg('Versión del expediente no válida. No se ha guardado nada.');return;}
+   const oldNotes=text(item,['notas']);
+   const actor=ctx?.display_name||ctx?.role||'Usuario';
+   const stamp=new Date().toISOString();
+   const audit=`[CAMBIO MANUAL DE FASE] ${latest} → ${selected} · Motivo: ${reason.trim()} · Usuario: ${actor} · Fecha: ${stamp}`;
+   const notes=oldNotes?`${oldNotes}\n${audit}`:audit;
+   let status=500;let data:any=null;
+   if(!writableStages.has(selected)){setMsg('La fase aún no está habilitada en el contrato de Supabase. No se ha cambiado el expediente.');return;}
+   if(IS_PRODUCTION){
+    const result=await gatewayRpc<any>('fenix_prod_exp_update',{p_code:code,p_expected_version:version,p_cliente_alias:null,p_stage:selected,p_inmobiliaria_code:null,p_notas:notes,p_proxima_accion:null});
+    data=result.data;status=result.error?500:Number(result.data?.status||200);
+   }else{
+    const {data:{session}}=await supabase.auth.getSession();
+    if(!session?.access_token){setMsg('La sesión no permite guardar el cambio.');return;}
+    const result=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(code)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes:{stage:selected,notas:notes}})});
+    status=result.status;try{data=await result.json()}catch{}
+   }
+   if(status===200&&data?.ok!==false){
+    setRow({...item,stage:selected,fase:selected,estado:selected,notas:notes,version:version+1});
+    setSelected('');setReason('');setMsg(`Fase actualizada a ${selected}. Motivo registrado.`);
+    window.dispatchEvent(new CustomEvent('fenix:expediente-stage-updated',{detail:{code,stage:selected}}));
+    await reloadData();
+   }else if(status===409){setMsg('El expediente cambió mientras lo revisabas. Actualiza y vuelve a intentarlo.');await reloadData();}
+   else if(status===403)setMsg('Tu perfil no puede cambiar la fase.');
+   else setMsg(`No se pudo cambiar la fase (${data?.error||status}).`);
+  }catch{setMsg('Error al guardar o recuperar el expediente. Comprueba su estado antes de reintentar.');}
+  finally{setBusy(false);}
  }
  if(!host||!saveHost)return null;
  return <>
@@ -57,9 +93,11 @@ export default function ExpedienteManualPhaseGuard(){
    <div className="manual-phase-header"><div><span>CONTROL MANUAL DE FASE</span><strong>{canEdit?'Puedes intervenir cuando lo necesites':'Tu perfil ve el recorrido en solo lectura'}</strong></div>{selected&&<button type="button" className="manual-phase-close" onClick={close} aria-label="Cerrar cambio manual"><X size={17}/></button>}</div>
    {!selected?<div className="manual-phase-hint">{canEdit?'Pulsa cualquier fase del recorrido para preparar un cambio manual. Nada cambia hasta que expliques el motivo y pulses Guardar cambio.':'Los cambios manuales están reservados a Dirección y Financiero.'}</div>:<>
     <div className="manual-phase-transition"><div><small>Fase actual</small><strong>{current}</strong></div><span>→</span><label><small>Nueva fase</small><select value={selected} onChange={e=>{setSelected(e.target.value);setMsg('')}}>{phases.map(p=><option key={p}>{p}</option>)}</select></label></div>
+    {!writableStages.has(selected)&&<div className="manual-phase-warning"><ShieldAlert size={17}/> Este paso o subpaso aún no es un estado válido para el backend. Guardar está deshabilitado hasta adaptar y probar el contrato sin tocar los expedientes existentes.</div>}
     {selected===current&&<div className="manual-phase-warning"><ShieldAlert size={17}/> Esa ya es la fase actual. Elige una fase distinta.</div>}
     {movement==='salto'&&<div className="manual-phase-warning"><ShieldAlert size={17}/> Estás saltando una o más fases. El motivo será obligatorio.</div>}
     {movement==='retroceso'&&<div className="manual-phase-warning"><RotateCcw size={17}/> Estás retrocediendo el expediente. El motivo será obligatorio.</div>}
+    <div className="manual-phase-substeps" aria-label="Elegir subpaso"><span>Subpasos:</span><button type="button" className={selected==='Análisis'?'active':''} onClick={()=>{setSelected('Análisis');setMsg('')}}>Documentación → Análisis</button><button type="button" className={selected==='Oferta'?'active':''} onClick={()=>{setSelected('Oferta');setMsg('')}}>Banco → Oferta</button></div>
     <label className="manual-phase-reason">¿Por qué quieres cambiar la fase?<textarea rows={3} value={reason} onChange={e=>{setReason(e.target.value);setMsg('')}} placeholder="Explica el motivo operativo, excepción o evidencia que justifica el cambio…"/></label>
     <div className="manual-phase-actions"><button type="button" onClick={()=>window.open(`/documentacion?expediente=${encodeURIComponent(code)}&upload=1&phaseEvidence=${encodeURIComponent(selected)}`,'_blank','noopener,noreferrer')}><FileUp size={16}/> Añadir documento justificativo</button><span className="manual-phase-save-help">El cambio solo se aplica al pulsar Guardar cambio.</span></div>
    </>}
