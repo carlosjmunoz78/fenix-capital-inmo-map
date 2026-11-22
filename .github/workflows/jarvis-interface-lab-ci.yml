@@ -1,0 +1,56 @@
+name: JARVIS Always Present Interface LAB CI
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-always-present-interface-lab-20261106
+    paths:
+      - 'src/CerebroConsoleShell.tsx'
+      - 'src/CerebroJarvisWorkConsole.tsx'
+      - 'src/JarvisOperativaComposerPortal.tsx'
+      - 'src/jarvisConversationMemory.ts'
+      - 'src/jarvisComposerBridge.ts'
+      - 'src/jarvis-composer-presence.css'
+      - 'src/cerebroConsoleApi.ts'
+      - 'tests/jarvis-interface-lab.test.mjs'
+      - 'tests/jarvis-interface-presence-lab.spec.ts'
+      - 'tests/jarvis-ui-lab-harness.html'
+      - 'playwright.jarvis-interface.config.ts'
+      - '.github/workflows/jarvis-interface-lab-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jarvis-always-present-ui-lab
+  cancel-in-progress: true
+
+jobs:
+  isolated-ui-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      DEEPSEEK_API_KEY: ''
+      JARVIS_LAB_STUDY_APPROVED: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - name: Install pinned dependencies
+        run: npm ci --ignore-scripts
+      - name: Compile and build unchanged existing App
+        run: npm run build
+      - name: Owner-scoped JARVIS UI and gateway contract tests
+        run: node --test tests/jarvis-interface-lab.test.mjs
+      - name: Install Playwright Chromium for physical UI tests
+        run: npx playwright install chromium --only-shell
+      - name: Exercise the actual JARVIS bottom composer on desktop and mobile
+        run: npx playwright test --config=playwright.jarvis-interface.config.ts
+      - name: Check no dangerous source paths were touched
+        run: |
+          test -f src/CerebroConsoleShell.tsx
+          test -f src/JarvisOperativaComposerPortal.tsx
+          test -f src/cerebroConsoleApi.ts
+          echo 'JARVIS_UI_LAB_NO_PROD_DEPLOY'

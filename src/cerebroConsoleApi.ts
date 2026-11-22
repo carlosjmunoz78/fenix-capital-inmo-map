@@ -113,7 +113,7 @@ export async function fetchCerebroConsole<T>(path:string):Promise<{status:number
   const headers=await authHeaders();
   if(!headers)return{status:401,data:null};
   try{
-    const response=await fetch(endpoint,{method:'GET',headers,cache:'no-store'});
+    const response=await fetch(endpoint,{method:'GET',headers,cache:'no-store',signal:AbortSignal.timeout(12000)});
     let data:T|null=null;
     try{data=await response.json() as T}catch{data=null}
     return{status:response.status,data};

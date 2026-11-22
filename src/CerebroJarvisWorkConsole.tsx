@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
 import {Activity,Check,ChevronDown,ChevronRight,Code2,Columns3,ExternalLink,FileText,FlaskConical,Folder,FolderOpen,Globe2,GripVertical,Home,Maximize2,Minus,Paperclip,Pencil,Plus,Radio,RotateCcw,Search,Terminal,Upload,X} from 'lucide-react';
 import JarvisEmbeddedConsole from './JarvisEmbeddedConsole';
+import {primeJarvisComposerMessage,sendJarvisComposerMessage} from './jarvisComposerBridge';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {createJarvisProject,createJarvisSubproject,fetchJarvisProjects,importJarvisProject,renameJarvisProject,renameJarvisSubproject,type JarvisProject} from './jarvisWorkApi';
 import projectRegistryJson from '../cerebro/registry/jarvis-project-registry.v1.json';
@@ -94,7 +95,7 @@ export default function CerebroJarvisWorkConsole({surface='JARVIS'}:Props){
  function beginResize(side:'left'|'right',event:React.PointerEvent){dragRef.current={side,startX:event.clientX,startWidth:side==='left'?layout.left:layout.right};document.body.classList.add('jarvis-resizing');event.currentTarget.setPointerCapture?.(event.pointerId)}
  function focusPane(pane:Exclude<FocusPane,null>){setLayout(current=>({...current,focus:current.focus===pane?null:pane,[pane==='left'?'leftOpen':pane==='center'?'centerOpen':'rightOpen']:true}))}
  function togglePane(pane:'leftOpen'|'centerOpen'|'rightOpen'){setLayout(current=>{const next={...current,[pane]:!current[pane],focus:null};if(!next.leftOpen&&!next.centerOpen&&!next.rightOpen)next.centerOpen=true;return next})}
- function primeJarvisCommand(text:string,submit=false){const textarea=document.querySelector<HTMLTextAreaElement>('.jarvis-conversation .cerebro-chat-form textarea');if(!textarea)return;setReactTextareaValue(textarea,text);textarea.focus();if(submit){const form=textarea.closest('form');window.setTimeout(()=>form?.requestSubmit(),0)}}
+ function primeJarvisCommand(text:string,submit=false){if(submit&&sendJarvisComposerMessage(text))return;if(primeJarvisComposerMessage(text))return;const textarea=document.querySelector<HTMLTextAreaElement>('.jarvis-conversation .cerebro-chat-form textarea');if(!textarea)return;setReactTextareaValue(textarea,text);textarea.focus();if(submit){const form=textarea.closest('form');window.setTimeout(()=>form?.requestSubmit(),0)}}
  function editCurrentProject(){if(!selectedProject)return;const scope=selectedSubTitle?` / ${selectedSubTitle}`:'';primeJarvisCommand(`Quiero actualizar el proyecto ${displayProjectTitle(selectedProject)}${scope}. Conserva evidencia e historial y limita el cambio a metadatos gobernados.`)}
  function reconcileCurrentProject(){if(!selectedProject)return;const scope=selectedSubTitle?` / ${selectedSubTitle}`:'';primeJarvisCommand(`Reconciliación de ${displayProjectTitle(selectedProject)}${scope}: compara el estado canónico con la evidencia viva disponible y devuelve HECHO / EXISTENTE / PARCIAL / DEFINIDO / PLANIFICADO / POR AUDITAR con evidencias.`,true)}
  function triggerVoice(){document.querySelector<HTMLButtonElement>('.jarvis-conversation .cerebro-voice-main')?.click()}

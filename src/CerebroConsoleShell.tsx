@@ -5,6 +5,8 @@ import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
 import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {clearJarvisConversation,recallJarvisConversation,rememberJarvisConversation} from './jarvisConversationMemory';
+import {JARVIS_COMPOSER_SEND_EVENT,type JarvisComposerSendDetail} from './jarvisComposerBridge';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -29,6 +31,7 @@ export default function CerebroConsoleShell(){
  const [message,setMessage]=useState('');
  const [sending,setSending]=useState(false);
  const [lines,setLines]=useState<ChatLine[]>([]);
+ const [conversationOwner,setConversationOwner]=useState<string|null>(null);
  const [pendingAction,setPendingAction]=useState<CerebroPendingAction|null>(null);
  const [readContext,setReadContext]=useState<CerebroReadContext|null>(null);
  const [voiceSessionActive,setVoiceSessionActive]=useState(false);
@@ -62,11 +65,15 @@ export default function CerebroConsoleShell(){
  const interruptRestartTimerRef=useRef<number|null>(null);
  const startListeningRef=useRef<()=>void>(()=>{});
  const sendVoiceTextRef=useRef<(text:string,confidence:number|null)=>void>(()=>{});
+ const hydratedOwnerRef=useRef<string|null>(null);
+ const chatReadyRef=useRef(false);
+ const sendFromJarvisComposerRef=useRef<(text:string)=>void>(()=>{});
 
  useEffect(()=>{pendingActionRef.current=pendingAction},[pendingAction]);
  useEffect(()=>{readContextRef.current=readContext},[readContext]);
  useEffect(()=>{voicePreferencesRef.current=voicePreferences},[voicePreferences]);
  useEffect(()=>{learningCandidateRef.current=learningCandidate},[learningCandidate]);
+ useEffect(()=>{if(conversationOwner)rememberJarvisConversation(conversationOwner,lines)},[conversationOwner,lines]);
 
  useEffect(()=>{
   let cancelled=false;
@@ -74,12 +81,30 @@ export default function CerebroConsoleShell(){
   const check=async()=>{
    const {data:{session}}=await supabase.auth.getSession();
    if(cancelled)return;
-   if(!session){setOwnerAccess('checking');return}
+   if(!session){
+    if(hydratedOwnerRef.current)clearJarvisConversation(hydratedOwnerRef.current);
+    hydratedOwnerRef.current=null;
+    setConversationOwner(null);
+    setLines([]);
+    setOwnerAccess('checking');
+    return;
+   }
    const {status,data}=await fetchAppApi<SessionContext>('/session/context');
    if(cancelled)return;
    const allowed=Boolean(status===200&&data?.actor_code==='CARLOS-ADMIN');
    setOwnerAccess(allowed?'allowed':'denied');
-   if(!allowed)navigate('/inicio',{replace:true});
+   if(allowed&&hydratedOwnerRef.current!==session.user.id){
+    hydratedOwnerRef.current=session.user.id;
+    setLines(recallJarvisConversation(session.user.id));
+    setConversationOwner(session.user.id);
+   }
+   if(!allowed){
+    if(hydratedOwnerRef.current)clearJarvisConversation(hydratedOwnerRef.current);
+    hydratedOwnerRef.current=null;
+    setConversationOwner(null);
+    setLines([]);
+    navigate('/inicio',{replace:true});
+   }
   };
   void check();
   const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void check()});
@@ -99,19 +124,46 @@ export default function CerebroConsoleShell(){
 
  useEffect(()=>{
   let cancelled=false;
-  if(!isCerebroPath||ownerAccess!=='allowed'||!configured){setGatewayState('closed');setHealth(null);return}
+  let pending=false;
+  if(!isCerebroPath||ownerAccess!=='allowed'||!configured){
+   setGatewayState('closed');
+   setHealth(null);
+   return;
+  }
+  const check=async()=>{
+   if(cancelled||pending)return;
+   pending=true;
+   try{
+    const {status,data}=await fetchCerebroConsoleHealth();
+    if(cancelled)return;
+    const safe=Boolean(status===200&&data?.status==='ok'&&
+     data.authenticated_transport===true&&data.direct_model_access===false&&
+     data.prod_execution_enabled===false&&data.live_writes===false);
+    setHealth(safe?data:null);
+    setGatewayState(safe?'ready':'error');
+   }catch{
+    if(!cancelled){setHealth(null);setGatewayState('error')}
+   }finally{pending=false}
+  };
   setGatewayState('checking');
-  fetchCerebroConsoleHealth().then(({status,data})=>{
-   if(cancelled)return;
-   const safe=Boolean(status===200&&data?.status==='ok'&&data.authenticated_transport===true&&data.direct_model_access===false&&data.prod_execution_enabled===false&&data.live_writes===false);
-   setHealth(safe?data:null);
-   setGatewayState(safe?'ready':'error');
-  });
-  return()=>{cancelled=true};
+  void check();
+  const onReconnect=()=>{if(document.visibilityState==='visible')void check()};
+  const timer=window.setInterval(onReconnect,30_000);
+  window.addEventListener('online',onReconnect);
+  window.addEventListener('focus',onReconnect);
+  document.addEventListener('visibilitychange',onReconnect);
+  return()=>{
+   cancelled=true;
+   window.clearInterval(timer);
+   window.removeEventListener('online',onReconnect);
+   window.removeEventListener('focus',onReconnect);
+   document.removeEventListener('visibilitychange',onReconnect);
+  };
  },[configured,isCerebroPath,ownerAccess]);
 
  const ready=gatewayState==='ready';
  const chatReady=Boolean(ready&&health?.chat_available&&['DETERMINISTIC_READ_ONLY','OWNER_DECISION_BY_EXCEPTION_V1'].includes(health?.chat_mode||''));
+ chatReadyRef.current=chatReady;
 
  useEffect(()=>{
   let cancelled=false;
@@ -533,6 +585,21 @@ export default function CerebroConsoleShell(){
   }
  }
 
+ sendFromJarvisComposerRef.current=(text:string)=>{void sendText(text,null,false)};
+ useEffect(()=>{
+  if(!isCerebroPath||ownerAccess!=='allowed')return;
+  const onComposerSend=(event:Event)=>{
+   const detail=(event as CustomEvent<JarvisComposerSendDetail>).detail;
+   if(!detail||typeof detail.message!=='string'||
+     !detail.message.trim()||detail.message.length>4000||
+     !chatReadyRef.current||sendingRef.current)return;
+   detail.accepted=true;
+   sendFromJarvisComposerRef.current(detail.message);
+  };
+  window.addEventListener(JARVIS_COMPOSER_SEND_EVENT,onComposerSend);
+  return()=>window.removeEventListener(JARVIS_COMPOSER_SEND_EVENT,onComposerSend);
+ },[isCerebroPath,ownerAccess]);
+
  function startListening(){
   if(!voiceSessionRef.current||!chatReady||sendingRef.current||voiceSpeakingRef.current||recognitionRef.current)return;
   const recognition=createVoiceRecognition();
@@ -660,7 +727,7 @@ export default function CerebroConsoleShell(){
    <p>{detail}</p>
    <div className="cerebro-fields"><label>Empresa<select disabled><option>Fénix · sesión autenticada</option></select></label><label>Contexto<select disabled>{CONTEXTS.map(item=><option key={item}>{item}</option>)}</select></label></div>
    <div className="cerebro-chat-log" aria-live="polite">
-    {lines.length===0?<div className="cerebro-chat-empty">Pregunta lo que necesites o pide una acción. CEREBRO separará lectura de ejecución.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{renderMessage(line.text)}</span>{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
+    {lines.length===0?<div className="cerebro-chat-empty">Hola, soy JARVIS. Estoy aquí para ayudarte. Puedes escribir, dictar o hablar conmigo. Las acciones reales continúan protegidas por el Gateway.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{renderMessage(line.text)}</span>{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
    </div>
    <div className={`cerebro-voice-session ${voiceSessionActive?'is-active':''} ${voiceListening?'is-listening':''} ${voiceSpeaking?'is-speaking':''}`}>
     <button type="button" className="cerebro-voice-main" onClick={toggleVoiceSession} disabled={!chatReady||!voiceSupport.stt} aria-pressed={voiceSessionActive}>

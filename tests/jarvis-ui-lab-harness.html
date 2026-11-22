@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;background:#0c1015;color:#edf8fc">
+ <main class="jarvis-work jarvis-work-v2" style="height:100dvh">
+  <section class="jarvis-center-pane" style="height:100%;display:flex;flex-direction:column">
+   <section class="jarvis-conversation" style="min-height:160px;overflow:auto">
+    <div class="cerebro-console">
+     <section class="cerebro-panel">
+      <h2>Transporte autenticado verificado</h2>
+      <form class="cerebro-chat-form"><textarea aria-label="Core oculto"></textarea><button type="submit">Enviar</button></form>
+      <button class="cerebro-voice-main" type="button" aria-pressed="false">Hablar con JARVIS</button>
+      <span class="cerebro-voice-status">Pulsa para hablar.</span>
+      <div class="cerebro-voice-error"></div>
+     </section>
+    </div>
+   </section>
+   <div class="jarvis-input-tools" aria-label="Zona de entrada JARVIS"></div>
+  </section>
+ </main>
+ <div id="root"></div>
+ <output id="accepted-message" aria-live="polite"></output>
+ <output id="voice-toggles"></output>
+ <script type="module">
+  import React from 'react';
+  import {createRoot} from 'react-dom/client';
+  import Portal from '../src/JarvisOperativaComposerPortal.tsx';
+  import {JARVIS_COMPOSER_SEND_EVENT} from '../src/jarvisComposerBridge.ts';
+  import '../src/jarvis-work-premium-final.css';
+  window.addEventListener(JARVIS_COMPOSER_SEND_EVENT,event=>{
+   event.detail.accepted=true;
+   document.querySelector('#accepted-message').textContent=event.detail.message;
+  });
+  const voice=document.querySelector('.cerebro-voice-main');
+  voice.addEventListener('click',()=>{
+   const pressed=voice.getAttribute('aria-pressed')==='true';
+   voice.setAttribute('aria-pressed',String(!pressed));
+   document.querySelector('.cerebro-voice-status').textContent=pressed
+    ?'Pulsa para hablar.':'CEREBRO está escuchando…';
+   document.querySelector('#voice-toggles').textContent=pressed?'off':'on';
+  });
+  createRoot(document.getElementById('root')).render(React.createElement(Portal));
+ </script>
+</body></html>
