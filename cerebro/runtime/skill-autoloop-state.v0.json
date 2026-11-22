@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-22T02:39:10.953Z",
+  "updated_at": "2026-11-22T02:40:47.605Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -578,7 +578,8 @@
     "github-wide-skills:81e648a1e73bdc76a40d",
     "github-wide-skills:5f55ee65378fdb260f65",
     "github-wide-skills:520ee3244e14453e7347",
-    "github-wide-skills:96f4eca40df8f300536d"
+    "github-wide-skills:96f4eca40df8f300536d",
+    "github-wide-skills:931223d50eb37a57359c"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2849,6 +2850,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44956714086,
       "checkpointed_at": "2026-11-21T22:26:37.133Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:931223d50eb37a57359c": {
+      "candidate_id": "github-wide-skills:931223d50eb37a57359c",
+      "name": "abbasid-lustreware",
+      "human_alias": "Abbasid Lustreware",
+      "wrapper_id": "skillwrap:8867fdc19aa22561cea6",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 84.55,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "musicalbee/design-ontology",
+        "upstream_head_commit": "2b135a0ea29515ceef5c8705e4001390171e86b6",
+        "manifest_sha256": "f941895adf67bc185cee4a7a8fc101ed488ea7b5273a4ac94133eb4b11d883fa",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 44977170078,
+      "checkpointed_at": "2026-11-22T02:40:47.605Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34342,7 +34377,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34355,7 +34390,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 44956714086,
+  "last_discovery_run_id": 44977170078,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
