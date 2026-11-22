@@ -1,0 +1,662 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "audit_date": "2026-11-07",
+  "audit_type": "AUTHENTICATED_WORDPRESS_DRAFT_AND_SCREENSHOT_INSPECTION",
+  "source": "OWNER_SCREENSHOT_AND_WP_READ_ONLY_VERIFIED",
+  "wordpress_origin": "https://fenixcapital.es",
+  "draft_status": "FOUR_DRAFTS_PHYSICALLY_PRESENT",
+  "release_status": "HOLD_NOT_OWNER_APPROVED",
+  "real_image_api_batch_dispatch": "NOT_VERIFIED",
+  "image_provider": "UMS-001_OPENAI_API_REQUIRED_NOT_SUBSTITUTABLE_WITH_CHAT_RENDER",
+  "non_authorized_methods": [
+    "PRETEND_PRODUCTORA_IMAGES_EXIST",
+    "REUSE_MEDIA_FROM_PREVIOUS_URLS",
+    "ADD_GENERIC_PLACEHOLDER_AND_MARK_PREMIUM",
+    "MODIFY_GLOBAL_ASTRA_TEMPLATE",
+    "CREATE_DUPLICATE_DRAFTS",
+    "AUTO_PUBLISH"
+  ],
+  "required_gates": [
+    "REAL_PREVIEW_SHOWS_OWN_CONTENT_NOT_SINGLE_SERVICES",
+    "SINGLE_SEMANTIC_H1_IN_RENDERED_DOM",
+    "NO_THEME_BANNER_DUPLICATE",
+    "NO_UNWANTED_POST_SIDEBAR",
+    "SIGNED_UMS_OPENAI_ORIGIN_RECEIPT_FOR_EACH_REQUIRED_IMAGE",
+    "INDEPENDENT_PREMIUM_VISUAL_DESKTOP_MOBILE_PASS",
+    "MEDIA_OWNERSHIP_LICENSING_SHA256_PHASH_AND_ALT",
+    "SEO_YMYL_EDITORIAL_AND_LINK_QA",
+    "FULL_BACKUP_FILES_SQL_ISOLATED_RESTORE_ROLLBACK",
+    "FIRST_THREE_SUPERVISED_RELEASES_WITH_EXACT_OWNER_APPROVAL"
+  ],
+  "wordpress_publications_authorized": false,
+  "owner_approves_media": false,
+  "owner_approves_release": false,
+  "additional_new_subscription_eur": 0,
+  "live_site_writes_in_audit": [
+    "POST_52714_DRAFT_META_SCOPED_EXPERIMENT_AND_REVERSAL_TO_THEME_DEFAULTS"
+  ],
+  "real_preview_notes": "Owner screenshot of 52714 shows thematic content, FAQ and large theme title/sidebar. 52715 and 52716 previews show 'Single Services' and Lorem ipsum, not their saved drafts. Per-post Astra banner/title/meta settings on 52714 persisted in WP but did not change rendered preview. Reverted tested meta to empty theme defaults.",
+  "items": [
+    {
+      "id": 52713,
+      "type": "post",
+      "persona": "B2C_COMPRADOR_DERRAMA",
+      "intent": "INFORMATIONAL",
+      "headline": "¿El piso tiene una derrama aprobada? Antes de comprar, mira esto",
+      "faq_count": 6,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52713-HERO"
+    },
+    {
+      "id": 52714,
+      "type": "post",
+      "persona": "B2B_INMOBILIARIA_VENTA_ENCADENADA",
+      "intent": "INFORMATIONAL",
+      "headline": "¿Tu comprador tiene que vender primero? Evita que las fechas enfríen la operación",
+      "faq_count": 6,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52714-HERO"
+    },
+    {
+      "id": 52715,
+      "type": "page",
+      "persona": "B2C_COMPRADOR_DERRAMA",
+      "intent": "COMMERCIAL_CONSULTATION",
+      "headline": "¿Te gusta un piso con derrama? Comprueba cuánto te costará comprarlo",
+      "faq_count": 8,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "preview_demo": "SINGLE_SERVICES_LOREM",
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52715-HERO"
+    },
+    {
+      "id": 52716,
+      "type": "page",
+      "persona": "B2B_INMOBILIARIA_VENTA_ENCADENADA",
+      "intent": "COMMERCIAL_COLLABORATION",
+      "headline": "¿Tu comprador tiene que vender primero? Coordinamos las dos operaciones contigo",
+      "faq_count": 8,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "preview_demo": "SINGLE_SERVICES_LOREM",
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52716-HERO"
+    }
+  ],
+  "followup_2026_11_07": {
+    "verified_source": "WORDPRESS_COWBOY_LIVE_DRAFT_AND_WPWRITER_SECOND_OPINION",
+    "scope": "FOUR_EXISTING_DRAFTS_ONLY",
+    "post_status_verified": "DRAFT_4_OF_4",
+    "visual_release_gate": "HOLD",
+    "template_52715_52716": "BLOCKED_META_NOT_PERSISTENT_RENDERS_SINGLE_SERVICES",
+    "producer_generation": "PENDING_UMS_OPENAI_PROVENANCE",
+    "media_assets_generated_in_this_cycle": 0,
+    "wordpress_publications": 0,
+    "paid_api_calls": 0,
+    "new_subscriptions": 0,
+    "improvements": [
+      {
+        "id": 52713,
+        "snapshot_id": 182,
+        "change_id": 2128,
+        "action": "ADDED_FOUR_STEP_BUYER_CHECKLIST",
+        "wpwriter_seo_before": 73,
+        "wpwriter_seo_after": 80
+      },
+      {
+        "id": 52714,
+        "snapshot_id": 183,
+        "change_id": 2129,
+        "action": "ADDED_FIVE_FIELD_B2B_COORDINATION_CHECKLIST",
+        "wpwriter_seo_before": 75,
+        "wpwriter_seo_after": 82
+      },
+      {
+        "id": 52715,
+        "snapshot_id": 184,
+        "change_id": 2132,
+        "action": "ADDED_FOUR_ITEM_BUYER_DOCUMENT_CHECKLIST",
+        "wpwriter_seo_before": 80,
+        "wpwriter_seo_after": 87
+      },
+      {
+        "id": 52716,
+        "snapshot_id": 185,
+        "change_id": 2133,
+        "action": "ADDED_FOUR_ITEM_B2B_MILESTONE_CHECKLIST",
+        "wpwriter_seo_before": 80,
+        "wpwriter_seo_after": 87
+      }
+    ],
+    "previous_verified_changes": [
+      {
+        "id": 52715,
+        "snapshot_id": 180,
+        "change_id": 2123,
+        "action": "CONTEXTUAL_LINK_TO_PUBLISHED_PRECIOMAXIMO"
+      },
+      {
+        "id": 52716,
+        "snapshot_id": 181,
+        "change_id": 2124,
+        "action": "CONTEXTUAL_LINK_TO_PUBLISHED_ARRAS_TASACION_BANCO"
+      },
+      {
+        "id": 52716,
+        "change_id": 2125,
+        "action": "YOAST_SEO_TITLE_SHORTENED"
+      }
+    ],
+    "seo_post_body_score_note": "WPWriter own heuristic on stored HTML, not live rendered page; does not certify SEO ranking or YMYL",
+    "provider_access_note": "OPENAI_API_KEY_NAME_VISIBLE_IN_GITHUB_ACTIONS_SECRETS_UI; secret value not read; no batch2 dispatcher or provider image receipt confirmed",
+    "next_block": "VISUAL_AUTHENTICATED_EDITOR_PER_PAGE_TEMPLATE_AND_PREVIEW_THEN_UMS_ONE_PHOTO_PER_WORK_COST_GATED_AND_MEDIA_QA",
+    "blocked_methods_do_not_repeat": [
+      "WP_UPDATE_POST_META_TEMPLATE_DID_NOT_PERSIST",
+      "WP_CLI_SHELL_EXEC_DISABLED"
+    ],
+    "all_draft_no_auto_publish": true
+  },
+  "media_recovery_2026_11_07": {
+    "verified_in": "LIVE_WORDPRESS_COWBOY_MCP_7_NOV_2026",
+    "status": "MEDIA_ATTACHED_IN_DRAFTS_QA_PENDING",
+    "images": [
+      {
+        "post_id": 52713,
+        "attachment_id": 52718,
+        "filename": "fenix-seo001-52713-derrama-comunidad-piso-cordoba-hero-original.jpg"
+      },
+      {
+        "post_id": 52714,
+        "attachment_id": 52719,
+        "filename": "fenix-seo001-52714-vender-antes-comprar-agencia-cordoba-hero-original.jpg"
+      },
+      {
+        "post_id": 52715,
+        "attachment_id": 52720,
+        "filename": "fenix-seo001-52715-revisar-gastos-derrama-compra-cordoba-hero-original.jpg"
+      },
+      {
+        "post_id": 52716,
+        "attachment_id": 52721,
+        "filename": "fenix-seo001-52716-compraventas-encadenadas-agencias-cordoba-hero-original.jpg"
+      }
+    ],
+    "all_expected_photo_dimensions": "1536x1024",
+    "media_attachment_alt_caption_metadata": "PRESENT_4_OF_4",
+    "source_provenance": "WP_MEDIA_DESCRIPTION_STATES_GENERATED_WITH_OPENAI;_ORIGINAL_RECEIPT_NOT_INDEPENDENTLY_VERIFIED",
+    "reused_existing_wp_uploads": true,
+    "new_paid_generation_this_step": 0,
+    "new_subscriptions": 0,
+    "wordpress_featured_media_mapped": "4_OF_4",
+    "body_img_inserted": "4_OF_4",
+    "img_alt_inserted": "4_OF_4",
+    "img_caption_inserted": "4_OF_4",
+    "wp_post_status_after": "DRAFT_4_OF_4",
+    "wp_thumbnail_verified_after": "52713:52718,52714:52719,52715:52720,52716:52721",
+    "wp_body_qa_state": "MEDIA_ATTACHED_QA_PENDING",
+    "coreguard_snapshots": [
+      191,
+      192,
+      193,
+      194
+    ],
+    "undo_journal_body_image_changes": [
+      2159,
+      2160,
+      2161,
+      2162
+    ],
+    "undo_journal_state_changes": [
+      2163,
+      2164,
+      2165,
+      2166
+    ],
+    "undo_journal_comment_changes": [
+      2167,
+      2168,
+      2169,
+      2170
+    ],
+    "authenticated_opera_previews": {
+      "52713": "PREVIEW_OPENED_AUTHENTICATED_BUT_AX_VISUAL_RECHECK_INCOMPLETE",
+      "52714": "TITLE_HEADINGS_BREADCRUMBS_CORRECT_NO_404_ACCESSIBILITY",
+      "52715": "HEADINGS_CORRECT_NO_404_NO_DEMO_ACCESSIBILITY",
+      "52716": "HEADINGS_CORRECT_NO_404_NO_DEMO_ACCESSIBILITY"
+    },
+    "visual_screenshot_status": "BLOCKED_OPERA_SCREENSHOT_TIMEOUT_AFTER_30S_REPEATED",
+    "physical_release_qa": "HOLD_SCREENSHOT_RESPONSIVE_AND_IMAGE_VISUAL_NOT_VERIFIED",
+    "publication": "OFF",
+    "next_gate": "RESTORE_OPERA_SCREENSHOT_OR_APPROVED_SCREENSHOT_PATH; DESKTOP_MOBILE_VISUAL + IMAGE_LICENSE_PROVENANCE + LINKS + YMYL + FIRST_3_TUTORED_PUBLICATIONS",
+    "media_attached_before_template_revision": true,
+    "current_reference": "article_astra_native_banner_2026_11_07"
+  },
+  "hero_image_fix_2026_11_07": {
+    "source": "LIVE_WORDPRESS_COWBOY_AND_AUTHENTICATED_OPERA_DESKTOP_SCREENSHOTS",
+    "outcome": "SIX_MISSING_HTML_HERO_IMAGES_INSERTED_AND_VERIFIED",
+    "new_hero_images_for_existing_drafts": [
+      52660,
+      52661,
+      52713,
+      52714,
+      52715,
+      52716
+    ],
+    "existing_hero_images_unchanged": [
+      52662,
+      52663
+    ],
+    "all_eight_verified_html_header_image_count": 1,
+    "image_source": "EXISTING_OWN_WORDPRESS_MEDIA_FEATURED_ATTACHMENTS",
+    "new_image_generation_this_step": 0,
+    "new_api_cost_eur": 0,
+    "new_subscription_eur": 0,
+    "content_changed_scope": "INDIVIDUAL_WORDPRESS_DRAFTS_ONLY",
+    "snapshots": [
+      195,
+      196,
+      197,
+      198,
+      199,
+      200
+    ],
+    "hero_change_journal": [
+      2177,
+      2178,
+      2179,
+      2180,
+      2181,
+      2182
+    ],
+    "typography_changes": [
+      {
+        "post_id": 52715,
+        "change_id": 2187,
+        "h1_max_px": 42
+      },
+      {
+        "post_id": 52716,
+        "change_id": 2188,
+        "h1_max_px": 40
+      }
+    ],
+    "physical_opera_desktop": [
+      {
+        "id": 52715,
+        "photo_hero": "VISIBLE",
+        "headline": "VISIBLE",
+        "cta": "VISIBLE",
+        "format": "TWO_COLUMN",
+        "overall_visual": "HEADER_PASS"
+      },
+      {
+        "id": 52716,
+        "photo_hero": "VISIBLE",
+        "headline": "VISIBLE",
+        "cta": "VISIBLE",
+        "format": "TWO_COLUMN",
+        "overall_visual": "HEADER_PASS"
+      },
+      {
+        "id": 52713,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      },
+      {
+        "id": 52714,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      },
+      {
+        "id": 52660,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      },
+      {
+        "id": 52661,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      }
+    ],
+    "theme_banner_pilot_52713": "NOT_EFFECTIVE_IN_PREVIEW; EXTRA_H1_AND_BREADCRUMB_REVERTED; PLUGIN_V0.0.4_RESTORED; NO_GLOBAL_THEME_CHANGE",
+    "wp_status_eight": "DRAFT_8_OF_8",
+    "outstanding": "RESPONSIVE_MOBILE_AND_FULL_PAGE_QA_AND_THEME_BANNER_DUPLICATION_FOR_ARTICLES_BEFORE_PUBLICATION",
+    "release_status": "HOLD_NOT_OWNER_APPROVED",
+    "publication_count": 0,
+    "historical_only": true,
+    "superseded_by": "article_astra_native_banner_2026_11_07"
+  },
+  "article_astra_native_banner_2026_11_07": {
+    "scope": "FOUR_EXISTING_WORDPRESS_POST_DRAFTS_ONLY",
+    "post_ids": [
+      52660,
+      52661,
+      52713,
+      52714
+    ],
+    "rule": "POST_USE_SINGLE_ASTRA_NATIVE_FEATURED_IMAGE_BANNER_AND_NATIVE_H1; DO_NOT_DUPLICATE_WITH_CUSTOM_HEADER_AND_SECOND_IMAGE",
+    "page_ids_using_separate_elementor_hero": [
+      52662,
+      52663,
+      52715,
+      52716
+    ],
+    "featured_media_used": {
+      "52660": 52699,
+      "52661": 52703,
+      "52713": 52718,
+      "52714": 52719
+    },
+    "removed_custom_header_in_article_body": "4_OF_4",
+    "native_astra_banner_in_opera": "4_OF_4",
+    "native_title_heading_in_accessibility_tree": "ONE_EXACT_MATCH_EACH",
+    "wp_body_h1": "ZERO_FOR_POSTS_ASTRA_PROVIDES_H1",
+    "wp_status": "DRAFT_8_OF_8",
+    "reverted_temp_form_probe": true,
+    "snapshots_and_undo": [
+      {
+        "post_id": 52713,
+        "snapshot": 205,
+        "change_id": 2206
+      },
+      {
+        "post_id": 52660,
+        "snapshot": 206,
+        "change_id": 2208
+      },
+      {
+        "post_id": 52661,
+        "snapshot": 207,
+        "change_id": 2210
+      },
+      {
+        "post_id": 52714,
+        "snapshot": 208,
+        "change_id": 2212
+      },
+      {
+        "post_id": 52660,
+        "probe_snapshot": 209,
+        "probe_open_change": 2214,
+        "probe_restored_change": 2215
+      }
+    ],
+    "preserved": "FAQ_COPY_LINKS_ORIGINAL_FEATURED_IMAGES_AND_FIRST_BATCH_FENIX_SEO001_CITY_FORM_SHORTCODES",
+    "wp_seo_audit": "NO_ISSUES_EIGHT_OF_EIGHT",
+    "form_test": {
+      "post_id": 52660,
+      "result": "REAL_FORM_VISIBLE_ON_TEMP_OPEN_COLLAPSIBLE_AND_RESTORED",
+      "fields": [
+        "name",
+        "email",
+        "phone",
+        "message",
+        "privacy_consent",
+        "marketing_consent_separate"
+      ],
+      "lead_submission_test": "NOT_EXECUTED"
+    },
+    "blocking_persona_gap": "EXISTING_CEREBRO_SEO001_CITY_FORM_PROD_V1_1_0_ACCEPTS_ONLY_STUDY_AND_GUIDE; B2B_POST_52661_USES_STUDY_GENERIC; SPECIFIC_PARTNER_FORM_NOT_CERTIFIED",
+    "visual_mobile_qa": "PENDING_NO_RESPONSIVE_VIEWPORT_TOOL",
+    "physical_full_page_qa": "PENDING",
+    "legal_financial_editorial_gate": "PENDING",
+    "publication": "OFF",
+    "next_batch": "BLOCKED_UNTIL_ALL_PRODUCTION_GATES_PASS"
+  },
+  "partner_form_v0_2026_11_07": {
+    "component": "cerebro-seo001-partner-form-v0/cerebro-seo001-partner-form-v0.php",
+    "plugin_version": "0.1.1",
+    "wordpress_status": "ACTIVE_SCOPED_TO_FOUR_EXISTING_B2B_IDS",
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "WORDPRESS_PROD_DRAFT_ONLY",
+    "version": "0.1.1",
+    "ids": [
+      52661,
+      52663,
+      52714,
+      52716
+    ],
+    "contract": "EXISTING_WP_REST_fenix-cerebro/v1/lead -> FENIX_CEREBRO_LEADS_PROD -> SUPABASE_fenix-web-lead -> fn_fenix_prod_web_lead_ingest_server",
+    "backend_source_note": "WP handler intentionally forces source=web; partner segment preserved in source_payload.funnel=PARTNER, asset=partner_cordoba, resource=partner_cordoba, agency appended into message",
+    "form_fields": [
+      "agency_required",
+      "contact_name_required",
+      "email_or_phone_required",
+      "operation_type",
+      "message_optional",
+      "consent_privacy_required",
+      "consent_marketing_optional",
+      "honeypot"
+    ],
+    "anti_duplicate": "ROLE_FORM_SECTION_NOT_NATIVE_FORM_AND_BUTTON_TYPE_BUTTON_CLICKS_ONLY; AVOIDS_EXISTING_GLOBAL_SUBMIT_CAPTURE_IN_FENIX_CEREBRO_LEADS",
+    "checks": {
+      "php_lint": "PASS",
+      "plugin_active": "VERIFIED",
+      "wordPress_saved_content": "4_OF_4",
+      "authenticated_opera_accessibility": "PARTNER_FORM_FIELDS_PRESENT_4_OF_4",
+      "published_privacy_page": "47569",
+      "seo_issues_eight_existing_drafts": "0_OF_8",
+      "fragment_anchors": "8_OF_8_NO_MISSING",
+      "created_real_leads": 0,
+      "real_lead_delivery_e2e": "NOT_EXECUTED",
+      "mobile_visual": "PENDING",
+      "full_page_screenshots": "PENDING_INTERMITTENT_OPERA_TIMEOUT",
+      "financial_legal_review": "PENDING"
+    },
+    "backup": {
+      "full_wp_db_checkpoint_id": 72,
+      "post_snapshots": [
+        {
+          "post_id": 52661,
+          "id": 210
+        },
+        {
+          "post_id": 52663,
+          "id": 211
+        },
+        {
+          "post_id": 52714,
+          "id": 212
+        },
+        {
+          "post_id": 52716,
+          "id": 213
+        }
+      ],
+      "pre_visible_bottom_snapshots": [
+        214,
+        215
+      ]
+    },
+    "change_journal": {
+      "plugin_create": 2220,
+      "plugin_activate": 2221,
+      "shortcode_updates": [
+        2222,
+        2223,
+        2224,
+        2225
+      ],
+      "visible_bottom": [
+        2227,
+        2229
+      ],
+      "anchors": [
+        2230,
+        2231,
+        2232,
+        2233
+      ],
+      "hero_cta_to_form": [
+        2234,
+        2235
+      ],
+      "plugin_accessibility_update": 2236
+    },
+    "rollback": "RESTORE_FOUR_DRAFT_CONTENTS_OR_CHANGE_JOURNAL_BEFORE_DEACTIVATING_OR_DELETING_SCOPED_PLUGIN; NEVER DEACTIVATE_WHILE_SHORTCODE_REFERENCES_REMAIN",
+    "cost_eur_new_subscription": 0,
+    "external_paid_ai_calls": 0,
+    "wordpress_published": 0,
+    "release": "HOLD_NOT_OWNER_APPROVED",
+    "next_gate": "VALIDATE_REAL_MOBILE_VISUAL_AND_LEAD_E2E_WITH_APPROVED_NON-PROD_FIXTURE_OR TUTORED_SINGLE_REAL_LEAD; CHECK_PROD_CRM_ROUTING_AND_COPY_LEGAL_SIGNOFF"
+  },
+  "partner_form_backend_guard_2026_11_08": {
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "WORDPRESS_PROD_DRAFT_ONLY",
+    "version": "0.1.2",
+    "wp_plugin": "cerebro-seo001-partner-form-v0/cerebro-seo001-partner-form-v0.php",
+    "source_of_truth_snapshot": "cerebro/seo-enterprise/v2/wordpress/cerebro-seo001-partner-form-v0.php",
+    "deterministic_tests": "cerebro/seo-enterprise/v2/tests/seo001-partner-contract.test.mjs",
+    "wordpress_file_change_id": 2237,
+    "wp_plugin_scope": [
+      52661,
+      52663,
+      52714,
+      52716
+    ],
+    "rest_filter": "rest_pre_dispatch",
+    "rest_filter_scope": "POST /fenix-cerebro/v1/lead ONLY WHEN FUNNEL PARTNER AND landing_id IN FOUR_IDS",
+    "scope_confined_to_existing_plugin": true,
+    "backend_data_contract": "FENIX_WP_LEAD_BRIDGE_FORCES_SOURCE_WEB; FUNNEL_PARTNER,AGENCY,PARTNER_NEED,LANDING_ID,PRESERVED_IN_SOURCE_PAYLOAD",
+    "negative_http_tests": [
+      {
+        "case": "partner_missing_privacy_no_identity",
+        "status": 422,
+        "code": "seo001_partner_privacy_required"
+      },
+      {
+        "case": "generic_no_identity",
+        "status": 422,
+        "code": "identifier_required"
+      },
+      {
+        "case": "partner_missing_privacy_with_dummy_identifier",
+        "status": 422,
+        "code": "seo001_partner_privacy_required"
+      },
+      {
+        "case": "partner_missing_agency_with_dummy_identifier",
+        "status": 422,
+        "code": "seo001_partner_identity_required"
+      },
+      {
+        "case": "partner_privacy_and_agency_valid_but_no_contact",
+        "status": 422,
+        "code": "identifier_required"
+      }
+    ],
+    "negative_probes_created_leads": "NO_EXPECTED_ALL_422_NO_VALID_CONTACT",
+    "crm_partner_aggregate_at_test": 0,
+    "happy_path_e2e": "NOT_RUN_PROD_NO_FAKE_LEADS",
+    "wp_plugin_php_lint": "PASS",
+    "offline_contract_assertions": "8_OF_8_PASS_IN_TOOL",
+    "node_ci_tests": "NOT_RUN_COMMIT_SKIP_CI",
+    "visual_evidence": "OPERA_DESKTOP_FORM_52716_SCREENSHOT_SEEN",
+    "mobile_visual": "NOT_VERIFIED",
+    "accessibility": "DESKTOP_PREVIEW_FIELDS_VERIFIED_ALL_4",
+    "crm_routing_truth": "GENERIC_WEB_CHANNEL, BELEN-DIR_GENERIC_FOLLOWUP; PARTNER FIELDS IN SOURCE_PAYLOAD ONLY",
+    "security_residual": "EXISTING_GENERIC_LEAD_ENDPOINT_OUTSIDE_FOUR_IDS_NOT_COVERED_BY_SCOPED_GUARD; NO_CHANGE_TO_PROD_CORE",
+    "next_gate": "SUPERVISED_REAL_HAPPY_PATH_LEAD_OR_NON_PROD_FIXTURE, CHECK_CRM_PARTNER_ROUTING_AND_MOBILE_DEVICE; LEGAL_EDITORIAL_SIGNOFF",
+    "publication": "OFF",
+    "automated_next_batch": "BLOCKED",
+    "additional_subscription_cost_eur": 0,
+    "new_paid_ai_call_count": 0,
+    "superseded_by": "partner_form_dedicated_transport_2026_11_08"
+  },
+  "partner_form_dedicated_transport_2026_11_08": {
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "WORDPRESS_PROD_DRAFT_ONLY",
+    "version": "0.2.0",
+    "status": "NEGATIVE_CONTRACT_VERIFIED_POSITIVE_E2E_PENDING",
+    "wordpress_source": "plugins/cerebro-seo001-partner-form-v0/cerebro-seo001-partner-form-v0.php",
+    "github_source": "cerebro/seo-enterprise/v2/wordpress/cerebro-seo001-partner-form-v0.php",
+    "github_tests": "cerebro/seo-enterprise/v2/tests/seo001-partner-contract.test.mjs",
+    "endpoint": "POST /wp-json/cerebro-seo001/v0/partner-lead",
+    "four_scoped_ids": [
+      52661,
+      52663,
+      52714,
+      52716
+    ],
+    "reuses_existing": "fenix_cerebro_lead_payload + fenix_cerebro_forward_lead WITHOUT MODIFYING_EITHER",
+    "server_structured_payload": [
+      "agency",
+      "partner_need",
+      "funnel=PARTNER",
+      "source=web_agency_partner",
+      "landing_id",
+      "consent_privacy",
+      "consent_marketing"
+    ],
+    "source_routing": "WEB_AGENCY_PARTNER_PRESERVED_IN_SOURCE_PAYLOAD_ON_SUCCESS; CRM_TASK_ASSIGNMENT_STILL_GENERIC_BELEN_DIR_NOT_PARTNER_SPECIFIC",
+    "negative_http_tests": [
+      {
+        "test": "privacy_required",
+        "http": 422,
+        "code": "seo001_partner_privacy_required",
+        "pass": true
+      },
+      {
+        "test": "agency_required",
+        "http": 422,
+        "code": "seo001_partner_identity_required",
+        "pass": true
+      },
+      {
+        "test": "need_valid",
+        "http": 422,
+        "code": "seo001_partner_need_invalid",
+        "pass": true
+      },
+      {
+        "test": "landing_scoped",
+        "http": 422,
+        "code": "seo001_partner_landing_invalid",
+        "pass": true
+      },
+      {
+        "test": "contact_identifier_required",
+        "http": 422,
+        "code": "identifier_required",
+        "pass": true
+      }
+    ],
+    "client_checks": "10_OF_10_IN_MEMORY_PASS",
+    "php_lint": "PASS",
+    "rest_route_registered": true,
+    "nonprod_happy_path": "NOT_EXECUTED",
+    "no_test_lead_created": true,
+    "existing_crm_code_modified": false,
+    "existing_wp_lead_bridge_modified": false,
+    "supabase_modified": false,
+    "live_plugins_global_modified": false,
+    "physical_mobile_qa": "UNVERIFIED_NEEDS_REAL_MOBILE_VIEWPORT",
+    "desktop_form_capture": "SEEN_IN_AUTHENTICATED_OPERA_52716",
+    "legal_editorial_approval": "PENDING",
+    "release_gate": "HOLD",
+    "new_subscriptions_eur": 0,
+    "new_paid_ai_calls": 0,
+    "restore": "WordPress journal change 2243 or GitHub v0.1.2 snapshot commit 5329fa3c35d9db23d1ead94bd4b41fec262b5b14",
+    "next_gate": "HUMAN_SUPERVISED_REAL_B2B_LEAD_VERIFY_SOURCE_PAYLOAD_TASK_OWNER_NO_DUPLICATES_PLUS_REAL_MOBILE_QA_AND_APPROVAL"
+  }
+}

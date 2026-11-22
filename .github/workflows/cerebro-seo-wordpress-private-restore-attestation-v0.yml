@@ -1,0 +1,27 @@
+name: CEREBRO SEO · Private WordPress full-site recovery cryptographic acceptance
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-wordpress-private-restore-attestation-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-wordpress-private-restore-attestation-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-wordpress-private-restore-attestation-v0.yml'
+permissions:
+  contents: read
+jobs:
+  cryptographic-evidence-schema:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Test signed PRIVATE-restore receipts using generated synthetic keys only
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-wordpress-private-restore-attestation-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-wordpress-private-restore-attestation-v0.test.mjs
+      - name: Fail closed pending genuine Hostinger encrypted backup and private isolated restore
+        run: |
+          echo 'REAL_BACKUP_DOWNLOADED=NO ACTUAL_PRIVATE_RESTORE_EXECUTED=NO SIGNING_KEY_PINNED_IN_VAULT=NO'
+          echo 'NO_BACKUP_BYTES_IN_GITHUB=YES NO_CUSTOMER_PII=YES PROD_WRITES=0'

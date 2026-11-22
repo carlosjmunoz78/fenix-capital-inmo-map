@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "6.0.0",
+  "batch_id": "SEO001-SURGICAL-DETERMINISTIC-20261108-V6",
+  "status": "PREPARED_OFFLINE_HARD_HOLD",
+  "source": {
+    "batch_id": "SEO001-SURGICAL-PATCH-20261108-V5",
+    "run_id": 42446075036,
+    "artifact_id": 13603278337,
+    "artifact_name": "seo001-surgical-v5-20261108-LAB-UNAPPROVED",
+    "work_id": "SEO001-FENIX-AR20261108V5-B2B-002",
+    "html_sha256": "4a4ebb9895e260cd2e6e50be624a8525c5798fcb657c9e83ff8f70ce469da965",
+    "nonce": "CONSUMED_20261108_SURGICAL_V5"
+  },
+  "work_id": "SEO001-FENIX-AR20261108V6-B2B-002",
+  "persona": "INMOBILIARIAS",
+  "limits": {
+    "max_runs": 1,
+    "max_model_calls": 0,
+    "max_paid_calls": 0,
+    "max_cost_eur": 0,
+    "allow_model_call": false,
+    "allow_paid_fallback": false,
+    "allow_wp_write": false,
+    "allow_publication": false,
+    "allow_crm_write": false,
+    "allow_supabase_write": false,
+    "allow_media_call": false,
+    "allow_merge": false,
+    "allow_next_batch": false
+  },
+  "targets": [
+    {
+      "section": 2,
+      "paragraph": 1,
+      "before_words": 88,
+      "after_words": 85,
+      "before_sha256": "5f5bc393345a10c8c635113b733b172ef980a775951604a5000ef96fb32779bc",
+      "original_text": "El papel de la inmobiliaria durante la espera consiste en actuar como un canal neutro de comunicación y seguimiento estructurado. Para ello, resulta indispensable documentar cada hito del proceso hipotecario sin trasladar impresiones subjetivas sobre la valoración económica que emitirá el perito designado. Conviene recordar que los plazos de emisión pueden variar según la carga de trabajo de la sociedad de tasación, por lo que anticipar fechas sin confirmación oficial escrita de la entidad financiera suele deteriorar la confianza depositada en la mediación profesional de la agencia cordobesa.",
+      "rewrite_pairs": [
+        [
+          "Para ello, resulta indispensable documentar cada hito",
+          "Para ello, conviene documentar cada hito"
+        ],
+        [
+          "confirmación oficial escrita de la entidad",
+          "confirmación escrita de la entidad"
+        ],
+        [
+          "mediación profesional de la agencia cordobesa",
+          "mediación de la agencia cordobesa"
+        ]
+      ]
+    },
+    {
+      "section": 4,
+      "paragraph": 1,
+      "before_words": 89,
+      "after_words": 85,
+      "before_sha256": "9c7a67b88664dacb5c8d23c7adf2265ff243afbfe1a64966f46a886045c17478",
+      "original_text": "La incertidumbre generada por una tasación demorada suele trasladarse al ámbito de los acuerdos de reserva o arras firmados entre las partes. Para evitar que esta situación derive en un litigio, la inmobiliaria debe abogar por la revisión detallada de las cláusulas contractuales y los plazos esenciales establecidos en el documento, evitando afirmar de manera categórica que un retraso justifica por sí mismo la resolución del contrato o la penalización automática, dado que la validez de tales efectos depende de los hechos probados y de la interpretación jurídica especializada.",
+      "rewrite_pairs": [
+        [
+          "La incertidumbre generada por una tasación demorada suele trasladarse al ámbito de los acuerdos de reserva o arras firmados entre las partes.",
+          "La incertidumbre por una tasación demorada puede afectar a los acuerdos de reserva o arras entre las partes."
+        ]
+      ]
+    }
+  ],
+  "quality": {
+    "required_old_penalty": 18,
+    "required_new_penalty": 0,
+    "non_target_bytes_unchanged": true,
+    "legal_review": "PENDING",
+    "visual_mobile": "PENDING",
+    "b2b_crm_real_e2e": "PENDING"
+  },
+  "telemetry": {
+    "v5_historical_rejection_cause": "UNOBSERVABLE_V5_DID_NOT_LOG",
+    "v6_denial_codes": "EXPLICIT_SAFE_DIAGNOSTIC_NO_TEXT"
+  },
+  "launch": "PR22_ONE_OFFLINE_QA_CHECK",
+  "prohibited": "MODEL_CALLS_AND_WORDPRESS_PUBLICATION_AND_ALL_PROD_WRITES"
+}

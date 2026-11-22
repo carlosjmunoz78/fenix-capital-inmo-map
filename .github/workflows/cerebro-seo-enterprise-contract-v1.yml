@@ -1,0 +1,312 @@
+name: CEREBRO SEO Enterprise Architecture Contract V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v1/**'
+      - 'cerebro/seo-enterprise/v2/**'
+      - 'cerebro/factory/seo-org-v0.mjs'
+      - 'cerebro/factory/seo-org-cli-v0.mjs'
+      - 'cerebro/tests/seo-org-v0.test.mjs'
+      - 'cerebro/governance/universal-excellence*'
+      - 'cerebro/tests/universal-excellence-lab-v0.test.mjs'
+      - 'cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs'
+      - 'cerebro/gateway/universal-excellence-owner-binding-v0.mjs'
+      - 'cerebro/console/universal-excellence-console-binding-v0.mjs'
+      - 'cerebro/governance/supabase-owner-session-verifier-lab-v0.mjs'
+      - 'cerebro/tests/supabase-owner-session-verifier-lab-v0.test.mjs'
+      - 'cerebro/tests/universal-excellence-console-binding-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-enterprise-contract-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# PR #22 changes currently trigger this wide architecture suite on every push.
+# It has no external mutations: obsolete PR checks can be cancelled safely.
+# Manual workflow_dispatch runs are never intentionally cancelled.
+concurrency:
+  group: seo001-enterprise-architecture-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate SEO unit contracts; physical-input suites run in their dedicated workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The 5 listed suites require historical artifact downloads, external
+          # ffmpeg or private directories. Running them without those inputs
+          # creates false infrastructure failures, not a meaningful QA verdict.
+          # The dedicated workflows retain their REAL tests and release HOLD.
+          tests=(cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs)
+          unit=()
+          for file in "${tests[@]}"; do
+            case "$file" in
+              */seo-physical-release-tribunal-v0.test.mjs|\
+              */seo-ums-photo-physical-intake-v0.test.mjs|\
+              */seo-v4-1-wordpress-draft-guard-v0.test.mjs|\
+              */seo-v4-documentary-risk-gate-v1.test.mjs|\
+              */seo-v4-official-source-repair-v1.test.mjs)
+                echo "REQUIRES_DEDICATED_PHYSICAL_CI: $file"
+                ;;
+              *) unit+=("$file") ;;
+            esac
+          done
+          test "${#unit[@]}" -ge 10
+          node --test "${unit[@]}"
+      - name: Prove universal owner-only excellence rewards suspension and replacement policy
+        run: node --test cerebro/tests/universal-excellence-lab-v0.test.mjs cerebro/tests/universal-excellence-governance-contract-v0.test.mjs cerebro/tests/universal-excellence-job001-adapter-v0.test.mjs cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs cerebro/tests/universal-excellence-console-binding-v0.test.mjs cerebro/tests/supabase-owner-session-verifier-lab-v0.test.mjs
+      - name: Enforce official WordPress draft-first and scoped owner-approved autonomy policy
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-official-publication-decision-v0.test.mjs
+      - name: Verify FACT-001 SEO organization overlay, preserve canonical 177-engine scaffold
+        run: node --test cerebro/tests/seo-org-v0.test.mjs
+      - name: Materialize 8 families and 32 departments as non-deployed organizational contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/factory/seo-org-cli-v0.mjs validate
+          node cerebro/factory/seo-org-cli-v0.mjs generate --company-id fenix --out "$RUNNER_TEMP/seo-org-contracts"
+          node cerebro/factory/seo-org-cli-v0.mjs generate --company-id fenix --out "$RUNNER_TEMP/seo-org-contracts"
+      - name: Retain organizational index only (no secrets or user data)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-org-32-departments-v0
+          path: ${{ runner.temp }}/seo-org-contracts/index.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Generate 32 SEO specialist courseware manifests twice without overwrites
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-specialist-training"
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs generate-training --out "$RUNNER_TEMP/seo-specialist-training"
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs generate-training --out "$RUNNER_TEMP/seo-specialist-training"
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs readiness
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs route --type MARKETING_PLAN --objective 'Preparar propuesta de marketing y SEO usando los inventarios existentes' --ref OWNER_MKT_PLAN_SEO_001
+      - name: Archive only training course index (no claim of actual training)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-training-32-courseware-v1
+          path: ${{ runner.temp }}/seo-specialist-training/manifest.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build and independently verify all 191 role curricula and 573 drill templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2-all-roles"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-all-roles-curriculum-v1.mjs build \
+            "$RUNNER_TEMP/seo-phase2-all-roles/role-curriculum.json"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-all-roles-curriculum-v1.mjs verify \
+            "$RUNNER_TEMP/seo-phase2-all-roles/role-curriculum.json"
+      - name: Archive phase 2 role knowledge and drill bindings (not trained agents)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-all-191-role-curricula-573-drills
+          path: ${{ runner.temp }}/seo-phase2-all-roles/role-curriculum.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Run first source-grounded ChatGPT professional pilot through isolated JOB-001
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2-pilot"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-pilot-runner-v1.mjs \
+            "$RUNNER_TEMP/seo-phase2-pilot/job001.v8" \
+            "$RUNNER_TEMP/seo-phase2-pilot/pilot-receipt.json"
+      - name: Archive anonymized pilot receipt only (not autonomous-agent training)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-first-professional-pilot-job001-readonly
+          path: ${{ runner.temp }}/seo-phase2-pilot/pilot-receipt.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Exercise 141 SEO specialist knowledge contracts with durable JOB-001 (NO AGENT IAM)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-workforce-141"
+          node cerebro/seo-enterprise/v2/runtime/seo-workforce-orientation-v2.mjs run \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/orientation.json"
+          node cerebro/seo-enterprise/v2/runtime/seo-workforce-orientation-v2.mjs verify \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/verification.json"
+      - name: Assemble 32 departments and 141 role bindings using the existing JOB-001 journal
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-v2-control-plane-assembly-v1.mjs assemble \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/assembly.json"
+          node cerebro/seo-enterprise/v2/runtime/seo-v2-control-plane-assembly-v1.mjs verify \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/assembly.json"
+      - name: Archive 141 contract-orientation receipts and 32/141 assembly manifest (not agent certifications)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-141-subagent-contract-orientation-lab-v2
+          path: |
+            ${{ runner.temp }}/seo-workforce-141/orientation.json
+            ${{ runner.temp }}/seo-workforce-141/verification.json
+            ${{ runner.temp }}/seo-workforce-141/assembly.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Generate 141 SEO specialist FACT-001 scaffolds twice idempotently (no deployment)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-role-scaffolds"
+          node cerebro/factory/seo-skillpack-factory-v2.mjs generate "$RUNNER_TEMP/seo-role-scaffolds"
+          node cerebro/factory/seo-skillpack-factory-v2.mjs generate "$RUNNER_TEMP/seo-role-scaffolds"
+      - name: Archive specialist scaffold manifest only
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-141-specialist-fact001-scaffolds-lab-v2
+          path: ${{ runner.temp }}/seo-role-scaffolds/index.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Checkout preserved V4 source archive from historical branch (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          ref: cerebro/seo001-staging-audit-v5-20261018
+          path: seo-historical-source
+          persist-credentials: false
+      - name: Join historical V4 URL-copy-image source in LAB without crawling
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-historical-v4"
+          python3 cerebro/seo-enterprise/v2/runtime/seo-historical-web-assets-reader-v1.py \
+            "seo-historical-source/docs/web-baseline/2026-10-18-v4/CEREBRO_FENIX_STAGING_BASELINE_2026-10-18.zip" \
+            "$RUNNER_TEMP/seo-historical-v4/url-image-usage-index.json" \
+            "$RUNNER_TEMP/seo-historical-v4/receipt.json"
+      - name: Retain verified historic URL-image map and receipt (not PROD)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-existing-web-assets-v4-lab
+          path: |
+            ${{ runner.temp }}/seo-historical-v4/url-image-usage-index.json
+            ${{ runner.temp }}/seo-historical-v4/receipt.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Prove read-only official WordPress ingress to ACTGW-001 and JOB-001 (synthetic provider)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-wp-draft-ingress"
+          node cerebro/seo-enterprise/v2/runtime/seo-official-wp-read-ingress-runner-v0.mjs \
+            "$RUNNER_TEMP/seo-wp-draft-ingress/queue.v8" \
+            "$RUNNER_TEMP/seo-wp-draft-ingress/receipt.json"
+      - name: Archive minimal read-only WordPress ingress proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-wp-read-ingress-lab-v0
+          path: ${{ runner.temp }}/seo-wp-draft-ingress/receipt.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Validate durable SEO WordPress draft review JOB-001 LAB queue
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-draft-review"
+          node cerebro/seo-enterprise/v2/runtime/seo-draft-review-runner-v0.mjs \
+            "$RUNNER_TEMP/seo-draft-review/review-queue.v8" \
+            "$RUNNER_TEMP/seo-draft-review/review-evidence.json"
+      - name: Archive synthetic SEO review evidence without secrets
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-draft-review-lab-v0
+          path: ${{ runner.temp }}/seo-draft-review/review-evidence.json
+          retention-days: 14
+          if-no-files-found: error
+      - name: Physical synthetic LAB universal excellence proof (no IAM privilege applied)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cerebro-excellence"
+          node cerebro/governance/universal-excellence-runner-v0.mjs \
+            "$RUNNER_TEMP/cerebro-excellence/excellence-ledger.v8" \
+            "$RUNNER_TEMP/cerebro-excellence/excellence-evidence.json"
+      - name: Keep minimal LAB proof (no raw customer data)
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: cerebro-universal-excellence-lab-v0
+          path: |
+            ${{ runner.temp }}/cerebro-excellence/excellence-ledger.v8
+            ${{ runner.temp }}/cerebro-excellence/excellence-evidence.json
+          retention-days: 14
+          if-no-files-found: error
+  seo-pilot-d31-evidence:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the original noncertifying JOB-001 pilot receipt from this workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-seo-v2-first-professional-pilot-job001-readonly
+          path: ${{ runner.temp }}/seo-phase2/pilot
+      - name: Independently recompute source facts from frozen PROD corpus (D31 objective QA only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2/d31"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-d31-evidence-check-v1.mjs \
+            "$RUNNER_TEMP/seo-phase2/pilot/pilot-receipt.json" \
+            "$RUNNER_TEMP/seo-phase2/d31/d31-receipt.json"
+      - name: Preserve D31 non-professional source-integrity report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-d31-source-integrity-no-certification
+          path: ${{ runner.temp }}/seo-phase2/d31/d31-receipt.json
+          retention-days: 14
+          if-no-files-found: error
+
+  seo-pilot-d32-feedback:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' }}
+    needs: seo-pilot-d31-evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pinned pilot receipt from the same workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-seo-v2-first-professional-pilot-job001-readonly
+          path: ${{ runner.temp }}/seo-phase2/pilot
+      - name: Download independent D31 source-integrity evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-seo-v2-d31-source-integrity-no-certification
+          path: ${{ runner.temp }}/seo-phase2/d31
+      - name: D32 verifies D31 report and prepares remaining two role-specific exercises
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2/d32"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-d32-training-feedback-v1.mjs \
+            "$RUNNER_TEMP/seo-phase2/pilot/pilot-receipt.json" \
+            "$RUNNER_TEMP/seo-phase2/d31/d31-receipt.json" \
+            "$RUNNER_TEMP/seo-phase2/d32/d32-feedback.json"
+      - name: Preserve D32 learning and remediation plan (not training or privileges)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-d32-remediation-plan-no-certification
+          path: ${{ runner.temp }}/seo-phase2/d32/d32-feedback.json
+          retention-days: 14
+          if-no-files-found: error
+

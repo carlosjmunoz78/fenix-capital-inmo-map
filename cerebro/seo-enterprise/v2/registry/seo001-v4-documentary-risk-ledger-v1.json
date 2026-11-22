@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "V4-DOCUMENTARY-RISK-V1",
+  "status": "DOCUMENTARY_RESEARCH_REVIEW_REQUIRED_NOT_LEGAL_CERTIFICATION",
+  "owner_qa_policy": "SOURCE_BOUND_YMYL_RISK_GATES_AND_EXACT_DIGEST_NO_AUTO_RELEASE",
+  "articles": [
+    {
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "persona": "PARTICULARES",
+      "sha256": "875720fb5d22a3b325ab81eef39c10b9f4de71a4577a52c26a7e127c5625548b",
+      "issues": [
+        {
+          "code": "REGISTER_NOTA_SIMPLE_INFORMATIONAL_ONLY",
+          "needle": "comprobar la titularidad exacta y la ausencia de cargas ocultas",
+          "severity": "HIGH",
+          "source_url": "https://www.registradores.org/es/-/%C2%BFque-diferencias-existen-entre-una-nota-simple-y-una-certificacio-n-registral-",
+          "source_summary": "Una nota simple es informativa y no equivale a certificación registral ni garantiza ausencia de cargas no inscritas",
+          "action": "REWRITE_AND_LEGAL_QA"
+        },
+        {
+          "code": "REGISTER_SURFACE_OVERCLAIM",
+          "needle": "la superficie construida y útil reflejada en el registro coincide con la realidad física",
+          "severity": "HIGH",
+          "source_url": "https://sede.registradores.org/site/propiedad?lang=es",
+          "source_summary": "La descripción registral debe contrastarse con documentación y realidad; no afirmar coincidencia exacta o metros útiles siempre disponibles",
+          "action": "REWRITE_AND_LEGAL_QA"
+        },
+        {
+          "code": "COMMUNITY_DEBT_CERTIFICATE_OVERCLAIM",
+          "needle": "Este documento protege al comprador frente a deudas acumuladas",
+          "severity": "HIGH",
+          "source_url": "https://www.boe.es/eli/es/l/1960/07/21/49/con/20250724",
+          "source_summary": "LPH artículo 9 establece afección real del inmueble por deudas comunitarias en límites temporales y certificado de estado de deudas salvo exoneración",
+          "action": "REWRITE_AND_LEGAL_QA"
+        },
+        {
+          "code": "MORTGAGE_TIED_SALES_OVERCLAIM",
+          "needle": "productos vinculados obligatorios, como seguros de hogar o tarjetas de crédito",
+          "severity": "HIGH",
+          "source_url": "https://www.boe.es/buscar/act.php?id=BOE-A-2019-3814",
+          "source_summary": "Ley 5/2019 artículo 17 restringe ventas vinculadas y contempla condiciones y excepciones; no presentar productos como universalmente obligatorios",
+          "action": "REWRITE_AND_YMYL_QA"
+        },
+        {
+          "code": "PROPERTY_VALUATION_BANK_ROLE",
+          "needle": "los bancos suelen tasar el inmueble según criterios propios muy conservadores",
+          "severity": "HIGH",
+          "source_url": "https://www.bde.es/hnb/es/criterios-buenas-practicas/tasacion-para-la-concesion-de-prestamos-y-creditos-hipotecarios.html",
+          "source_summary": "La tasación la emite sociedad homologada independiente; las entidades deben aceptar tasación homologada vigente y la concesión depende de capacidad de pago y política crediticia",
+          "action": "REWRITE_AND_YMYL_QA"
+        }
+      ]
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "persona": "INMOBILIARIAS",
+      "sha256": "8342799e75d8ec1aca3afa9df362dffa8948d92473dde0a8953339833bfbd83f",
+      "issues": [
+        {
+          "code": "UNCONDITIONAL_COMMUNICATION_GUARANTEE",
+          "needle": "asegura que ninguna información relevante se pierda",
+          "severity": "MEDIUM",
+          "source_url": null,
+          "source_summary": "Un protocolo de comunicación reduce riesgos pero no garantiza ausencia de pérdidas",
+          "action": "REWRITE_FOR_ACCURACY"
+        },
+        {
+          "code": "UNPROVEN_CONTRACT_BREAKDOWN_IMPACT",
+          "needle": "reduce drásticamente las rupturas contractuales posteriores",
+          "severity": "MEDIUM",
+          "source_url": null,
+          "source_summary": "Afirmación de efecto cuantitativo sin evidencia específica; evitar conclusiones causales no comprobadas",
+          "action": "REWRITE_OR_SOURCE_PROOF"
+        },
+        {
+          "code": "UNCONDITIONAL_PRE_RESERVATION_ABORT",
+          "needle": "Se desestima la propuesta de forma limpia antes de formalizar reservas",
+          "severity": "HIGH",
+          "source_url": "https://www.boe.es/buscar/act.php?id=BOE-A-2019-3814",
+          "source_summary": "La situación de una propuesta y compromisos de compra puede variar; no asegurar siempre que no existe reserva o que la cancelación carece de consecuencias",
+          "action": "REWRITE_AND_LEGAL_QA"
+        },
+        {
+          "code": "MORTGAGE_INTERMEDIATION_ROLE_REQUIREMENTS",
+          "needle": "el asesor financiero asume el estudio pormenorizado",
+          "severity": "MEDIUM",
+          "source_url": "https://www.boe.es/buscar/act.php?id=BOE-A-2019-3814",
+          "source_summary": "La Ley 5/2019 define intermediación de crédito y servicios de asesoramiento y sus obligaciones; verificar habilitación y alcance concreto antes de atribuir funciones",
+          "action": "PROFESSIONAL_SCOPE_CHECK"
+        }
+      ]
+    }
+  ],
+  "independent_professional_legal_signoff": false,
+  "source_page_authenticity_checked_manually": true,
+  "publication_authorized": false,
+  "wordpress_write_authorized": false,
+  "machine_matches_do_not_prove_legal_invalidity": true,
+  "media_producer_ready": false,
+  "photo_with_text_or_logo_forbidden": true
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "V4-D13-CLOUD-FREE-REPAIRED",
+  "batch_state": "DETERMINISTIC_QA_PASS_RELEASE_HOLD",
+  "source_model": "gemini-3.5-flash-lite",
+  "model_project": "CEREBRO-GEMINI-FREE",
+  "generation_run_id": 42231912203,
+  "correction_run_id": 42233493715,
+  "work": [
+    {
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "persona": "PARTICULARES",
+      "content_type": "ARTICLE",
+      "original_model_sha256": "eb047007504311dca7b4cdb98e2a622e2677b943f2dbca196b60a9806bcbb358",
+      "review_only_sha256": "875720fb5d22a3b325ab81eef39c10b9f4de71a4577a52c26a7e127c5625548b",
+      "qa_status": "TECHNICAL_PRECHECK_PASS_RELEASE_HOLD",
+      "visible_words": 1643,
+      "main_words_excluding_faq": 1432,
+      "faq": 6,
+      "photography_order": "UMS-001_IMAGE_BRIEF_ONLY_NO_API_DISPATCH",
+      "wordpress": "DRAFT_DRYRUN_PLAN_ONLY_NO_WRITE",
+      "original_v3_preserved": true,
+      "owner_exact_version_approved": false
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "persona": "INMOBILIARIAS",
+      "content_type": "ARTICLE",
+      "original_model_sha256": "f60d409f1d2082b4e022c3e3ac51dbf95149b55ae47645a03c3955646924415e",
+      "review_only_sha256": "8342799e75d8ec1aca3afa9df362dffa8948d92473dde0a8953339833bfbd83f",
+      "qa_status": "TECHNICAL_PRECHECK_PASS_RELEASE_HOLD",
+      "visible_words": 1588,
+      "main_words_excluding_faq": 1434,
+      "faq": 6,
+      "photography_order": "UMS-001_IMAGE_BRIEF_ONLY_NO_API_DISPATCH",
+      "wordpress": "DRAFT_DRYRUN_PLAN_ONLY_NO_WRITE",
+      "original_v3_preserved": true,
+      "owner_exact_version_approved": false
+    }
+  ],
+  "evidence": {
+    "real_generation": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42231912203",
+    "deterministic_repair": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42233493715",
+    "artifact_id": 13509932634
+  },
+  "policy": {
+    "min_article_words": 1000,
+    "min_main_words": 750,
+    "min_faq": 6,
+    "landing_words": 900,
+    "landing_main_words": 600,
+    "landing_faq": 8,
+    "require_independent_professional_qa": true,
+    "require_source_factcheck": true,
+    "require_original_photo_rights_and_uniqueness": true,
+    "require_physical_wp_snapshot_restore_iam": true,
+    "require_owner_exact_content_signoff": true
+  },
+  "finance": {
+    "new_subscriptions": 0,
+    "paid_provider_calls": 0,
+    "additional_generated_image_api_calls": 0
+  },
+  "permissions": {
+    "wordpress_write_authorized": false,
+    "media_upload_authorized": false,
+    "publish_authorized": false,
+    "schedule_authorized": false,
+    "merge_main_authorized": false
+  },
+  "next_step": "INDEPENDENT_YMYL_EDITORIAL_QA_AND_SOURCE_REVIEW_BEFORE_PUBLISH_FOLLOWED_BY_UMS_IMAGE_PHYSICAL_DELIVERY_AND_WP_DRAFT_BACKUP_IAM"
+}

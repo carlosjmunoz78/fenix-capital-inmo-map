@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "10.0.0",
+  "component": "EXISTING_SEO001_PIPELINE_READINESS_ORCHESTRATOR",
+  "status": "IMPLEMENTED_IN_PARALLEL_PR22_NOT_PROMOTED",
+  "scope": "Read and compare V7 editorial, V9 image physical receipt and existing owner release policy",
+  "triggers": "existing PR22 V8 QA workflow and existing daily CEREBRO SEO automation; no new scheduler",
+  "no_duplicate_engines": true,
+  "existing_gateway": "seo-autopublish-gateway-shadow-v0.mjs",
+  "rollback": "Revert V10 runtime/tests/registry and only the new V8 workflow step; leave older steps untouched.",
+  "permissions": {
+    "write_wordpress": false,
+    "write_crm": false,
+    "write_supabase": false,
+    "write_prod": false,
+    "publish": false,
+    "merge": false,
+    "paid_calls": false
+  },
+  "current_release_status": "HOLD",
+  "independent_proofs_required": [
+    "media provider signed rights",
+    "WordPress real mobile QA",
+    "safe B2B real positive CRM E2E",
+    "private full site restore + rollback",
+    "independent legal YMYL signoff",
+    "separate least privilege gateway IAM",
+    "three individually approved supervised publications",
+    "revocable scoped owner grant"
+  ],
+  "note": "Continuous readiness is automated evidence analysis, NOT unattended article generation nor approved production publishing. Workflow remains PR path-triggered; daily continuity comes from the existing SEO automation."
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "id": "SEO001_GOOGLE_FAQ_RICH_RESULT_RETIREMENT_REVIEW_2026",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB_POLICY_PROPOSAL",
+  "version": "1.0.0",
+  "verified_as_of": "2026-11-15",
+  "google_faq_rich_results": {
+    "available_in_google_search": false,
+    "retirement_date": "2026-05-07",
+    "docs_removed": "2026-06-15",
+    "authoritative_source": "https://developers.google.com/search/updates",
+    "official_background": "https://developers.google.com/search/blog/2023/08/howto-faq-changes",
+    "google_rich_result_advantage_claimed": false
+  },
+  "legacy_city_contract": {
+    "name": "CITY_GROWTH_PLUGIN_EXECUTOR_V1",
+    "page_id": 52200,
+    "city": "Jaén",
+    "physically_verified": {
+      "http_status": 200,
+      "canonical_ok": true,
+      "missing_internal_schema_marker": true,
+      "missing_faqpage_marker": true,
+      "mass_pilot_certified": false
+    },
+    "verdict": "LEGACY_SCHEMA_CONTRACT_NEEDS_VERSIONED_OLD_NEW_REVIEW_NOT_AUTO_REPAIR"
+  },
+  "policy_proposal": {
+    "do_not_inject_faqpage_just_for_google_rich_results": true,
+    "preserve_visible_faq_content": true,
+    "require_faqpage_for_google_seo_rich_result": false,
+    "preserve_valid_relevant_structured_data": true,
+    "schema_must_describe_actual_visible_content": true,
+    "existing_internal_guard_marker_review_required": true,
+    "old_vs_new_html_and_mobile_qa_required": true,
+    "contract_change_requires_owner_and_tribunal_approval": true,
+    "no_workaround_for_missing_certification": true
+  },
+  "release": {
+    "wordpress_changes": 0,
+    "staging_requests": 0,
+    "new_subscriptions_eur": 0,
+    "approved_for_production": false,
+    "mass_rollout_allowed": false,
+    "existing_contract_overridden": false
+  },
+  "next_action": "Review CITY_GROWTH_PLUGIN_EXECUTOR_V1 dependencies; create a versioned contract test without obsolete Google FAQ benefits. Run against full private restored site before any CITY pilot recertification."
+}

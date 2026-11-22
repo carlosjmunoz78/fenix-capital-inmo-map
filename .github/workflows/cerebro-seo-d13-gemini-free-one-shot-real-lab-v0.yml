@@ -1,0 +1,55 @@
+name: CEREBRO SEO · D13 one-shot REAL Gemini Free LAB only
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-d13-gemini-free-one-shot-real-lab-v0.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo-d13-one-shot-gemini-free-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  one-real-free-canary:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Check exact no-cost IAM, one-call contract, QA and secret safety first
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs
+      - name: Explicit one-shot owner-authorized commit gate
+        id: gate
+        run: |
+          subject="$(git log -1 --format=%s)"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          if [ "$subject" = "seo(d13): ONE_SHOT_FREE_35_QUALITY_V2_20261106" ]; then
+            echo "run_one_shot=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_one_shot=false" >> "$GITHUB_OUTPUT"
+            echo "ONE_SHOT_NOT_REQUESTED=HOLD"
+          fi
+      - name: Only one real request to already verified Gemini FREE project
+        if: ${{ steps.gate.outputs.run_one_shot == 'true' }}
+        env:
+          CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
+          REVIEW_OUTPUT_DIR: ${{ runner.temp }}/seo-d13-free-real-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs "$REVIEW_OUTPUT_DIR"
+      - name: Archive candidate and receipt in GitHub Actions only
+        if: ${{ always() && steps.gate.outputs.run_one_shot == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-d13-gemini-free-real-one-shot-evidence
+          path: ${{ runner.temp }}/seo-d13-free-real-${{ github.run_id }}/*
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Production safety fence
+        if: ${{ always() }}
+        run: echo 'CEREBRO_CLOUD=TRUE EXPLICIT_COMMIT_GATE=TRUE MAX_GEMINI_POST=1 AUTO_RETRIES=0 PAID_FALLBACK=NO WP_WRITES=0 PROD_WRITES=0'

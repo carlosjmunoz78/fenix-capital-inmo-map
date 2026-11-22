@@ -1,0 +1,66 @@
+name: CEREBRO SEO · Learned ONE Batch 2026-11-08 LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-learned-one-batch-pilot-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-learned-one-batch-runner-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
+      - '.github/workflows/cerebro-seo-learned-one-batch-20261108-lab.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-learned-one-batch-20261108-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  one-learned-batch-lab:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Test learning really enters writer and absence of unsafe side effects
+        run: |
+          node --version
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-learned-one-batch-runner-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs
+      - name: Exact owner one-shot batch commit gate
+        id: permit
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          subject="$(git log -1 --format=%s)"
+          if [ "$subject" = "seo(learning): ONE_BATCH_20261108_B2C_B2B_FREE_LAB" ]; then
+            echo 'launch=true' >> "$GITHUB_OUTPUT"
+            echo 'ONE_LEARNED_BATCH=PERMITTED LAB_ONLY'
+          else
+            echo 'launch=false' >> "$GITHUB_OUTPUT"
+            echo 'ONE_LEARNED_BATCH=HOLD_COMMIT_NOT_AUTHORIZED'
+          fi
+      - name: Generate exactly ONE B2C+B2B pilot batch, no paid fallback
+        if: ${{ steps.permit.outputs.launch == 'true' }}
+        env:
+          CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
+          OUTPUT_DIR: ${{ runner.temp }}/seo001-learned-one-batch-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-learned-one-batch-runner-v0.mjs "$OUTPUT_DIR"
+      - name: Archive unapproved draft candidates and physical-gate holds
+        if: ${{ always() && steps.permit.outputs.launch == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-learned-one-batch-20261108-LAB-UNAPPROVED
+          path: ${{ runner.temp }}/seo001-learned-one-batch-${{ github.run_id }}/*
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Explicit no-production release gate
+        if: ${{ always() }}
+        run: echo 'ONE_BATCH_MAX=1 TWO_WORKS_MAX=2 MODEL_CALLS_MAX=2 AUTO_RETRY=0 NO_PAID_FALLBACK=TRUE WP_WRITES=0 MEDIA_API=0 CRM_WRITES=0 PUBLISH=NO'

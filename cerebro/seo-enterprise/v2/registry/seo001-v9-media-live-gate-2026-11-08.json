@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "batch_id": "SEO001-V9-LIVE-MEDIA-READONLY-20261108",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "9.0.0",
+  "status": "PREPARED_READONLY",
+  "sources": "2026-11-08 connected authenticated WordPress wp_get_post/wp_list_media",
+  "images": [
+    {
+      "post_id": 52713,
+      "media_id": 52718,
+      "url": "https://fenixcapital.es/wp-content/uploads/2026/11/fenix-seo001-52713-derrama-comunidad-piso-cordoba-hero-original.jpg",
+      "expected_width": 1536,
+      "expected_height": 1024,
+      "metadata_alt_present": true,
+      "independent_provider_receipt": false,
+      "rights_review_approved": false
+    },
+    {
+      "post_id": 52714,
+      "media_id": 52719,
+      "url": "https://fenixcapital.es/wp-content/uploads/2026/11/fenix-seo001-52714-vender-antes-comprar-agencia-cordoba-hero-original.jpg",
+      "expected_width": 1536,
+      "expected_height": 1024,
+      "metadata_alt_present": true,
+      "independent_provider_receipt": false,
+      "rights_review_approved": false
+    },
+    {
+      "post_id": 52715,
+      "media_id": 52720,
+      "url": "https://fenixcapital.es/wp-content/uploads/2026/11/fenix-seo001-52715-revisar-gastos-derrama-compra-cordoba-hero-original.jpg",
+      "expected_width": 1536,
+      "expected_height": 1024,
+      "metadata_alt_present": true,
+      "independent_provider_receipt": false,
+      "rights_review_approved": false
+    },
+    {
+      "post_id": 52716,
+      "media_id": 52721,
+      "url": "https://fenixcapital.es/wp-content/uploads/2026/11/fenix-seo001-52716-compraventas-encadenadas-agencias-cordoba-hero-original.jpg",
+      "expected_width": 1536,
+      "expected_height": 1024,
+      "metadata_alt_present": true,
+      "independent_provider_receipt": false,
+      "rights_review_approved": false
+    }
+  ],
+  "cost": {
+    "max_model_calls": 0,
+    "max_image_generation_calls": 0,
+    "max_paid_calls": 0,
+    "new_subscriptions_eur": 0
+  },
+  "permissions": {
+    "wordpress_write": false,
+    "crm_write": false,
+    "supabase_write": false,
+    "publish": false,
+    "autopublish": false,
+    "merge": false
+  },
+  "unverified": [
+    "ORIGIN_PROVIDER_RECEIPT",
+    "ORIGINAL_LICENSE_AND_RIGHTS",
+    "WORDPRESS_LIVE_MOBILE_VISUAL",
+    "POSITIVE_B2B_CRM_E2E",
+    "INDEPENDENT_LEGAL_REVIEW",
+    "REAL_BACKUP_RESTORE",
+    "OWNER_APPROVAL_AND_SUPERVISED_RELEASES"
+  ]
+}

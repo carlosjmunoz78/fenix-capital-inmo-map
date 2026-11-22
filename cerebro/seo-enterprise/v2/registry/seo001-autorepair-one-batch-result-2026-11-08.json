@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "batch_id": "SEO001-AUTOREPAIR-PILOT-20261108-V1",
+  "run_id": 42441908078,
+  "job_id": 128612732906,
+  "workflow_status": "SUCCESS_EXECUTION",
+  "editorial_status": "INCOMPLETE_HOLD",
+  "artifact_id": 13600984615,
+  "artifact_name": "seo001-autorepair-20261108-v1-LAB-UNAPPROVED",
+  "artifact_sha256": "4348ffaa2a80ba5c2433c621a43ea23732d7a9f52c976a196699356e4617064d",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "GOOGLE_GEMINI_FREE_PROJECT",
+  "model_requests_actual": 6,
+  "model_calls_budget": 6,
+  "works": [
+    {
+      "work_id": "SEO001-FENIX-AR20261108-B2C-001",
+      "persona": "PARTICULARES",
+      "attempts": 3,
+      "last_copy_precheck": "HOLD",
+      "main_h2": 6,
+      "faq_items": 6,
+      "paragraph_count": 18,
+      "paragraph_words_by_section": [
+        [
+          84,
+          70,
+          65
+        ],
+        [
+          81,
+          72,
+          74
+        ],
+        [
+          64,
+          70,
+          53
+        ],
+        [
+          68,
+          67,
+          59
+        ],
+        [
+          65,
+          63,
+          47
+        ],
+        [
+          74,
+          52,
+          47
+        ]
+      ],
+      "out_of_range_count": 5,
+      "final_issue_codes": [
+        "MODEL_OR_COPY_PRECHECK_NOT_PASSED",
+        "MAIN_PARAGRAPH_WORD_RANGE"
+      ],
+      "section_totals_under_180": [
+        5,
+        6
+      ],
+      "approved": false
+    },
+    {
+      "work_id": "SEO001-FENIX-AR20261108-B2B-002",
+      "persona": "INMOBILIARIAS",
+      "attempts": 3,
+      "last_copy_precheck": "HOLD",
+      "main_h2": 6,
+      "faq_items": 6,
+      "paragraph_count": 18,
+      "paragraph_words_by_section": [
+        [
+          80,
+          74,
+          67
+        ],
+        [
+          74,
+          72,
+          74
+        ],
+        [
+          70,
+          70,
+          69
+        ],
+        [
+          74,
+          71,
+          54
+        ],
+        [
+          74,
+          74,
+          57
+        ],
+        [
+          75,
+          73,
+          65
+        ]
+      ],
+      "out_of_range_count": 2,
+      "final_issue_codes": [
+        "MODEL_OR_COPY_PRECHECK_NOT_PASSED",
+        "MAIN_PARAGRAPH_WORD_RANGE"
+      ],
+      "approved": false
+    }
+  ],
+  "observed_improvement": "FAQ_DOM_AND_EXACT_MAIN_H2_STRUCTURE_PASSED_BOTH_AFTER_THREE_ROUNDS",
+  "failed_improvement": "GENERIC_MAIN_PARAGRAPH_WORD_RANGE_FEEDBACK_DID_NOT_IDENTIFY_WHICH_SECTION_OR_PARAGRAPH_TO_FIX; PROVIDER_STYLE_STATUS_DETAIL_NOT_FORWARDED",
+  "learned_rule_to_add": "TARGET_DIAGNOSTIC_SECTION_INDEX_PARAGRAPH_INDEX_AND_EXACT_WORD_COUNT; RETAIN_SOURCE_AUDIT_ISSUES_IN_FEEDBACK; DETECT_SECTION_TOTAL_BELOW_180_TO_PREVENT_PADDING_WITHOUT_SUBSTANCE",
+  "safety": {
+    "retries_after_provider_error": false,
+    "paid_fallback_calls": 0,
+    "wordpress_writes": 0,
+    "crm_writes": 0,
+    "image_generation_calls": 0,
+    "published": 0,
+    "publish_allowed": false,
+    "next_batch_authorized": false
+  },
+  "cost": {
+    "new_subscription_eur": 0,
+    "actual_provider_billing": "NOT_INDEPENDENTLY_VERIFIED"
+  },
+  "physical_gates_pending": [
+    "ORIGINAL_MEDIA_RIGHTS",
+    "DESKTOP_MOBILE_REAL_VISUAL_QA",
+    "B2B_FORM_POSITIVE_E2E",
+    "PROFESSIONAL_LEGAL_YMYL_SIGNOFF"
+  ],
+  "quality_result": "NOT_PERFECT_DO_NOT_PUBLISH"
+}

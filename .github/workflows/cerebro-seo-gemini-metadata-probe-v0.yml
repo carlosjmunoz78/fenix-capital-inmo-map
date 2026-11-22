@@ -1,0 +1,42 @@
+name: CEREBRO SEO · Gemini provider metadata probe zero inference PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-gemini-cloud-readiness-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-gemini-metadata-probe-v0.yml'
+permissions:
+  contents: read
+jobs:
+  provider-metadata:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test zero-cost metadata preflight and secret redaction rules
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-gemini-cloud-readiness-v0.test.mjs
+      - name: Authenticate FREE project key against one read-only model metadata request
+        env:
+          CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {probeGeminiModelMetadata} from './cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs';
+          const state=await probeGeminiModelMetadata({key:process.env.CEREBRO_GEMINI_FREE_API_KEY||null});
+          const receipt={
+            status:state.status,reason:state.reason,key_present:state.key_present,
+            model_available:state.model_available,connection_verified:state.connection_verified===true,
+            billing_tier_verified:state.billing_tier_verified,
+            inference_calls:state.inference_calls,wordpress_writes:state.wordpress_writes,
+            additional_cost_eur:state.additional_cost_eur,can_publish:state.can_publish
+          };
+          process.stdout.write(JSON.stringify(receipt)+'\n');
+          if(state.status!=='METADATA_ONLY_VERIFIED'||state.connection_verified!==true){
+            process.stderr.write('BLOCKED: FREE Gemini connection has not passed read-only authentication.\n');
+            process.exitCode=2;
+          }
+          NODE
+      - name: Zero-inference verification
+        run: echo 'READONLY_METADATA_ONLY=YES GEMINI_GENERATIONS=0 BILLING_TIER=UNVERIFIED PAID_FALLBACK=NO'

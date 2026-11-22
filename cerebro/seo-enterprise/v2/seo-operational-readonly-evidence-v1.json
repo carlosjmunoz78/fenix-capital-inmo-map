@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "2.3.0",
+  "mode": "EXISTING_APPROVED_SNAPSHOT_ONLY_NO_WEBSITE_REAUDIT",
+  "parent_engine_registry": "cerebro/registry/engine-registry.v1.json",
+  "parent_registry_modified": false,
+  "skillpacks": 32,
+  "logical_specializations": 141,
+  "baseline": {
+    "published_wordpress_pages": 166,
+    "published_wordpress_posts": 34,
+    "stored_urls": 200,
+    "media_library_images": 629,
+    "snapshot_date": "2026-11-05",
+    "no_reaudits": true
+  },
+  "execution": {
+    "status": "READONLY_SPECIALIZED_WORK_AND_DETERMINISTIC_PRACTICE_VERIFIED",
+    "source_sha": "4ecac3b5390edc8c6a7e85f78d58c8b7c8ad5ef8",
+    "workflow_run_id": 42112241987,
+    "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42112241987",
+    "workflow_result": "success",
+    "architecture_run_id": 42112242037,
+    "architecture_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42112242037",
+    "architecture_result": "success",
+    "independent_github_oidc_jobs": 3,
+    "read_only_specialist_work_products": 141,
+    "existing_url_action_queue": 200,
+    "role_scope_proofs_verified": 141,
+    "training_case_count": 423,
+    "deterministic_practice_responses_executed": 423,
+    "subject_matter_exams_by_independently_authenticated_agents": 0,
+    "specialty_training_certificates": 0,
+    "distinct_iam_agent_principals": 0,
+    "specialist_processes_24_7": 0,
+    "production_autonomous_departments": 0,
+    "wordpress_published_changes": 0,
+    "app_crm_changes": 0,
+    "incremental_paid_subscriptions_eur": 0,
+    "test_suites": {
+      "seo": {
+        "total": 142,
+        "passed": 142,
+        "failed": 0
+      },
+      "governance": {
+        "total": 22,
+        "passed": 22,
+        "failed": 0
+      },
+      "supplementary_a": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "supplementary_b": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      }
+    }
+  },
+  "work_products": {
+    "generator": "cerebro/seo-enterprise/v2/runtime/seo-specialist-work-product-v1.mjs",
+    "practice_executor": "cerebro/seo-enterprise/v2/runtime/seo-specialist-practice-attempt-v1.mjs",
+    "corpus_worker": "cerebro/seo-enterprise/v2/runtime/seo-corpus-job001-work-v1.mjs",
+    "sources": "PROD_READONLY_SNAPSHOT_VERSIONED_IN_REPO",
+    "qa": "SEPARATE_OIDC_JOB_RECOMPUTES_ALL_141_OUTPUTS_200_URLS_423_L0_PRACTICES",
+    "tribunal": "THIRD_OIDC_JOB_ACCEPTS_EVIDENCE_ONLY_NOT_PROD_AUTONOMY",
+    "artifact_retention_days": 14,
+    "run_artifacts": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42112241987",
+    "priority_method": "HEURISTIC_FROM_SAVED_CMS_FIELDS_NOT_RANKINGS_OR_ROI",
+    "real_writer_claim": false
+  },
+  "governance": {
+    "no_new_audit": true,
+    "staging_off": true,
+    "prod_release_allowed": false,
+    "full_agent_autonomy_asserted": false,
+    "old_vs_new_required_for_future_prod_write": true,
+    "backup_rollback_required_for_future_prod_write": true,
+    "role_review_independent": true,
+    "financial_legal_claims_external_source_required": true,
+    "existing_app_crm_wordpress_protected": true
+  },
+  "unmet_gates": [
+    "INDIVIDUAL_AGENT_IAM_OR_VERIFIED_TRUSTED_DELEGATION_WITH_EXPLICIT_USER_POLICY",
+    "REAL_PROFESSIONAL_EVALUATION_OF_SPECIALIST_RESPONSES",
+    "PERMANENT_APPROVED_GATEWAY_HOST_AND_OBSERVABILITY",
+    "ADDITIONAL_AUTHORIZED_GSC_GA4_AND_EXTERNAL_DATA_ONLY_FOR_REQUIRED_TASKS",
+    "MARKETING_STRATEGY_OWNER_APPROVAL",
+    "BACKUP_ROLLBACK_OLD_NEW_AND_CAREFUL_PROD_PROMOTION_IF_PUBLICATION_REQUESTED"
+  ],
+  "completion_grade": "KNOWLEDGE_AND_READONLY_L0_PIPELINE_GREEN__PRODUCTION_AUTONOMY_BLOCKED"
+}

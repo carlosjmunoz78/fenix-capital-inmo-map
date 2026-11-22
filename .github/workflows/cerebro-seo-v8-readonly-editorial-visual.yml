@@ -1,0 +1,161 @@
+name: CEREBRO SEO V8 - Readonly Automated Editorial and Visual LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/drafts/v7-semantic-review-only/**'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-semantic-v7-review-only-2026-11-08.json'
+      - '.github/workflows/cerebro-seo-v8-readonly-editorial-visual.yml'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v10-continuous-readiness.test.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v10-operational-readiness-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v11-evidence-gap-role-training.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v11-evidence-gap-role-training.test.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v11-evidence-gap-role-training-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v11-b2b-live-form-static-readonly-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/fixtures/seo001-v12-live-plugin-excerpts.php'
+      - 'cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v12-partner-offline-mock-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v13-local-loopback-sink.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v13-local-sink-2026-11-08.json'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-v8-pr22
+  cancel-in-progress: true
+jobs:
+  readonly-lab:
+    if: github.event.pull_request.number == 22
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: V7 regression and content quality guards
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-v7-semantic-review-only.test.mjs
+      - name: V10 reuse existing V7 V9 evidence and test no-release state machine
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v10-continuous-readiness.test.mjs
+          node cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs /tmp/seo001-v10-readiness
+      - name: V11 real evidence gap specialist knowledge routing and negative tests
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v11-evidence-gap-role-training.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v11-evidence-gap-role-training.test.mjs
+          node cerebro/seo-enterprise/v2/runtime/seo-v11-evidence-gap-role-training.mjs /tmp/seo001-v11-role-handoffs
+      - name: V12 execute exact PHP plugin excerpts with intercepted HTTP (NO CRM CALLS)
+        run: |
+          php -v | head -2
+          php -l cerebro/seo-enterprise/v2/fixtures/seo001-v12-live-plugin-excerpts.php
+          php -l cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php
+          php -d allow_url_fopen=0 -d disable_functions=curl_exec,curl_multi_exec,fsockopen,pfsockopen,stream_socket_client cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php
+      - name: V13 local HTTP sink idempotency and rollback (never Supabase)
+        shell: bash
+        env:
+          SEO001_V13_DIR: ${{ runner.temp }}/seo001-v13-${{ github.run_id }}
+          SEO001_V13_LOCAL_SINK: http://127.0.0.1:34381/ingest
+        run: |
+          set -euo pipefail
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v13-local-loopback-sink.mjs
+          node cerebro/seo-enterprise/v2/runtime/seo-v13-local-loopback-sink.mjs "$SEO001_V13_DIR" >/tmp/seo001-v13-http.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for n in $(seq 1 30); do
+            if node --input-type=module -e "fetch('http://127.0.0.1:34381/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"; then break; fi
+            sleep 0.2
+          done
+          php -d allow_url_fopen=1 -d disable_functions=curl_exec,curl_multi_exec,fsockopen,pfsockopen cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          const u='http://127.0.0.1:34381';
+          const before=await (await fetch(u+'/status')).json();
+          assert.equal(before.stored,1);
+          assert.equal(before.attempts,2);
+          assert.equal(before.duplicates,1);
+          const response=await fetch(u+'/rollback',{method:'POST'});
+          assert.equal(response.status,200);
+          assert.equal((await response.json()).rollback,true);
+          const after=await (await fetch(u+'/status')).json();
+          assert.equal(after.stored,0);
+          assert.equal(after.rolled_back,true);
+          console.log('SEO001_V13_LOCAL_HTTP_PERSISTENCE_AND_ROLLBACK_PASS_REAL_CRM_HOLD');
+          NODE
+      - name: Store V13 dummy-only rollback receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v13-dummy-local-http-LAB-HOLD
+          path: ${{ runner.temp }}/seo001-v13-${{ github.run_id }}/receipt.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Use existing Playwright dependencies
+        run: npm ci --ignore-scripts
+      - name: Independent responsive LAB screenshots with hard publication HOLD
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          import {chromium} from '@playwright/test';
+          const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
+          const src='cerebro/seo-enterprise/v2/';
+          const v7=JSON.parse(fs.readFileSync(src+'registry/seo001-semantic-v7-review-only-2026-11-08.json','utf8'));
+          if(v7.status!=='SEMANTIC_REVIEW_ONLY_HOLD'||v7.environment!=='LAB'||v7.limits?.allow_publish!==false)throw Error('RELEASE_GATE');
+          const dir='/tmp/seo001-v8-readonly';
+          fs.mkdirSync(dir,{recursive:false});
+          const css='*{box-sizing:border-box}body{margin:0;background:#f5f5f5;color:#222;font-family:Arial,sans-serif}article{max-width:990px;margin:30px auto;padding:40px;background:#fff;border-radius:12px}h1{font-size:clamp(28px,4vw,43px)}h2{font-size:clamp(23px,3vw,30px);margin-top:35px}p{line-height:1.7;font-size:17px}a{color:#9c430b;overflow-wrap:anywhere}.faq{border-top:2px solid #ff5f00;margin-top:36px;padding-top:15px}.faq-item{border-bottom:1px solid #ddd;padding:12px 0}@media(max-width:600px){body{background:#fff}article{margin:0;padding:18px;border-radius:0}}';
+          const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});
+          const results=[];
+          try {
+            for(const [persona,file] of [['B2C','compradores-V7-REVIEW-ONLY.html'],['B2B','inmobiliarias-V7-REVIEW-ONLY.html']]){
+              const body=fs.readFileSync(src+'drafts/v7-semantic-review-only/'+file,'utf8');
+              const links=[...body.matchAll(/<a\b[^>]*href=["']([^"']+)["']/gi)].map(x=>x[1]);
+              if(hash(body)!==v7.reviews[persona].sha256||(body.match(/<h1\b/gi)||[]).length!==1||
+                 (body.match(/<h2\b/gi)||[]).length!==7||(body.match(/class=["']faq-item["']/gi)||[]).length!==6||
+                 links.length!==3||links.some(u=>!/^https:\/\/fenixcapital\.es\/[a-z0-9_-]+\/$/i.test(u))||
+                 /<(script|img|form|input|iframe|style)\b|single services|lorem ipsum/i.test(body))throw Error('V7_SHA_OR_CONTENT_DRIFT');
+              const document='<!doctype html><html lang="es"><head><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><style>'+css+'</style></head><body><article><p style="padding:16px;background:#fff2db;border-left:5px solid #ff5f00">CEREBRO SEO V8 · MAQUETA LOCAL. NO WORDPRESS, SIN FOTO, NO PUBLICADO.</p>'+body+'</article></body></html>';
+              for(const spec of [{device:'mobile',width:390,height:844},{device:'desktop',width:1440,height:900}]){
+                const page=await browser.newPage({viewport:{width:spec.width,height:spec.height},deviceScaleFactor:1});
+                await page.route('**/*',r=>r.abort());
+                await page.setContent(document,{waitUntil:'domcontentloaded'});
+                const q=await page.evaluate(()=>({w:document.documentElement.clientWidth,sw:document.documentElement.scrollWidth,h1:document.querySelectorAll('h1').length,faq:document.querySelectorAll('.faq-item').length}));
+                if(q.w!==spec.width||q.sw>spec.width||q.h1!==1||q.faq!==6)throw Error('VIEWPORT_OVERFLOW_OR_STRUCTURE');
+                const name=persona+'-'+spec.device+'-LAB.png';
+                await page.screenshot({path:path.join(dir,name),fullPage:true,animations:'disabled'});
+                results.push({persona,device:spec.device,width:spec.width,screenshot_sha256:hash(fs.readFileSync(path.join(dir,name))),horizontal_overflow:false});
+                await page.close();
+              }
+            }
+          }finally { await browser.close(); }
+          const report={batch:'SEO001-V8-READONLY-20261108',company_id:'fenix',engine_id:'SEO-001',environment:'LAB',status:'OFFLINE_RESPONSIVE_V7_PASS_RELEASE_HOLD',screenshots:results,wp_drafts_observed_previous_readonly:[52713,52714,52715,52716],media_observed_previous_readonly:[52718,52719,52720,52721],photo_provider_receipts_independently_certified:false,real_wordpress_mobile_verified:false,legal_editorial_approved:false,positive_b2b_form_crm_e2e:false,full_site_restore_rollback_verified:false,three_supervised_publications_passed:false,owner_exact_digest_approved:false,model_calls:0,image_calls:0,wordpress_writes:0,crm_writes:0,published:0,autopublish_allowed:false,release_certified:false};
+          fs.writeFileSync(path.join(dir,'manifest.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+          console.log(JSON.stringify({status:report.status,screenshots:results.length,publish_allowed:false}));
+          NODE
+      - name: Preserve QA evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v8-readonly-visual-20261108-LAB-UNAPPROVED
+          path: /tmp/seo001-v8-readonly/*
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Save V10 decision manifest separately from V8 screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v10-continuous-readiness-LAB-HOLD
+          path: /tmp/seo001-v10-readiness/readiness.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Save V11 specialist evidence routing without private data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v11-evidence-role-handoffs-LAB-HOLD
+          path: /tmp/seo001-v11-role-handoffs/seo001-v11-handoffs.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Zero external effects
+        if: always()
+        run: echo 'LAB OFFLINE HTML, not LIVE WordPress mobile proof. NO API, CRM, WP, MEDIA UPLOAD or AUTOPUBLISH.'

@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0.0",
+  "registry_entry_id": "SEO-001-FACT001-PREMIUM-OG-FUNNEL-PILOT-V1",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "capabilities": [
+    {
+      "id": "SEO_PREMIUM_OG_COMPOSITOR_V1",
+      "owner_engine": "FACT-001",
+      "consumer_engine": "SEO-001",
+      "status": "TECHNICAL_CI_GREEN_VISUAL_TRIBUNAL_HOLD",
+      "source_post_id": 960,
+      "worker_legacy_modified": false,
+      "path": "cerebro/seo-enterprise/v2/runtime/seo-premium-creative-v1.mjs",
+      "tests": "cerebro/seo-enterprise/v2/tests/seo-premium-creative-v1.test.mjs",
+      "workflow": ".github/workflows/cerebro-seo-premium-creative-preprod-v1.yml",
+      "ci_run_id": 42134348550,
+      "render_sha256": "2f042f9a5833560e6f693a76768d0a73eb22ef8267ddf07f0c24578bd5aa72a8",
+      "publish_authorized": false
+    },
+    {
+      "id": "SEO_FUNNEL_SEGMENT_CONTRACT_V0",
+      "owner_engine": "SEO-001",
+      "status": "PREPROD_LOGIC_GREEN_PROD_UNCHANGED",
+      "path": "cerebro/seo-enterprise/v2/runtime/seo-lead-segmentation-contract-v0.mjs",
+      "tests": "cerebro/seo-enterprise/v2/tests/seo-lead-segmentation-contract-v0.test.mjs",
+      "workflow": ".github/workflows/cerebro-seo-funnel-segmentation-preprod-v0.yml",
+      "ci_run_id": 42134348772,
+      "publish_authorized": false
+    },
+    {
+      "id": "SEO_CHECKLIST_TRANSACTIONAL_DELIVERY_V0",
+      "owner_engine": "SEO-001",
+      "provider": "BREVO_EXISTING_TRANSACTIONAL",
+      "status": "PREPROD_PHYSICAL_LEDGER_GREEN_BREVO_LIVE_SEND_BLOCKED",
+      "source_post_id": 52656,
+      "asset_id": "SEO-MAGNET-52656-CHECKLIST-V1",
+      "pdf_sha256": "59e6fb100d82eb1bf90193d9bfabb0bdc581382f60c5996c4c29d30e04a372f6",
+      "path": "cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v0.mjs",
+      "tests": "cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs",
+      "workflow": ".github/workflows/cerebro-seo-checklist-delivery-preprod-v0.yml",
+      "ci_run_id": 42174299373,
+      "test_passed": 10,
+      "pdf_pages": 2,
+      "pdf_form_fields": 33,
+      "storage_bucket": "seo-preprod-assets",
+      "storage_upload_verified": false,
+      "server_origin_verified_in_live": false,
+      "durable_ledger_connected": false,
+      "brevo_live_send_verified": false,
+      "physical_inbox_received": false,
+      "marketing_autosubscribe": false,
+      "publish_authorized": false,
+      "additional_eur": 0,
+      "durable_ledger_table": "public.cerebro_seo_checklist_delivery_v0",
+      "durable_ledger_project_id": "hnqlnvakzaywtafeiybt",
+      "durable_ledger_access": "SERVICE_ROLE_ONLY",
+      "durable_ledger_rls": true,
+      "durable_ledger_rows": 0,
+      "durable_ledger_connected_to_sender": false,
+      "durable_ledger_adapter": "cerebro/seo-enterprise/v2/runtime/seo-checklist-ledger-supabase-v0.mjs",
+      "durable_ledger_sql": "cerebro/seo-enterprise/v2/contracts/seo-checklist-delivery-ledger-preprod-v0.sql",
+      "physical_sql_claim_idempotence_verified": true
+    }
+  ],
+  "existing_dependencies_preserved": [
+    "cerebro/runtime/creative-job-runner-v1.mjs",
+    ".github/workflows/cerebro-creative-job-runner-v1.yml",
+    "public.cerebro_creative_job_v1",
+    "cerebro-creative-assets",
+    "fenix-cerebro-leads",
+    "cerebro-seo001-city-form-prod",
+    "fenix-web-lead",
+    "fenix_prod_web_lead_ingest_server",
+    "fenix-web-lead-alert-worker",
+    "WordPress post 960 and 52656",
+    "GitHub PR #22 DRAFT"
+  ],
+  "old_vs_new": {
+    "old_renderer": "PLAYWRIGHT_FFMPEG_PIPER",
+    "old_original_job_id": "c4012f43-c12f-400b-9610-2e5f2e286000",
+    "old_sha256": "bb88f1f907d9e2a6a13f984c2ed20707c0c1b4c69cd05a2bdb25ce71b73aac0c",
+    "new_premium_preview_sha256": "2f042f9a5833560e6f693a76768d0a73eb22ef8267ddf07f0c24578bd5aa72a8",
+    "compatibility": "ADDITIVE_PARALLEL_MODULES_ONLY"
+  },
+  "security": {
+    "company_isolated": true,
+    "private_assets_only": true,
+    "customer_emails_sent": 0,
+    "customer_leads_created": 0,
+    "provider_calls": 0,
+    "publish_authorized": false,
+    "oauth_secrets_exposed": false
+  },
+  "economic": {
+    "new_subscriptions_eur": 0,
+    "additional_api_cost_eur": 0
+  },
+  "gates": {
+    "unit_green": true,
+    "physical_render_green": true,
+    "brand_font_logo_green": true,
+    "independent_visual_qa": false,
+    "wordpress_import": false,
+    "crm_segmentation_e2e": false,
+    "newsletter_double_optin_e2e": false,
+    "rollback_proven_by_no_prod_change": true,
+    "checklist_mime_local_verified": true,
+    "checklist_contract_unit_tests_green": true,
+    "checklist_physical_brevo_delivery_e2e": false,
+    "checklist_durable_ledger": true,
+    "checklist_asset_uploaded_preprod": false,
+    "checklist_brand_final_approved": false,
+    "checklist_durable_ledger_transport_connected": false
+  },
+  "rollback": {
+    "trigger": "ANY_VISUAL_COMPLIANCE_SEPARATION_OR_COST_FAILURE",
+    "method": "LEAVE_PR_22_UNMERGED; NO PROD OVERRIDES; PRESERVE_ORIGINAL_JOB_AND_CMS_CONTENT",
+    "production_changes_to_reverse": 0
+  },
+  "docs": [
+    "cerebro/seo-enterprise/v2/evidence/SEO_PREMIUM_IMAGE_AND_FUNNEL_GATES_2026-11-06.md",
+    "cerebro/docs/CEREBRO_SEO_ESTADO_VIVO_CONTINUIDAD_2026-11-06.md",
+    "cerebro/seo-enterprise/v2/evidence/SEO_CHECKLIST_BREVO_DELIVERY_PREPROD_GATE_2026-11-06.md"
+  ],
+  "autonomous_prod_status": "DENIED",
+  "notes": "PDF original MIME local PASS; PREPROD SQL receipt ledger created, RLS grants verified, transaction rollback tests PASS; 10/10 CI. Real Brevo delivery still blocked by asset upload, authenticated event, staging client binding, mailbox proof, editorial PDF QA."
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "WORDPRESS_POST_AND_PAGE_SLUG_READONLY_SCAN_NO_EXACT_MATCH",
+  "observed_at_utc": "2026-11-06T16:54:06.921Z",
+  "source": "LIVE_Cowboy_MCP_web_wp_list_posts",
+  "post_listed_count": 45,
+  "page_listed_count": 180,
+  "post_pages_returned": 1,
+  "page_pages_returned": 2,
+  "product_keyword_search_result_count": [
+    0,
+    0
+  ],
+  "target_slugs": [
+    {
+      "slug": "comparar-dos-pisos-despues-visita-cordoba",
+      "found_exact": false
+    },
+    {
+      "slug": "derivacion-hipotecaria-comprador-inmobiliaria-cordoba",
+      "found_exact": false
+    }
+  ],
+  "scan_scope": "post and page entries returned by wp_list_posts status:any, plus product keyword searches",
+  "omissions": [
+    "trash_auto_drafts_not_guaranteed",
+    "all_product_slugs_not_enumerated",
+    "custom_post_types_not_scanned",
+    "redirect_and_permalink_routing_not_verified",
+    "must_repeat_immediately_before_write"
+  ],
+  "permission": "READ_ONLY",
+  "draft_creation_authorized": false,
+  "publish_authorized": false,
+  "wordpress_writes": 0,
+  "core_guard_unchanged": true
+}

@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "11.0.0",
+  "status": "KNOWLEDGE_GAP_HANDFOFFS_PREPARED_NOT_EXECUTED",
+  "source_v10": "seo-v10-continuous-readiness.mjs",
+  "real_attestations_created": 0,
+  "real_exams_passed": 0,
+  "iam_actors_authenticated": 0,
+  "production_release": false,
+  "reviewer": "SEO:GLOBAL:JUDGE",
+  "trainer": "SEO-D32:DEPARTMENT_HEAD",
+  "protocols": [
+    {
+      "gate": "SOURCE_RIGHTS_RECEIPTS",
+      "owner_role": "SEO-D26:SPECIALIST:04",
+      "competency": "licencias multimedia",
+      "category": "EXTERNAL_ATTESTATION",
+      "required_proof": "Asset-specific provider record + immutable SHA relation 52718-52721 and commercial rights; CMS descriptions/metadata are not receipts",
+      "next_safe_action": "Find original provider's signed/immutable receipt in already authorized account; compare exact media SHA in private evidence; do not regenerate images",
+      "rejected_faux_proof": "WordPress description says OpenAI; dHash and JPEG format pass",
+      "human_exception": null
+    },
+    {
+      "gate": "WORDPRESS_REAL_MOBILE_VISUAL",
+      "owner_role": "SEO-D31:SPECIALIST:01",
+      "competency": "QA SEO multidisciplinar",
+      "category": "PHYSICAL_EXECUTION",
+      "required_proof": "Authenticated WordPress draft visual and DOM, 390px and 1440px, exact content H1 / CTA / image / footer and overflow; no toolbar secrets in stored captures",
+      "next_safe_action": "Capture and inspect actual authenticated WordPress draft on isolated responsive browser; avoid treating local V8 HTML fixture as live WordPress",
+      "rejected_faux_proof": "V8 local mock responsive screenshots and desktop-only authenticated Opera view",
+      "human_exception": null
+    },
+    {
+      "gate": "SAFE_B2B_CRM_E2E",
+      "owner_role": "SEO-D24:SPECIALIST:04",
+      "competency": "CRM E2E",
+      "category": "SAFE_EXECUTION_ACCESS",
+      "required_proof": "Consent-aware positive test in isolated test tenant with unique correlation ID, verified create/retrieve and reversal, zero real customer or spam data",
+      "next_safe_action": "Map existing shortcode and handler in read-only, verify test-mode endpoint and rollback before submitting any test lead; do not touch live CRM",
+      "rejected_faux_proof": "Form is visible and privacy checkbox renders, but no successful CRM receipt",
+      "human_exception": null
+    },
+    {
+      "gate": "WORDPRESS_PRIVATE_RESTORE_AND_ROLLBACK",
+      "owner_role": "SEO-D31:SPECIALIST:04",
+      "competency": "rollback y backup",
+      "category": "ISOLATED_INFRA_REQUIRED",
+      "required_proof": "Timestamp-matched real DB plus uploads/theme/plugin bytes privately restored in isolated host, manifest hashes, rollback rehearsal and no PII emitted to CI",
+      "next_safe_action": "Retrieve remaining matching web/media archive through authorized private route, restore in isolated MariaDB+files runner, compare and roll back; never upload private backup to GitHub",
+      "rejected_faux_proof": "SQL gzip integrity PASS and separate fixture restore performed",
+      "human_exception": null
+    },
+    {
+      "gate": "INDEPENDENT_YMYL_LEGAL_REVIEW",
+      "owner_role": "SEO-D14:SPECIALIST:02",
+      "competency": "ofertas hipotecarias YMYL",
+      "category": "LEGAL_EXPERT_ATTESTATION",
+      "required_proof": "Independent qualified legal/financial reviewer approves exact article SHA, source/version/date, claims, reservations and privacy with signed digest",
+      "next_safe_action": "Prepare cited claim-by-claim dossier and exact SHA for professional legal review, then store verification reference (not personal data)",
+      "rejected_faux_proof": "LLM says legally sound, or BOE URL exists, or D31 style copy QA passes",
+      "human_exception": "LEGAL_REQUIRED"
+    },
+    {
+      "gate": "THREE_OWNER_SIGNED_PUBLISHES",
+      "owner_role": "SEO-D31:SPECIALIST:02",
+      "competency": "gates publicación",
+      "category": "OWNER_APPROVAL",
+      "required_proof": "Three individually owner-authenticated exact-SHA releases of new URLs with independent QA, publication receipts, live checks and rollback available",
+      "next_safe_action": "After the other safety gates are physically proven, submit exact-SHA supervised candidate 1 of 3 for owner approval; no auto-sign",
+      "rejected_faux_proof": "Three static CI tests, 3 calendar days elapsed or WordPress draft IDs",
+      "human_exception": "SIGNATURE_REQUIRED"
+    },
+    {
+      "gate": "SCOPED_GATEWAY_PUBLISHER_IAM",
+      "owner_role": "SEO-D31:SPECIALIST:02",
+      "competency": "gates publicación",
+      "category": "IAM_INFRA_REQUIRED",
+      "required_proof": "Provider-verified independent least privilege publisher and reviewer identities, gateway binding, revocation test, idempotency, deny cross tenant and emergency kill switch",
+      "next_safe_action": "Validate actual identity/permissions and revocation against existing Gateway in non-prod shadow, then request scope-limited revocable owner grant when graduated",
+      "rejected_faux_proof": "191 template role names, GitHub OIDC ephemeral identity or synthetic IAM fixture",
+      "human_exception": null
+    }
+  ],
+  "operating_contract": {
+    "do_not_create_new_agents": true,
+    "do_not_create_schedulers": true,
+    "use_existing_d24_d26_d31_d32": true,
+    "use_existing_v10_readiness": true,
+    "use_existing_actgw_shadow": true,
+    "no_wordpress_writes": true,
+    "no_crm_writes": true,
+    "no_supabase_writes": true,
+    "no_publish": true,
+    "no_model_calls": true,
+    "no_paid_calls": true,
+    "expected_first_step": "READ_EXISTING_PROOFS_AND_ROUTE_REAL_MISSING_GATES",
+    "allowed_human_exceptions": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  }
+}

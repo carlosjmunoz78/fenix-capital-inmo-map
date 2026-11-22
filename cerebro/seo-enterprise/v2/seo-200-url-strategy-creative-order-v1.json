@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "2.5.0",
+  "owner_direction": "NO_NEW_WEB_AUDITS_PRESERVE_ALL_EXISTING_VALID_URLS",
+  "snapshot_source": "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+  "snapshot_corpus_fragments": "cerebro/seo-enterprise/v2/data/live-copy-chunk-{01..10}.json",
+  "snapshot_date": "2026-11-05",
+  "previous_snapshot_not_reaudited": true,
+  "verified_strategy": {
+    "run_id": 42119865699,
+    "run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42119865699",
+    "run_conclusion": "success",
+    "code_sha": "629724eb75e57fde6da9ccd9c99ea9c49ac9f1cb",
+    "worker_job": 127569081135,
+    "qa_job": 127569200225,
+    "tribunal_job": 127569298060,
+    "new_tests": {
+      "passed": 7,
+      "total": 7,
+      "failed": 0
+    },
+    "documents_covered": 200,
+    "unique_existing_urls": 200,
+    "exact_focus_keyword_collisions": 1,
+    "collision_details": [
+      {
+        "keyword": "hipotecas en Córdoba",
+        "primary_provisional": "https://fenixcapital.es/",
+        "secondary": "https://fenixcapital.es/inicio/",
+        "resolution": "PRESERVE_BOTH_REVIEW_ONLY",
+        "google_cannibalization_proven": false
+      }
+    ],
+    "b2b_b2c_same_municipality_pairs": 24,
+    "funnel_contracts": 8,
+    "snapshot_focus_keyword_not_set": 7,
+    "families": {
+      "B2C_LOCAL_ADVISOR": 67,
+      "B2C_FINANCE": 52,
+      "B2B_PARTNERS": 14,
+      "B2C_INFORMATION": 17,
+      "B2C_100": 11,
+      "B2B_LOCAL_PARTNERS": 24,
+      "GENERAL": 8,
+      "INSTITUTIONAL": 6,
+      "INHERITANCE": 1
+    },
+    "artifacts": [
+      {
+        "name": "seo-owner-200-url-strategy-v1",
+        "artifact_id": 13457872275
+      },
+      {
+        "name": "seo-owner-independent-qa-v1",
+        "artifact_id": 13457614191
+      },
+      {
+        "name": "seo-owner-tribunal-v1",
+        "artifact_id": 13457988433
+      }
+    ],
+    "artifact_retention_days": 14,
+    "full_source_rebuildable": true,
+    "actual_form_connections_verified": 0,
+    "actual_gsc_cannibalizations_proven": 0,
+    "website_mutations": 0,
+    "seo_canonical_updates": 0,
+    "redirects": 0,
+    "new_pages_created": 0
+  },
+  "creative_producer_order": {
+    "status": "QUEUED_CONFIRMED",
+    "job_id": "c4012f43-c12f-400b-9610-2e5f2e286000",
+    "provider": "CREATIVE-PROGRAMMATIC-RENDER-V1",
+    "umbrella": "UMS-001",
+    "source_post_id": 960,
+    "source_url": "https://fenixcapital.es/hipoteca-autonomos-cordoba-requisitos-documentacion/",
+    "format": "SEO_IMAGE",
+    "dimensions": [
+      1200,
+      630
+    ],
+    "branding": {
+      "manual_reference": "Fénix Capital Manual de marca 2025",
+      "fonts_required": "Montserrat",
+      "colors_required": [
+        "#222222",
+        "#870064",
+        "#FFB71B",
+        "#FF5F00",
+        "#FFFFFF"
+      ],
+      "renderer_font_currently_unverified_as_montserrat": true
+    },
+    "expected_added_eur": 0,
+    "max_attempts": 1,
+    "publish_authorized": false,
+    "media_generation_succeeded_verified": false,
+    "render_qa_verified": false,
+    "asset_attached_to_wordpress": false,
+    "asset_rights_approved": false
+  },
+  "contracts": {
+    "strategy": "cerebro/seo-enterprise/v2/runtime/seo-owner-intent-funnel-v1.mjs",
+    "media": "cerebro/seo-enterprise/v2/runtime/seo-audiovisual-brief-v1.mjs",
+    "pipeline": "cerebro/seo-enterprise/v2/runtime/seo-owner-funnel-cli-v1.mjs",
+    "workflow": ".github/workflows/cerebro-seo-owner-funnel-media-v1.yml",
+    "existing_no_write_protection": true,
+    "individual_form_newsletter_integrations_status": "PLANNED_UNVERIFIED"
+  },
+  "next_required": [
+    "QUALITY_REVIEW_CREATIVE_PRODUCER_OUTPUT_AND_MONTSERRAT_BRAND",
+    "DECIDE_HOME_VS_INICIO_PRIMARY_KEYWORD_WITH_GSC_WHEN_AUTHORIZED",
+    "VERIFY_FUNNEL_ACTUAL_FORM_CAPABILITIES_WITHOUT_SITE_REAUDIT",
+    "BUILD_MISSING_PERSONA_SPECIFIC_FORMS_AND_LEAD_MAGNETS_UNDER_PROTECTED_WRITE_GATES",
+    "INDEPENDENT_BACKUP_AND_ROLLBACK_BEFORE_PILOT_WORDPRESS_DRAFT",
+    "OLD_VS_NEW_MEASURED_WITH_NO_DELETION_OF_EXISTING_URLS",
+    "NO_PROD_PUBLISH_UNTIL_WP_REVIEW_LEGAL_FACTCHECK_AND_RIGHTS_PASS"
+  ]
+}

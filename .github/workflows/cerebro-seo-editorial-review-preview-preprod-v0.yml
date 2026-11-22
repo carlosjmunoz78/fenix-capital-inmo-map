@@ -1,0 +1,37 @@
+name: CEREBRO SEO · Real layout previews and UMS brief handoff PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-editorial-preview-and-producer-handoff-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-editorial-preview-and-producer-handoff-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-editorial-qa-job001-pipeline-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-editorial-visual-gate-v2.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/drafts/*-v3-faq.draft.html'
+      - '.github/workflows/cerebro-seo-editorial-review-preview-preprod-v0.yml'
+permissions:
+  contents: read
+jobs:
+  real-preview:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test immutable content, FAQ and producer handoff
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-editorial-preview-and-producer-handoff-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-editorial-preview-and-producer-handoff-v0.test.mjs
+      - name: Render actual review files without external writes or paid AI
+        env:
+          OUTPUT_DIR: ${{ runner.temp }}/seo001-review-${{ github.run_id }}
+        run: node cerebro/seo-enterprise/v2/runtime/seo-editorial-preview-and-producer-handoff-v0.mjs "$OUTPUT_DIR"
+      - name: Archive mobile-readable HTML pages and exact UMS producer orders
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-fenix-b2c-b2b-v3-visual-review-ums-orders
+          path: ${{ runner.temp }}/seo001-review-${{ github.run_id }}/*
+          retention-days: 14
+          if-no-files-found: error
+      - name: Evidence only, writer and producer remain gated
+        run: echo 'CEREBRO_RENDERED_PAGES=2 IMAGE_API_CALLS=0 WORDPRESS_WRITES=0 PUBLISH_AUTHORIZED=FALSE'

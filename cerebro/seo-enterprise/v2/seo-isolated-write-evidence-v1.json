@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "2.4.0",
+  "state": "REAL_ISOLATED_EDITORIAL_DRAFT_WRITE_VERIFIED_NOT_WORDPRESS",
+  "date": "2026-11-05",
+  "owner_directive": "CEREBRO_MUST_GAIN_WRITE_CAPABILITIES_AFTER_SAFE_GATES",
+  "protected_systems": [
+    "WORDPRESS_OFFICIAL",
+    "APP",
+    "CRM",
+    "SUPABASE",
+    "DNS",
+    "TRADING"
+  ],
+  "saved_source_only": true,
+  "site_reaudit_performed": false,
+  "staging_used": false,
+  "implementation": {
+    "name": "SEO_WRITE_EDITORIAL_DRAFT_FILES_LAB",
+    "gateway": "ACTGW-001",
+    "workflow": "CEREBRO SEO Corpus Workforce Identity V1",
+    "file": "cerebro/seo-enterprise/v2/runtime/seo-draft-writer-lab-v1.mjs",
+    "repo_workflow": ".github/workflows/cerebro-seo-corpus-workload-v1.yml",
+    "auth_type": "GITHUB_OIDC_SIGNED_JWKS_AND_PROVIDER_JOB",
+    "authorization_source": "EPHEMERAL_GITHUB_ACTIONS_JOB_NOT_INDIVIDUAL_AGENT_IAM",
+    "scope": "SANDBOX_RUNNER_TEMP_FILES_ONLY",
+    "direct_repo_write_token": false,
+    "direct_wordpress_write_token": false,
+    "editor_workflow_steps": [
+      "SEO_CORPUS_WORKER",
+      "SEO_CORPUS_INDEPENDENT_QA",
+      "SEO_CORPUS_TRIBUNAL",
+      "SEO_SANDBOX_DRAFT_WRITER"
+    ],
+    "output_isolation": "GITHUB_RUNNER_TEMP",
+    "output_path_rule": "OUTSIDE_REPOSITORY_AND_ONLY_UNDER_RUNNER_TEMP",
+    "write_unit": "20_EDITORIAL_DRAFT_JSON_FILES_AND_1_MANIFEST",
+    "backups": "ORIGINALS_IN_REPO_IMMUTABLE_NO_OVERWRITES",
+    "idempotency": "EXCLUSIVE_CREATE_AND_DIGEST_EQUALITY_FOR_REPLAY",
+    "tested_rollback": "PHYSICAL_CANARY_DELETE_AND_EXISTING_FILE_PRESERVATION_ON_RUNNER",
+    "not_tested": "WORDPRESS_PROD_BACKUP_RESTORE_NOT_PERFORMED"
+  },
+  "physical_verification": {
+    "github_actions_run_id": 42114713494,
+    "github_actions_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42114713494",
+    "github_actions_result": "success",
+    "verified_code_sha": "e823b0ebf08076d5387ab2001d04fab10e3ed553",
+    "worker_job_id": 127551171830,
+    "qa_job_id": 127551265420,
+    "tribunal_job_id": 127551365855,
+    "isolated_writer_job_id": 127551471926,
+    "isolated_writer_oidc_provider_verified": true,
+    "work_artifact_id": 13455159335,
+    "work_artifact_name": "seo-editorial-write-lab-v1",
+    "work_artifact_size_bytes": 25399,
+    "other_artifacts": {
+      "worker": 13455666446,
+      "qa": 13454279852,
+      "tribunal": 13456040913
+    },
+    "artifacts_retention_days": 14,
+    "physical_editorial_files_written": 20,
+    "physical_manifest_files_written": 1,
+    "extra_artifact_receipt_files": 1,
+    "rollback_canary_verified": true,
+    "actual_publication_count": 0,
+    "actual_wordpress_write_count": 0,
+    "actual_app_crm_write_count": 0,
+    "additional_subscription_cost_eur": 0
+  },
+  "architecture_test_run": {
+    "id": 42114713057,
+    "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42114713057",
+    "result": "success",
+    "test_counts": {
+      "seo": {
+        "total": 144,
+        "passed": 144,
+        "failed": 0
+      },
+      "governance": {
+        "total": 22,
+        "passed": 22,
+        "failed": 0
+      },
+      "other_a": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "other_b": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      }
+    }
+  },
+  "next_write_mode_contract": {
+    "github_review_branch": "PLANNED_REQUIRES_PERMISSIONS_AND_NON_PR_TRUST_BOUNDARY",
+    "wordpress_create_draft": "PLANNED_NOT_ENABLED_BACKUP_AND_WRITER_IAM_REQUIRED",
+    "wordpress_edit_existing_draft": "PLANNED_REQUIRES_SNAPSHOT_BEFORE_AFTER_QA",
+    "wordpress_publish": "DENIED_UNTIL_INDEPENDENT_QA_TRIBUNAL_AND_OWNER_POLICY",
+    "wordpress_edit_published": "DENIED_UNTIL_FULL_PHYSICAL_ROLLBACK_TESTED_AND_GATED",
+    "app_crm_prod_write": "NOT_IN_SCOPE"
+  },
+  "unfulfilled_gates": [
+    "COMPETENCE_SPECIFIC_IAM_BINDING_OR_VERIFIABLE_DELEGATION",
+    "BACKUP_AND_RESTORE_PER_DOCUMENT_IN_WORDPRESS",
+    "NONDESTRUCTIVE_WORDPRESS_DRAFT_CREATE_CAPABILITY_AND_LEAST_PRIVILEGE",
+    "TRUSTED_EDITORIAL_YMYL_FACTCHECK_D31_TRIBUNAL",
+    "STRATEGY_AND_PUBLICATION_POLICY",
+    "OLD_VS_NEW_PREPROD_SHADOW_AND_ROLLBACK",
+    "GATEWAY_PERSISTENT_RUNTIME_AND_OBSERVABILITY"
+  ],
+  "assurance": "REAL_ARTIFACT_WRITE_ONLY__NO_WORDPRESS_OR_PROD_WRITE"
+}
