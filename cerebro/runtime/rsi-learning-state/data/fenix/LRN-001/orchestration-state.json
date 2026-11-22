@@ -7,19 +7,19 @@
   "version": "0.6.0",
   "last_success": {
     "DAILY": "2026-11-22T06:49:07.483Z",
-    "WEEKLY": "2026-11-15T12:00:50.301Z",
+    "WEEKLY": "2026-11-22T12:40:12.232Z",
     "MONTHLY": "2026-11-05T22:47:09.910Z"
   },
-  "plans_emitted": 47,
+  "plans_emitted": 48,
   "additional_cost_eur": 0,
   "prod_authorized": false,
   "prod_write_authorized": false,
   "trading_access": false,
-  "last_planned_at": "2026-11-22T06:49:07.483Z",
+  "last_planned_at": "2026-11-22T12:40:12.232Z",
   "last_result": {
-    "cadence": "DAILY",
+    "cadence": "WEEKLY",
     "status": "GREEN",
-    "completed_at": "2026-11-22T06:49:07.483Z"
+    "completed_at": "2026-11-22T12:40:12.232Z"
   },
   "migration_history": [
     {

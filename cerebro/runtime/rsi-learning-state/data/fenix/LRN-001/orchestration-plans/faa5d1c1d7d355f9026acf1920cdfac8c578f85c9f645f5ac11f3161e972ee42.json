@@ -1,0 +1,30 @@
+{
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.6.0",
+  "cadence": "WEEKLY",
+  "event_type": null,
+  "scheduled_at": "2026-11-22T12:40:12.232Z",
+  "checkpoint": {
+    "task": "METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN",
+    "horizon_bucket": "2026-11-16"
+  },
+  "lock_key": "faa5d1c1d7d355f9026acf1920cdfac8c578f85c9f645f5ac11f3161e972ee42",
+  "max_attempts": 3,
+  "backoff_seconds": [
+    30,
+    120,
+    600
+  ],
+  "budget_eur": 0,
+  "execution_mode": "INCREMENTAL_PLAN_ONLY",
+  "allow_prod_writes": false,
+  "prod_authorized": false,
+  "paid_fallback": false,
+  "trading_access": false,
+  "customer_data_access": false,
+  "horizon_bucket": "2026-11-16",
+  "task": "METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN",
+  "execution_authority": "PREPROD_PLAN_ONLY"
+}

@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_LRN_HORIZON_RESULT",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.6.0",
+  "lock_key": "faa5d1c1d7d355f9026acf1920cdfac8c578f85c9f645f5ac11f3161e972ee42",
+  "horizon_bucket": "2026-11-16",
+  "cadence": "WEEKLY",
+  "task": "METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN",
+  "status": "GREEN",
+  "completed_at": "2026-11-22T12:40:12.232Z",
+  "evidence": {
+    "reports_considered": 7,
+    "learning_records_latest": 2332,
+    "held_total": 0,
+    "human_required": [],
+    "meta_metrics_ready": true,
+    "meta_review_status": "META_CANDIDATE_CREATED_HELD"
+  },
+  "meta_candidate_generated": true,
+  "meta_review": {
+    "schema_version": "1.0.0",
+    "company_id": "fenix",
+    "engine_id": "METALEARN-001",
+    "environment": "PREPROD",
+    "version": "0.6.0",
+    "reviewed_at": "2026-11-22T12:40:12.232Z",
+    "status": "META_CANDIDATE_CREATED_HELD",
+    "minimum_samples": 3,
+    "samples_total": 148,
+    "bottleneck": {
+      "stage": "learn",
+      "cost_or_latency": 1121.1078089729729
+    },
+    "candidate": {
+      "meta_learning_id": "8a6099a694d413f15c20cedd329c0f5e0f964accbe8a1689af2fb7c0fe0eef89",
+      "company_id": "fenix",
+      "engine_id": "METALEARN-001",
+      "environment": "PREPROD",
+      "version": "0.6.0",
+      "target_stage": "learn",
+      "prior_strategy_version": "lrn-orchestration-0.6.0",
+      "candidate_strategy_version": "lrn-orchestration-0.6.0-opt-learn",
+      "dataset_scope": "LOCAL_PREPROD_STAGE_TIMINGS_LAST_148",
+      "metric_definition": {
+        "name": "mean_stage_duration_ms",
+        "direction": "MINIMIZE",
+        "current_value_ms": 1121.1078089729729,
+        "p95_ms": 2872.8784650000002
+      },
+      "leakage_checks": {
+        "raw_customer_data": false,
+        "tenant_scope": "fenix",
+        "holdout_required_before_claim": true
+      },
+      "anti_gaming_checks": {
+        "quality_gates_must_not_degrade": true,
+        "cost_budget_eur": 0,
+        "authority_must_not_expand": true
+      },
+      "proposed_change": {
+        "type": "PROFILE_AND_OPTIMIZE_STAGE",
+        "target_stage": "learn",
+        "claim_status": "HYPOTHESIS_ONLY",
+        "requires_old_vs_new": true
+      },
+      "decision": null,
+      "state": "META_CANDIDATE",
+      "reduces_requirements": false,
+      "may_edit_judge": false,
+      "may_elevate_permissions": false,
+      "may_elevate_budget": false,
+      "prod_authorized": false,
+      "additional_cost_budget_eur": 0
+    },
+    "gate": {
+      "ok": false,
+      "reasons": [
+        "independent_evaluation_required",
+        "independent_judge_required",
+        "rollback_required",
+        "rebuild_required"
+      ],
+      "next_gate": "HOLD",
+      "prod_authorized": false,
+      "prod_write_authorized": false
+    },
+    "automatic_promotion": false,
+    "additional_cost_eur": 0,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false
+  },
+  "factory_candidate_generated": false,
+  "supervisor_reason": "NO_CROSS_ENGINE_REPEATED_FAILURE_EVIDENCE",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false
+}
