@@ -1,0 +1,88 @@
+{
+  "format": "FACT001-NOTION-BATCH-75-100-COMPOSITE-OFFSITE-D1-CAS-VERIFIED-V1",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "date": "2026-11-11",
+  "source_index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+  "batch": {
+    "offset": 75,
+    "next_offset": 100,
+    "batch_ref": "f966dd998a8124cb82f386adc8fe192376fb2692110dc8b5f2cecf52ad5b28e9",
+    "objects": 25,
+    "pages": 24,
+    "data_sources": 1,
+    "data_source_rows": 24,
+    "block_count": 3877,
+    "source_chunks": 48,
+    "provider_notion_writes": 0
+  },
+  "components": {
+    "first23": {
+      "github_run_id": 42933659552,
+      "github_artifact_id": 13816509464,
+      "drive_file_id": "1MeUf70NJ6l2URxIjeYy9jO_5JPeYTh8x",
+      "sha256": "642f2f933d00b5b020aedf5dd69639f66d8c7e0754a5481e93320c66b737fd18",
+      "first_failure": "ITEM_BLOCKED_23_HTTP_546_WORKER_RESOURCE_LIMIT"
+    },
+    "page24": {
+      "github_run_id": 42934881464,
+      "github_artifact_id": 13817862497,
+      "drive_file_id": "1n9F6gScAEzXpGZzrk2Gp17faGuRdKMB1",
+      "sha256": "cce23767fc9752d76bb38d038f7f6425815aebdc4202767252c90fc217edfe40"
+    },
+    "source23": {
+      "github_run_id": 42936490272,
+      "github_artifact_id": 13819260587,
+      "drive_file_id": "1dVc9OBKwnaGUVSmX7hTMfBvimOcHNjq7",
+      "sha256": "f46c31304920cdd5c00ea280c32dcd0dd3d48a3a172c2701fe171059028ba4ef",
+      "chunks": 48,
+      "rows": 24,
+      "blocks": 2977
+    }
+  },
+  "composite": {
+    "google_drive_id": "1jqCgm1qY2euqCy9uO_KGHrV4hMqSI0BC",
+    "filename": "FACT001_NOTION_BATCH_75_100_COMPOSITE_AES256GCM_20261111.zip",
+    "size_bytes": 3829582,
+    "sha256": "8501eb64a02b3bdaa9351fe2c460e81181781e399da7f839f86f0070b1a0c49b",
+    "private": true,
+    "crc_pass": true,
+    "drive_download_sha256_equal_d1": true,
+    "encrypted_only": true,
+    "secret_in_archive": false
+  },
+  "cas": {
+    "database_id": "bc085807-a6ca-4c56-a288-fe56716fec6f",
+    "jurisdiction": "eu",
+    "prior_offset": 75,
+    "prior_version": 3,
+    "final_offset": 100,
+    "final_version": 4,
+    "audit_rows_total": 3,
+    "transition": "75→100",
+    "last_zip_sha256": "8501eb64a02b3bdaa9351fe2c460e81181781e399da7f839f86f0070b1a0c49b",
+    "last_drive_file_id": "1jqCgm1qY2euqCy9uO_KGHrV4hMqSI0BC"
+  },
+  "cumulative": {
+    "objects": 100,
+    "pages": 96,
+    "data_sources": 4,
+    "record_rows_in_sources": 122,
+    "remaining_pages": 6350,
+    "remaining_sources": 182
+  },
+  "gates": {
+    "full_workspace_backup": false,
+    "media_binaries": false,
+    "comments": false,
+    "permissions": false,
+    "physical_notion_restore": false,
+    "independent_key_escrow": false,
+    "production_promotion": false,
+    "private_cas_autonomous_writer": false
+  }
+}

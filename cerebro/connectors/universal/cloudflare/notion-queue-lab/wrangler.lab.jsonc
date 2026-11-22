@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cerebro-fact001-notion-queue-lab",
+  "main": "worker.mjs",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "compatibility_date": "2026-11-10",
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {"crons": []},
+  "d1_databases": [{
+    "binding": "FACT001_D1",
+    "database_name": "cerebro-fact001-recovery-lab-eu",
+    "database_id": "1305f791-7c44-47f9-946b-f330a09c88aa"
+  }]
+}

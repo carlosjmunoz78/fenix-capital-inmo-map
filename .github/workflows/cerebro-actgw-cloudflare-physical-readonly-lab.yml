@@ -1,0 +1,35 @@
+name: FACT-001 CEREBRO Console ACTGW Cloudflare E2E - GET-only LAB
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - cerebro/connectors/universal/transport/cerebro-actgw-cloudflare-readonly-lab.mjs
+      - cerebro/connectors/universal/tests/cerebro-actgw-cloudflare-readonly-lab.test.mjs
+      - .github/workflows/cerebro-actgw-cloudflare-physical-readonly-lab.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-cerebro-actgw-cloudflare-get-only-lab
+  cancel-in-progress: false
+jobs:
+  prove-cerebro-via-real-cloudflare:
+    if: github.ref == 'refs/heads/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout isolated branch, no persisted GitHub token
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test CEREBRO Gateway and action policies with fake HTTP, including rejects
+        run: node --test cerebro/connectors/universal/tests/cerebro-actgw-cloudflare-readonly-lab.test.mjs cerebro/tests/action-gateway-v1.test.mjs
+      - name: Full shared FACT-001 regression and 4D catalog validation
+        run: |
+          node --test cerebro/connectors/universal/tests/*.test.mjs
+          node cerebro/connectors/universal/src/validate.mjs
+      - name: Run physical Console to ActionGateway to shared FACT-001 to Cloudflare GET
+        env:
+          CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: node cerebro/connectors/universal/transport/cerebro-actgw-cloudflare-readonly-lab.mjs

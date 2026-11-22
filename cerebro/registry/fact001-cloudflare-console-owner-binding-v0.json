@@ -1,0 +1,39 @@
+{
+  "schema": "cerebro.fact001.console-owner-cloudflare-binding.v0",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "state": "DEFINED_OFF",
+  "enable_flag": "FACT001_CONSOLE_CF_OWNER_ENABLED",
+  "enabled": false,
+  "old_console_slug": "cerebro-console-gateway-v0",
+  "old_console_version": 33,
+  "old_console_modified": false,
+  "canary_slug": "cerebro-fact001-console-owner-canary-lab",
+  "canary_version": 2,
+  "method": "POST",
+  "route": "owner-inventory",
+  "base_url": "https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-console-owner-canary-lab",
+  "authorization": "CURRENT_SIGNED_IN_SUPABASE_USER_JWT_PLUS_CARLOS_ADMIN_SERVER_RPC",
+  "accepts_api_token_from_browser": false,
+  "body": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "operations": [
+    "cloudflare.d1.list",
+    "cloudflare.workers.list"
+  ],
+  "allow_writes": false,
+  "gates": {
+    "owner_session_physical_positive": false,
+    "dedicated_cloudflare_readonly_token": false,
+    "old_vs_new_route_regression": false,
+    "prod_promotion": false
+  },
+  "rollback": "Disable flag. Main Console v33 is unchanged. No App code modifications.",
+  "additional_subscriptions": 0
+}

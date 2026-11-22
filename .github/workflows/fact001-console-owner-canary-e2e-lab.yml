@@ -1,0 +1,76 @@
+name: FACT001 CEREBRO Console owner Cloudflare LAB parallel canary
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/fact001-console-owner-canary-lab/requests/queue-gateway-signed-20261111.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-console-owner-oidc-canary-lab
+  cancel-in-progress: false
+jobs:
+  physical-gateway-to-d1-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Signed principal and fixed D1 queue policy regression
+        run: |
+          node --test cerebro/connectors/universal/supabase/fact001-console-owner-canary-lab/tests/*.test.mjs
+      - name: "Owner-signed CEREBRO LAB Gateway -> existing D1 queue"
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/fact001-console-owner-canary-lab/requests/queue-gateway-signed-20261111.v1.json','utf8'));
+          const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+             operation:'fact001.lab.heartbeat',request_id:'FACT001-CF-GW-SIGNED-20261111-001',max_cost_eur:0};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(fixed).sort())||
+             Object.entries(fixed).some(([k,v])=>order[k]!==v))throw Error('SIGNED_GATEWAY_ORDER_DENIED');
+          const endpoint='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-console-owner-canary-lab';
+          const issuer=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!issuer||!grant)throw Error('OWNER_OIDC_MISSING');
+          const r=await fetch(issuer+(issuer.includes('?')?'&':'?')+
+            'audience='+encodeURIComponent('cerebro-fact001-console-owner-canary-lab-20261109'),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!r.ok)throw Error('OIDC_RESPONSE_'+r.status);
+          const jwt=(await r.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_INVALID');
+          async function call(route,auth,body){
+            const x=await fetch(endpoint+'/'+route,{method:body?'POST':'GET',redirect:'error',
+              headers:{Accept:'application/json',...(auth?{Authorization:'Bearer '+auth}:{}),
+               ...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),
+              signal:AbortSignal.timeout(25000)});
+            let data={};try{data=await x.json()}catch{}
+            return {http:x.status,data};
+          }
+          if((await call('health')).http!==401||(await call('health','fake')).http!==401||
+             (await call('gateway-queue-submit',undefined,order)).http!==401)
+             throw Error('PUBLIC_AUTH_BYPASS');
+          const health=await call('health',jwt);
+          if(health.http!==200||health.data?.status!=='AUTHENTICATED')throw Error('SIGNED_OWNER_HEALTH_DENIED');
+          if((await call('owner-queue-submit',jwt,{...order,request_id:'FACT001-CF-GW-SESSION-20261111-001'})).http!==401)
+             throw Error('OIDC_IMPERSONATES_SESSION_OWNER');
+          const bad=await call('gateway-queue-submit',jwt,{...order,environment:'PROD'});
+          if(bad.http!==400)throw Error('GATEWAY_ACCEPTED_PROD');
+          console.log('CF_GW_SIGNED_IDENTITY_AND_NEGATIVE_GATES=PASS');
+          const queued=await call('gateway-queue-submit',jwt,order);
+          console.log('CF_GW_ENQUEUE_HTTP='+queued.http);
+          console.log('CF_GW_ENQUEUE_STATUS='+String(queued.data?.status||queued.data?.code||'UNKNOWN').replace(/[^A-Za-z0-9_]/g,'').slice(0,64));
+          if(queued.http!==200||queued.data?.status!=='QUEUED_OR_ALREADY_PRESENT'||
+             queued.data?.job_id!==order.request_id||queued.data?.cloudflare_db!=='1305f791-7c44-47f9-946b-f330a09c88aa'||
+             queued.data?.credential_exposed!==false||queued.data?.provider_writes!==0)
+             throw Error('GATEWAY_ENQUEUE_NOT_VERIFIED');
+          const again=await call('gateway-queue-submit',jwt,order);
+          if(again.http!==200||again.data?.job_id!==order.request_id||again.data?.attempts!==queued.data?.attempts)
+             throw Error('GATEWAY_IDEMPOTENT_REPLAY_FAILED');
+          const status=await call('gateway-queue-status',jwt,order);
+          if(status.http!==200||status.data?.status!=='READBACK'||status.data?.job_id!==order.request_id)
+             throw Error('GATEWAY_DURABLE_READBACK_FAILED');
+          console.log('CF_GW_QUEUE_D1_DURABLE=PASS');
+          console.log('CF_GW_IDEMPOTENT_REPLAY=PASS');
+          console.log('CF_GW_PRODUCTION_CHANGES=0');
+          console.log('CF_GW_TOKEN_VALUES_LOGGED=false');
+          NODE

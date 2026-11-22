@@ -1,0 +1,67 @@
+name: FACT-001 one-time worker-scoped Access owner-only LAB
+# Existing Access application already created and verified. No automatic rerun.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  create-guarded-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CF_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Create only isolated Worker Access app after member verification; never expose the URL
+        run: |
+          node --input-type=module <<'NODE'
+          const account='e39a57e1ac42650ca5a6d5307cf0ac8e', id='862c28ba6b834d54ba3825161170bf68', name='cerebro-fact001-gateway-lab-eu-20261109', token=process.env.CF_TOKEN;
+          if(!token)throw Error('SECRET_MISSING');
+          const base='https://api.cloudflare.com/client/v4', headers={Authorization:'Bearer '+token,Accept:'application/json'};
+          async function request(path,method='GET',data){
+            const res=await fetch(base+path,{method,headers:{...headers,...(data?{'Content-Type':'application/json'}:{})},...(data?{body:JSON.stringify(data)}:{}),redirect:'error',signal:AbortSignal.timeout(12000)});
+            let obj=null;try{obj=await res.json()}catch{}
+            if(res.status>=400||obj?.success!==true){
+              const code=Array.isArray(obj?.errors)?obj.errors.map(e=>e.code).filter(Number.isSafeInteger).slice(0,3).join(','):'NONE';
+              console.log('FACT001_CF_'+method+'_HTTP='+res.status);
+              console.log('FACT001_CF_ERROR_CODES='+code);
+              throw Error('CLOUDFLARE_REQUEST_DENIED');
+            }
+            return obj;
+          }
+          const scripts=(await request('/accounts/'+account+'/workers/scripts')).result;
+          const workers=(await request('/accounts/'+account+'/workers/workers?per_page=100')).result;
+          if(!Array.isArray(scripts)||scripts.filter(w=>w.id===name).length!==1)throw Error('EXACT_SCRIPT_NOT_FOUND');
+          if(!Array.isArray(workers)||workers.filter(w=>w.id===id&&w.name===name).length!==1)throw Error('IMMUTABLE_ID_MISMATCH');
+          const sub=(await request('/accounts/'+account+'/workers/scripts/'+name+'/subdomain')).result;
+          if(sub?.enabled!==false||sub?.previews_enabled!==false)throw Error('LAB_URL_WAS_ENABLED');
+          const members=await request('/accounts/'+account+'/members?per_page=50&page=1&status=accepted');
+          const people=members.result;
+          if(!Array.isArray(people)||members.result_info?.total_count!==1||people.length!==1)throw Error('OWNER_NOT_UNIQUELY_VERIFIED');
+          const owner=people[0]?.user?.email||people[0]?.email;
+          if(typeof owner!=='string'||!/^[-.+A-Za-z0-9_]+@[-.A-Za-z0-9]+\.[A-Za-z]{2,}$/.test(owner))throw Error('OWNER_EMAIL_INVALID');
+          console.log('FACT001_OWNER_IDENTITY_CONFIRMED=true');
+          const existing=(await request('/accounts/'+account+'/access/apps?per_page=100')).result;
+          if(!Array.isArray(existing))throw Error('ACCESS_APPS_UNTRUSTED');
+          const matches=existing.filter(x=>(x.destinations||[]).some(y=>y.type==='worker'&&y.worker_id===id));
+          if(matches.length!==0)throw Error('ACCESS_APP_ALREADY_EXISTS_NO_OVERWRITE');
+          const body={
+            name:'CEREBRO FACT-001 private Worker LAB 20261109',type:'self_hosted',
+            session_duration:'1h',
+            destinations:[{type:'worker',worker_id:id}],
+            policies:[{name:'FACT001 LAB exact single Cloudflare account member',decision:'allow',include:[{email:{email:owner}}]}]
+          };
+          const made=(await request('/accounts/'+account+'/access/apps','POST',body)).result;
+          if(typeof made?.id!=='string'||!made.id)throw Error('ACCESS_APP_CREATE_UNVERIFIED');
+          // Do NOT print the owner's email or any application credentials.
+          const after=(await request('/accounts/'+account+'/access/apps/'+made.id)).result;
+          if(after?.id!==made.id||(after.destinations||[]).length!==1||after.destinations[0].type!=='worker'||after.destinations[0].worker_id!==id)throw Error('ACCESS_DESTINATION_VERIFICATION_DENIED');
+          const protectedWorker=(await request('/accounts/'+account+'/workers/scripts/'+name+'/subdomain')).result;
+          if(protectedWorker?.enabled!==false||protectedWorker?.previews_enabled!==false)throw Error('ACCESS_UNEXPECTED_PUBLIC_URL');
+          console.log('FACT001_ACCESS_APP_ID='+made.id);
+          console.log('FACT001_ACCESS_EXACT_WORKER_PROTECTED=true');
+          console.log('FACT001_ACCESS_OTHER_WORKERS_MODIFIED=0');
+          console.log('FACT001_WORKERS_DEV=false');
+          console.log('FACT001_PREVIEW_URLS=false');
+          console.log('FACT001_ACCESS_OWNER_COUNT=1');
+          console.log('FACT001_ACCESS_ADDITIONAL_PAYMENT_ACTIONS=0');
+          NODE

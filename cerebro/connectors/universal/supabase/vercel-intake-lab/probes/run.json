@@ -1,0 +1,1 @@
+{"probe_id":"FACT001-VERCEL-OIDC-AUTH-20261111-001","provider":"vercel","scope":"fenix-capital/FACT-001/LAB","purpose":"only signed GET health, reject anonymous/forged JWT and PROD job; never enqueue","state":"LAB_AUTH_TEST"}

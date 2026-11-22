@@ -1,0 +1,65 @@
+name: FACT-001 Official Cloudflare MCP - backend handshake LAB GET-only
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - cerebro/connectors/universal/transport/cloudflare-official-mcp-client.mjs
+      - cerebro/connectors/universal/tests/cloudflare-official-mcp-client.test.mjs
+      - .github/workflows/cerebro-cloudflare-official-mcp-readonly-lab.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-official-cloudflare-mcp-readonly-lab
+  cancel-in-progress: false
+jobs:
+  backend-mcp-handshake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout isolated FACT-001 code without persisted GitHub credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node environment
+        run: node --version
+      - name: Run MCP protocol and account-isolation regression
+        run: node --test cerebro/connectors/universal/tests/cloudflare-official-mcp-client.test.mjs
+      - name: Enforce read-only protocol contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const s=fs.readFileSync('cerebro/connectors/universal/transport/cloudflare-official-mcp-client.mjs','utf8');
+          if(!s.includes("['initialize','notifications/initialized','tools/list']"))process.exit(1);
+          if(/\btools\/call\b/.test(s))process.exit(1);
+          if(!s.includes('https://mcp.cloudflare.com/mcp'))process.exit(1);
+          console.log('OFFICIAL_MCP_READ_ONLY_ALLOWLIST=true');
+          NODE
+      - name: Physically verify authenticated Official MCP handshake, no tool calls
+        env:
+          CF_ACCOUNT_ID: e39a57e1ac42650ca5a6d5307cf0ac8e
+          CF_MCP_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {CloudflareOfficialMcpClient} from './cerebro/connectors/universal/transport/cloudflare-official-mcp-client.mjs';
+          const value=process.env.CF_MCP_TOKEN;
+          if(!value){console.log('OFFICIAL_MCP_AUTH_SECRET_PRESENT=false');process.exit(1);}
+          const c=new CloudflareOfficialMcpClient({tokenProvider:async()=>value});
+          try {
+            const status=await c.verifyReadOnly({account_id:process.env.CF_ACCOUNT_ID,client_id:'cerebro',environment:'LAB'});
+            console.log('OFFICIAL_MCP_AUTHENTICATED=true');
+            console.log('OFFICIAL_MCP_PROTOCOL='+status.protocol_version);
+            console.log('OFFICIAL_MCP_TOOL_COUNT='+status.tool_count);
+            console.log('OFFICIAL_MCP_KNOWN_TOOLS='+status.available_known_tools.join(','));
+            console.log('OFFICIAL_MCP_MUTATIONS=0');
+            console.log('OFFICIAL_MCP_CLIENT=CEREBRO_BACKEND_LAB');
+          } catch(e) {
+            // NEVER log an upstream response body, response headers, bearer or error stack.
+            const label=String(e?.message||'UNKNOWN').replace(/[^A-Z_0-9]/g,'_').slice(0,80);
+            console.log('OFFICIAL_MCP_AUTHENTICATED=false');
+            console.log('OFFICIAL_MCP_FAILURE_CODE='+label);
+            console.log('OFFICIAL_MCP_MUTATIONS=0');
+            process.exit(1);
+          }
+          NODE

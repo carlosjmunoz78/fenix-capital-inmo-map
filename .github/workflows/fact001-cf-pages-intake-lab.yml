@@ -1,0 +1,55 @@
+name: FACT001 Cloudflare Pages signed OIDC command intake LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/cf-pages-intake-lab/requests/submit-one.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-cf-pages-intake-20261111-lab
+  cancel-in-progress: false
+jobs:
+  send-signed-pages-command:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Signed GitHub service OIDC Pages LAB to sealed D1 queue
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const payload=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-pages-intake-lab/requests/submit-one.json','utf8'));
+          const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',provider:'cloudflare',max_cost_eur:0};
+          const fields=[...Object.keys(fixed),'operation','resource_name','job_id','request_id','idempotency_key'];
+          const ops=['pages.project.create_empty','pages.project.update_branch','pages.project.rollback_branch','pages.project.delete_empty'];
+          if(JSON.stringify(Object.keys(payload).sort())!==JSON.stringify(fields.sort())||Object.entries(fixed).some(([k,v])=>payload[k]!==v)||
+             !ops.includes(payload.operation)||!/^cerebro-fact001-managed-pages-lab-[a-z0-9]{4,20}$/.test(payload.resource_name)||
+             !/^FACT001-CF-CMD-[A-Z0-9-]{8,72}$/.test(payload.job_id)||!/^[A-Z0-9-]{10,80}$/.test(payload.request_id)||
+             !/^[a-z0-9-]{12,90}$/.test(payload.idempotency_key))throw Error('PAGES_SIGNED_ORDER_SCOPE_DENIED');
+          const u=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!u||!grant)throw Error('OIDC_UNAVAILABLE');
+          const j=await fetch(u+(u.includes('?')?'&':'?')+'audience=cerebro-fact001-cf-pages-intake-lab-20261111',
+             {headers:{Authorization:'Bearer '+grant},signal:AbortSignal.timeout(12000)});
+          if(j.status!==200)throw Error('ISSUER_FAILED');
+          const jwt=(await j.json()).value;
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-pages-intake-lab/';
+          const call=async(route,token,body)=>{
+           const r=await fetch(base+route,{method:body?'POST':'GET',headers:{...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},
+             ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(32000)});
+           let data={};try{data=await r.json()}catch{}
+           return{http:r.status,data};
+          };
+          if((await call('health')).http!==401||(await call('health','forged')).http!==401||(await call('submit',null,payload)).http!==401)throw Error('PAGES_PUBLIC_BYPASS');
+          if((await call('submit',jwt,{...payload,environment:'PROD'})).http!==403)throw Error('PAGES_PROD_SCOPE_BYPASS');
+          const health=await call('health',jwt);
+          if(health.http!==200||health.data.status!=='SIGNED_COMMAND_INTAKE_READY')throw Error('PAGES_IDENTITY_NOT_ACCEPTED');
+          const result=await call('submit',jwt,payload);
+          console.log('FACT001_PAGES_SIGNED_SUBMIT='+String(result.data.status||'UNKNOWN'));
+          if(result.http!==200||result.data.status!=='QUEUED_VERIFIED'||result.data.token_exposed!==false)throw Error('PAGES_SIGNED_SUBMIT_FAILED');
+          const replay=await call('submit',jwt,payload);
+          if(replay.http!==200||replay.data.status!=='IDEMPOTENT_EXISTING')throw Error('PAGES_REPLAY_FAILED');
+          console.log('FACT001_PAGES_SIGNED_IDEMPOTENT=PASS');
+          NODE

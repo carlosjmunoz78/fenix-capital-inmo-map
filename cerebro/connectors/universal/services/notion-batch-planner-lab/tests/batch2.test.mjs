@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {webcrypto} from 'node:crypto';
+import {sealNotionIndexManifest} from '../notion-encrypted-index-manifest.mjs';
+import {planNextNotionBackupBatch,verifyNotionBackupBatch} from '../notion-content-batch-planner.mjs';
+import {EXPECTED,assertBatch2Order,SOURCE_SHA,PREVIOUS_SHA} from '../batch2-order.mjs';
+if(!globalThis.crypto)globalThis.crypto=webcrypto;
+const secret='ab'.repeat(32);
+const pages=Array.from({length:75},(_,i)=>({id:(i+100).toString(16).padStart(8,'0')+'-1111-4111-8111-111111111111',object:i%20===0?'data_source':'page',parent:{type:'workspace',workspace:true}}));
+async function snap(){const a=await sealNotionIndexManifest({notionToken:'test-notion-secret-not-real-12345',encryptionKey:secret,http:async()=>({status:200,json:async()=>({results:pages,has_more:false})})});return a;}
+test('second batch offset25→50 with no disclosed IDs, stable hash',async()=>{const a=await snap();const b=await planNextNotionBackupBatch({encryptionKey:secret,indexArtifact:a,offset:25,maxItems:25});assert.equal(b.items,25);assert.equal(b.offset,25);assert.equal(b.next_offset,50);assert.equal(b.provider_writes,0);assert.equal(b.content_downloaded,false);assert.equal((await verifyNotionBackupBatch({encryptionKey:secret,artifact:b,expectedIndexSha256:a.id_list_sha256})).item_count,25);for(const p of pages)assert.ok(!JSON.stringify(b).includes(p.id));});
+test('wrong-key and tamper fail closed',async()=>{const a=await snap();await assert.rejects(planNextNotionBackupBatch({encryptionKey:'cd'.repeat(32),indexArtifact:a,offset:25,maxItems:25}),/AUTHENTICITY/);await assert.rejects(planNextNotionBackupBatch({encryptionKey:secret,indexArtifact:{...a,id_list_sha256:'f'.repeat(64)},offset:25,maxItems:25}),/INTEGRITY|DRIFT|AUTHENTICITY/);});
+test('order must match exact signed scope; rejects wrong offset, PROD, foreign zip, and excess keys',()=>{const a={status:'FACT001_NOTION_INDEX_ENCRYPTED',object_count:6632,page_count:6446,data_source_count:186,search_index_complete:true,id_list_sha256:SOURCE_SHA,envelope:{format:'FACT001-NOTION-INDEX-MANIFEST-AES256GCM-V1'}};const good={...EXPECTED,index_artifact:a};assert.equal(assertBatch2Order(good),a);for(const t of [{...good,offset:0},{...good,environment:'PROD'},{...good,previous_zip_sha256:'0'.repeat(64)},{...good,arbitrary:'value'},{...good,index_artifact:{...a,object_count:0}}])assert.throws(()=>assertBatch2Order(t),/DENIED/);assert.equal(PREVIOUS_SHA.length,64);});
+test('no provider writes in planner source',async()=>{const fs=await import('node:fs');const s=fs.readFileSync(new URL('../index.ts',import.meta.url),'utf8');assert.ok(s.includes('await verifyGitHubOidc(auth.slice(7))'));assert.ok(!/method:\s*['"](PUT|PATCH|DELETE)['"]/.test(s));assert.ok(!s.includes('update vault.'));});

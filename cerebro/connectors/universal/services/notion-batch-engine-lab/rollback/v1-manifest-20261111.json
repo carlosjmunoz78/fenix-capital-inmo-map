@@ -1,0 +1,19 @@
+{
+  "format": "FACT001-BATCH-ENGINE-ROLLBACK-MANIFEST-V1",
+  "scope": "fenix-capital/FACT-001/LAB/1.0.0",
+  "old_git_commit": "ad93a375878d814c524c340502701ebadfc5f5ea",
+  "old_edge_function": "cerebro-fact001-notion-batch-engine-lab",
+  "old_edge_version": 1,
+  "old_edge_bundle_sha256": "4530fbdd4803413756ee3e5776cc7d8e7c555d1e8c6ccee68f3c0c673029732e",
+  "code_files": {
+    "index.ts": "bd95e067fef0852845b52603078c11978e818dd565c89c5f0d04392c34033b66",
+    "content.mjs": "dea110c0c2e6db1cd78470836aa063371c49fc4f446d462e1baee04058bf8d05",
+    "policy.mjs": "d136faf3a884beee2c3d220b449219f238fa81fb1e015f6c9e6bb092be69d7ee",
+    "notion-content-batch-planner.mjs": "ace18e2d9a6827017b6b6e0eb40faaa5e2c0a86b2b6282392edc0a13db70ffca",
+    "notion-encrypted-index-manifest.mjs": "ecfd0b55cd1e833cb6dc3ea455b62d118fadf9d7822a4364c5c8018543edd127",
+    "deno.json": "511ad3cbe225fcdcf4947a23554c76ef9856a805a191217456c1db50ce3fe87c"
+  },
+  "rollback": "Fetch the six old code files from old_git_commit, redeploy the SAME isolated LAB Edge Function, verify original hash and route denials. Never touch original broker, D1 or PROD.",
+  "original_notion_writes": 0,
+  "original_main_modified": false
+}

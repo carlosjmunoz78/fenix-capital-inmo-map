@@ -1,0 +1,85 @@
+name: FACT001 Notion Reusable Batch Engine LAB One Shot
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/execute-20261111.v2.json
+      - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/recover-index24-20261111.v1.json
+      - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/recover-source23-20261111.v1.json
+      - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/execute-100-125-20261112.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-notion-batch-engine-owner-lab
+  cancel-in-progress: false
+jobs:
+  encrypt-readonly:
+    if: github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_BATCH_ENGINE_75_100_ONCE_20261111')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Check D1 CAS Git evidence and export encrypted-only 25 objects
+        run: node cerebro/connectors/universal/services/notion-batch-engine-lab/run-once.mjs
+      - name: Preserve encrypted artifacts (including partial failures)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-75-100-mixed-content-aes256gcm-20261111
+          path: fact001-notion-batch-engine-encrypted-75-100
+          if-no-files-found: warn
+          retention-days: 90
+  recover-index24:
+    if: github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_RECOVER_INDEX24_ONCE_20261111')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Export only unprocessed index24 of ciphertext batch 75-100
+        run: node cerebro/connectors/universal/services/notion-batch-engine-lab/run-recover-index24.mjs
+      - name: Preserve encrypted salvage regardless of result
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-75-100-recover-index24-20261111
+          path: fact001-notion-batch-75-100-recover-index24-ciphertext
+          if-no-files-found: warn
+          retention-days: 90
+
+  recover-source23:
+    if: github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_RECOVER_SOURCE23_ONCE_20261111')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Export only heavy source index23 via bounded encrypted chunks
+        run: node cerebro/connectors/universal/services/notion-batch-engine-lab/run-recover-source23.mjs
+      - name: Preserve encrypted chunks even if incomplete
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-75-100-recover-source23-chunks-20261111
+          path: fact001-notion-75-100-source23-chunks-ciphertext
+          if-no-files-found: warn
+          retention-days: 90
+  encrypt-next-100-125:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_BATCH_ENGINE_100_125_ONCE_20261112')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Validate signed LAB owner order and seal only Notion content from 100 to 125
+        run: node cerebro/connectors/universal/services/notion-batch-engine-lab/run-once-100-125.mjs
+      - name: Preserve AES-only artifacts or partial failed encryption evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-100-125-mixed-content-aes256gcm-20261112
+          path: fact001-notion-batch-engine-encrypted-100-125
+          if-no-files-found: warn
+          retention-days: 90

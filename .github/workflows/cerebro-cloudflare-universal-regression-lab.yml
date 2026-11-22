@@ -1,0 +1,24 @@
+name: FACT-001 Cloudflare Universal - additive read-only modules LAB
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - .github/workflows/cerebro-cloudflare-universal-regression-lab.yml
+      - cerebro/connectors/universal/src/cloudflare.mjs
+      - cerebro/connectors/universal/tests/cloudflare-universal-read-expansion.test.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Full preexisting dual-client test suite and generic Cloudflare read additions
+        run: node --test cerebro/connectors/universal/tests/*.test.mjs
+      - name: Validate 4D registry
+        run: node cerebro/connectors/universal/src/validate.mjs

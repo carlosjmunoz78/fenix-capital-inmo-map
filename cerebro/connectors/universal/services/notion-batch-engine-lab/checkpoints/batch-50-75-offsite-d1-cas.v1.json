@@ -1,0 +1,79 @@
+{
+  "format": "FACT001-NOTION-ENCRYPTED-BATCH-50-75-CAS-VERIFIED-V1",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "date": "2026-11-11",
+  "source_index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+  "previous": {
+    "offset": 50,
+    "cas_version": 2,
+    "batch_zip_sha256": "d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026",
+    "drive_file_id": "12UJyaeYukgOlFIHrLlebxLOgLTsdalcq"
+  },
+  "batch": {
+    "start_offset": 50,
+    "next_offset": 75,
+    "batch_ref": "94bcf25541972a5abeb7e041551afcd97cd49a5a3be38065909cbe85f908bec1",
+    "items_expected": 25,
+    "items_sealed": 25,
+    "pages": 23,
+    "data_sources": 2,
+    "data_source_rows": 30,
+    "blocks": 879,
+    "failed_count": 0,
+    "index_search_calls": 67,
+    "provider_writes": 0,
+    "encrypted_verified_in_service": true
+  },
+  "github": {
+    "workflow_run_id": 42930782418,
+    "artifact_id": 13815744233,
+    "artifact_zip_bytes": 1059382,
+    "sha256": "5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f",
+    "plan_inside_zip": true,
+    "zip_entries": 27
+  },
+  "drive": {
+    "id": "1l68TceZpyar7jOoTZI5Nr5OUy4D8-XOg",
+    "folder_id": "1xQe5jd-AIQLDUlfZDktVod2qSJkS4M1E",
+    "private": true,
+    "size_bytes": 1059382,
+    "readback_sha256": "5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f",
+    "exact_bytes": true,
+    "crc_pass": true
+  },
+  "d1_checkpoint": {
+    "database_id": "bc085807-a6ca-4c56-a288-fe56716fec6f",
+    "database_name": "cerebro-fact001-notion-checkpoint-lab-eu",
+    "jurisdiction": "eu",
+    "offset": 75,
+    "cas_version": 3,
+    "audit_count": 2,
+    "transition": "50→75",
+    "replay_affected_rows": 0,
+    "bookmark": "00000003-00000002-00005120-65626883ac8f32e6834ce567f2af5c27"
+  },
+  "cumulative_first_3_batches": {
+    "content_objects": 75,
+    "pages": 72,
+    "data_sources": 3,
+    "data_source_rows": 98,
+    "remaining_pages": 6374,
+    "remaining_data_sources": 183
+  },
+  "gates": {
+    "complete_workspace_backup": false,
+    "media_binaries_included": false,
+    "comments_included": false,
+    "physical_notion_restore": false,
+    "independent_key_escrow": false,
+    "autonomous_cas_writer": false,
+    "production_promoted": false,
+    "new_subscriptions": false,
+    "cloudflare_free_d1_databases_used": 10
+  }
+}

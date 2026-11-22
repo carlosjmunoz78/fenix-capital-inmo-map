@@ -1,0 +1,52 @@
+{
+  "format": "FACT001-NOTION-CONTENT-OFFSITE-CHECKPOINT-V1",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "status": "FIRST_25_CONTENT_ENCRYPTED_OFFSITE_READBACK_VERIFIED",
+  "batch_ref": "50fc9fc1d7d6fd985dc58e238604fe534d3b536af9b86ccc77ad52fe2a1ea1c7",
+  "source_index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+  "content_start_offset": 0,
+  "content_next_offset": 25,
+  "items_expected": 25,
+  "items_sealed": 25,
+  "failed_items": 0,
+  "all_item_schemas_verified": true,
+  "source_provider_writes": 0,
+  "app_crm_writes": 0,
+  "github": {
+    "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+    "workflow_run_id": 42921160489,
+    "artifact_id": 13812640522,
+    "artifact_zip_bytes": 454715,
+    "sha256": "e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65"
+  },
+  "drive": {
+    "file_id": "1sGt2mXOLwK0AJCxfRNr8fY-dYVHjrR5p",
+    "parent_folder_id": "1xQe5jd-AIQLDUlfZDktVod2qSJkS4M1E",
+    "readback_bytes": 454715,
+    "readback_sha256": "e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65",
+    "zip_crc_pass": true,
+    "private": true
+  },
+  "verification": {
+    "github_run_conclusion": "success",
+    "anonymous_401": true,
+    "forged_401": true,
+    "prod_403": true,
+    "github_vs_drive_sha256_equal": true,
+    "encrypted_page_objects": 25,
+    "memory_roundtrips": 25
+  },
+  "checkpoint_durability": "GIT_COMMIT_SHA_GUARDED",
+  "d1_cas_checkpoint_committed": false,
+  "full_workspace_backup": false,
+  "media_binaries_included": false,
+  "comments_included": false,
+  "notion_physical_restore_tested": false,
+  "escrow_independent": false,
+  "notes": "The content offset is recorded in an immutable GitHub evidence commit after remote readback; downstream D1 compare-and-swap checkpoint not yet configured. Do not assume complete workspace backup."
+}

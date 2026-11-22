@@ -1,0 +1,10 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "client_id": "cerebro",
+  "operation": "cloudflare.gateway_lab_d1_writer.issue_once",
+  "request_id": "FACT001-CF-GW-20261111-ISSUE-001"
+}

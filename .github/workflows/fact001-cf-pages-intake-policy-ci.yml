@@ -1,0 +1,29 @@
+name: FACT001 Cloudflare Pages signed intake security CI
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/cf-pages-intake-lab/**
+      - .github/workflows/fact001-cf-pages-intake-policy-ci.yml
+permissions:
+  contents: read
+jobs:
+  pages-intake-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: node --test cerebro/connectors/universal/supabase/cf-pages-intake-lab/tests/*.test.mjs
+      - name: Signed OIDC, D1 only, no provider mutation
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const p=readFileSync('cerebro/connectors/universal/supabase/cf-pages-intake-lab/policy.mjs','utf8');
+          const i=readFileSync('cerebro/connectors/universal/supabase/cf-pages-intake-lab/index.ts','utf8');
+          if(!p.includes("payload.workflow_ref!==WORKFLOW_REF")||!p.includes("payload.actor!=='carlosjmunoz78'")||
+             !p.includes("payload.event_name!=='push'")||!p.includes("payload.aud!==OIDC_AUDIENCE"))throw Error('OIDC_WEAK');
+          if(!i.includes("fact001_cf_pages_jobs_v1")||!i.includes("ON CONFLICT(idempotency_key) DO NOTHING"))throw Error('PAGES_D1_GATE');
+          if(i.includes('/workers/scripts')||i.includes('/pages/projects')||i.includes('console.log('))throw Error('PROVIDER_MUTATION_OR_LOG');
+          console.log('FACT001_PAGES_INTAKE_SECURITY=PASS');
+          NODE
