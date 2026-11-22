@@ -1,0 +1,120 @@
+{
+  "checked_at": "2026-11-12",
+  "environment": "LAB",
+  "workers": {
+    "cerebro-ums001-universal-runtime-broker-lab-eu": {
+      "flags": [
+        {
+          "name": "BROKER_ENABLED",
+          "value": "true"
+        }
+      ],
+      "secrets": [
+        "GATEWAY_CALLER_TOKEN",
+        "UMS001_RUNTIME_BROKER_TOKEN"
+      ],
+      "services": [
+        {
+          "name": "UMS001_PROVISIONER",
+          "service": "cerebro-fact001-ums001-issuer-provisioner-lab-eu"
+        }
+      ],
+      "subdomain": {
+        "enabled": false,
+        "previews_enabled": false
+      }
+    },
+    "cerebro-fact001-gateway-lab-eu-20261109": {
+      "flags": [
+        {
+          "name": "ALLOW_MUTATIONS",
+          "value": "false"
+        },
+        {
+          "name": "CLOUDFLARE_API_ENABLED",
+          "value": "false"
+        },
+        {
+          "name": "GATEWAY_ENABLED",
+          "value": "false"
+        },
+        {
+          "name": "UMS001_PRIVATE_BINDING_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "UMS001_QUEUE_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "UNIVERSAL_IMAGE_RUNTIME_ENABLED",
+          "value": "true"
+        }
+      ],
+      "secrets": [
+        "CEREBRO_RUNTIME_CALLER_TOKEN",
+        "FACT_EVENT_SIGNING_KEY",
+        "GATEWAY_CALLER_TOKEN",
+        "UMS001_CALLER_TOKEN"
+      ],
+      "services": [
+        {
+          "name": "UMS001_RUNTIME_BROKER",
+          "service": "cerebro-ums001-universal-runtime-broker-lab-eu"
+        },
+        {
+          "name": "UMS_PRODUCER",
+          "service": "cerebro-ums001-producer-private-gateway-lab-eu"
+        }
+      ],
+      "subdomain": {
+        "enabled": false,
+        "previews_enabled": false
+      }
+    },
+    "cerebro-fact001-ums001-issuer-provisioner-lab-eu": {
+      "flags": [
+        {
+          "name": "FACT_PROVISION_ENABLED",
+          "value": "true"
+        }
+      ],
+      "secrets": [
+        "FACT_ENROLL_TOKEN",
+        "FACT_EVENT_SIGNING_KEY",
+        "FACT_PRIVATE_MASTER_KEY",
+        "GITHUB_OIDC_BRIDGE_SECRET",
+        "UMS001_RUNTIME_BROKER_TOKEN"
+      ],
+      "services": [
+        {
+          "name": "SIGNED_GATEWAY",
+          "service": "cerebro-ums001-universal-gateway-lab-eu"
+        }
+      ],
+      "subdomain": {
+        "enabled": false,
+        "previews_enabled": false
+      }
+    }
+  },
+  "test": {
+    "request_id": "UMS001-LAB-CENTRAL-20261112-01",
+    "engine_id": "FACT-OIDC-LAB-E2E-001",
+    "status": "PRIVATE_ASSET_RECEIVED",
+    "jpeg_bytes": 633388,
+    "sha256": "8e0149691f0e7615bd0cf2a7bf8b417937b6cbfcba3dfe9c472e05dfef9e9075",
+    "private_read_verified": true,
+    "publication": false
+  },
+  "capability_probe": {
+    "active": "FACT-OIDC-LAB-E2E-001",
+    "active_state": "READY_AUTHENTICATED",
+    "not_active": "SEO-001",
+    "not_active_state": "PENDING_FACTORY_IAM"
+  },
+  "allowlist_proof": {
+    "registry_active_count": 3,
+    "canonical_documented_count": 177
+  }
+}
