@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-22T10:18:42.211Z",
+  "updated_at": "2026-11-22T10:21:51.493Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -579,7 +579,8 @@
     "github-wide-skills:5f55ee65378fdb260f65",
     "github-wide-skills:520ee3244e14453e7347",
     "github-wide-skills:96f4eca40df8f300536d",
-    "github-wide-skills:931223d50eb37a57359c"
+    "github-wide-skills:931223d50eb37a57359c",
+    "github-wide-skills:85edb83e43322d10ed7c"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2884,6 +2885,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 44977170078,
       "checkpointed_at": "2026-11-22T02:40:47.605Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:85edb83e43322d10ed7c": {
+      "candidate_id": "github-wide-skills:85edb83e43322d10ed7c",
+      "name": "design-system-adoption",
+      "human_alias": "Design System Adoption",
+      "wrapper_id": "skillwrap:84a077490099325b3555",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 89.5,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Trystan-SA/product-engineer-skills",
+        "upstream_head_commit": "e0a46359dcd497e73f1f8a6e953b2e56fb59bef2",
+        "manifest_sha256": "71150077d828fed0ae719e5b83073cfa3ddc3e98101518faeda3501356762a87",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 45012035049,
+      "checkpointed_at": "2026-11-22T10:21:51.493Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34377,7 +34414,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34390,7 +34427,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 44979373761,
+  "last_discovery_run_id": 45012035049,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
