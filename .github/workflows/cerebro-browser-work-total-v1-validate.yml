@@ -61,10 +61,30 @@ jobs:
           set -euo pipefail
           git diff --name-only "$(git merge-base HEAD origin/main)" HEAD | while IFS= read -r file; do
             case "$file" in
-              src/CerebroBrowserConsole.tsx|src/cerebroBrowserSessionFreshness.ts|cerebro/runtime/browser-session-freshness-v3.ts|cerebro/tests/browser-console-session-freshness.test.mjs|cerebro/runtime/browser-work-total-v1-contract.test.mjs|cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs|cerebro/runtime/browser-ergonomics-p0.test.mjs|.github/workflows/cerebro-browser-work-total-v1-validate.yml) echo "ALLOWED $file" ;;
+              src/CerebroBrowserConsole.tsx|src/cerebroBrowserSessionFreshness.ts|cerebro/runtime/browser-session-freshness-v3.ts|cerebro/tests/browser-console-session-freshness.test.mjs|cerebro/runtime/browser-work-total-v1-contract.test.mjs|cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs|cerebro/runtime/browser-ergonomics-p0.test.mjs|.github/workflows/cerebro-browser-work-total-v1-validate.yml|supabase/functions/cerebro-browser-interactive-v3/gateway-prod.ts) echo "ALLOWED $file" ;;
               *) echo "UNEXPECTED_CHANGE $file"; exit 1 ;;
             esac
           done
+      - name: Prove owner/list projection adds expiry only (no new authority)
+        if: github.ref_name == 'cerebro/navegador-prod-stale-session-voice-p0-20261119'
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='supabase/functions/cerebro-browser-interactive-v3/gateway-prod.ts'
+          base="$(git merge-base HEAD origin/main)"
+          git show "$base:$file" > /tmp/browser-owner-status-before.ts
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const original=fs.readFileSync('/tmp/browser-owner-status-before.ts','utf8');
+          const candidate=fs.readFileSync('supabase/functions/cerebro-browser-interactive-v3/gateway-prod.ts','utf8');
+          const old="'session_id,state,control_owner,worker_alive,current_url,current_title,opened_at,last_heartbeat_at,closed_at,updated_at'";
+          const newer="'session_id,state,control_owner,worker_alive,current_url,current_title,opened_at,last_heartbeat_at,expires_at,closed_at,updated_at'";
+          if(original.split(old).length!==2||candidate!==original.replace(old,newer)){
+            console.error('HOLD_OWNER_LIST_DIFF_OUT_OF_SCOPE: only existing expires_at column may be projected');
+            process.exit(1);
+          }
+          console.log('PASS_OWNER_LIST_EXPIRES_AT_READ_ONLY; old authority unchanged; no routes or mutations added');
+          NODE
       - name: Test browser session freshness P0
         run: node --test cerebro/tests/browser-console-session-freshness.test.mjs
       - name: Test browser P0 ergonomics
