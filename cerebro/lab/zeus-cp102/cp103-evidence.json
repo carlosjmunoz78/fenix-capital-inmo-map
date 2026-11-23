@@ -1,0 +1,102 @@
+{
+  "job": 137801534462,
+  "run": 45205166521,
+  "attempt": 5,
+  "proofCommit": "354051dac01a011a904a3ef3b081ba300546cc56",
+  "receipt": {
+    "mode": "REPLAY",
+    "identity": "GITHUB_ACTIONS_OIDC",
+    "storage": "D1_WORKER_BINDING",
+    "ack": {
+      "status": "REPLAY",
+      "changes": [
+        1,
+        1,
+        1
+      ],
+      "position": 1,
+      "run": "45205166521",
+      "attempt": "5"
+    },
+    "dedup": {
+      "status": "REPLAY",
+      "changes": [
+        0,
+        0,
+        0
+      ],
+      "position": 1,
+      "run": "45205166521",
+      "attempt": "5"
+    },
+    "negative": [
+      403,
+      422
+    ],
+    "manifest": {
+      "schema": "zeus-lrn-provenance/v1",
+      "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+      "branch": "cerebro-rsi-learning-state-v0",
+      "scope": {
+        "company_id": "fenix",
+        "engine_id": "LRN-001",
+        "environment": "PREPROD",
+        "version": "0.6.0"
+      },
+      "runId": 45150907763,
+      "attempt": 1,
+      "workflowId": 403468557,
+      "jobId": 137611733062,
+      "stateCommit": "565f5d75b82a1fcd5d196386ea930a672f101000",
+      "sourceHead": "902022f5d4dcc4aab29e6d35411a63c38fe438e7",
+      "lock_key": "eb5da601d613a78eb996be1933d5821a32c5359e53512144bf81347e5b7827c1",
+      "summary": {
+        "path": "cerebro/runtime/rsi-learning-state/last-control-plane-run.json",
+        "git_blob": "59eacf1453d8c9277b52ae9de6051353ba335840",
+        "sha256": "ad23027e7708f57b8b895196c5ab2765c2654c1a6df63f62ea2e1adb8dc89cda"
+      },
+      "result": {
+        "path": "cerebro/runtime/rsi-learning-state/data/fenix/LRN-001/orchestration-results/eb5da601d613a78eb996be1933d5821a32c5359e53512144bf81347e5b7827c1.json",
+        "git_blob": "7e2cbcb9efbbd998b20542bf4523452a65e37fbf",
+        "sha256": "fa223279dd427750e59186681de6474368ed3a1074a175d57a3149355066f92f"
+      }
+    }
+  },
+  "verification": {
+    "obs": [
+      {
+        "company_id": "fenix",
+        "engine_id": "LRN-001",
+        "environment": "PREPROD",
+        "source_job_id": "137611733062",
+        "source_commit": "565f5d75b82a1fcd5d196386ea930a672f101000",
+        "lock_key": "eb5da601d613a78eb996be1933d5821a32c5359e53512144bf81347e5b7827c1",
+        "source_blob": "7e2cbcb9efbbd998b20542bf4523452a65e37fbf",
+        "source_sha256": "fa223279dd427750e59186681de6474368ed3a1074a175d57a3149355066f92f",
+        "promotion_allowed": 0
+      }
+    ],
+    "cursor": [
+      {
+        "id": "fenix:LRN-001:PREPROD:daily",
+        "position": 1
+      }
+    ],
+    "manifestExact": true,
+    "cross": 0,
+    "canaryTablesAfter": 0,
+    "canonicalExact": true,
+    "canonicalManifestExact": true,
+    "canonicalCursor": [
+      {
+        "id": "fenix:LRN-001:PREPROD:daily",
+        "position": 1
+      }
+    ],
+    "subdomain": {
+      "enabled": false,
+      "previews_enabled": false
+    },
+    "schedules": []
+  }
+}
