@@ -47,7 +47,7 @@ async function authorize(request) {
  if(!ok)throw Error('SIGNATURE');
  return claims;
 }
-function validate(m,claims) {
+export function validate(m,claims) {
  if(!m||typeof m!=='object'||Array.isArray(m)||m.schema!=='zeus-lrn-publication-auto/v1'||
     m.repository!==REPO||m.workflow_id!==403468557||m.source_branch!=='cerebro-rsi-learning-state-v0'||
     m.scope?.company_id!==SCOPE.company_id||m.scope?.engine_id!==SCOPE.engine_id||
