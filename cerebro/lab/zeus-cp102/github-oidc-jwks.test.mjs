@@ -67,3 +67,13 @@ test('reject missing kid and unsafe cache settings',async()=>{
   await assert.rejects(load('bad.kid'),/KEY/);
   assert.throws(()=>createGithubOidcJwksLoader({cacheTtlMs:600000}),/CACHE_CONFIG/);
 });
+
+test('Cloudflare Workers manual redirects are required and rejected',async()=>{
+  const original=makeFetcher();
+  const loader=createGithubOidcJwksLoader({fetcher:async (url,options)=>{
+    assert.equal(options.redirect,'manual');
+    if(url.endsWith('openid-configuration')) return Response.redirect('https://bad.invalid/',302);
+    return original.fetcher(url,options);
+  }});
+  await assert.rejects(loader('first'),/KEYS_FETCH/);
+});
