@@ -2,7 +2,7 @@ name: CEREBRO RSI Learning Control Plane V0
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_run:
     workflows:
       - CEREBRO RSI Learning Outbox Publisher V0
