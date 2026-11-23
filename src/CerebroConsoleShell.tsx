@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState,type FormEvent} from 'react';
+import {useEffect,useRef,useState,type FormEvent,type ReactNode} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
@@ -19,7 +19,9 @@ function renderMessage(text:string){
  return parts.map((part,index)=>/^https?:\/\//.test(part)?<a key={index} href={part} target="_blank" rel="noreferrer">{part}</a>:part);
 }
 
-export default function CerebroConsoleShell(){
+/** Extensión de SOLO renderizado (sin modificación del chat, permisos ni voz). */
+type ConsolePresentationPort={renderAssistantMessage?:(text:string)=>ReactNode};
+export default function CerebroConsoleShell({renderAssistantMessage}:ConsolePresentationPort={}){
  const location=useLocation(),navigate=useNavigate();
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const configured=cerebroConsoleLinkEnabled();
@@ -660,7 +662,7 @@ export default function CerebroConsoleShell(){
    <p>{detail}</p>
    <div className="cerebro-fields"><label>Empresa<select disabled><option>Fénix · sesión autenticada</option></select></label><label>Contexto<select disabled>{CONTEXTS.map(item=><option key={item}>{item}</option>)}</select></label></div>
    <div className="cerebro-chat-log" aria-live="polite">
-    {lines.length===0?<div className="cerebro-chat-empty">Pregunta lo que necesites o pide una acción. CEREBRO separará lectura de ejecución.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{renderMessage(line.text)}</span>{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
+    {lines.length===0?<div className="cerebro-chat-empty">Pregunta lo que necesites o pide una acción. CEREBRO separará lectura de ejecución.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong>{line.role==='cerebro'&&renderAssistantMessage?renderAssistantMessage(line.text):<span>{renderMessage(line.text)}</span>}{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
    </div>
    <div className={`cerebro-voice-session ${voiceSessionActive?'is-active':''} ${voiceListening?'is-listening':''} ${voiceSpeaking?'is-speaking':''}`}>
     <button type="button" className="cerebro-voice-main" onClick={toggleVoiceSession} disabled={!chatReady||!voiceSupport.stt} aria-pressed={voiceSessionActive}>
