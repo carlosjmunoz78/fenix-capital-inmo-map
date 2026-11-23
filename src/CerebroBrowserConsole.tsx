@@ -15,15 +15,27 @@ type BrowserActionResponse={ok:boolean;error?:string;command?:{command_id:string
 type BrowserCommandStatusResponse={ok:boolean;command?:{command_id:string;status:string;error_code?:string|null};error?:string};
 type VisibleCommand={text:string;status:'ENVIADA'|'INICIANDO'|'EJECUTANDO'|'COMPLETADA'|'ERROR';error?:string};
 type BrowserCompaniesResponse={ok:boolean;companies:BrowserCompanyV3[];error?:string};
-type BrowserSessionSummary={session_id:string;state:string;control_owner:string;worker_alive:boolean;current_url:string|null;current_title:string|null;opened_at:string;last_heartbeat_at:string|null;closed_at:string|null;updated_at:string};
+type BrowserSessionSummary={session_id:string;state:string;control_owner:string;worker_alive:boolean;current_url:string|null;current_title:string|null;opened_at:string;last_heartbeat_at:string|null;expires_at?:string|null;closed_at:string|null;updated_at:string};
 type BrowserSessionsResponse={ok:boolean;sessions:BrowserSessionSummary[];error?:string};
 
 const EMPTY:CoreSnapshot={ready:false,sending:false,voiceActive:false};
 const TERMINAL=new Set(['STOPPED','ERROR','CLOSED','HIBERNATED']);
+// Match the existing server-side session-liveness contract. The owner/list API
+// exposes expires_at on new deployments; the legacy response gets a bounded
+// 15-minute activity fallback, never an indefinite ACTIVE state.
+const LEGACY_SESSION_ACTIVITY_TTL_MS=15*60_000;
+function sessionUsableForUI(session:{state:string;expires_at?:string|null;last_heartbeat_at?:string|null;updated_at?:string|null},nowMs=Date.now()){
+ if(TERMINAL.has(session.state))return false;
+ const expiresAt=Date.parse(String(session.expires_at||''));
+ if(Number.isFinite(expiresAt))return expiresAt>nowMs;
+ const activityAt=Date.parse(String(session.last_heartbeat_at||session.updated_at||''));
+ return Number.isFinite(activityAt)&&activityAt>nowMs-LEGACY_SESSION_ACTIVITY_TTL_MS;
+}
 const HUMAN_TYPING_DEBOUNCE_MS=55;
 
 function stateLabel(session:BrowserSessionV3|null){
  if(!session)return'SIN SESIÓN VISUAL';
+ if(!sessionUsableForUI(session))return'SESIÓN CADUCADA';
  if(session.state==='CONNECTING')return'CONECTANDO';
  if(session.state==='CEREBRO_CONTROLLED')return'CEREBRO EN CONTROL';
  if(session.state==='TAKEOVER_PENDING')return'TOMA DE CONTROL PENDIENTE';
@@ -94,7 +106,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    if(cancelled||result.status===0)return;
    if(result.status!==200||!result.data?.ok){setBrowserError(result.data?.error||'No se pudo cargar el historial de sesiones');return;}
    const list=Array.isArray(result.data.sessions)?result.data.sessions:[];setSessionOptions(list);
-   setSelectedSessionId(current=>current&&list.some(item=>item.session_id===current)?current:(list.find(item=>!TERMINAL.has(item.state))?.session_id||list[0]?.session_id||''));
+   setSelectedSessionId(current=>current&&list.some(item=>item.session_id===current)?current:(list.find(item=>sessionUsableForUI(item))?.session_id||list[0]?.session_id||''));
   };
   void refreshSessions();const interval=window.setInterval(()=>{void refreshSessions()},2500);return()=>{cancelled=true;window.clearInterval(interval)};
  },[selectedCompany]);
@@ -166,18 +178,19 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  function openTab(){if(humanControl&&tabs.length<8){drainHumanTextBuffer();void queueHumanInput('OPEN_TAB',{url:'about:blank'});}}
  function closeTab(){if(humanControl&&tabs.length>1){drainHumanTextBuffer();void queueHumanInput('CLOSE_TAB',{});}}
 
- const live=Boolean(browserSession?.worker_alive&&frameUrl&&!TERMINAL.has(browserSession.state));
- const canTakeover=Boolean(browserSession?.worker_alive&&((browserSession.state==='CEREBRO_CONTROLLED'&&browserSession.control_owner==='CEREBRO')||(browserSession.state==='HUMAN_REQUIRED'&&browserSession.control_owner==='NONE'))&&!browserSession.emergency_stop);
- const humanControl=Boolean(browserSession?.worker_alive&&browserSession.state==='HUMAN_CONTROLLED'&&browserSession.control_owner==='HUMAN'&&browserSession.human_lease_id);
- const canStop=Boolean(browserSession?.worker_alive&&!TERMINAL.has(browserSession.state));
- const hasActiveSession=sessionOptions.some(item=>!TERMINAL.has(item.state));
+ const sessionUsable=Boolean(browserSession&&sessionUsableForUI(browserSession));
+ const live=Boolean(sessionUsable&&browserSession?.worker_alive&&frameUrl);
+ const canTakeover=Boolean(sessionUsable&&browserSession?.worker_alive&&((browserSession.state==='CEREBRO_CONTROLLED'&&browserSession.control_owner==='CEREBRO')||(browserSession.state==='HUMAN_REQUIRED'&&browserSession.control_owner==='NONE'))&&!browserSession.emergency_stop);
+ const humanControl=Boolean(sessionUsable&&browserSession?.worker_alive&&browserSession.state==='HUMAN_CONTROLLED'&&browserSession.control_owner==='HUMAN'&&browserSession.human_lease_id);
+ const canStop=Boolean(sessionUsable&&browserSession?.worker_alive);
+ const hasActiveSession=sessionOptions.some(item=>sessionUsableForUI(item));
  const canStart=Boolean(selectedCompany)&&!hasActiveSession;
  const tabs=browserSession?.tabs||[];
  const activeTab=tabs.find(tab=>tab.active)||tabs.find(tab=>tab.index===browserSession?.active_tab_index)||tabs[0];
  const companyLabel=browserSession?.company_id||selectedCompany||'SIN EMPRESA';
  const environmentLabel=browserSession?.environment||(selectedCompany?'PREPROD':'SIN SESIÓN');
  const humanRequired=humanRequiredLabel(browserSession?.human_required);
- const sessionHealth=browserSession?.worker_alive?'WORKER ONLINE':browserSession?'WORKER OFFLINE':'ESPERANDO';
+ const sessionHealth=browserSession&&!sessionUsable?'SESIÓN CADUCADA':browserSession?.worker_alive?'WORKER ONLINE':browserSession?'WORKER OFFLINE':'ESPERANDO';
  const viewport=browserSession?.viewport_width&&browserSession?.viewport_height?`${browserSession.viewport_width}×${browserSession.viewport_height}`:'—';
  const freshness=useMemo(()=>formatTime(browserSession?.last_heartbeat_at),[browserSession?.last_heartbeat_at]);
  const selectedSessionValue=selectedSessionId||browserSession?.session_id||'';
