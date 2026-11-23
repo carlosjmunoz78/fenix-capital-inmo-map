@@ -1,0 +1,129 @@
+{
+  "schema": "cerebro.jarvis.voice.cloudflare.real_account_free_access_preflight.v1",
+  "observed_on": "2026-11-07",
+  "environment": "LAB",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "reviewer": "ChatGPT READ_ONLY authenticated Cloudflare dashboard + GitHub UI + published official Cloudflare docs",
+  "mode": "READ_ONLY_NO_PROD_CHANGES",
+  "objective": "VOICE online in CEREBRO consoles mobile/tablet/PC, no local PC server, no new costs",
+  "account": {
+    "workers_plan": {
+      "observed": "Workers Free",
+      "active": true,
+      "evidence": "Cloudflare Billing > Subscriptions",
+      "state": "HECHO"
+    },
+    "zero_trust_plan": {
+      "observed": "Teams Free Base",
+      "active": true,
+      "evidence": "Cloudflare Billing > Subscriptions",
+      "state": "HECHO"
+    },
+    "ai_free_daily_allocation_neurons": {
+      "value": 10000,
+      "scope": "ALL_WORKERS_AI_MODELS_SHARED",
+      "reset_utc": "00:00",
+      "source": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+      "state": "EXISTENTE"
+    },
+    "paid_overage_permitted_by_plan": false,
+    "ai_consumed_today_neurons": {
+      "value": null,
+      "state": "POR_AUDITAR",
+      "reason": "Authenticated Workers AI usage screen exposed onboarding/landing, not an auditable numeric live neuron meter"
+    },
+    "api_token_available_in_repo_actions_secrets": {
+      "value": false,
+      "state": "VERIFIED_FOR_REPOSITORY_ONLY",
+      "note": "No CLOUDFLARE_API_TOKEN / CLOUDFLARE_WORKERS_AI_TOKEN in repository secret name list; no secret values read"
+    }
+  },
+  "security": {
+    "worker_name": "cerebro-jarvis-cut32-lab-eu",
+    "original_worker": "cerebro-jarvis-lab-eu",
+    "access_application": {
+      "exists": true,
+      "name": "cerebro-jarvis-cut32-lab-eu - Cloudflare Workers",
+      "access_application_id": "f8772497-cd71-47ef-852f-bbeedcac7307",
+      "state": "HECHO"
+    },
+    "access_policy": {
+      "exists": true,
+      "name": "JARVIS-CUT33-OWNER-ONLY",
+      "access_policy_id": "5d4f5580-92ab-4ba4-a6c3-b70a86c55014",
+      "action": "Allow",
+      "include_selector_count": 1,
+      "selector": "SINGLE_EXPLICIT_EMAIL",
+      "anonymous_all_rule": false,
+      "actual_email_not_recorded": true,
+      "state": "CONFIGURED_NOT_E2E_TESTED"
+    },
+    "cut32_public_routes": 0,
+    "cut32_workers_dev_unrestricted_url": {
+      "value": null,
+      "state": "POR_AUDITAR",
+      "note": "Do not assume absence of worker routes proves every potential preview endpoint non-public"
+    },
+    "worker_ai_binding": {
+      "observed_present": false,
+      "evidence": "Cloudflare Worker > Settings > Bindings: only existing D1 binding is displayed",
+      "state": "NO_HECHO"
+    },
+    "b2_b3_live_owner_e2e": {
+      "verified": false,
+      "state": "NO_HECHO"
+    },
+    "owner_microphone_android_e2e": {
+      "verified": false,
+      "state": "NO_HECHO"
+    }
+  },
+  "code": {
+    "lab_pr": 38,
+    "branch": "fix/jarvis-full-chat-dictation-voice-persona-lab-20261107",
+    "provider_model": "@cf/deepgram/aura-2-es",
+    "speaker": "javier",
+    "voice_identity": "GENERIC_ES_NOT_APPROVED_JARVIS_V2",
+    "canonical_jarvis_voice_verified": false,
+    "tts_port_path": "zeus/jarvis/voice/online-cloudflare-lab/jarvis-online-free-tts-port-v0.mjs",
+    "http_path": "zeus/jarvis/voice/online-cloudflare-lab/jarvis-online-free-voice-http-v0.mjs",
+    "security_tests": {
+      "run_id": 42419296678,
+      "passed": 28,
+      "failed": 0,
+      "mode": "OFFLINE_MOCK",
+      "no_provider_inference": true
+    },
+    "chat_voice_browser_tests": {
+      "run_id": 42412391753,
+      "passed": 5,
+      "failed": 0,
+      "mode": "CHROMIUM_MOCK_OWNER_AND_AUDIO"
+    }
+  },
+  "blockers": [
+    "Real Workers AI audio synthesis has not been executed: no Cloudflare AI binding on CUT32 and no existing encrypted Cloudflare API token in GitHub repository",
+    "Quota consumption across Workers AI account not observable in live numeric form",
+    "Access Owner E2E over a real protected service URL not yet tested; CUT32 currently has zero public routes",
+    "Approved JARVIS V2 voice clone from vidIQ is NOT the generic Cloudflare model and lacks a verified zero-cost online synthesis route",
+    "Real Android microphone and audio playback Owner session not tested"
+  ],
+  "cost": {
+    "new_subscriptions": 0,
+    "cloudflare_ai_model_calls_made": 0,
+    "additional_euro_spent": 0,
+    "new_workers_created": 0
+  },
+  "release": {
+    "status": "NO_GO",
+    "prod_app_changed": false,
+    "crm_changed": false,
+    "dns_changed": false,
+    "cloudflare_original_worker_changed": false,
+    "cloudflare_cut32_worker_mutated": false,
+    "main_merged": false
+  },
+  "next_safe_action": "Authorized interactive Cloudflare Work browser session: verify CUT32 workers_dev/preview protection, create AI binding only in isolated OFF candidate after snapshot, run exactly one short non-sensitive free TTS call guarded by existing Workers Free plan and Access; no prod publication or model impersonation.",
+  "constraints": "Preserve OLD → verify Access and free hard cap → offline candidate → single real canary → physical owner E2E → tribunal + rollback → eventual gradual release"
+}

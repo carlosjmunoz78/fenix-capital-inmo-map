@@ -47,10 +47,10 @@ type LearningCandidate = {
 };
 
 const DEFAULT_PREFERENCES:Record<string,string>={
-  tone:"warm_close_caring",
+  tone:"professional_direct",
   response_length:"concise",
-  speech_rate:"1.08",
-  speech_pitch:"1.04"
+  speech_rate:"1.00",
+  speech_pitch:"0.94"
 };
 
 const LEARNING_CATEGORIES=new Set([
@@ -196,21 +196,12 @@ function previousUserTurn(context:ConversationTurn[]){
 }
 
 function closeOwnerGreeting(context:ConversationTurn[]=[]){
-  const variants=[
-    "Hola Carlos. ¿Qué tal guapo? Dime, ¿qué hacemos?",
-    "¡Buenas Carlos! Aquí estoy guapo. ¿Qué necesitas?",
-    "Hola guapo. Dime Carlos, ¿por dónde empezamos?",
-    "¡Muy buenas Carlos! ¿Cómo va guapo? Cuéntame.",
-    "Ey Carlos. ¿Qué tal guapo? Estoy aquí. ¿Qué vemos?",
-    "Hola Carlos guapo. Dime qué tienes entre manos.",
-    "Buenas guapo. Cuéntame, ¿qué miramos hoy?",
-    "Hola Carlos. Aquí estoy. ¿Por dónde tiramos?",
-    "Muy buenas guapo. Dime qué necesitas y vamos a ello.",
-    "Ey Carlos. Te escucho. ¿Qué quieres revisar?"
-  ];
-  const priorGreetings=context.filter(turn=>turn.role==="cerebro"&&/(hola carlos|hola guapo|buenas carlos|buenas guapo|ey carlos|muy buenas)/i.test(turn.text)).length;
-  const slot=(Math.floor(Date.now()/1000)+priorGreetings)%variants.length;
-  return variants[slot];
+ // JARVIS persona: competent, direct, respectful and warm without intimacy.
+ // No random affectionate greetings or false assertions of autonomous abilities.
+ const priorGreetings=context.filter(turn=>turn.role==="cerebro"&&/(hola|buenas|aquí estoy|aqui estoy)/i.test(turn.text)).length;
+ return priorGreetings>0
+  ?"Aquí estoy. Dime qué necesitas y lo revisamos con precisión."
+  :"Hola. Soy JARVIS. Estoy listo para ayudarte con consultas y tareas autorizadas. ¿Qué necesitas?";
 }
 
 async function sha256(value:string){

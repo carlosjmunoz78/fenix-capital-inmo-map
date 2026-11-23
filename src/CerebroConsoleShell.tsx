@@ -1,14 +1,22 @@
-import {useEffect,useRef,useState,type FormEvent} from 'react';
+import {useContext,useEffect,useRef,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {JarvisConversationBridgeContext,type JarvisConversationDriver} from './jarvisConversationBridge';
+import {preferredJarvisMaleBrowserVoice} from './jarvisMaleBrowserVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
-const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'1.08',speech_pitch:'1.04'};
+const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'professional_direct',response_length:'concise',speech_rate:'1.00',speech_pitch:'0.94'};
+function normalizeJarvisPreferences(source:CerebroPreferences={}):CerebroPreferences{
+ const result={...DEFAULT_VOICE_PREFERENCES,...source};
+ // Legacy overly affectionate preset cannot override the approved JARVIS persona.
+ if(result.tone==='warm_close_caring'){result.tone='professional_direct';result.speech_pitch='0.94';}
+ return result;
+}
 type GatewayState='closed'|'checking'|'ready'|'error';
 type ChatLine={role:'user'|'cerebro';text:string;mediaUrl?:string|null};
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -21,6 +29,7 @@ function renderMessage(text:string){
 
 export default function CerebroConsoleShell(){
  const location=useLocation(),navigate=useNavigate();
+ const jarvisDriverRef=useContext(JarvisConversationBridgeContext);
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const configured=cerebroConsoleLinkEnabled();
  const [ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
@@ -118,7 +127,7 @@ export default function CerebroConsoleShell(){
   if(!chatReady)return;
   fetchCerebroConsolePreferences().then(({status,data})=>{
    if(cancelled||status!==200||!data?.preferences)return;
-   setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+   setVoicePreferences(normalizeJarvisPreferences(data.preferences));
   });
   return()=>{cancelled=true};
  },[chatReady]);
@@ -281,7 +290,11 @@ export default function CerebroConsoleShell(){
   const plan=speechPlanRef.current;
   if(!voiceSessionRef.current||!voiceSupport.tts||!plan.length)return false;
   const token=++speechRunTokenRef.current;
-  const selected=preferredSpanishVoice(spanishVoices());
+  const selected=preferredJarvisMaleBrowserVoice(spanishVoices());
+  if(!selected){
+   setVoiceError('No hay una voz masculina española identificable en este dispositivo. La voz oficial JARVIS V2 aún necesita conexión; el texto sigue disponible.');
+   return false;
+  }
   const speakSegment=(index:number,charIndex:number)=>{
    if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
    if(index>=plan.length){
@@ -300,8 +313,14 @@ export default function CerebroConsoleShell(){
    const utterance=new SpeechSynthesisUtterance(remaining);
    utterance.rate=segment.rate;
    utterance.pitch=segment.pitch;
-   if(selected){utterance.voice=selected;utterance.lang=selected.lang}
-   else utterance.lang='es-ES';
+   try{
+    utterance.voice=selected;
+    utterance.lang=selected.lang;
+   }catch{
+    setVoiceError('El navegador no acepta la voz seleccionada. La respuesta está disponible por escrito.');
+    finishSpeechPlan(token);
+    return;
+   }
    utterance.onboundary=event=>{
     if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
     const localIndex=typeof event.charIndex==='number'&&Number.isFinite(event.charIndex)?event.charIndex:0;
@@ -312,20 +331,35 @@ export default function CerebroConsoleShell(){
     speechCursorRef.current={segmentIndex:index+1,charIndex:0};
     speakSegment(index+1,0);
    };
-   utterance.onerror=()=>{
+   utterance.onerror=event=>{
     if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
+    const error=String(event.error||'');
+    if(error==='not-allowed'||error==='audio-busy'||error==='synthesis-unavailable'){
+     setVoiceError('El navegador ha bloqueado la reproducción de voz. Comprueba el volumen y pulsa otra vez Conversación por voz; el texto sigue visible.');
+     finishSpeechPlan(token);
+     return;
+    }
     speechCursorRef.current={segmentIndex:index+1,charIndex:0};
     speakSegment(index+1,0);
    };
-   window.speechSynthesis.speak(utterance);
+   try{
+    window.speechSynthesis.speak(utterance);
+   }catch{
+    setVoiceError('El dispositivo no ha podido iniciar la reproducción de voz. La respuesta escrita sigue disponible.');
+    finishSpeechPlan(token);
+   }
   };
+  // Start output without waiting for a second microphone permission.
+  voiceSpeakingRef.current=true;
+  setVoiceSpeaking(true);
+  bargeInSpeechStartedAtRef.current=performance.now();
+  speakSegment(startIndex,startCharIndex);
   void prepareVoiceActivityBargeIn().then(vadReady=>{
-   if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
-   voiceSpeakingRef.current=true;
-   setVoiceSpeaking(true);
-   bargeInSpeechStartedAtRef.current=performance.now();
+   if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current||!voiceSpeakingRef.current)return;
    if(!vadReady)scheduleInterruptListening(120);
-   speakSegment(startIndex,startCharIndex);
+  }).catch(()=>{
+   if(token!==speechRunTokenRef.current||!voiceSessionRef.current||!voiceSpeakingRef.current)return;
+   scheduleInterruptListening(120);
   });
   return true;
  }
@@ -350,7 +384,8 @@ export default function CerebroConsoleShell(){
  function speakAndResume(text:string,fullDetail=false,meta:CerebroSpokenMeta={}){
   if(!voiceSessionRef.current)return;
   const maxChars=fullDetail?560:(voicePreferencesRef.current.response_length==='concise'?420:560);
-  const segments=speechSegments(text,maxChars,voicePreferencesRef.current,fullDetail?'action':'normal',meta);
+  const spokenText=text.replace(/\bCEREBRO(?: OS)?\b/gi,'JARVIS');
+  const segments=speechSegments(spokenText,maxChars,voicePreferencesRef.current,fullDetail?'action':'normal',meta);
   if(!segments.length){scheduleListening();return}
   stopRecognition();
   if(!voiceSupport.tts){
@@ -363,7 +398,7 @@ export default function CerebroConsoleShell(){
   speechCursorRef.current={segmentIndex:0,charIndex:0};
   voicePausedRef.current=false;
   setVoicePaused(false);
-  playSpeechPlan(0,0);
+  if(!playSpeechPlan(0,0))scheduleListening(150);
  }
 
  function pauseSpeech(){
@@ -453,36 +488,36 @@ export default function CerebroConsoleShell(){
 
  async function sendText(text:string,voiceConfidence:number|null=null,fromVoice=false){
   const clean=text.trim();
-  if(!clean||!chatReady||sendingRef.current)return;
+  if(!clean||!chatReady||sendingRef.current)return false;
   if(fromVoice&&voicePausedRef.current){
    if(voiceResumeRequested(clean)){
     setMessage('');
     setVoiceError('');
     resumeSpeech();
-    return;
+    return true;
    }
    if(voiceInterruptRequested(clean)){
     setMessage('');
     setVoiceError('');
-    return;
+    return true;
    }
    if(voiceNeedsClarification(clean,voiceConfidence)){
-    const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+    const warning=`He entendido «${clean}», pero no tengo suficiente certeza de haberlo oído bien. Repítemelo, por favor.`;
     setMessage('');
     setVoiceError(warning);
     setLines(current=>[...current,{role:'cerebro',text:warning}]);
     speakAndResume(warning);
-    return;
+    return true;
    }
    discardPausedSpeech();
   }
   if(fromVoice&&voiceNeedsClarification(clean,voiceConfidence)){
-   const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+   const warning=`He entendido «${clean}», pero no tengo suficiente certeza de haberlo oído bien. Repítemelo, por favor.`;
    setMessage('');
    setVoiceError(warning);
    setLines(current=>[...current,{role:'cerebro',text:warning}]);
    speakAndResume(warning);
-   return;
+   return true;
   }
   if(fromVoice&&voiceNeedsManualConfirmation(clean,voiceConfidence,Boolean(pendingActionRef.current))){
    const warning='No voy a usar una transcripción de baja confianza para confirmar una acción. Di «sí» otra vez con claridad o escríbelo manualmente.';
@@ -490,7 +525,7 @@ export default function CerebroConsoleShell(){
    setLines(current=>[...current,{role:'user',text:clean},{role:'cerebro',text:warning}]);
    setMessage('');
    speakAndResume(warning);
-   return;
+   return true;
   }
   setVoiceError('');
   setLines(current=>[...current,{role:'user',text:clean}]);
@@ -506,7 +541,7 @@ export default function CerebroConsoleShell(){
     readContextRef.current=data.read_context;
     setReadContext(data.read_context);
    }
-   if(data?.preferences)setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+   if(data?.preferences)setVoicePreferences(normalizeJarvisPreferences(data.preferences));
    if(Object.prototype.hasOwnProperty.call(data??{},'learning_candidate')){
     const next=data?.learning_candidate??null;
     learningCandidateRef.current=next;
@@ -524,12 +559,14 @@ export default function CerebroConsoleShell(){
    sendingRef.current=false;
    setSending(false);
    if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')),{...(data??{}),source_question:clean});
+   return status>=200&&status<300&&Boolean(data?.message);
   }catch{
    const response='No he podido contactar con CEREBRO Gateway.';
    setLines(current=>[...current,{role:'cerebro',text:response}]);
    sendingRef.current=false;
    setSending(false);
    if(voiceSessionRef.current)speakAndResume(response);
+   return false;
   }
  }
 
@@ -618,6 +655,17 @@ export default function CerebroConsoleShell(){
   event.preventDefault();
   await sendText(message,null,false);
  }
+ // A private React driver shares canonical send and voice logic with the
+ // visual composer. Neither synthetic input events nor DOM submit are used.
+ useEffect(()=>{
+  if(!jarvisDriverRef||!chatReady||ownerAccess!=='allowed')return;
+  const driver:JarvisConversationDriver={
+   sendText:(text)=>sendText(text,null,false),
+   toggleVoice:()=>toggleVoiceSession()
+  };
+  jarvisDriverRef.current=driver;
+  return()=>{if(jarvisDriverRef.current===driver)jarvisDriverRef.current=null};
+ });
 
  useEffect(()=>{
   return()=>{
