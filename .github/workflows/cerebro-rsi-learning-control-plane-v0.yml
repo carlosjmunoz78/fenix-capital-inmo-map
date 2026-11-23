@@ -1,6 +1,9 @@
 name: CEREBRO RSI Learning Control Plane V0
 
 on:
+  push:
+    branches:
+      - lab/zeus-lrn-actions-token-cp102
   schedule:
     - cron: '*/15 * * * *'
   workflow_run:
@@ -28,7 +31,7 @@ on:
       - 'cerebro/runtime/rsi-learning-worker.mjs'
 
 concurrency:
-  group: cerebro-rsi-learning-control-plane-v0-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'durable' }}
+  group: cerebro-rsi-learning-control-plane-v0-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || (github.event_name == 'push' && format('zeus-lab-{0}', github.sha)) || 'durable' }}
   cancel-in-progress: false
 
 env:
@@ -279,3 +282,22 @@ jobs:
         run: |
           set -euo pipefail
           jq -e '.status != "PARTIAL_REMOTE_ERROR" and .remote_outbox.status != "REMOTE_OUTBOX_ERROR"' /tmp/cerebro-rsi-result.json >/dev/null
+
+  zeus-actions-token-lab:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/lab/zeus-lrn-actions-token-cp102'
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify historical publication using the job token
+        env:
+          ZEUS_JOB_TOKEN: ${{ github.token }}
+        run: node cerebro/lab/zeus-cp102/actions-job-probe.mjs
