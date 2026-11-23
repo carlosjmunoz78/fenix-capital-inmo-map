@@ -3,7 +3,7 @@ const ISSUER='https://token.actions.githubusercontent.com';
 const AUDIENCE='cerebro-zeus-lrn-auto-lab';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
 const WORKFLOW_REF=REPO+'/.github/workflows/cerebro-rsi-learning-control-plane-v0.yml@refs/heads/main';
-const IMMUTABLE='e88ca2983ec9f6595f20f121bd31637d981a96e8';
+const IMMUTABLE='11571f23af27db8cf9a0e5236d883c2ccf0e99e4';
 const JOB_REF=REPO+'/.github/workflows/cerebro-zeus-lrn-verified-reusable-v1.yml@'+IMMUTABLE;
 const REF='refs/heads/main';
 const SUBJECT='repo:carlosjmunoz78@130542695/fenix-capital-inmo-map@1441445836:ref:'+REF;
@@ -29,7 +29,7 @@ async function authorize(request) {
   claims.ref!==REF||claims.workflow_ref!==WORKFLOW_REF||
   claims.job_workflow_ref!==JOB_REF||claims.job_workflow_sha!==IMMUTABLE||
   typeof claims.workflow_sha!=='string'||!/^[a-f0-9]{40}$/.test(claims.workflow_sha)||
-  claims.sha!==claims.workflow_sha||!['schedule','workflow_run'].includes(claims.event_name)||
+  claims.sha!==claims.workflow_sha||!['schedule','workflow_run','workflow_dispatch'].includes(claims.event_name)||
   claims.runner_environment!=='github-hosted'||
   !/^[1-9][0-9]{0,15}$/.test(claims.run_id||'')||
   !/^[1-9][0-9]{0,5}$/.test(claims.run_attempt||''))throw Error('IDENTITY_DENIED');
