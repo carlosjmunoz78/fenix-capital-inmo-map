@@ -42,3 +42,24 @@ test('CP122 idle rearm gate: no empty-queue self-dispatch, retain scheduled wake
   assert.match(rearm,/Dispatch next bounded consumer cycle or use schedule fallback/);
   // This gate does not alter the underlying queue lease, owner checks or existing eight-slot capacity.
 });
+
+test('CP126: the existing OIDC status path counts only expired PROD leases, never reaps or grants public access',()=>{
+  const edge=fs.readFileSync(new URL('../../supabase/functions/cerebro-browser-dispatch-v2/index.ts',import.meta.url),'utf8');
+  const status=edge.split("if(route==='status-v2'){")[1]?.split("return out(req,404,")[0];
+  assert.ok(status,'existing protected status route');
+  assert.match(status,/\.select\('job_id',\{count:'exact',head:true\}\)/);
+  assert.match(status,/\.eq\('environment','PROD'\)/);
+  assert.match(status,/\.eq\('status','LEASED'\)\.lt\('lease_expires_at'/);
+  assert.match(status,/LEASE_EXPIRY_STATUS_UNAVAILABLE/);
+  assert.match(status,/expired_leases:expired/);
+  assert.doesNotMatch(status,/rpc\('cerebro_browser_reap_v2'/);
+  assert.match(edge,/if\(req\.method==='POST'&&route==='enqueue-v2'\)/);
+  assert.match(edge,/const w=await worker\(req\);if\(!w\.ok\)return out\(req,403,w\)/);
+});
+test('CP126: watcher notices stale leases but remains compatible with the previously deployed status schema',()=>{
+  assert.match(workflow,/if\(body\.expired_leases!==undefined&&\(!Number\.isSafeInteger\(body\.expired_leases\)/);
+  assert.match(workflow,/const expired=body\.expired_leases\?\?0/);
+  assert.match(workflow,/pending=Number\(lastStates\.QUEUED\|\|0\)\+Number\(lastStates\.RETRY_WAIT\|\|0\)\+expired/);
+  const rearm=workflow.split('\n  rearm:\n')[1];
+  assert.match(rearm,/needs\.queue\.result == 'success' && needs\.queue\.outputs\.pending != '0'/);
+});

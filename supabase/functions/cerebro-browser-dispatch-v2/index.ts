@@ -97,7 +97,23 @@ Deno.serve(async req=>{
     if(route==='credential-materialize-v2'){const n=slot(body.worker_slot);const {data,error}=await svc.rpc('cerebro_browser_credential_materialize_v2',{p_job_id:body.job_id,p_lease_id:body.lease_id,p_worker_id:`${w.base_worker}:slot-${n}`});if(error||data?.ok!==true)return out(req,403,{ok:false,error:'CREDENTIAL_MATERIALIZE_V2_DENIED',reason:String(data?.error||error?.message||'POLICY_DENIED')});return out(req,200,data);}
     if(route==='complete-v2'){const n=slot(body.worker_slot);const {data,error}=await svc.rpc('cerebro_browser_complete_v2',{p_job_id:body.job_id,p_lease_id:body.lease_id,p_worker_id:`${w.base_worker}:slot-${n}`,p_outcome:String(body.outcome||'FAILED'),p_result_summary:body.result_summary??null,p_error_code:body.error_code??null,p_retryable:w.role==='LIVE'?body.retryable!==false:false});if(error)throw error;return out(req,200,data);}
     if(route==='metrics-v2'){const n=slot(body.worker_slot),c=stage(body.stage_concurrency);const {data,error}=await svc.rpc('cerebro_browser_metrics_insert_v2',{p_run_id:String(body.run_id||w.benchmark_id),p_worker_id:`${w.base_worker}:slot-${n}`,p_environment:'PROD',p_stage_concurrency:c,p_job_id:body.job_id,p_company_id:body.company_id,p_department_id:body.department_id,p_browser_profile_id:body.browser_profile_id,p_started_at:body.started_at,p_finished_at:body.finished_at,p_duration_ms:Number(body.duration_ms||0),p_rss_start_bytes:Number(body.rss_start_bytes||0),p_rss_end_bytes:Number(body.rss_end_bytes||0),p_heap_used_start_bytes:Number(body.heap_used_start_bytes||0),p_heap_used_end_bytes:Number(body.heap_used_end_bytes||0),p_cpu_user_micros:Number(body.cpu_user_micros||0),p_cpu_system_micros:Number(body.cpu_system_micros||0),p_outcome:String(body.outcome||'UNKNOWN')});if(error)throw error;return out(req,200,data);}
-    if(route==='status-v2'){const {data,error}=await svc.rpc('cerebro_browser_status_v2',{p_environment:'PROD'});if(error)throw error;return out(req,200,{...data,run_id:w.benchmark_id,worker_role:w.role});}
+    if(route==='status-v2'){
+      const {data,error}=await svc.rpc('cerebro_browser_status_v2',{p_environment:'PROD'});
+      if(error)throw error;
+      // CP126: bounded read-only count for the already-authorized GitHub OIDC
+      // worker. No reaper invocation, mutation, public route, or expanded grants.
+      let expired=0;
+      const leased=Number(data?.states?.LEASED??0);
+      if(leased>0){
+        const {count,error:countError}=await svc.from('cerebro_browser_job_v2')
+          .select('job_id',{count:'exact',head:true}).eq('environment','PROD')
+          .eq('status','LEASED').lt('lease_expires_at',new Date().toISOString());
+        if(countError||!Number.isSafeInteger(count)||count<0||count>leased)
+          return out(req,503,{ok:false,error:'LEASE_EXPIRY_STATUS_UNAVAILABLE'});
+        expired=count;
+      }
+      return out(req,200,{...data,expired_leases:expired,run_id:w.benchmark_id,worker_role:w.role});
+    }
     return out(req,404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
   }catch(e){return out(req,400,{ok:false,error:'BROWSER_V2_OPERATION_FAILED',detail:e instanceof Error?e.message:String(e)});}
 });

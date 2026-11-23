@@ -75,7 +75,12 @@ jobs:
             const body=await r.json().catch(()=>null);
             if(!r.ok||body?.ok!==true)throw new Error(`STATUS_FAILED:${r.status}:${body?.error||'UNKNOWN'}`);
             lastStates=body.states||{};
-            pending=Number(lastStates.QUEUED||0)+Number(lastStates.RETRY_WAIT||0);
+            // CP126: a stale lease needs one worker entry to invoke the existing
+            // reaper. Missing optional field retains the old worker contract.
+            if(body.expired_leases!==undefined&&(!Number.isSafeInteger(body.expired_leases)||body.expired_leases<0))
+              throw new Error('STATUS_EXPIRED_LEASES_INVALID');
+            const expired=body.expired_leases??0;
+            pending=Number(lastStates.QUEUED||0)+Number(lastStates.RETRY_WAIT||0)+expired;
             if(pending>0)break;
             await new Promise(resolve=>setTimeout(resolve,5000));
           }
