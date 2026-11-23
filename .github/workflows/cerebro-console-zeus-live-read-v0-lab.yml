@@ -1,0 +1,47 @@
+name: CEREBRO Console ZEUS live read V0 LAB
+on:
+  push:
+    branches:
+      - lab/cerebro-console-zeus-read-v0-20261123
+    paths:
+      - '.github/workflows/cerebro-console-zeus-live-read-v0-lab.yml'
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  validate-live-console:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read two exact company/engine scopes with ephemeral GitHub OIDC
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const audience='cerebro-zeus-console-read-v0-lab';
+          const issue=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          issue.searchParams.set('audience',audience);
+          const reply=await fetch(issue,{headers:{Authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'manual'});
+          if(!reply.ok)throw Error('OIDC_ISSUANCE_FAILED_'+reply.status);
+          const jwt=(await reply.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_INVALID');
+          const endpoint='https://cerebro-console-zeus-live-lab-eu.carlosj-munozcabeza.workers.dev/v1/engine';
+          async function read(company_id,engine_id,environment,auth=true) {
+            const url=new URL(endpoint);
+            url.searchParams.set('company_id',company_id);
+            url.searchParams.set('engine_id',engine_id);
+            url.searchParams.set('environment',environment);
+            const r=await fetch(url,{redirect:'manual',headers:auth?{Authorization:'Bearer '+jwt}:{},signal:AbortSignal.timeout(15000)});
+            return {status:r.status,data:await r.json()};
+          }
+          const noAuth=await read('fenix','LRN-001','PREPROD',false);
+          if(noAuth.status!==403)throw Error('ANONYMOUS_READ_NOT_DENIED_'+noAuth.status);
+          const invalid=await read('fenix','FACT-001','LAB');
+          if(invalid.status!==404)throw Error('CROSS_SCOPE_NOT_DENIED_'+invalid.status);
+          const lrn=await read('fenix','LRN-001','PREPROD');
+          if(lrn.status!==200||lrn.data.source!=='LIVE_CLOUDFLARE_D1_LAB'||lrn.data.engine.engine_id!=='LRN-001'||lrn.data.engine.promotion_allowed!==0||lrn.data.details.daily_cursor_position!==1)
+            throw Error('LRN_LIVE_READ_FAILED_'+lrn.status);
+          const fact=await read('fenix-capital','FACT-001','LAB');
+          if(fact.status!==200||fact.data.engine.engine_id!=='FACT-001'||fact.data.engine.promotion_allowed!==0||fact.data.engine.health_state!=='LAB_GREEN')
+            throw Error('FACT_LIVE_READ_FAILED_'+fact.status);
+          console.log(JSON.stringify({verified:true,source:'LIVE_CLOUDFLARE_D1_LAB',fact:{company:fact.data.scope.company_id,health:fact.data.engine.health_state},lrn:{company:lrn.data.scope.company_id,health:lrn.data.engine.health_state,position:lrn.data.details.daily_cursor_position,publications:lrn.data.details.publications_received},crossScopeBlocked:true,anonymousBlocked:true,d1Writes:0}));
+          NODE
