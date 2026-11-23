@@ -31,7 +31,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: actions/checkout@v4
         with:
-          ref: aab27139c62ca55f1a3cfbbdfb47b36177876849
+          ref: 104c585aad6ca456c1a1f01cb8b634e667314b2b
           persist-credentials: false
       - uses: actions/setup-node@v4
         if: github.ref == 'refs/heads/main'
