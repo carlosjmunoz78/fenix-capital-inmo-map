@@ -10,15 +10,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Verify immutable OIDC workflow claims in LAB without D1 writes
+        if: github.ref != 'refs/heads/main'
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          u.searchParams.set('audience','cerebro-zeus-lrn-auto-lab');
+          const response=await fetch(u,{headers:{Authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'manual'});
+          if(!response.ok)throw Error('OIDC_ISSUE_'+response.status);
+          const token=(await response.json()).value;
+          const text=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+          const claims=JSON.parse(Buffer.from(text,'base64').toString('utf8'));
+          const keys=['iss','aud','sub','repository','repository_id','repository_owner_id','ref','workflow_ref','workflow_sha','job_workflow_ref','job_workflow_sha','event_name','runner_environment'];
+          const safe=Object.fromEntries(keys.map(k=>[k,claims[k]??null]));
+          if(!safe.job_workflow_ref||!/^[0-9a-f]{40}$/.test(safe.job_workflow_sha||''))throw Error('REUSABLE_SHA_MISSING');
+          console.log(JSON.stringify({verifiedStructure:true,claims:safe,tokenNotLogged:true,d1Writes:0}));
+          NODE
       - name: Checkout immutable receipt attestor
+        if: github.ref == 'refs/heads/main'
         uses: actions/checkout@v4
         with:
           ref: aab27139c62ca55f1a3cfbbdfb47b36177876849
           persist-credentials: false
       - uses: actions/setup-node@v4
+        if: github.ref == 'refs/heads/main'
         with:
           node-version: '24'
       - name: Attest upstream Learning publication and send OIDC receipt
+        if: github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN_LRN_LAB: ${{ github.token }}
         run: node cerebro/lab/zeus-cp102/continuous-publication-sender.mjs
