@@ -12,7 +12,7 @@ test('Browser viewer fills the complete governed viewport from the Phase 3 UI su
 
 test('Human typing is batched before React so normal typing is not serialized character by character',async()=>{
   const source=await read('src/cerebroBrowserInteractive.ts');
-  assert.match(source,/const HUMAN_TEXT_BATCH_MS=180/);
+  assert.match(source,/const HUMAN_TEXT_BATCH_MS=30/);
   assert.match(source,/__cerebroTypingBatch/);
   assert.match(source,/typing\.value=`\$\{typing\.value\}\$\{event\.key\}`\.slice\(0,4000\)/);
   assert.match(source,/document\.addEventListener\('paste',onPaste,true\)/);

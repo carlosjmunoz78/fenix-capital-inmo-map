@@ -24,13 +24,13 @@ test('Work Total PROD preserves the validated fast private human-input loop',asy
   assert.match(runtime,/PROD_PROJECT_REF='cluhljgonannaafpmblx'/);
 });
 
-test('Work Total PROD preserves encrypted persistence and VERIFIED-only Google identity gates',async()=>{
+test('Work Total PROD preserves encrypted persistence and VERIFIED-only owner or Google identity gates',async()=>{
   const runtime=await read(runtimePath);
   for(const token of ['restoreWorkspace','saveWorkspace','ACCOUNT_IDENTITY_UNVERIFIED','REAUTH_REQUIRED','ACCOUNT_CONFIRMATION_REQUIRED','ACCOUNT_MISMATCH'])assert.match(runtime,new RegExp(token));
   assert.match(runtime,/verificationState!=='VERIFIED'/);
   assert.match(runtime,/requireVerifiedIdentity/);
   assert.match(runtime,/workspace_tabs_encrypted:true/);
-  assert.match(runtime,/workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED'/);
+  assert.match(runtime,/workspace_identity_verification:'OWNER_OR_GOOGLE_VERIFIED_ONLY_FAIL_CLOSED'/);
   assert.match(runtime,/raw_cdp_exposed:false/);
   assert.match(runtime,/incremental_cost_eur:0/);
 });
