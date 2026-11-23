@@ -5,9 +5,9 @@
   "engine_id": "KNOWLEDGE-100-GATE",
   "environment": "PROD_READ_ONLY_ACCEPTANCE",
   "version": "v0",
-  "observed_at": "2026-10-20T18:44:48Z",
-  "observed_repo_sha": "8e7625161910ffb52bd3201d083a104c151c010f",
-  "evidence_method": "AUTHORIZED_CONNECTOR_READ_ONLY_REFRESH",
+  "observed_at": "2026-11-23T19:40:14.491Z",
+  "observed_repo_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1",
+  "evidence_method": "AUTHORIZED_NOTION_CONNECTOR_DIRECT_PAGE_READ_ONLY",
   "notion_sources": [
     {
       "id": "3f781b1a-756d-8165-8d6d-e8853d3c41e3",
@@ -31,17 +31,23 @@
     }
   ],
   "assertions": {
-    "notion_live_search_available": true,
+    "notion_live_search_available": null,
     "human_intelligence_master_found": true,
     "knowledge_foundry_found": true,
     "knowledge_router_found": true,
-    "synthetic_human_population_found": true
+    "synthetic_human_population_found": true,
+    "notion_direct_page_fetch_available": true
   },
   "connector_evidence": {
     "master_id_verified": "3f781b1a-756d-8165-8d6d-e8853d3c41e3",
     "knowledge_foundry_id_verified": "3f781b1a-756d-81ad-8a1d-cc9c33fff720",
     "knowledge_router_id_verified": "3c081b1a-756d-810e-8361-c19b018761fa",
-    "synthetic_human_id_verified": "3f781b1a-756d-8119-93c9-da74aec6855d"
+    "synthetic_human_id_verified": "3f781b1a-756d-8119-93c9-da74aec6855d",
+    "verification_method": "NOTION_FETCH_DIRECT_BY_STABLE_PAGE_ID",
+    "verified_on": "2026-11-23T19:40:14.491Z",
+    "verified_source_count": 4,
+    "scope": "PAGE_EXISTS_AND_CONTENT_RETRIEVABLE; DOES_NOT_PROVE_INDEX_SEARCH_OR_AUTONOMOUS_RAG",
+    "read_only": true
   },
   "contains_customer_data": false,
   "contains_secrets": false,
