@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {PostgresMissionStore} from './jarvis-postgres-mission-store.mjs';
+import {JarvisUniversalCore} from './jarvis-universal-core.mjs';
+function service(){
+ const rows=new Map();let reads=0;
+ return {rows,get reads(){return reads},from(table){assert.equal(table,'jarvis_universal_mission_v0');const filters={};return{
+   select(){const q={eq(k,v){filters[k]=v;return q},async maybeSingle(){reads++;const row=[...rows.values()].find(x=>Object.entries(filters).every(([k,v])=>x[k]===v));return{data:row?structuredClone(row):null,error:null}}};return q},
+   insert(row){return{select(){return{async maybeSingle(){if([...rows.values()].some(x=>x.owner_id===row.owner_id&&x.company_id===row.company_id&&x.idempotency_key===row.idempotency_key))return {data:null,error:{code:'23505'}};rows.set(row.id,structuredClone(row));return{data:structuredClone(row),error:null}}}}}},
+   update(patch){const q={eq(k,v){filters[k]=v;return q},select(){return{async maybeSingle(){const row=[...rows.values()].find(x=>Object.entries(filters).every(([k,v])=>x[k]===v));if(!row)return{data:null,error:null};Object.assign(row,structuredClone(patch));return{data:structuredClone(row),error:null}}}}};return q}
+ }}};
+}
+const mission=(id='m1')=>({id,ownerId:'zeus-owner:abc',companyId:'fenix',idempotencyKey:'once',status:'RECEIVED',revision:0,updatedAt:'2026-11-03T00:00:00Z'});
+test('server-only store requires service client',()=>assert.throws(()=>new PostgresMissionStore({}),/SERVICE_CLIENT_REQUIRED/));
+test('one durable mission per owner/company/key, even with owner namespace colon',async()=>{const db=service(),a=new PostgresMissionStore({serviceClient:db}),b=new PostgresMissionStore({serviceClient:db});const first=await a.createIfAbsent(mission());const second=await b.createIfAbsent(mission('m2'));assert.equal(first.id,'m1');assert.equal(second.id,'m1');assert.equal((await b.findByIdempotency('zeus-owner:abc:fenix','once')).id,'m1');assert.equal(db.rows.size,1);});
+test('CAS transition rejects stale revision and preserves winner',async()=>{const db=service(),a=new PostgresMissionStore({serviceClient:db}),b=new PostgresMissionStore({serviceClient:db});const m=await a.createIfAbsent(mission());const saved=await a.put({...m,status:'AUTHORIZED'});assert.equal(saved.revision,1);await assert.rejects(b.put({...m,status:'SUCCEEDED'}),/MISSION_REVISION_CONFLICT/);assert.equal((await b.get(m.id)).status,'AUTHORIZED');});
+test('core returns existing idempotent mission and handles revisioned store',async()=>{const db=service(),store=new PostgresMissionStore({serviceClient:db});const principal={ownerId:'zeus-owner:abc',sessionId:'s1',roles:['OWNER_ROOT'],authorizedCompanies:['fenix']};const core=new JarvisUniversalCore({identityProvider:{verify:async()=>principal},store,ids:()=> 'm1',capabilities:new Map([['READ',{mutating:false,run:async()=>({ok:true})}]])});const request={token:'verified-token',companyId:'fenix',projectId:'p1',intent:'READ',idempotencyKey:'once'};const a=await core.submit(request),b=await core.submit({...request,channel:'phone'});assert.equal(a.replayed,false);assert.equal(b.replayed,true);assert.equal(b.mission.id,'m1');const x=await core.execute({token:'verified-token',missionId:'m1'});assert.equal(x.mission.status,'SUCCEEDED');assert.equal(x.mission.revision,2);});

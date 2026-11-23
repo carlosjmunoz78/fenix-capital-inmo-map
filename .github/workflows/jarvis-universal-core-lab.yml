@@ -1,0 +1,20 @@
+name: JARVIS Universal Core LAB Tests
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/**'
+      - '.github/workflows/jarvis-universal-core-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  node-core-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Execute independent superagent core tests
+        run: node --test zeus/jarvis/core/*.test.mjs
