@@ -29,3 +29,16 @@ test('host runtime patch preserves the eight-slot governed worker pool',()=>{
   assert.match(workflow,/max-parallel: 8/);
   assert.match(workflow,/slot: \[1,2,3,4,5,6,7,8\]/);
 });
+
+test('CP122 idle rearm gate: no empty-queue self-dispatch, retain scheduled wake-up and worker pool',()=>{
+  const rearm=workflow.split('\n  rearm:\n')[1];
+  assert.ok(rearm,'existing rearm job must remain');
+  assert.match(rearm,/needs\.queue\.result == 'success' && needs\.queue\.outputs\.pending != '0'/);
+  assert.match(rearm,/github\.event_name != 'schedule'/);
+  assert.match(rearm,/github\.run_attempt == 1/);
+  assert.match(workflow,/schedule:\s*\n\s*- cron: '\*\/5 \* \* \* \*'/);
+  assert.match(workflow,/workflow_run:\s*\n\s*workflows: \['PROD Runtime Smoke'\]/);
+  assert.match(workflow,/name: Browser 1 V2 worker \$\{\{ matrix\.slot \}\} \/ 8/);
+  assert.match(rearm,/Dispatch next bounded consumer cycle or use schedule fallback/);
+  // This gate does not alter the underlying queue lease, owner checks or existing eight-slot capacity.
+});

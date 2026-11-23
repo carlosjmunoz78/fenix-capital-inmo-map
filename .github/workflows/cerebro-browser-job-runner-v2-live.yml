@@ -143,7 +143,11 @@ jobs:
   rearm:
     name: Rearm fresh PROD consumer
     needs: [queue, workers, status]
-    if: always() && github.run_attempt == 1 && github.event_name != 'schedule'
+    # CP122: no recursive Actions dispatch when the governed queue is empty.
+    # Existing 5-minute best-effort schedule remains the fallback; no PROD promotion before E2E wake-up proof.
+    if: >-
+      always() && github.run_attempt == 1 && github.event_name != 'schedule' &&
+      needs.queue.result == 'success' && needs.queue.outputs.pending != '0'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
