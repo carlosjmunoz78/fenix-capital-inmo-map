@@ -34,7 +34,7 @@ export function createGithubOidcJwksLoader({
     const request = async url => {
       let response;
       try {
-        response = await fetcher(url, { method: 'GET', headers: ACCEPT, redirect: 'error', signal: AbortSignal.timeout(8000) });
+        response = await fetcher(url, { method: 'GET', headers: ACCEPT, redirect: 'manual', signal: AbortSignal.timeout(8000) });
       } catch { throw Error('KEYS_FETCH'); }
       return boundedJSON(response);
     };
