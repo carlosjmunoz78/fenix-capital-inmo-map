@@ -1,8 +1,18 @@
 # JARVIS · corte de dominio y aceptación física · 2026-11-03
 
-Estado: **PARCIAL / NO PROMOCIONAR DNS**. Propósito: que JARVIS, voz, chat y App/CRM continúen funcionando al cambiar el origen del dominio.
+Estado actual (03-11-2026): **DNS CORTADO Y VERIFICADO / VOZ FÍSICA PENDIENTE / JARVIS PARCIAL**. Propósito: que JARVIS, voz, chat y App/CRM continúen funcionando al cambiar el origen del dominio.
 
-## Evidencia real
+## Estado vivo después del cambio DNS · 03-11-2026
+- **HECHO por el propietario:** el registro Cloudflare `app` se ha actualizado a `cname.vercel-dns.com.`; no requiere volver a tocar Cloudflare.
+- **VERIFICADO:** Google Public DNS respondió `Status=0`, `type=CNAME`, `TTL=300`, destino `cname.vercel-dns.com.`.
+- **VERIFICADO:** Vercel Domain Config informa `configuredBy=CNAME`, `misconfigured=false`, `conflicts=[]`; proyecto `prj_4ElVl8e2KzrHS7r5yvBGBban1DXV`, dominio verificado.
+- **HECHO:** deployment PROD asociado al alias `app.fenixcapital.es`, ID `dpl_7H3FJvWR1u3pmL29UUwa69ZrgDeH`, READY, commit `0ed8c3edd8a92c2c991bb64ab770a7c9f00a853b` (PR #11).
+- **PARCIAL:** Opera conectado inicialmente mostraba una interfaz antigua sin A−/A+; tras recarga normal se comprobaron ambos controles y tipografía mayor en captura. Chrome todavía requiere comprobar recarga limpia y configuración de caché.
+- **NO ACEPTADO FÍSICAMENTE:** propietario confirma dictado y conversación por voz inoperantes tanto en Opera como en Chrome; no inferir operación por CI sintético.
+- **CANDIDATO NO-PROD:** PR #12 (branch `cerebro/jarvis-browser-voice-independent-dictation-20261103`) corrige bloqueo UI por Gateway y permite diagnóstico; no fusionar ni promover sin gates y aceptación física.
+- **ROLLBACK PREFERIDO para versión de Vercel:** deployment anterior READY `dpl_CR6f7aqykPD2PpwAW2Qo4Us68K9H` (commit `d04fbc76...`). **No revertir DNS a GitHub Pages solo por un problema de dictado**, porque el dominio antiguo ya devolvía 404 en rutas SPA.
+
+## Evidencia histórica previa al corte (no describe el DNS actual)
 - DNS externo de `app.fenixcapital.es`: Cloudflare; CNAME a `carlosjmunoz78.github.io.` (GitHub Pages).
 - HTTP público: `Server: GitHub.com`; `/cerebro` devuelve 404 con HTML de fallback SPA. Esto explica que el dominio no sirva automáticamente commits desplegados en Vercel.
 - Vercel: proyecto `prj_4ElVl8e2KzrHS7r5yvBGBban1DXV`; alias `app.fenixcapital.es` configurado, **pero** DNS externo incorrecto.
@@ -34,5 +44,5 @@ Estado: **PARCIAL / NO PROMOCIONAR DNS**. Propósito: que JARVIS, voz, chat y Ap
 ## Estado de pruebas
 - CI sintético: evidencias verificables en el PR de corrección de voz (no garantiza permisos del PC).
 - Micrófono físico en Chrome: **POR AUDITAR**, requiere presencia y permiso real del usuario.
-- Migración DNS: **DEFINIDA, NO EJECUTADA**.
+- Migración DNS (estado histórico previo): **DEFINIDA, NO EJECUTADA**. Estado actual registrado arriba: **EJECUTADA Y VERIFICADA**.
 - Capacidad autónoma total de JARVIS: **PARCIAL**.

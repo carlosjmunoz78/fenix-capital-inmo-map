@@ -199,3 +199,33 @@ test('JARVIS dictation diagnostic explains Chrome microphone permission denial',
  await page.getByRole('button',{name:'Conversación por voz',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('el navegador no tiene acceso al micrófono');
 });
+
+
+test('JARVIS · offline browser dictation remains available while Gateway is closed',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.addInitScript(()=>{
+  class SpeechRecognitionMock {
+   lang='es-ES'; continuous=false; interimResults=false; maxAlternatives=1;
+   onstart:(()=>void)|null=null;
+   onresult:((event:unknown)=>void)|null=null;
+   onerror:((event:{error:string})=>void)|null=null;
+   onend:(()=>void)|null=null;
+   start(){this.onstart?.();this.onresult?.({results:{length:1,0:{length:1,isFinal:true,0:{transcript:'texto local',confidence:.99}}}});this.onend?.();}
+   stop(){this.onend?.();}
+   abort(){this.onend?.();}
+  }
+  Object.defineProperty(window,'SpeechRecognition',{value:SpeechRecognitionMock,configurable:true,writable:true});
+  Object.defineProperty(window,'webkitSpeechRecognition',{value:SpeechRecognitionMock,configurable:true,writable:true});
+ });
+ await installIsolatedPreprod(page);
+ await page.route('**/functions/v1/cerebro-console-gateway-v0/health',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({status:'error'})}));
+ await page.goto('/cerebro?section=jarvis');
+ const dictate=page.getByRole('button',{name:'Dictar',exact:true});
+ const voice=page.getByRole('button',{name:'Conversación por voz',exact:true});
+ await expect(dictate).toBeEnabled();
+ await dictate.click();
+ await expect(page.getByRole('textbox',{name:'Mensaje para Jarvis'})).toHaveValue('texto local');
+ await expect(voice).toBeEnabled();
+ await voice.click();
+ await expect(page.getByRole('alert')).toContainText('necesita un Gateway conectado');
+});
