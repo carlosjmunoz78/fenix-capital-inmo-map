@@ -285,6 +285,7 @@ jobs:
     # after the authentic PREPROD publisher succeeded.
     if: >-
       github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main')
@@ -295,4 +296,4 @@ jobs:
       id-token: write
     # Immutable executable/attestor: avoids granting unreviewed main branch code
     # any D1 write capability. Caller can only submit genuine run evidence.
-    uses: carlosjmunoz78/fenix-capital-inmo-map/.github/workflows/cerebro-zeus-lrn-verified-reusable-v1.yml@e88ca2983ec9f6595f20f121bd31637d981a96e8
+    uses: carlosjmunoz78/fenix-capital-inmo-map/.github/workflows/cerebro-zeus-lrn-verified-reusable-v1.yml@11571f23af27db8cf9a0e5236d883c2ccf0e99e4
