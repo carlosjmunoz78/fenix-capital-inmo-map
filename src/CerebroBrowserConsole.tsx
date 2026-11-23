@@ -16,7 +16,7 @@ type BrowserActionResponse={ok:boolean;error?:string;command?:{command_id:string
 type BrowserCommandStatusResponse={ok:boolean;command?:{command_id:string;status:string;error_code?:string|null};error?:string};
 type VisibleCommand={text:string;status:'ENVIADA'|'INICIANDO'|'EJECUTANDO'|'COMPLETADA'|'ERROR';error?:string};
 type BrowserCompaniesResponse={ok:boolean;companies:BrowserCompanyV3[];error?:string};
-type BrowserSessionSummary={session_id:string;state:string;control_owner:string;worker_alive:boolean;current_url:string|null;current_title:string|null;opened_at:string;last_heartbeat_at:string|null;closed_at:string|null;updated_at:string};
+type BrowserSessionSummary={session_id:string;state:string;control_owner:string;worker_alive:boolean;current_url:string|null;current_title:string|null;opened_at:string;last_heartbeat_at:string|null;expires_at?:string|null;closed_at:string|null;updated_at:string};
 type BrowserSessionsResponse={ok:boolean;sessions:BrowserSessionSummary[];error?:string};
 
 const EMPTY:CoreSnapshot={ready:false,sending:false,voiceActive:false};
