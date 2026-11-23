@@ -1,0 +1,33 @@
+name: CEREBRO ZEUS CP104 OIDC Remote LAB Proof
+on:
+  push:
+    branches:
+      - lab/zeus-jwks-refresh-cp104-20261123
+    paths:
+      - '.github/workflows/cerebro-zeus-jwks-oidc-proof-cp104-lab.yml'
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  verify-signed-oidc-in-cloudflare-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify GitHub OIDC signature from Cloudflare runtime without D1 writes
+        run: |
+          node --input-type=module <<'NODE'
+          const issue=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          issue.searchParams.set('audience','cerebro-zeus-jwks-cp104-lab');
+          const issued=await fetch(issue,{headers:{Authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'manual'});
+          if(!issued.ok)throw Error('OIDC_ISSUE_FAILED_HTTP_'+issued.status);
+          const jwt=(await issued.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_FORMAT');
+          const r=await fetch('https://cerebro-zeus-jwks-egress-probe-20261123.carlosj-munozcabeza.workers.dev/prove-oidc-cp104',{
+            method:'POST',headers:{Authorization:'Bearer '+jwt,'X-Cerebro-Commit-SHA':process.env.GITHUB_SHA},
+            redirect:'manual',signal:AbortSignal.timeout(12000)
+          });
+          const data=await r.json();
+          if(!r.ok||data.verified!==true||data.run!==process.env.GITHUB_RUN_ID||data.attempt!==process.env.GITHUB_RUN_ATTEMPT)
+            throw Error('REMOTE_OIDC_PROOF_FAILED_'+r.status+'_'+String(data.code||'NO_DETAIL'));
+          console.log(JSON.stringify({verified:true,remoteStatus:r.status,scope:'fenix/LRN-001/PREPROD',run:data.run,attempt:data.attempt,cloudflare:'LAB',d1_writes:0}));
+          NODE

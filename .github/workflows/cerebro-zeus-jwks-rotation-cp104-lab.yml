@@ -1,0 +1,36 @@
+name: CEREBRO ZEUS JWKS CP104 LAB Tests
+
+on:
+  push:
+    branches:
+      - lab/zeus-jwks-refresh-cp104-20261123
+    paths:
+      - 'cerebro/lab/zeus-cp102/github-oidc-jwks.mjs'
+      - 'cerebro/lab/zeus-cp102/github-oidc-jwks.test.mjs'
+      - 'cerebro/lab/zeus-cp102/cp103-writer.mjs'
+      - '.github/workflows/cerebro-zeus-jwks-rotation-cp104-lab.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-jwks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax validation for Worker and loader
+        run: |
+          node --check cerebro/lab/zeus-cp102/github-oidc-jwks.mjs
+          node --check cerebro/lab/zeus-cp102/cp103-writer.mjs
+      - name: Test JWKS discovery, refresh, negative and concurrency paths
+        run: node --test cerebro/lab/zeus-cp102/github-oidc-jwks.test.mjs
+      - name: Assert read-only LAB workflow
+        run: |
+          test "${{ github.ref }}" = 'refs/heads/lab/zeus-jwks-refresh-cp104-20261123'
+          test -z "$(git status --porcelain --untracked-files=all)"
