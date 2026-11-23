@@ -8,7 +8,9 @@ const read=(file:string)=>fs.readFileSync(path.join(root,file),'utf8');
 test('Jarvis and Operativa are physically separated while sharing canonical state infrastructure',async()=>{
  const host=read('src/CerebroConsoleHost.tsx');
  expect(host).toContain("import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';");
- expect(host).toContain("import CerebroOperativeConsole from './CerebroOperativeConsole';");
+ expect(host).toContain("import CerebroOperativeConsole from './CerebroOperativeLiveConsole';");
+ expect(host).toContain("import CerebroOperativeLabConsole from './CerebroOperativeConsole';");
+ expect(host).toContain('visualPreview?<CerebroOperativeLabConsole visualPreview/>:<CerebroOperativeConsole/>');
  expect(host).toContain('<CerebroJarvisWorkConsole surface="JARVIS"/>');
  expect(host).toContain('<CerebroOperativeConsole/>');
  expect(host).toContain("primaryView==='JARVIS'?");
@@ -103,4 +105,28 @@ test('canonical Gateway and voice core remain the execution path',async()=>{
  expect(shell).toContain('postCerebroConsoleChat');
  expect(shell).toContain('createVoiceRecognition');
  expect(shell).toContain('window.speechSynthesis.speak');
+});
+
+test('Default Operativa keeps the owner-authenticated live dialogue; V3 still uses separate presentation',()=>{
+ const live=read('src/CerebroOperativeLiveConsole.tsx');
+ const hook=read('src/useCerebroOperativaChat.ts');
+ const liveCss=read('src/cerebro-operative-live-console.css');
+ expect(live).toContain("import {useCerebroOperativaChat} from './useCerebroOperativaChat';");
+ expect(live).toContain('Conversación con CEREBRO');
+ expect(live).toContain('aria-label="Mensaje para CEREBRO"');
+ expect(live).toContain('className="operativa-dialogue-log"');
+ expect(live).not.toContain('<CerebroConsoleShell/>');
+ expect(liveCss).toContain('.operativa-dialogue>.operativa-jarvis-composer');
+ expect(hook).toContain('postCerebroConsoleChat');
+ expect(hook).toContain('voiceNeedsManualConfirmation');
+});
+
+test('JARVIS visible-language rewrite is scoped only to Jarvis, never to Operativa chat',()=>{
+ const host=read('src/CerebroConsoleHost.tsx');
+ const live=read('src/CerebroOperativeLiveConsole.tsx');
+ expect(host).toContain("primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null");
+ expect(host).toContain("view==='JARVIS'||view==='V0'?<JarvisVisibleLanguageGuard/>:null");
+ expect(live).toContain('aria-label="Mensaje para CEREBRO"');
+ expect(live).toContain('Conversación con CEREBRO');
+ expect(host).not.toContain('  <JarvisVisibleLanguageGuard/>\n  <CerebroSpeechOutputGuard/>');
 });

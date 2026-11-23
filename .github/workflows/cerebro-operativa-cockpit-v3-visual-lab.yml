@@ -1,0 +1,75 @@
+name: Operativa Cockpit V3 · Visual LAB (no deploy)
+on:
+  push:
+    branches:
+      - cerebro/operativa-cockpit-visual-lab-v0-20261112
+    paths:
+      - src/CerebroOperativeCockpitV3.tsx
+      - src/CerebroOperativaUniverseViews.tsx
+      - src/cerebroOperativaLabUniverseApi.ts
+      - src/cerebro-operative-cockpit-v3.css
+      - src/CerebroOperativeConsole.tsx
+      - src/CerebroOperativeLiveConsole.tsx
+      - src/useCerebroOperativaChat.ts
+      - src/cerebro-operative-live-console.css
+      - src/CerebroConsoleHost.tsx
+      - tests/cerebro-operativa-cockpit-v3-visual.test.mjs
+      - tests/cerebro-operativa-cockpit-v3-e2e.spec.ts
+      - tests/cerebro-operativa-owner-universe-live-negative.smoke.mjs
+      - .github/workflows/cerebro-operativa-cockpit-v3-visual-lab.yml
+  pull_request:
+    paths:
+      - src/CerebroOperativeCockpitV3.tsx
+      - src/CerebroOperativaUniverseViews.tsx
+      - src/cerebroOperativaLabUniverseApi.ts
+      - src/cerebro-operative-cockpit-v3.css
+      - src/CerebroOperativeConsole.tsx
+      - src/CerebroOperativeLiveConsole.tsx
+      - src/useCerebroOperativaChat.ts
+      - src/cerebro-operative-live-console.css
+      - src/CerebroConsoleHost.tsx
+      - tests/cerebro-operativa-cockpit-v3-visual.test.mjs
+      - .github/workflows/cerebro-operativa-cockpit-v3-visual-lab.yml
+permissions:
+  contents: read
+concurrency:
+  group: operativa-cockpit-v3-qa-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  visual-code-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verify protected original navigation and functional preview
+        run: node --test tests/cerebro-operativa-cockpit-v3-visual.test.mjs
+      - name: Install locked dependencies (no new packages)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: TypeScript and Vite compile
+        run: npm run build
+      - name: Install isolated Chromium for visual regression
+        run: npx playwright install --with-deps chromium
+      - name: Real browser QA of cockpit and conversation bridge (mock authentication)
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: operativa-e2e-not-a-real-key
+        run: npx playwright test tests/cerebro-operativa-cockpit-v3-e2e.spec.ts --project=desktop-chromium --reporter=line
+      - name: Verify real LAB browser preflight and anonymous denial (no token)
+        run: node tests/cerebro-operativa-owner-universe-live-negative.smoke.mjs
+      - name: Preserve isolated desktop/mobile visual evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: operativa-cockpit-v3-visual-evidence
+          path: test-results/cockpit-v3-*.png
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Confirm no production deployment configured
+        run: |
+          test "${{ github.event_name }}" != "workflow_dispatch" || exit 1
+          echo 'QA ONLY: no publish, deployment or database mutation in this workflow'

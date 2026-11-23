@@ -9,6 +9,9 @@ const shell=read('src/CerebroConsoleShell.tsx');
 const jarvis=read('src/CerebroJarvisWorkConsole.tsx');
 const jarvisEmbedded=read('src/JarvisEmbeddedConsole.tsx');
 const operative=read('src/CerebroOperativeConsole.tsx');
+const live=read('src/CerebroOperativeLiveConsole.tsx');
+const liveHook=read('src/useCerebroOperativaChat.ts');
+const liveCss=read('src/cerebro-operative-live-console.css');
 const operativeCss=read('src/cerebro-operative-console.css');
 const isolationCss=read('src/cerebro-route-isolation-v2.css');
 const attachment=read('src/CerebroAttachmentBridge.tsx');
@@ -20,7 +23,9 @@ const activityGateway=read('supabase/functions/cerebro-console-activity-v0/index
 must(route,"import CerebroConsoleHost from './CerebroConsoleHost';",'reversible host route');
 must(route,'return <CerebroConsoleHost/>;','host mount');
 must(host,"import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';",'Jarvis surface import');
-must(host,"import CerebroOperativeConsole from './CerebroOperativeConsole';",'Operativa surface import');
+must(host,"import CerebroOperativeConsole from './CerebroOperativeLiveConsole';",'Operativa default MUST preserve live authenticated chat');
+must(host,"import CerebroOperativeLabConsole from './CerebroOperativeConsole';",'Cockpit V3 isolated optional import');
+must(host,'visualPreview?<CerebroOperativeLabConsole visualPreview/>:<CerebroOperativeConsole/>','live chat default and optional V3 preview split');
 must(host,"primaryView==='JARVIS'?",'Jarvis view routing');
 must(host,"primaryView==='OPERATIVA'?",'Operativa view routing');
 must(host,'<CerebroJarvisWorkConsole surface="JARVIS"/>','Jarvis dedicated mount');
@@ -36,6 +41,19 @@ must(jarvisEmbedded,'<CerebroConsoleShell','canonical V0 rendered inside Jarvis 
 must(jarvis,'fetchCerebroActivity','real activity source retained in Jarvis');
 
 must(operative,'fetchCerebroActivity','real activity source consumed by Operativa');
+must(live,"import {useCerebroOperativaChat} from './useCerebroOperativaChat';",'authentic chat client preserved');
+must(live,'useCerebroOperativaChat()','live chat hook mounted on default Operativa');
+must(live,'Conversación con CEREBRO','live conversation box preserved');
+must(live,'className="operativa-dialogue-log"','real chat response log preserved');
+must(live,'className="operativa-jarvis-composer"','real inline composer preserved');
+must(live,'aria-label="Mensaje para CEREBRO"','owner conversation accessibility preserved');
+must(live,'fetchCerebroActivity','real activity still visible on live console');
+must(liveCss,'.operativa-dialogue>.operativa-jarvis-composer','in-flow chat composer (not floating) retained');
+must(liveCss,'position:relative','real chat composer inline positioning');
+must(liveHook,'postCerebroConsoleChat','canonical authenticated Gateway remains sole client');
+must(liveHook,'voiceNeedsManualConfirmation','human confirmation guard on uncertain speech');
+mustNot(live,'<CerebroConsoleShell/>','no parallel duplicate chat core in the live console');
+
 must(operative,"progress_provenance!=='REAL_GITHUB_JOBS'",'fail-closed numeric progress');
 must(operative,'No voy a inventar trabajos ni porcentajes.','explicit no-fake-work empty state');
 must(operative,'Fénix Capital','human company selector');
