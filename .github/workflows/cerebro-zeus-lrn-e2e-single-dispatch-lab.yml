@@ -1,0 +1,26 @@
+name: CEREBRO ZEUS LRN E2E · one-shot synthetic PREPROD ingress
+on:
+  push:
+    branches: [lab/zeus-lrn-continuous-20261123]
+    paths:
+      - '.github/workflows/cerebro-zeus-lrn-e2e-single-dispatch-lab.yml'
+permissions:
+  contents: read
+  actions: write
+jobs:
+  dispatch-once:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/lab/zeus-lrn-continuous-20261123'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch existing synthetic bounded PREPROD Learning ingress
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method POST \
+            "repos/carlosjmunoz78/fenix-capital-inmo-map/actions/workflows/cerebro-rsi-universal-learning-ingress-v0.yml/dispatches" \
+            -f ref=main \
+            -f 'inputs[fixture_path]=cerebro/runtime/fixtures/universal-learning-signal-selfcheck.v0.json'
+          echo "DISPATCHED_ONE_SYNTHETIC_PREPROD_INGRESS"
