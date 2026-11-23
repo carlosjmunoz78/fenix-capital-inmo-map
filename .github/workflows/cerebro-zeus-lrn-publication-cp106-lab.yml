@@ -1,0 +1,26 @@
+name: CEREBRO ZEUS CP106 Learning Publication OIDC LAB
+on:
+  push:
+    branches:
+      - lab/zeus-lrn-publication-cp106-20261123
+    paths:
+      - '.github/workflows/cerebro-zeus-lrn-publication-cp106-lab.yml'
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+jobs:
+  send-verified-publication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify authentic Learning publication and submit OIDC evidence to D1 LAB
+        env:
+          ZEUS_LAB_JOB_TOKEN: ${{ github.token }}
+        run: node cerebro/lab/zeus-cp102/cp106-publication-sender.mjs
