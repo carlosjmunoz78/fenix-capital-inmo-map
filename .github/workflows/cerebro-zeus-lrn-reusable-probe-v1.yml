@@ -11,7 +11,7 @@ permissions:
   id-token: write
 jobs:
   attest-immutable-job:
-    uses: carlosjmunoz78/fenix-capital-inmo-map/.github/workflows/cerebro-zeus-lrn-verified-reusable-v1.yml@e88ca2983ec9f6595f20f121bd31637d981a96e8
+    uses: carlosjmunoz78/fenix-capital-inmo-map/.github/workflows/cerebro-zeus-lrn-verified-reusable-v1.yml@11571f23af27db8cf9a0e5236d883c2ccf0e99e4
     permissions:
       contents: read
       actions: read
