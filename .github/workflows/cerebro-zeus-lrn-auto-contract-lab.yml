@@ -1,0 +1,31 @@
+name: CEREBRO ZEUS LRN AUTO V1 LAB Contract
+on:
+  push:
+    branches: [lab/zeus-lrn-continuous-20261123]
+    paths:
+      - 'cerebro/lab/zeus-cp102/continuous-publication-*.mjs'
+      - 'cerebro/lab/zeus-cp102/continuous-publication-*.sql'
+      - 'cerebro/lab/zeus-cp102/continuous-publication.test.mjs'
+      - '.github/workflows/cerebro-zeus-lrn-auto-contract-lab.yml'
+permissions:
+  contents: read
+jobs:
+  validate-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Static safety check
+        run: |
+          node --check cerebro/lab/zeus-cp102/continuous-publication-sender.mjs
+          node --check cerebro/lab/zeus-cp102/continuous-publication-writer.mjs
+          grep -q 'job_workflow_sha' cerebro/lab/zeus-cp102/continuous-publication-writer.mjs
+          grep -q 'PUBLISHER_JOB_SUCCESS' cerebro/lab/zeus-cp102/continuous-publication-writer.mjs
+          if grep -q 'GITHUB_TOKEN_LRN_LAB.*Bearer' cerebro/lab/zeus-cp102/continuous-publication-writer.mjs; then exit 1; fi
+      - name: Contract tests
+        run: node --test cerebro/lab/zeus-cp102/continuous-publication.test.mjs
