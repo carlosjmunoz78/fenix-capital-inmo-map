@@ -35,7 +35,7 @@ async function assertSessionScope(sessionId:string){
 async function ownerStatus(body:any){
  const base='session_id,job_id,company_id,department_id,environment,version,identity_id,account_id,browser_profile_id,state,control_owner,worker_alive,emergency_stop,current_url,current_title,tabs,active_tab_index,viewport_width,viewport_height,frame_ciphertext,frame_iv,frame_seq,frame_mime,frame_captured_at,human_lease_id,human_lease_expires_at,human_required,last_heartbeat_at,opened_at,expires_at,closed_at,updated_at';
  if(body?.list===true){
-  const r=await svc.from('cerebro_browser_session_v3').select('session_id,state,control_owner,worker_alive,current_url,current_title,opened_at,last_heartbeat_at,closed_at,updated_at').eq('company_id',COMPANY_ID).eq('environment','PROD').order('updated_at',{ascending:false}).limit(12);
+  const r=await svc.from('cerebro_browser_session_v3').select('session_id,state,control_owner,worker_alive,current_url,current_title,opened_at,last_heartbeat_at,expires_at,closed_at,updated_at').eq('company_id',COMPANY_ID).eq('environment','PROD').order('updated_at',{ascending:false}).limit(12);
   if(r.error)throw r.error;return{ok:true,sessions:r.data??[]};
  }
  let q=svc.from('cerebro_browser_session_v3').select(base).eq('company_id',COMPANY_ID).eq('environment','PROD');
