@@ -1,0 +1,48 @@
+name: JARVIS HOTFIX · Voice and chat repair isolated QA
+
+on:
+  push:
+    branches:
+      - hotfix/jarvis-voice-chat-direct-send-20261107
+    paths:
+      - '.github/workflows/cerebro-jarvis-hotfix-voice-chat-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: 'Run six direct chat/voice safety contracts'
+        run: node --test cerebro/jarvis/boost-001/fastlane-voice-chat-repair-contract-v1.test.mjs
+      - name: 'Install exactly pinned dependencies'
+        run: npm ci --no-audit --no-fund
+      - name: 'Typecheck and compile full existing App, do NOT deploy'
+        run: npm run build
+      - name: 'Build exact owner100 production configuration WITHOUT publishing'
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-owner100/
+        run: |
+          set -euo pipefail
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          npx vite build --base=/ --outDir dist-prod-only-qa
+          grep -R -F 'cerebro-console-gateway-human-v1-owner100' dist-prod-only-qa >/dev/null
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-prod-only-qa
+
+# Recheck final Android nonblocking TTS and uncertain-timeout safety fix.
