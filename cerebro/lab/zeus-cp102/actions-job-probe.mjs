@@ -49,7 +49,16 @@ try {
       redirect: 'error', signal: AbortSignal.timeout(12000) });
   }
   if ((await send(first.manifest)).status !== 403) throw Error('UNAUTHENTICATED_REJECTION_FAILED');
-  if ((await send({ ...first.manifest, lock_key: '0'.repeat(64) }, jwt)).status !== 422) throw Error('TAMPERING_REJECTION_FAILED');
+  const claims = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString());
+  console.log(JSON.stringify({ oidc_scope: {
+    aud: claims.aud, issuer: claims.iss, repository: claims.repository, repository_id: claims.repository_id,
+    repository_owner_id: claims.repository_owner_id, ref: claims.ref, subject: claims.sub,
+    workflow_ref: claims.workflow_ref, workflow_sha: claims.workflow_sha, sha: claims.sha, event: claims.event_name,
+    runner: claims.runner_environment, attempt_type: typeof claims.run_attempt, run_type: typeof claims.run_id,
+    lifetime: claims.exp - claims.iat, has_nbf: Number.isSafeInteger(claims.nbf),
+  } }));
+  const tamper = await send({ ...first.manifest, lock_key: '0'.repeat(64) }, jwt);
+  if (tamper.status !== 422) throw Error('TAMPERING_REJECTION_HTTP_' + tamper.status);
   const stored = await send(first.manifest, jwt);
   if (!stored.ok) throw Error('D1_WRITE_HTTP_' + stored.status);
   const ack = await stored.json();

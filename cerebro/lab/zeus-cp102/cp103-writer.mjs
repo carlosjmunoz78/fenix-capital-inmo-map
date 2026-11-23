@@ -22,7 +22,7 @@ export async function authorize(header, expectedSha, loadKeys, now = Math.floor(
       claims.iss !== issuer || claims.aud !== audience ||
       claims.repository !== repo || claims.repository_id !== '1441445836' ||
       claims.repository_owner_id !== '130542695' || claims.ref !== ref ||
-      claims.sub !== 'repo:' + repo + ':ref:' + ref ||
+      claims.sub !== 'repo:carlosjmunoz78@130542695/fenix-capital-inmo-map@1441445836:ref:' + ref ||
       claims.workflow_ref !== workflow || claims.workflow_sha !== expectedSha ||
       claims.sha !== expectedSha || claims.event_name !== 'push' ||
       claims.runner_environment !== 'github-hosted' ||
