@@ -5,7 +5,7 @@ import fs from 'node:fs';
 const workflow=fs.readFileSync(new URL('../../.github/workflows/cerebro-rsi-learning-control-plane-v0.yml',import.meta.url),'utf8');
 
 test('control plane is hostless, periodic and event-driven without requiring the PC',()=>{
-  assert.match(workflow,/cron: '\*\/15 \* \* \* \*'/);
+  assert.match(workflow,/cron: '7,22,37,52 \* \* \* \*'/);
   assert.match(workflow,/workflow_run:/);
   assert.match(workflow,/CEREBRO RSI Learning Outbox Publisher V0/);
   assert.match(workflow,/CEREBRO RSI Universal Learning Ingress V0/);
