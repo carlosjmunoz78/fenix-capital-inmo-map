@@ -83,8 +83,8 @@ export default {
      .bind(String(m.run_id),m.run_attempt,String(m.publisher_job_id),m.source_head_sha,m.state_commit,m.daily_result.status,
        m.daily_result.status==='ELIGIBLE'?m.daily_result.lock_key:null,raw);
    const extra=m.daily_result.status==='ELIGIBLE'?
-     env.ZEUS_DB.prepare("INSERT INTO zeus_lrn_auto_daily_v1(company_id,engine_id,environment,daily_lock_key,first_run_id,state_commit) VALUES ('fenix','LRN-001','PREPROD',?,?,?) ON CONFLICT(company_id,engine_id,environment,daily_lock_key) DO NOTHING")
-       .bind(m.daily_result.lock_key,String(m.run_id),m.state_commit):null;
+     env.ZEUS_DB.prepare("INSERT INTO zeus_lrn_auto_daily_v1(company_id,engine_id,environment,daily_lock_key,first_run_id,state_commit) SELECT 'fenix','LRN-001','PREPROD',?,?,? WHERE EXISTS(SELECT 1 FROM zeus_lrn_auto_receipts_v1 WHERE company_id='fenix' AND engine_id='LRN-001' AND environment='PREPROD' AND run_id=? AND run_attempt=? AND manifest=?) ON CONFLICT(company_id,engine_id,environment,daily_lock_key) DO NOTHING")
+       .bind(m.daily_result.lock_key,String(m.run_id),m.state_commit,String(m.run_id),m.run_attempt,raw):null;
    const all=await env.ZEUS_DB.batch(extra?[statement,extra]:[statement]);
    const record=await env.ZEUS_DB.prepare("SELECT manifest FROM zeus_lrn_auto_receipts_v1 WHERE company_id='fenix' AND engine_id='LRN-001' AND environment='PREPROD' AND run_id=? AND run_attempt=?")
      .bind(String(m.run_id),m.run_attempt).first();
