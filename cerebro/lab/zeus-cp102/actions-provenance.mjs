@@ -9,7 +9,7 @@ export function verifyActionsPublication({run,workflow,job,lines,stateCommit,sou
       !Number.isSafeInteger(run.id) || !Number.isSafeInteger(run.run_attempt) || run.run_attempt < 1 ||
       workflow.id!==403468557 || run.workflow_id!==workflow.id || workflow.path!==workflowPath ||
       run.path!==workflowPath || run.repository!==repo || run.head_repository!==repo ||
-      run.head_branch!=='main' || run.head_sha!==sourceHead || run.event!=='schedule' ||
+      run.head_branch!=='main' || run.head_sha!==sourceHead || !['schedule','workflow_run'].includes(run.event) ||
       run.status!=='completed' || run.conclusion!=='success' ||
       job.name!=='run-preprod-control-plane' || job.id!==expectedJobId ||
       job.run_id!==run.id || job.run_attempt!==run.run_attempt || job.head_sha!==run.head_sha ||

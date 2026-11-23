@@ -1,0 +1,27 @@
+name: CEREBRO ZEUS CP105 Publication Source LAB
+on:
+  push:
+    branches: [lab/zeus-jwks-refresh-cp104-20261123]
+    paths:
+      - 'cerebro/lab/zeus-cp102/learning-publication-reader.mjs'
+      - 'cerebro/lab/zeus-cp102/learning-publication-probe.mjs'
+      - 'cerebro/lab/zeus-cp102/actions-provenance.mjs'
+      - '.github/workflows/cerebro-zeus-learning-publication-cp105-lab.yml'
+permissions:
+  actions: read
+  contents: read
+jobs:
+  verify-authentic-publication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify exact run, job, commit, bytes and zero-DAILY classification
+        env:
+          GITHUB_TOKEN_LRN_LAB: ${{ github.token }}
+        run: node cerebro/lab/zeus-cp102/learning-publication-probe.mjs
