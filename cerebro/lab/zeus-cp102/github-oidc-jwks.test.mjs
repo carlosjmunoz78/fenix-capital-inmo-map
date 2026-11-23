@@ -23,7 +23,7 @@ test('verified discovery, keys, no redirects, no credentials and cache reuse',as
   assert.deepEqual((await load('first')).keys,[A]);
   assert.deepEqual((await load('first')).keys,[A]);
   assert.equal(x.calls.length,2);
-  assert(x.calls.every(c=>c.options.redirect==='error' && !('Authorization' in c.options.headers)));
+  assert(x.calls.every(c=>c.options.redirect==='manual' && !('Authorization' in c.options.headers)));
 });
 test('refresh after TTL and accept only newly retrieved key',async()=>{
   let now=0, current=[A]; let calls=0;
