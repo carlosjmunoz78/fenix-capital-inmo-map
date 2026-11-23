@@ -104,11 +104,13 @@ Deno.serve(async req=>{
       // worker. No reaper invocation, mutation, public route, or expanded grants.
       let expired=0;
       const leased=Number(data?.states?.LEASED??0);
+      if(!Number.isSafeInteger(leased)||leased<0)
+        return out(req,503,{ok:false,error:'LEASED_STATE_INVALID'});
       if(leased>0){
         const {count,error:countError}=await svc.from('cerebro_browser_job_v2')
           .select('job_id',{count:'exact',head:true}).eq('environment','PROD')
           .eq('status','LEASED').lt('lease_expires_at',new Date().toISOString());
-        if(countError||!Number.isSafeInteger(count)||count<0||count>leased)
+        if(countError||typeof count!=='number'||!Number.isSafeInteger(count)||count<0||count>leased)
           return out(req,503,{ok:false,error:'LEASE_EXPIRY_STATUS_UNAVAILABLE'});
         expired=count;
       }

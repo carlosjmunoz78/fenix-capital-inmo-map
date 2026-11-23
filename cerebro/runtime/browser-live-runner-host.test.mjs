@@ -63,3 +63,11 @@ test('CP126: watcher notices stale leases but remains compatible with the previo
   const rearm=workflow.split('\n  rearm:\n')[1];
   assert.match(rearm,/needs\.queue\.result == 'success' && needs\.queue\.outputs\.pending != '0'/);
 });
+
+test('CP126 validates status types before trusting stale lease counts',()=>{
+  const edge=fs.readFileSync(new URL('../../supabase/functions/cerebro-browser-dispatch-v2/index.ts',import.meta.url),'utf8');
+  assert.match(edge,/LEASED_STATE_INVALID/);
+  assert.match(edge,/typeof count!=='number'/);
+  assert.match(edge,/count>leased/);
+  assert.match(edge,/LEASE_EXPIRY_STATUS_UNAVAILABLE/);
+});
