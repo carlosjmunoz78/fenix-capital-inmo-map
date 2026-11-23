@@ -21,6 +21,12 @@ test('closed session never blocks start',()=>{
 test('old heartbeat is not an active session',()=>{
  assert.equal(isActionableBrowserSession({...baseline,state:'CEREBRO_CONTROLLED',last_heartbeat_at:ago(17)},now),false);
 });
+test('explicit session expiry from owner/list overrides a fresh heartbeat',()=>{
+ assert.equal(isActionableBrowserSession({...baseline,state:'CEREBRO_CONTROLLED',last_heartbeat_at:ago(1),expires_at:ago(2)},now),false);
+ assert.equal(isActionableBrowserSession({...baseline,state:'CEREBRO_CONTROLLED',last_heartbeat_at:ago(1),expires_at:new Date(now+60_000).toISOString()},now),true);
+ assert.equal(isActionableBrowserSession({...baseline,state:'CEREBRO_CONTROLLED',last_heartbeat_at:ago(1),expires_at:'not-a-date'},now),false);
+});
+
 test('invalid timestamps fail closed',()=>{
  assert.equal(isActionableBrowserSession({...baseline,updated_at:'invalid',opened_at:'invalid'},now),false);
 });
