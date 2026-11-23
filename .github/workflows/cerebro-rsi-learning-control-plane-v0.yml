@@ -279,3 +279,20 @@ jobs:
         run: |
           set -euo pipefail
           jq -e '.status != "PARTIAL_REMOTE_ERROR" and .remote_outbox.status != "REMOTE_OUTBOX_ERROR"' /tmp/cerebro-rsi-result.json >/dev/null
+
+  zeus-lrn-auto-append-only:
+    # Reuse existing 15-minute Learning schedule, no new cron, and run only
+    # after the authentic PREPROD publisher succeeded.
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    needs: [run-preprod-control-plane]
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    # Immutable executable/attestor: avoids granting unreviewed main branch code
+    # any D1 write capability. Caller can only submit genuine run evidence.
+    uses: carlosjmunoz78/fenix-capital-inmo-map/.github/workflows/cerebro-zeus-lrn-verified-reusable-v1.yml@e88ca2983ec9f6595f20f121bd31637d981a96e8
