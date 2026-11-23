@@ -75,6 +75,16 @@ export default function CerebroOperativaUniverseViews({
     <Empty text="No se ha podido verificar el registro de proyectos para este contexto."/ >}
    <p className="op3-source-note">Fuente: jarvis_project_overlay_v1. No representa el inventario de todos los proyectos de todas las empresas.</p>
   </div>}
+  {section==='motores'&&(scope==='fenix'||scope==='all')&&<div className="op3-universe-line" role="region" aria-label="Supervisor ZEUS de Fénix · lectura real LAB">
+   <ShieldCheck size={20}/>
+   <div><strong>ZEUS · Estado real de FACT y Learning</strong>
+    <small>Lectura en directo del D1 de LAB, protegida mediante Cloudflare Access. No autoriza ejecución ni promoción a producción.</small></div>
+   <span className="is-ok">LAB · LECTURA</span>
+   <a href="https://cerebro-console-zeus-owner-lab-eu.carlosj-munozcabeza.workers.dev/"
+    target="_blank" rel="noopener noreferrer"
+    aria-label="Abrir ZEUS supervisión en nueva pestaña protegida">
+    Abrir ZEUS <ChevronRight size={16}/></a>
+  </div>}
   {section==='motores'&&<CerebroEngineCatalog sourceReady={sourceReady} factoryReady={factoryReady}
    engines={engines} factoryCatalog={catalog} scaffolded={scaffolded} observed={observed} scope={scope}/>}
 

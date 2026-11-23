@@ -1,0 +1,112 @@
+{
+  "component_id": "OPSCTRL-001",
+  "title": "CEREBRO OPERATIVA · mandos reales controlados",
+  "company_id": "fenix",
+  "engine_id": "OPSCTRL-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "state": "LAB_EXECUTION_PROVEN_PROD_HOLD",
+  "shared_runtime": true,
+  "existing_engines": [
+    {
+      "engine_id": "QA-001",
+      "job_id": 74,
+      "permissions": [
+        "RUN_ONCE",
+        "PAUSE_SCHEDULE",
+        "RESUME_SCHEDULE"
+      ],
+      "verified": true
+    },
+    {
+      "engine_id": "CERT-001",
+      "job_id": 77,
+      "permissions": [
+        "RUN_ONCE",
+        "PAUSE_SCHEDULE",
+        "RESUME_SCHEDULE"
+      ],
+      "verified": true
+    }
+  ],
+  "unsupported_engines": [
+    {
+      "engine_id": "CONSOLE-001",
+      "state": "NO_GENERAL_CONTROL_CONTRACT"
+    },
+    {
+      "engine_id": "FACT-001",
+      "state": "IAM_GATE_NOT_CLEARED"
+    },
+    {
+      "engine_id": "UMS-001",
+      "state": "OWNER_REJECTED_HOLD_INTACT"
+    }
+  ],
+  "data_contracts": {
+    "state_rpc": "public.cerebro_lab_operator_state_v1",
+    "command_rpc": "public.cerebro_lab_operator_command_v1",
+    "audit_table": "cerebro_lab.operativa_operator_command_v1",
+    "owner_resolver": "PROD_FENIX_APP_GATEWAY_SESSION_CONTEXT_READ_ONLY",
+    "edge": "cerebro-operativa-controls-lab-v1",
+    "preview_api": "api/cerebro-operativa-controls.ts",
+    "company_id_required": "fenix",
+    "environment_required": "LAB",
+    "idempotency": "REQUEST_UUID_UNIQUE",
+    "last_monitor_protection": true
+  },
+  "security": {
+    "owner_only": true,
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "service_role_rpc_execute": true,
+    "raw_credentials_exposed": false,
+    "prod_execution_enabled": false,
+    "paid_execution_enabled": false,
+    "job_scope_fixed": true,
+    "arbitrary_url_denied": true,
+    "rate_limit_run_once_seconds": 60
+  },
+  "tests": {
+    "qa_run_once": "PASSED_RECEIPT_20261119-1000-4000-8000-000000000001",
+    "qa_pause": "PASSED_RECEIPT_20261119-1000-4000-8000-000000000002",
+    "qa_resume": "PASSED_RECEIPT_20261119-1000-4000-8000-000000000003",
+    "last_monitor_rejection": "OPSCTRL_LAST_MONITOR_PROTECTED",
+    "qa_restore": "PASSED_RECEIPT_20261119-1000-4000-8000-000000000006",
+    "cert_run_once": "PASSED_RECEIPT_20261119-1000-4000-8000-000000000007",
+    "ums_disallowed": "OPSCTRL_INVALID_SCOPE",
+    "request_id_mismatch": "OPSCTRL_IDEMPOTENCY_CONFLICT",
+    "public_api_without_owner": "401_OWNER_SESSION_REQUIRED",
+    "browser_owner_get_motores": "PASSED_REAL_BROWSER",
+    "browser_owner_get_trabajos": "PASSED_REAL_BROWSER",
+    "interactive_button_post_browser": "NOT_YET_TESTED"
+  },
+  "rollback": {
+    "lab_alias_previous_deployment": "dpl_AVetCsC8dm5kERWTzVHGNYZDp9GR",
+    "lab_alias_current_deployment": "dpl_DuBLvQFdCzBL1eusMrA9DkSMNwxU",
+    "lab_alias_rollback_and_restore_physically_verified": true,
+    "production_rollback_verified": false
+  },
+  "costs": {
+    "new_subscriptions_eur": 0,
+    "marginal_usage_eur": "NOT_MEASURED"
+  },
+  "promotion": {
+    "prod_enabled": false,
+    "prod_vercel_target_access_verified": false,
+    "prod_access_error": "403_TARGET_DOMAIN",
+    "owner_access_and_old_vs_new_required": true,
+    "pending_gates": [
+      "PROD_VERCEL_TEAM_ACCESS",
+      "OWNER_POST_UI_E2E",
+      "PROD_BACKUP_SNAPSHOT",
+      "PROD_OLD_VS_NEW",
+      "PROD_ROLLBACK_DRILL",
+      "MARGINAL_COST_MEASURED"
+    ],
+    "no_main_merge_until_green": true
+  },
+  "documentation": "cerebro/universal/v0/OPSCTRL001_REAL_ENGINE_CONTROLS_LAB_2026-11-19.md",
+  "chat_voice_state": "HECHO_A_MEJORAR",
+  "browser_control_project_out_of_scope": true
+}

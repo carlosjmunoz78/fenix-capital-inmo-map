@@ -1,0 +1,54 @@
+name: CEREBRO Operativa verified evidence bridge LAB
+on:
+  pull_request:
+    branches: [cerebro/operativa-agent-directory-prod-candidate-20261117]
+permissions:
+  contents: read
+jobs:
+  evidence-bridge:
+    # Explicit canonical identity; source adapter validates GitHub job + steps.
+    env:
+      CEREBRO_COMPANY_ID: fenix
+      CEREBRO_ENGINE_ID: QA-001
+      CEREBRO_AGENT_ROLE_ID: ENG-QA
+      CEREBRO_EVIDENCE_MODE: PROVIDER_GITHUB_JOB_READBACK
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --experimental-strip-types --test cerebro/universal/v0/agent-evidence-bridge-v1.test.mjs cerebro/universal/v0/agent-receipt-attestor-v1.test.mjs cerebro/universal/v0/agent-receipt-emitter-v1.test.mjs cerebro/universal/v0/agent-supervisor-v1.test.mjs cerebro/universal/v0/agent-github-run-attestor-v1.test.mjs
+      - run: node --experimental-strip-types --test cerebro/universal/v0/operativa-executor-coverage-private.acceptance.mjs
+      - run: node --experimental-strip-types cerebro/universal/v0/operativa-owner-directory-minimal.acceptance.mjs
+      - name: Validate ephemeral CI auth contract without credentials or network
+        run: |
+          bash -n scripts/cerebro-e2e-ephemeral-session.sh scripts/cerebro-secdef-canary-auth-e2e.sh
+          if grep -q 'secrets.CEREBRO_E2E_USER_JWT' .github/workflows/cerebro-session-context-auth-e2e.yml .github/workflows/jarvis-authenticated-orchestrator-e2e.yml; then
+            echo 'Legacy fixed user JWT still referenced' >&2
+            exit 1
+          fi
+          set +e
+          env -u CEREBRO_E2E_TEST_EMAIL -u CEREBRO_E2E_TEST_PASSWORD PROD_URL=https://cluhljgonannaafpmblx.supabase.co PROD_PUBLISHABLE_KEY=sb_publishable_canary_test bash scripts/cerebro-e2e-ephemeral-session.sh > /tmp/e2e-auth-negative.out 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 42
+          grep -q 'BLOCKED_DEDICATED_TEST_IDENTITY_NOT_CONFIGURED' /tmp/e2e-auth-negative.out
+          rm -f /tmp/e2e-auth-negative.out
+      - name: Check E2E identity metadata only (physical auth proven in IAM004)
+        env:
+          E2E_EMAIL: ${{ secrets.CEREBRO_E2E_TEST_EMAIL || 'cerebro-e2e@fenixcapital.es' }}
+          E2E_PASSWORD_CONFIGURED: ${{ secrets.CEREBRO_E2E_TEST_PASSWORD != '' }}
+        shell: bash
+        run: |
+          if [ "$E2E_EMAIL" = 'cerebro-e2e@fenixcapital.es' ] && [ "$E2E_PASSWORD_CONFIGURED" = true ]; then
+            echo 'IAM004_TEST_IDENTITY_MATERIAL=READY_FOR_E2E' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'IAM004_TEST_IDENTITY_MATERIAL=HOLD_VERIFY_DEDICATED_TEST_USER' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - run: npm run build
