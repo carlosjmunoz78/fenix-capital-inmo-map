@@ -49,7 +49,7 @@ export default function CerebroConsoleHost(){
 
  const primaryView=view as CerebroPrimaryView;
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
-  <JarvisVisibleLanguageGuard/>
+  {primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null}
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">

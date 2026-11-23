@@ -11,3 +11,18 @@
 @media(max-width:900px){.operativa-contextbar{padding:0 24px}.operativa-command-deck,.operativa-stage{width:auto;margin-left:24px;margin-right:24px}.operativa-command-deck{grid-template-columns:1fr;gap:28px}.operativa-reactor{align-items:flex-start}.operativa-reactor-shell{width:112px;height:112px}.operativa-reactor-shell i{inset:20px}.operativa-reactor-shell b{inset:32px}.operativa-reactor-shell em{inset:44px}.operativa-stage{grid-template-columns:1fr}.operativa-side-signal{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.operativa-side-signal section{border-bottom:0;border-top:1px solid var(--op-line);padding-top:20px}}
 @media(max-width:720px){.operativa-premium{padding-bottom:104px}.operativa-contextbar{height:auto;min-height:48px;padding:8px 16px;gap:8px}.operativa-live-state small{display:none}.operativa-command-deck,.operativa-stage{margin-left:16px;margin-right:16px}.operativa-command-deck{padding-top:24px}.operativa-deck-main h1{font-size:44px}.operativa-eyebrow-row nav{overflow-x:auto;flex-wrap:nowrap;max-width:100vw}.operativa-modes{overflow-x:auto}.operativa-stage{padding-top:30px}.operativa-side-signal{grid-template-columns:1fr}.operativa-work-main{grid-template-columns:15px minmax(0,1fr) 18px}.operativa-work-state{display:none}.operativa-reactor{display:none}.operativa-jarvis-composer{bottom:9px;width:calc(100vw - 18px);border-radius:20px}.operativa-composer-form textarea{font-size:16px}.operativa-inspector{padding:24px 20px}}
 @media(prefers-reduced-motion:reduce){.operativa-premium *,.operativa-premium *:before,.operativa-premium *:after{animation:none!important;transition:none!important}}
+
+/* Operativa dialogue: authenticated React projection, not a second chat. */
+.operativa-dialogue{position:relative;z-index:3;width:min(880px,calc(100% - 34px));margin:12px auto 24px;border:1px solid rgba(97,220,255,.15);border-radius:18px;background:rgba(4,20,27,.8);color:#edfaff}
+.operativa-dialogue header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 17px;border-bottom:1px solid rgba(97,220,255,.12)}
+.operativa-dialogue header strong{font-size:14px;font-weight:700}
+.operativa-dialogue header small{font-size:11px;color:#91b3be}
+.operativa-dialogue-log{min-height:80px;max-height:245px;overflow-y:auto;overscroll-behavior:contain;padding:12px 18px}
+.operativa-dialogue-log article{margin:0 0 10px;padding:10px 13px;border-radius:12px;border:1px solid rgba(97,220,255,.1);background:rgba(14,45,57,.35)}
+.operativa-dialogue-log article.is-user{background:rgba(23,82,110,.38)}
+.operativa-dialogue-log article strong{font-size:11px;color:#84deed;display:block;margin-bottom:4px}
+.operativa-dialogue-log article p{font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.52;margin:0}
+.operativa-dialogue-empty{font-size:13px;color:#96adb5}
+.operativa-attach:disabled{opacity:.3;cursor:not-allowed}
+.operativa-live-state.is-unavailable{color:#e7bb90}
+@media(max-width:720px){.operativa-dialogue{width:calc(100% - 18px);margin:8px auto 12px}.operativa-dialogue header{align-items:flex-start;flex-direction:column;gap:4px}.operativa-dialogue-log{max-height:205px}.operativa-jarvis-composer{bottom:calc(73px + env(safe-area-inset-bottom,0px))}}

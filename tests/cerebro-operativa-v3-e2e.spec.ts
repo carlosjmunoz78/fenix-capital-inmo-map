@@ -29,8 +29,8 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await expect(operative.getByText('Tribunal',{exact:true})).toHaveCount(0);
  await expect(operative.getByText('Para ti',{exact:true})).toBeVisible();
  await expect(operative.getByRole('radio',{name:'Normal'})).toHaveAttribute('aria-checked','true');
- await expect(operative.getByRole('button',{name:'Añadir archivo'})).toBeVisible();
- const composer=operative.getByRole('textbox',{name:'Mensaje para Jarvis'});
+ await expect(operative.getByRole('button',{name:'Archivos todavía no disponibles'})).toBeDisabled();
+ const composer=operative.getByRole('textbox',{name:'Mensaje para CEREBRO'});
  expect(await composer.getAttribute('placeholder')).toBeNull();
  await expect(operative.getByRole('button',{name:'Dictar'})).toBeVisible();
  await expect(operative.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
@@ -46,10 +46,11 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await operative.getByRole('button').filter({has:page.locator('svg')}).count();
  await composer.press('Enter');
  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Prueba Operativa nueva');
+ await expect(operative.getByRole('log').getByText('Prueba Operativa nueva')).toBeVisible();
 
  await operative.getByRole('radio',{name:'Máximo'}).click();
- await expect.poll(()=>String(postedChat?.message||''),{timeout:5_000}).toContain('Ajusta el ritmo operativo a Máximo');
- await expect(String(postedChat?.message||'')).toContain('no generes gasto no autorizado');
+ await expect.poll(()=>String(postedChat?.message||''),{timeout:5_000}).toContain('Solicito ritmo operativo Máximo');
+ await expect(String(postedChat?.message||'')).toContain('Sin elevar permisos ni costes');
 
  const floatingPrivateChat=page.getByRole('button',{name:'Abrir chat interno'});
  if(await floatingPrivateChat.count())await expect(floatingPrivateChat).toBeHidden();

@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {withSupabase} from "jsr:@supabase/server@^1";
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 
-const REPOSITORY="fenix-cerebro/fenix-capital-inmo-map";
+const REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map";
 const RUNS_URL=`https://api.github.com/repos/${REPOSITORY}/actions/runs?per_page=100`;
 const CACHE_TTL_MS=45_000;
 const PREPROD_PROJECT_REF="hnqlnvakzaywtafeiybt";

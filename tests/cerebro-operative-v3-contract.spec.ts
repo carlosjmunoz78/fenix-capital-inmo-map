@@ -48,10 +48,10 @@ test('Operativa exposes current multi-company scope and protected power modes',a
 test('Jarvis composer is empty, separates dictation and voice, and reuses canonical voice session',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
  expect(source).toContain('className="operativa-jarvis-composer"');
- expect(source).toContain('aria-label="Mensaje para Jarvis"');
+ expect(source).toContain('aria-label="Mensaje para CEREBRO"');
  expect(source).not.toContain('placeholder=');
  expect(source).toContain('createVoiceRecognition');
- expect(source).toContain("querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main')");
+ expect(source).toContain('chat.toggleVoice()');
  expect(source).toContain("dictating?'Detener dictado':'Dictar'");
  expect(source).toContain("snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'");
 });
@@ -98,8 +98,13 @@ test('activity projection still exposes real GitHub job-step progress',async()=>
 test('canonical Gateway and voice core remain the execution path',async()=>{
  const operative=read('src/CerebroOperativeConsole.tsx');
  const shell=read('src/CerebroConsoleShell.tsx');
- expect(operative).toContain('<CerebroConsoleShell/>');
- expect(operative).toContain(".operativa-core-bridge .cerebro-console");
+ expect(operative).toContain('useCerebroOperativaChat()');
+ const chat=read('src/useCerebroOperativaChat.ts');
+ expect(chat).toContain('postCerebroConsoleChat');
+ expect(chat).toContain('authenticated_transport===true');
+ expect(chat).toContain('voiceNeedsManualConfirmation');
+ expect(operative).not.toContain('requestSubmit(');
+ expect(operative).not.toContain('<CerebroConsoleShell/>');
  expect(shell).toContain('postCerebroConsoleChat');
  expect(shell).toContain('createVoiceRecognition');
  expect(shell).toContain('window.speechSynthesis.speak');
