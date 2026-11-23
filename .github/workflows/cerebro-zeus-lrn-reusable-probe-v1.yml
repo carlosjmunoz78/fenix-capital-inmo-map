@@ -1,0 +1,18 @@
+name: CEREBRO ZEUS reusable OIDC LAB acceptance
+on:
+  push:
+    branches:
+      - lab/zeus-lrn-continuous-20261123
+    paths:
+      - .github/workflows/cerebro-zeus-lrn-reusable-probe-v1.yml
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+jobs:
+  attest-immutable-job:
+    uses: carlosjmunoz78/fenix-capital-inmo-map/.github/workflows/cerebro-zeus-lrn-verified-reusable-v1.yml@e88ca2983ec9f6595f20f121bd31637d981a96e8
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
