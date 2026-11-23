@@ -1,0 +1,21 @@
+name: CEREBRO ZEUS E2E single bounded PREPROD control-plane dispatch
+on:
+  push:
+    branches: [lab/zeus-lrn-continuous-20261123]
+    paths: ['.github/workflows/cerebro-zeus-lrn-e2e-manual-root-once.yml']
+permissions:
+  contents: read
+  actions: write
+jobs:
+  one-shot:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/lab/zeus-lrn-continuous-20261123'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch current main Learning PREPROD control-plane exactly once
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/carlosjmunoz78/fenix-capital-inmo-map/actions/workflows/cerebro-rsi-learning-control-plane-v0.yml/dispatches" -f ref=main
+          echo DISPATCHED_CONTROL_PLANE_ONCE
