@@ -6,7 +6,7 @@ const SUMMARY_PATH='cerebro/runtime/rsi-learning-state/last-control-plane-run.js
 const SCOPE={company_id:'fenix',engine_id:'LRN-001',environment:'PREPROD',version:'0.6.0'};
 const runId=Number(process.env.GITHUB_RUN_ID),attempt=Number(process.env.GITHUB_RUN_ATTEMPT);
 if(process.env.GITHUB_REPOSITORY!==REPO||process.env.GITHUB_REF!=='refs/heads/main'||
-  !['schedule','workflow_run'].includes(process.env.GITHUB_EVENT_NAME)||
+  !['schedule','workflow_run','workflow_dispatch'].includes(process.env.GITHUB_EVENT_NAME)||
   !Number.isSafeInteger(runId)||runId<1||!Number.isSafeInteger(attempt)||attempt<1||
   !process.env.GITHUB_TOKEN_LRN_LAB)throw Error('TRUSTED_GITHUB_CONTEXT_REQUIRED');
 const github=githubActionsReader(async fn=>fn(process.env.GITHUB_TOKEN_LRN_LAB));
