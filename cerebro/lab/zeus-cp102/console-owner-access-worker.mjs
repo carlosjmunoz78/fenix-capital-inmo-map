@@ -67,7 +67,7 @@ async function authorize(request,env) {
  return true;
 }
 const QUERY="SELECT company_id,engine_id,environment,version,evidence_ref,execution_state,health_state,autonomy_state,promotion_allowed,source_sha256 FROM zeus_scoped_observations_v1 WHERE (company_id='fenix-capital' AND engine_id='FACT-001' AND environment='LAB') OR (company_id='fenix' AND engine_id='LRN-001' AND environment='PREPROD') ORDER BY engine_id";
-function render(rows,cursor,receiptCount) {
+function render(rows,cursor,receiptCount,autoCount,dailyCount,latestAuto) {
  const result=rows.map(row=>{
   const verified=(row.company_id==='fenix-capital'&&row.engine_id==='FACT-001'&&row.environment==='LAB')||
     (row.company_id==='fenix'&&row.engine_id==='LRN-001'&&row.environment==='PREPROD');
@@ -88,7 +88,7 @@ function render(rows,cursor,receiptCount) {
  '<div class="label">CEREBRO OS · SUPERVISOR ZEUS · LAB</div><h1>Estado operativo verificado</h1>'+
  '<p>Vista de lectura real en D1 · acceso individual por Cloudflare Access · sin control de ejecución.</p>'+
  '<div class="grid">'+result+'</div><div class="strip"><strong>Learning</strong> · cursor diario: '+htmlEscape(cursor)+
- ' · publicaciones acreditadas: '+htmlEscape(receiptCount)+
+ ' · publicaciones anteriores: '+htmlEscape(receiptCount)+' · recibos automáticos: '+htmlEscape(autoCount)+' · bloqueos diarios deduplicados: '+htmlEscape(dailyCount)+' · último run automático: '+htmlEscape(latestAuto||'sin recibir')+
  '. Ambos motores tienen promotion_allowed = false. Esta vista NO acredita autonomía en PROD.</div>'+
  '<footer>Estado consultado en directo al cargar. Fuente: ZEUS D1 · sin escrituras · distintas identidades: fenix-capital y fenix.</footer></main></body></html>';
 }
@@ -99,14 +99,16 @@ export default {
   try{await authorize(request,env);}catch{return json({ok:false,error:'ACCESS_DENIED'},403);}
   if(url.pathname==='/health')return json({ok:true,component:'CEREBRO_ZEUS_OWNER_LAB',read_only:true});
   try {
-   const [a,b,c]=await Promise.all([
+   const [a,b,c,d,e]=await Promise.all([
     env.ZEUS_DB.prepare(QUERY).all(),
     env.ZEUS_DB.prepare("SELECT position FROM zeus_lrn_replay_cursor_v1 WHERE id='fenix:LRN-001:PREPROD:daily'").first(),
-    env.ZEUS_DB.prepare("SELECT COUNT(*) AS n FROM zeus_lrn_publications_cp106_lab WHERE company_id='fenix' AND engine_id='LRN-001' AND environment='PREPROD'").first()
+    env.ZEUS_DB.prepare("SELECT COUNT(*) AS n FROM zeus_lrn_publications_cp106_lab WHERE company_id='fenix' AND engine_id='LRN-001' AND environment='PREPROD'").first(),
+    env.ZEUS_DB.prepare("SELECT COUNT(*) AS n,MAX(CAST(run_id AS INTEGER)) AS last_run FROM zeus_lrn_auto_receipts_v1 WHERE company_id='fenix' AND engine_id='LRN-001' AND environment='PREPROD'").first(),
+    env.ZEUS_DB.prepare("SELECT COUNT(*) AS n FROM zeus_lrn_auto_daily_v1 WHERE company_id='fenix' AND engine_id='LRN-001' AND environment='PREPROD'").first()
    ]);
    const rows=a.results||[];
-   if(rows.length!==2||!Number.isSafeInteger(b?.position)||!Number.isSafeInteger(c?.n))throw Error('MISSING_EVIDENCE');
-   return new Response(render(rows,b.position,c.n),{status:200,headers:{
+   if(rows.length!==2||!Number.isSafeInteger(b?.position)||!Number.isSafeInteger(c?.n)||!Number.isSafeInteger(d?.n)||!Number.isSafeInteger(e?.n))throw Error('MISSING_EVIDENCE');
+   return new Response(render(rows,b.position,c.n,d.n,e.n,d.last_run),{status:200,headers:{
     'Content-Type':'text/html; charset=utf-8','Cache-Control':'private,no-store',
     'X-Frame-Options':'DENY','X-Content-Type-Options':'nosniff',
     'Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
