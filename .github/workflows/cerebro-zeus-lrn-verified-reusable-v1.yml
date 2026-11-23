@@ -1,0 +1,24 @@
+name: CEREBRO ZEUS Verified Learning Receipt V1
+on:
+  workflow_call:
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+jobs:
+  attest-and-submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout immutable receipt attestor
+        uses: actions/checkout@v4
+        with:
+          ref: aab27139c62ca55f1a3cfbbdfb47b36177876849
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Attest upstream Learning publication and send OIDC receipt
+        env:
+          GITHUB_TOKEN_LRN_LAB: ${{ github.token }}
+        run: node cerebro/lab/zeus-cp102/continuous-publication-sender.mjs
