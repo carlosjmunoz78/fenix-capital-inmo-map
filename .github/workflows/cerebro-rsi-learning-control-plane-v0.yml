@@ -3,7 +3,7 @@ name: CEREBRO RSI Learning Control Plane V0
 on:
   push:
     branches:
-      - lab/zeus-lrn-actions-token-cp102
+      - lab/zeus-lrn-oidc-cp103
   schedule:
     - cron: '*/15 * * * *'
   workflow_run:
@@ -283,11 +283,12 @@ jobs:
           set -euo pipefail
           jq -e '.status != "PARTIAL_REMOTE_ERROR" and .remote_outbox.status != "REMOTE_OUTBOX_ERROR"' /tmp/cerebro-rsi-result.json >/dev/null
 
-  zeus-actions-token-lab:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/lab/zeus-lrn-actions-token-cp102'
+  zeus-oidc-d1-lab:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/lab/zeus-lrn-oidc-cp103'
     permissions:
       actions: read
       contents: read
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -297,7 +298,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Verify historical publication using the job token
+      - name: Verify historical publication and OIDC delivery to D1
         env:
           ZEUS_JOB_TOKEN: ${{ github.token }}
         run: node cerebro/lab/zeus-cp102/actions-job-probe.mjs

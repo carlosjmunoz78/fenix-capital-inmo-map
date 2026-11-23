@@ -33,8 +33,34 @@ try {
   const first = await ingestLearningPublication(input);
   const retry = await ingestLearningPublication(input);
   if (first.status !== 'ADVANCED' || retry.status !== 'CAUGHT_UP') throw Error('REPLAY_CURSOR_NOT_VERIFIED');
-  console.log(JSON.stringify({ mode: 'REPLAY', identity: 'GITHUB_TOKEN_JOB_ONLY', storage: 'DISPOSABLE_SQLITE',
-    first: first.status, retry: retry.status, manifest: first.manifest }));
+  const endpoint = 'https://cerebro-zeus-lrn-oidc-cp103-lab.carlosj-munozcabeza.workers.dev/v1/replay';
+  const oidcUrl = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+  oidcUrl.searchParams.set('audience', 'cerebro-zeus-lrn-cp103-lab');
+  const oidc = await fetch(oidcUrl, { headers: {
+    Authorization: 'Bearer ' + process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN,
+  }, redirect: 'error', signal: AbortSignal.timeout(10000) });
+  if (!oidc.ok) throw Error('OIDC_ISSUE_FAILED');
+  const jwt = (await oidc.json()).value;
+  if (typeof jwt !== 'string' || !jwt) throw Error('OIDC_TOKEN_MISSING');
+  async function send(manifest, bearer) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (bearer) headers.Authorization = 'Bearer ' + bearer;
+    return fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(manifest),
+      redirect: 'error', signal: AbortSignal.timeout(12000) });
+  }
+  if ((await send(first.manifest)).status !== 403) throw Error('UNAUTHENTICATED_REJECTION_FAILED');
+  if ((await send({ ...first.manifest, lock_key: '0'.repeat(64) }, jwt)).status !== 422) throw Error('TAMPERING_REJECTION_FAILED');
+  const stored = await send(first.manifest, jwt);
+  if (!stored.ok) throw Error('D1_WRITE_HTTP_' + stored.status);
+  const ack = await stored.json();
+  const duplicate = await send(first.manifest, jwt);
+  if (!duplicate.ok) throw Error('D1_RETRY_HTTP_' + duplicate.status);
+  const dedup = await duplicate.json();
+  if (ack.changes.join(',') !== '1,1,1' || dedup.changes.join(',') !== '0,0,0' ||
+      ack.position !== 1 || dedup.position !== 1 || ack.run !== process.env.GITHUB_RUN_ID ||
+      ack.attempt !== process.env.GITHUB_RUN_ATTEMPT) throw Error('D1_ACK_MISMATCH');
+  console.log(JSON.stringify({ mode: 'REPLAY', identity: 'GITHUB_ACTIONS_OIDC', storage: 'D1_WORKER_BINDING',
+    ack, dedup, negative: [403, 422], manifest: first.manifest }));
 } catch (error) {
   const code = /^[A-Z][A-Z0-9_]+$/.test(error?.message) ? error.message : 'PROBE_UNEXPECTED_ERROR';
   console.error(code);
