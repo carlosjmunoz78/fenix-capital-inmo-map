@@ -3,7 +3,7 @@
   "company_id": "fenix",
   "environment": "PROD_READONLY",
   "version": "1.0.0",
-  "generated_at": "2026-11-23T20:12:20.223Z",
+  "generated_at": "2026-11-24T04:47:09.675Z",
   "read_only": true,
   "no_runtime_execution_claim": true,
   "providers": {
@@ -11,7 +11,7 @@
       "metadata_observed": true,
       "worker_scripts_total": 57,
       "lab_named": 54,
-      "observed_at": "2026-11-23T20:12:20.223Z",
+      "observed_at": "2026-11-24T04:47:09.675Z",
       "source": "CLOUDFLARE_WORKERS_LIST_API"
     },
     "supabase": {
