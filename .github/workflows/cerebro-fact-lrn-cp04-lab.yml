@@ -5,6 +5,8 @@ on:
     paths:
       - 'cerebro/skills/skill-universal-learning-contract-v1.mjs'
       - '.github/workflows/cerebro-fact-lrn-cp04-lab.yml'
+      - 'cerebro/skills/skill-private-intake-v2.mjs'
+      - 'cerebro/skills/skill-private-intake-v2.test.mjs'
 permissions:
   contents: read
 jobs:
@@ -16,4 +18,6 @@ jobs:
         with:
           persist-credentials: false
       - name: Exercise existing FACT and LRN paths with synthetic fixtures
-        run: node --test cerebro/skills/skill-universal-learning-contract-v1.test.mjs cerebro/skills/skill-chatgpt-evolution-bridge-v1.test.mjs cerebro/skills/skill-external-learning-preprod-v1.test.mjs
+        run: node --test cerebro/skills/skill-universal-learning-contract-v1.test.mjs cerebro/skills/skill-chatgpt-evolution-bridge-v1.test.mjs cerebro/skills/skill-external-learning-preprod-v1.test.mjs cerebro/skills/skill-private-intake-v2.test.mjs
+      - name: Preserve existing factory behavior
+        run: node --test cerebro/tests/skill-creator-wrapper.test.mjs cerebro/tests/skill-creator-preprod-integration.test.mjs cerebro/tests/skill-wrapper-scaffold-v1.test.mjs cerebro/tests/universal-skill-activation-planner-v1.test.mjs cerebro/tests/universal-skill-adapter-factory-v1.test.mjs
