@@ -1,0 +1,46 @@
+name: CEREBRO OpenRouter quota-controlled skill evaluation LAB
+on:
+  push:
+    branches: [lab/openrouter-quota-v1-20261124]
+    paths: ['cerebro/router/openrouter-lab/skill-request.json']
+permissions:
+  contents: write
+concurrency:
+  group: cerebro-openrouter-account-lab-v1
+  cancel-in-progress: false
+jobs:
+  skill-evaluation:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/lab/openrouter-quota-v1-20261124' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Verify quota and behavioral oracle
+        run: node --test cerebro/router/openrouter-lab/quota.test.mjs cerebro/router/openrouter-lab/skill-oracle.test.mjs
+      - name: Verify private LAB project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: node cerebro/router/openrouter-lab/skill-dispatch.mjs preflight
+      - name: Reserve exactly one durable evaluation slot before dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH=lab/openrouter-quota-v1-20261124
+          git fetch origin "refs/heads/$BRANCH"
+          test "$(git rev-parse FETCH_HEAD)" = "$(git rev-parse HEAD)"
+          ID=$(node -e "const r=require('./cerebro/router/openrouter-lab/skill-request.json');if(!/^eval-[a-z0-9-]{5,90}$/.test(r.id))process.exit(2);process.stdout.write(r.id)")
+          CEREBRO_RESERVATION_ID="$ID" node cerebro/router/openrouter-lab/quota.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- cerebro/router/openrouter-lab/quota-state.json
+          git commit -m "LAB: reserve unique skill evaluation slot"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          echo "CEREBRO_RESERVATION_CONFIRMED=true" >> "$GITHUB_ENV"
+          echo "CEREBRO_RESERVATION_ID=$ID" >> "$GITHUB_ENV"
+      - name: Dispatch one skill packet to private preview
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: node cerebro/router/openrouter-lab/skill-dispatch.mjs dispatch

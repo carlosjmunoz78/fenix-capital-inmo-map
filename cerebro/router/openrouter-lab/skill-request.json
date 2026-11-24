@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "id": "eval-safe-engineering-cp08-20261124",
+  "packet_env": "CEREBRO_OR_SKILL_EVAL_PACKET_CP08",
+  "approved": true,
+  "mode": "OWNER_AUTHORIZED_SYNTHETIC_SKILL_EVAL"
+}

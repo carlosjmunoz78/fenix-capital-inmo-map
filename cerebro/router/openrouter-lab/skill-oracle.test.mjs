@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {AUTH,validatePacket,score} from './skill-oracle.mjs';
+const id='eval-test-001',p={version:1,id,skill_name:'skill-one',skill_text:'x'.repeat(80),case_id:'test-case',question:'A synthetic example question.',oracle:{patch:'A',allowed:false},authorization:AUTH};
+test('valid authorized packet',()=>assert.equal(validatePacket(p,id),true));
+test('wrong request id refused',()=>assert.equal(validatePacket(p,'other-id'),false));
+test('wrong authority refused',()=>assert.equal(validatePacket({...p,authorization:'unknown'},id),false));
+test('missing skill text refused',()=>assert.equal(validatePacket({...p,skill_text:''},id),false));
+test('secret marker refused',()=>assert.equal(validatePacket({...p,skill_text:'sk-or-v1-'+'a'.repeat(64)},id),false));
+test('nonfinite oracle refused',()=>assert.equal(validatePacket({...p,oracle:{n:Infinity}},id),false));
+test('extra keys refused',()=>assert.equal(score('{"patch":"A","allowed":false,"extra":1}',p.oracle).all_pass,false));
+test('correct answers pass',()=>assert.deepEqual(score('{"patch":"A","allowed":false}',p.oracle),{schema:true,checks:2,passed:2,all_pass:true,failed:[]}));
+test('wrong answers fail',()=>assert.equal(score('{"patch":"A","allowed":true}',p.oracle).passed,1));
+test('string false rejected',()=>assert.equal(score('{"patch":"A","allowed":"false"}',p.oracle).schema,false));
+test('malformed output rejected',()=>assert.equal(score('not json',p.oracle).schema,false));
+test('array rejected',()=>assert.equal(score('[]',p.oracle).schema,false));
