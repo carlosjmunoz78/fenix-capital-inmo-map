@@ -9,6 +9,9 @@ on:
       - 'cerebro/skills/skill-private-intake-v2.test.mjs'
       - 'cerebro/skills/skill-private-commit-v1.mjs'
       - 'cerebro/skills/skill-private-commit-v1.test.mjs'
+      - 'cerebro/skills/registry-lrn-port-v1.mjs'
+      - 'cerebro/skills/publisher-hook-v1.mjs'
+      - 'cerebro/skills/registry-lrn-port-v1.test.mjs'
 permissions:
   contents: read
 jobs:
@@ -27,3 +30,6 @@ jobs:
 
       - name: Verify authenticated atomic persistence contract with synthetic identities and temporary SQLite
         run: node --test cerebro/skills/skill-private-commit-v1.test.mjs
+
+      - name: Verify permanent private LRN registry link and preserve historical publisher response
+        run: node --test cerebro/skills/registry-lrn-port-v1.test.mjs
