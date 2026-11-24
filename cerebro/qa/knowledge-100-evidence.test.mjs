@@ -8,10 +8,11 @@ const SHA = 'a'.repeat(40);
 const OTHER = 'b'.repeat(40);
 const PATH = '.github/workflows/cerebro-continuous-human-qa-v0.yml';
 const MODULE_URL = new URL('./knowledge-100-v0.mjs', import.meta.url).href;
-function runFixture(target, runs) {
+function job(extra={}) { return {id:9,run_id:1,run_attempt:1,head_sha:SHA,name:'continuous-human-qa',status:'completed',conclusion:'success',steps:[{name:'Assert candidate App acceptance CP141',status:'completed',conclusion:'success'}],...extra}; }
+function runFixture(target, runs, jobs=[job()], jobHttp=200) {
   const cwd = mkdtempSync(join(tmpdir(), 'knowledge100-cp135-'));
   try {
-    const script = `globalThis.fetch=async()=>new Response(JSON.stringify({workflow_runs:${JSON.stringify(runs)}}),{status:200});await import(${JSON.stringify(MODULE_URL)});`;
+    const script = `globalThis.fetch=async(url)=>String(url).includes('/attempts/')?new Response(JSON.stringify({jobs:${JSON.stringify(jobs)}}),{status:${jobHttp}}):new Response(JSON.stringify({workflow_runs:${JSON.stringify(runs)}}),{status:200});await import(${JSON.stringify(MODULE_URL)});`;
     const child = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
       cwd, encoding: 'utf8', env: {...process.env, GITHUB_REPOSITORY:'fixture/repo', GITHUB_TOKEN:'fixture-not-a-secret', TARGET_SHA:target, GITHUB_SHA:''}, timeout:10000
     });
@@ -19,7 +20,7 @@ function runFixture(target, runs) {
     return JSON.parse(readFileSync(join(cwd, 'artifacts/knowledge-100/report.json'), 'utf8'));
   } finally { rmSync(cwd,{recursive:true,force:true}); }
 }
-function row(extra={}) {return {id:1,name:'CEREBRO Continuous Human QA V0',path:PATH,head_sha:SHA,status:'completed',conclusion:'success',updated_at:new Date(Date.now()-1000).toISOString(),...extra};}
+function row(extra={}) {return {id:1,run_attempt:1,name:'CEREBRO Continuous Human QA V0',path:PATH,head_sha:SHA,status:'completed',conclusion:'success',updated_at:new Date(Date.now()-1000).toISOString(),...extra};}
 const qa = report => report.live_evidence.workflows.human_qa;
 test('accepts canonical exact fresh successful QA run',()=>assert.equal(qa(runFixture(SHA,[row()])).accepted,true));
 test('missing SHA rejects even successful canonical QA',()=>assert.equal(qa(runFixture('',[row()])),null));
@@ -30,3 +31,10 @@ test('same workflow path different name is not canonical evidence',()=>assert.eq
 test('latest failure cannot be masked by older success',()=>assert.equal(qa(runFixture(SHA,[row({updated_at:new Date(Date.now()-5000).toISOString()}),row({id:2,conclusion:'failure'})])).accepted,false));
 test('stale success is rejected',()=>assert.equal(qa(runFixture(SHA,[row({updated_at:new Date(Date.now()-25*3600000).toISOString()})])),null));
 test('scope suffix in canonical workflow path remains supported',()=>assert.equal(qa(runFixture(SHA,[row({path:PATH+'@refs/heads/main'})])).accepted,true));
+test('controller success without candidate acceptance is HOLD',()=>assert.equal(qa(runFixture(SHA,[row()],[job({steps:[]})])).accepted,false));
+test('skipped candidate acceptance cannot certify App',()=>assert.equal(qa(runFixture(SHA,[row()],[job({steps:[{name:'Assert candidate App acceptance CP141',status:'completed',conclusion:'skipped'}]})])).accepted,false));
+test('wrong job SHA cannot certify the candidate',()=>assert.equal(qa(runFixture(SHA,[row()],[job({head_sha:OTHER})])).accepted,false));
+test('wrong job attempt cannot certify the candidate',()=>assert.equal(qa(runFixture(SHA,[row()],[job({run_attempt:2})])).accepted,false));
+test('unavailable job evidence is HOLD',()=>assert.equal(qa(runFixture(SHA,[row()],[],403)).accepted,false));
+test('duplicate matching jobs are rejected',()=>assert.equal(qa(runFixture(SHA,[row()],[job(),job({id:10})])).accepted,false));
+test('missing run attempt is HOLD',()=>assert.equal(qa(runFixture(SHA,[row({run_attempt:undefined})])).accepted,false));

@@ -135,6 +135,7 @@ function latestWorkflowEvidence(spec, {
     accepted: isAccepted,
     evidence_scope: evidenceScope,
     id: hit.id,
+    run_attempt: hit.run_attempt,
     name: hit.name,
     path: normalizeWorkflowPath(hit.path),
     event: hit.event,
@@ -165,8 +166,27 @@ const WF = Object.freeze({
   rollbackRehearsal: { names: ['PROD Rollback Rehearsal'], paths: ['.github/workflows/prod-rollback-rehearsal.yml'] }
 });
 
+// A successful supervisor run can contain product findings. Require the
+// candidate-only App acceptance step from the same immutable run attempt.
+async function certifyHumanQa(evidence) {
+  if (!evidence?.accepted) return evidence;
+  const deny = (reason) => Object.freeze({ ...evidence, accepted: false, qa_acceptance_reason: reason });
+  if (!Number.isSafeInteger(evidence.id) || evidence.id < 1 || !Number.isSafeInteger(evidence.run_attempt) || evidence.run_attempt < 1 || !repo || !token) return deny('QA_ATTEMPT_ID_MISSING');
+  try {
+    const url = `https://api.github.com/repos/${repo}/actions/runs/${evidence.id}/attempts/${evidence.run_attempt}/jobs?per_page=100`;
+    const response = await fetch(url, {headers: {Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'}});
+    if (!response.ok) return deny('QA_JOB_EVIDENCE_UNAVAILABLE');
+    const body = await response.json();
+    const jobs = Array.isArray(body.jobs) ? body.jobs.filter(j => j.name === 'continuous-human-qa') : [];
+    if (jobs.length !== 1 || jobs[0].status !== 'completed' || jobs[0].conclusion !== 'success' || jobs[0].run_id !== evidence.id || jobs[0].run_attempt !== evidence.run_attempt || jobs[0].head_sha !== targetSha) return deny('QA_JOB_SCOPE_OR_RESULT_INVALID');
+    const steps = (jobs[0].steps ?? []).filter(s => s.name === 'Assert candidate App acceptance CP141');
+    if (steps.length !== 1 || steps[0].status !== 'completed' || steps[0].conclusion !== 'success') return deny('QA_APP_ACCEPTANCE_NOT_PROVEN');
+    return Object.freeze({...evidence, qa_acceptance_reason: 'EXACT_CANDIDATE_APP_SYNTHETIC_ACCEPTANCE', qa_job_id: jobs[0].id});
+  } catch { return deny('QA_JOB_EVIDENCE_UNAVAILABLE'); }
+}
+
 const workflowEvidence = Object.freeze({
-  human_qa: latestWorkflowEvidence(WF.humanQa, { exactSha: true, maxAgeMs: 24 * HOUR, evidenceScope: 'EXACT_TARGET_SHA' }),
+  human_qa: await certifyHumanQa(latestWorkflowEvidence(WF.humanQa, { exactSha: true, maxAgeMs: 24 * HOUR, evidenceScope: 'EXACT_TARGET_SHA' })),
   prod_runtime_smoke: latestWorkflowEvidence(WF.runtimeSmoke, { maxAgeMs: 24 * HOUR, evidenceScope: 'RECENT_PROD_ENVIRONMENT' }),
   full_owner_100: latestWorkflowEvidence(WF.owner100, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   promotion_readiness: latestWorkflowEvidence(WF.promotionReadiness, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
