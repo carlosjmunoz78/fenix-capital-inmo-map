@@ -1,0 +1,26 @@
+{
+  "status": "PUBLIC_SYNTHETIC_E2E_PASS_PRIVATE_INFERENCE_HOLD",
+  "engine_id": "ROUTE-001",
+  "environment": "LAB",
+  "live_dispatch_enabled": false,
+  "proof": {
+    "github_run": 45454865017,
+    "github_job": 138661458839,
+    "vercel_deployment": "dpl_6XB3tGm1iKfM8RibeGwKR2szYgDE",
+    "http": 200,
+    "cost_usd": 0,
+    "tests_passed": 11
+  },
+  "limits": {
+    "learning_rolling_24h": 5,
+    "account_rolling_24h_target": 50,
+    "other_work_target": 45
+  },
+  "limitations": [
+    "Git ledger covers only controlled callers; exclusive account-wide dispatch not proven",
+    "Prior preview build could be redeployed by an authorized project operator; do not redeploy inference probes",
+    "No private prompts or skills authorized; strict ZDR returned 404",
+    "No recurring inference until durable exclusive admission and privacy proven"
+  ],
+  "rollback": "Revert this LAB-only workflow commit only under authorized controlled release; preserve reservation ledger and main."
+}
