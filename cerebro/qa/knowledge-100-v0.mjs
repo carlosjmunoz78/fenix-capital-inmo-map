@@ -44,12 +44,14 @@ const notionSnapshot = notionEvidenceFresh ? Object.freeze({
 const repo = process.env.GITHUB_REPOSITORY ?? '';
 const token = process.env.GITHUB_TOKEN ?? '';
 const targetSha = process.env.TARGET_SHA || process.env.GITHUB_SHA || '';
+const validTargetSha = /^[a-f0-9]{40}$/.test(targetSha);
 let runs = [];
 
 const currentShaEvidencePath = 'artifacts/knowledge-100/current-sha-evidence.json';
 let currentShaEvidence = null;
 try { currentShaEvidence = readJson(currentShaEvidencePath); } catch { currentShaEvidence = null; }
 const currentShaEvidenceValid = Boolean(
+  validTargetSha &&
   currentShaEvidence &&
   currentShaEvidence.state_type === 'CEREBRO_KNOWLEDGE_100_CURRENT_SHA_EVIDENCE' &&
   currentShaEvidence.target_sha === targetSha &&
@@ -112,7 +114,7 @@ function normalizeWorkflowPath(value) {
 function workflowMatches(run, spec) {
   const names = new Set(spec.names ?? []);
   const paths = new Set((spec.paths ?? []).map(normalizeWorkflowPath));
-  return names.has(run?.name) || paths.has(normalizeWorkflowPath(run?.path));
+  return names.has(run?.name) && paths.has(normalizeWorkflowPath(run?.path));
 }
 function latestWorkflowEvidence(spec, {
   exactSha = false,
@@ -122,7 +124,7 @@ function latestWorkflowEvidence(spec, {
 } = {}) {
   const candidates = runs
     .filter((run) => workflowMatches(run, spec))
-    .filter((run) => !exactSha || !targetSha || run.head_sha === targetSha)
+    .filter((run) => !exactSha || (validTargetSha && run.head_sha === targetSha))
     .filter((run) => freshIso(run.updated_at || run.created_at, maxAgeMs))
     .filter((run) => !ignoreSkipped || run.conclusion !== 'skipped')
     .sort((a, b) => Date.parse(b.updated_at || b.created_at || 0) - Date.parse(a.updated_at || a.created_at || 0));
@@ -133,6 +135,7 @@ function latestWorkflowEvidence(spec, {
     accepted: isAccepted,
     evidence_scope: evidenceScope,
     id: hit.id,
+    run_attempt: hit.run_attempt,
     name: hit.name,
     path: normalizeWorkflowPath(hit.path),
     event: hit.event,
@@ -163,11 +166,48 @@ const WF = Object.freeze({
   rollbackRehearsal: { names: ['PROD Rollback Rehearsal'], paths: ['.github/workflows/prod-rollback-rehearsal.yml'] }
 });
 
+// A successful supervisor run can contain product findings. Require the
+// candidate-only App acceptance step from the same immutable run attempt.
+async function certifyHumanQa(evidence) {
+  if (!evidence?.accepted) return evidence;
+  const deny = (reason) => Object.freeze({ ...evidence, accepted: false, qa_acceptance_reason: reason });
+  if (!Number.isSafeInteger(evidence.id) || evidence.id < 1 || !Number.isSafeInteger(evidence.run_attempt) || evidence.run_attempt < 1 || !repo || !token) return deny('QA_ATTEMPT_ID_MISSING');
+  try {
+    const url = `https://api.github.com/repos/${repo}/actions/runs/${evidence.id}/attempts/${evidence.run_attempt}/jobs?per_page=100`;
+    const response = await fetch(url, {headers: {Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'}});
+    if (!response.ok) return deny('QA_JOB_EVIDENCE_UNAVAILABLE');
+    const body = await response.json();
+    const jobs = Array.isArray(body.jobs) ? body.jobs.filter(j => j.name === 'continuous-human-qa') : [];
+    if (jobs.length !== 1 || jobs[0].status !== 'completed' || jobs[0].conclusion !== 'success' || jobs[0].run_id !== evidence.id || jobs[0].run_attempt !== evidence.run_attempt || jobs[0].head_sha !== targetSha) return deny('QA_JOB_SCOPE_OR_RESULT_INVALID');
+    const steps = (jobs[0].steps ?? []).filter(s => s.name === 'Assert candidate App acceptance CP141');
+    if (steps.length !== 1 || steps[0].status !== 'completed' || steps[0].conclusion !== 'success') return deny('QA_APP_ACCEPTANCE_NOT_PROVEN');
+    return Object.freeze({...evidence, qa_acceptance_reason: 'EXACT_CANDIDATE_APP_SYNTHETIC_ACCEPTANCE', qa_job_id: jobs[0].id});
+  } catch { return deny('QA_JOB_EVIDENCE_UNAVAILABLE'); }
+}
+
+// An applicable exact-candidate readiness result is required, not a green N/A run.
+async function certifyKnowledgeReadiness(evidence) {
+  if (!evidence?.accepted) return evidence;
+  const deny = (reason) => Object.freeze({...evidence, accepted:false, readiness_reason:reason});
+  if (evidence.event !== 'pull_request' || evidence.head_sha !== targetSha || !Number.isSafeInteger(evidence.id) || evidence.id < 1 || !Number.isSafeInteger(evidence.run_attempt) || evidence.run_attempt < 1 || !repo || !token) return deny('READINESS_SCOPE_OR_ATTEMPT_MISSING');
+  try {
+    const url = `https://api.github.com/repos/${repo}/actions/runs/${evidence.id}/attempts/${evidence.run_attempt}/jobs?per_page=100`;
+    const response = await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}});
+    if (!response.ok) return deny('READINESS_JOB_EVIDENCE_UNAVAILABLE');
+    const body = await response.json();
+    const jobs = Array.isArray(body.jobs) ? body.jobs.filter(j=>j.name==='scoped-readiness') : [];
+    if (jobs.length!==1 || jobs[0].status!=='completed' || jobs[0].conclusion!=='success' || jobs[0].run_id!==evidence.id || jobs[0].run_attempt!==evidence.run_attempt || jobs[0].head_sha!==targetSha) return deny('READINESS_JOB_SCOPE_OR_RESULT_INVALID');
+    const steps=(jobs[0].steps??[]).filter(s=>s.name==='Assert applicable Knowledge readiness CP142');
+    if(steps.length!==1 || steps[0].status!=='completed' || steps[0].conclusion!=='success') return deny('READINESS_APPLICABILITY_NOT_PROVEN');
+    return Object.freeze({...evidence,readiness_reason:'EXACT_KNOWLEDGE_CANDIDATE_READINESS_NO_PROMOTION',readiness_job_id:jobs[0].id});
+  } catch { return deny('READINESS_JOB_EVIDENCE_UNAVAILABLE'); }
+}
+
 const workflowEvidence = Object.freeze({
-  human_qa: latestWorkflowEvidence(WF.humanQa, { exactSha: true, maxAgeMs: 24 * HOUR, evidenceScope: 'EXACT_TARGET_SHA' }),
+  human_qa: await certifyHumanQa(latestWorkflowEvidence(WF.humanQa, { exactSha: true, maxAgeMs: 24 * HOUR, evidenceScope: 'EXACT_TARGET_SHA' })),
   prod_runtime_smoke: latestWorkflowEvidence(WF.runtimeSmoke, { maxAgeMs: 24 * HOUR, evidenceScope: 'RECENT_PROD_ENVIRONMENT' }),
   full_owner_100: latestWorkflowEvidence(WF.owner100, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
-  promotion_readiness: latestWorkflowEvidence(WF.promotionReadiness, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
+  promotion_readiness: await certifyKnowledgeReadiness(latestWorkflowEvidence(WF.promotionReadiness, { exactSha:true, maxAgeMs:24 * HOUR, evidenceScope:'EXACT_TARGET_SHA' })),
   session_context_regression: latestWorkflowEvidence(WF.sessionRegression, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   multichannel_unification: latestWorkflowEvidence(WF.multichannel, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   lrn001_ingress: latestWorkflowEvidence(WF.learningIngress, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
@@ -240,7 +280,7 @@ const staticChecks = {
   provenance: [
     check('skill_provenance_runtime', exists('cerebro/runtime/skill-eval-enhancements-v1.mjs')),
     check('notion_authorized_snapshot', notionEvidenceFresh),
-    check('target_sha', Boolean(targetSha))
+    check('target_sha', validTargetSha)
   ],
   evaluationTribunal: [
     check('tribunal', exists('cerebro/human-intelligence/evaluation/tribunal-v1.mjs')),
@@ -362,13 +402,14 @@ const report = {
     stale_success_cannot_mask_newer_completed_failure: true,
     exact_target_sha_required_for: [
       'continuous_human_qa',
+      'applicable_knowledge_promotion_readiness',
       'real_domain_contract_and_live_readonly_probe',
       'old_new_tribunal_contract',
       'rollback_no_deploy_rehearsal'
     ],
     recent_prod_environment_allowed_for: ['prod_runtime_smoke'],
     recent_canonical_gate_allowed_for: [
-      'full_owner_100', 'promotion_readiness', 'session_context_regression', 'multichannel_unification', 'lrn001_ingress'
+      'full_owner_100', 'session_context_regression', 'multichannel_unification', 'lrn001_ingress'
     ]
   },
   safety: {

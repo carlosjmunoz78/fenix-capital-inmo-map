@@ -59,7 +59,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
+
+      - name: Assert exact QA candidate SHA
+        shell: bash
+        env:
+          QA_TARGET_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$QA_TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$QA_TARGET_SHA"
 
       - uses: actions/setup-node@v4
         with:
@@ -248,3 +258,15 @@ jobs:
             test-results/**
           if-no-files-found: warn
           retention-days: 30
+
+      # Main continues to collect findings without suppressing learning. On a
+      # candidate, passing the controller is not sufficient for App acceptance.
+      - name: Assert candidate App acceptance CP141
+        if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+        shell: bash
+        env:
+          AUTH_EXIT: ${{ steps.auth_probe.outputs.exit_code }}
+        run: |
+          set -euo pipefail
+          test "$AUTH_EXIT" = '0'
+          jq -e '.targets.APP.status=="GREEN" and .targets.APP_AUTH_SYNTHETIC_LOCAL.status=="GREEN" and (.targets.APP_AUTH_SYNTHETIC_LOCAL.executed>=6) and (.targets.APP_AUTH_SYNTHETIC_LOCAL.failed==0) and (.targets.APP_AUTH_SYNTHETIC_LOCAL.passed==.targets.APP_AUTH_SYNTHETIC_LOCAL.executed) and .coverage.app_authenticated=="LOCAL_ISOLATED_SYNTHETIC_NO_CUSTOMER_DATA" and .safety.prod_write==false and .safety.customer_data==false and .safety.trading==false' artifacts/qa/state.after.json >/dev/null
