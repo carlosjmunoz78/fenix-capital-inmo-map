@@ -6,14 +6,14 @@
   "environment": "CONTROL_PLANE",
   "version": "0.2.0",
   "status": "FINDINGS_OPEN",
-  "updated_at": "2026-11-24T08:35:13.603Z",
-  "quality_score": 40,
-  "previous_quality_score": 60,
-  "quality_delta": -20,
+  "updated_at": "2026-11-24T19:33:11.620Z",
+  "quality_score": 60,
+  "previous_quality_score": 40,
+  "quality_delta": 20,
   "tests": {
     "executed": 12,
-    "passed": 9,
-    "failed": 3
+    "passed": 10,
+    "failed": 2
   },
   "targets": {
     "APP": {
@@ -35,10 +35,10 @@
       "passed": 0
     },
     "PRODUCT": {
-      "status": "RED",
+      "status": "GREEN",
       "executed": 2,
-      "failed": 1,
-      "passed": 1
+      "failed": 0,
+      "passed": 2
     }
   },
   "issues": [
@@ -50,7 +50,7 @@
       "project": "qa-desktop-chromium",
       "owner_engine": "WEB-001",
       "evidence": [
-        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"wp is not defined\",\u001b[39m\n\u001b[31m+   \"Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  106 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  107 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 108 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  109 |\n  110 |   if(target.exploreLinks){\n  111 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:108:60"
+        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  106 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  107 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 108 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  109 |\n  110 |   if(target.exploreLinks){\n  111 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:108:60"
       ],
       "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
       "auto_fix_eligible": false
@@ -67,56 +67,22 @@
       ],
       "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
       "auto_fix_eligible": false
-    },
-    {
-      "fingerprint": "57076bcd76dda8e6642db6ab",
-      "severity": "HIGH",
-      "kind": "PRODUCT",
-      "title": "product-readonly-observation.spec.ts › [PRODUCT] AION Product Factory PREPROD · human read-only observation",
-      "project": "qa-desktop-chromium",
-      "owner_engine": "QAB-001",
-      "evidence": [
-        "Error: AION product uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Cannot read properties of undefined (reading 'hooks')\",\u001b[39m\n\u001b[31m+   \"wp is not defined\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  19 |   expect(layout.mainCount).toBeGreaterThanOrEqual(1);\n  20 |   expect(layout.h1Count).toBeGreaterThanOrEqual(1);\n> 21 |   expect(pageErrors,'AION product uncaught page errors').toEqual([]);\n     |                                                          ^\n  22 |\n  23 |   const catalog=await page.goto(catalogUrl,{waitUntil:'domcontentloaded',timeout:45000});\n  24 |   if(catalog) expect(catalog.status(),'AION catalog response').toBeLessThan(500);\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/product-readonly-observation.spec.ts:21:58"
-      ],
-      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
-      "auto_fix_eligible": false
     }
   ],
   "issue_fingerprints": [
     "2bde0086f90207b526542ae3",
-    "106a1d44c42fd29681abaa93",
+    "106a1d44c42fd29681abaa93"
+  ],
+  "new_issue_fingerprints": [],
+  "resolved_issue_fingerprints": [
     "57076bcd76dda8e6642db6ab"
   ],
-  "new_issue_fingerprints": [
-    "57076bcd76dda8e6642db6ab"
-  ],
-  "resolved_issue_fingerprints": [],
   "recurring_issue_fingerprints": [
     "2bde0086f90207b526542ae3",
     "106a1d44c42fd29681abaa93"
   ],
-  "new_issues": [
-    {
-      "fingerprint": "57076bcd76dda8e6642db6ab",
-      "severity": "HIGH",
-      "kind": "PRODUCT",
-      "title": "product-readonly-observation.spec.ts › [PRODUCT] AION Product Factory PREPROD · human read-only observation",
-      "project": "qa-desktop-chromium",
-      "owner_engine": "QAB-001",
-      "evidence": [
-        "Error: AION product uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Cannot read properties of undefined (reading 'hooks')\",\u001b[39m\n\u001b[31m+   \"wp is not defined\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  19 |   expect(layout.mainCount).toBeGreaterThanOrEqual(1);\n  20 |   expect(layout.h1Count).toBeGreaterThanOrEqual(1);\n> 21 |   expect(pageErrors,'AION product uncaught page errors').toEqual([]);\n     |                                                          ^\n  22 |\n  23 |   const catalog=await page.goto(catalogUrl,{waitUntil:'domcontentloaded',timeout:45000});\n  24 |   if(catalog) expect(catalog.status(),'AION catalog response').toBeLessThan(500);\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/product-readonly-observation.spec.ts:21:58"
-      ],
-      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
-      "auto_fix_eligible": false
-    }
-  ],
-  "dispatch_queue": [
-    {
-      "fingerprint": "57076bcd76dda8e6642db6ab",
-      "owner_engine": "QAB-001",
-      "action": "REPRODUCE_AND_FIX_OR_ROUTE"
-    }
-  ],
+  "new_issues": [],
+  "dispatch_queue": [],
   "learned_regression_tests": 0,
   "recurring_issues": 2,
   "human_required": [],
@@ -233,10 +199,10 @@
   },
   "remediation": {
     "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
-    "open_cases": 6,
-    "bug_cases": 3,
+    "open_cases": 5,
+    "bug_cases": 2,
     "improvement_cases": 3,
-    "candidate_packages_total": 6,
+    "candidate_packages_total": 5,
     "human_required": [],
     "next_gate": "OLD_VS_NEW_EXPERIMENT",
     "authority": {
@@ -256,8 +222,8 @@
   },
   "self_healing": {
     "status": "PLANS_READY",
-    "plans_total": 6,
-    "plan_ready": 6,
+    "plans_total": 5,
+    "plan_ready": 5,
     "human_required_total": 0,
     "next_gate": "OWNER_EXECUTOR_CAPABILITY_AUDIT",
     "execution_authority": {
@@ -276,7 +242,7 @@
     }
   },
   "learning_bridge": {
-    "signals_total": 2,
+    "signals_total": 1,
     "downstream": "CEREBRO_RSI_UNIVERSAL_LEARNING_INGRESS_V0",
     "repair_semantics": "PREPROD_CANDIDATE_ONLY_UNTIL_EXISTING_PROMOTION_GATES_AUTHORIZE_MORE",
     "prod_write_authorized": false,
