@@ -2,7 +2,11 @@ const nativeFetch = globalThis.fetch;
 
 const repo = process.env.GITHUB_REPOSITORY ?? '';
 const token = process.env.GITHUB_TOKEN ?? '';
+const targetSha = process.env.TARGET_SHA || process.env.GITHUB_SHA || '';
+const validTargetSha = /^[a-f0-9]{40}$/.test(targetSha);
 const canonicalWorkflowFiles = Object.freeze([
+  'cerebro-continuous-human-qa-v0.yml',
+  'prod-runtime-smoke.yml',
   'cerebro-human-intelligence-owner100-v1.yml',
   'cerebro-human-intelligence-promotion-readiness-v1.yml',
   'cerebro-session-context-regression-guard.yml',
@@ -35,7 +39,12 @@ async function loadCanonicalWorkflowRuns() {
   if (!repo || !token) return [];
   const output = [];
   for (const workflowFile of canonicalWorkflowFiles) {
-    const url = `https://api.github.com/repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=20`;
+    // Human QA must match the exact candidate, not merely a recent run.
+    // Do not broaden the lookup if the target is missing or malformed.
+    const exactHumanQa = workflowFile === 'cerebro-continuous-human-qa-v0.yml';
+    if (exactHumanQa && !validTargetSha) continue;
+    const shaFilter = exactHumanQa ? `&head_sha=${encodeURIComponent(targetSha)}` : '';
+    const url = `https://api.github.com/repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=20${shaFilter}`;
     try {
       const response = await nativeFetch(url, { headers: headers() });
       if (!response.ok) {
