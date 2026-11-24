@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "engine_id": "ROUTE-001",
+  "environment": "LAB",
+  "state": "CONTROLLED_SKILL_BEHAVIORAL_EVALUATION_E2E_VERIFIED",
+  "request_id": "eval-safe-engineering-cp08-20261124",
+  "proof": {
+    "github_run": 45472692787,
+    "github_job": 138724590774,
+    "vercel_deployment": "dpl_AgyTzx7FJXV3ZKXiK3jhEguvv4Zt",
+    "http": 200,
+    "provider": "nvidia",
+    "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "cost_usd": 0,
+    "quota_and_oracle_tests": {
+      "passed": 23,
+      "total": 23
+    },
+    "behavioral_checks": {
+      "passed": 12,
+      "total": 12
+    },
+    "prompt_tokens": 1501,
+    "completion_tokens": 1185
+  },
+  "policy": {
+    "owner_authorized_skill_content_without_zdr": true,
+    "customer_data": false,
+    "credentials_in_payload": false,
+    "paid_models": false,
+    "automatic_fallback": false,
+    "automatic_retry": false,
+    "learning_rolling_24h_max": 5,
+    "learning_slots_reserved_in_cycle": 5,
+    "other_work_target": 45,
+    "packet_retired": true
+  },
+  "scope": {
+    "controlled_job_path": "cerebro/router/openrouter-lab/skill-request.json",
+    "schedule_enabled": false,
+    "main_changed": false,
+    "prod_changed": false,
+    "full_factory_autonomy_verified": false,
+    "global_account_exclusivity_verified": false,
+    "comparative_quality_certified": false
+  },
+  "limitations": [
+    "Only one skill case evaluated; no baseline comparison, no promotion.",
+    "All controlled requests pass through durable Git reservation; independently authorized Vercel project administrators could manually rebuild old deployments. Do not redeploy old inference builds.",
+    "Recurring automated packet submission not verified; no additional requests while quota exhausted."
+  ],
+  "rollback": "Stop skill-request submissions, preserve ledger, and keep the previous verification-only workflow. Existing engines remain unchanged."
+}
