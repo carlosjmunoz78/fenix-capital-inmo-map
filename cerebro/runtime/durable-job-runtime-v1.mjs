@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { serialize, deserialize } from 'node:v8';
-import { AtomicV8Journal } from './persistent-runtime.mjs';
+import { createRuntimeJournal } from './persistent-runtime.mjs';
 
 const PREPROD = 'PREPROD';
 const KIND = 'JOB-001-DURABLE-V1';
@@ -147,9 +147,9 @@ export class DurableJobRuntimeV1 {
   #jobs;
   #keys;
 
-  constructor({ file_path, environment = PREPROD }) {
+  constructor({ file_path, environment = PREPROD, journal_backend = 'ATOMIC_V8' }) {
     if (environment !== PREPROD) throw new Error('durable JOB-001 V1 accepts exact PREPROD only');
-    this.#journal = new AtomicV8Journal({ file_path: nonEmpty(file_path, 'file_path'), kind: KIND });
+    this.#journal = createRuntimeJournal({ file_path: nonEmpty(file_path, 'file_path'), kind: KIND, journal_backend });
     this.#operations = this.#journal.load();
     const state = replay(this.#operations);
     this.#jobs = state.jobs;

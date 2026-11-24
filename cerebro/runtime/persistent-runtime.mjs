@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {createRequire} from 'node:module';
 import { serialize, deserialize } from 'node:v8';
 import { EventBus, JobQueue } from './runtime.mjs';
 
@@ -53,6 +54,10 @@ function ensureDirectoryEntriesDurable(directory) {
   for (const entry of chain) fsyncDirectory(entry);
 }
 
+function encodeEnvelope(operations,kind) {
+  const payload=serialize(operations);
+  return serialize({schema_version:SCHEMA_VERSION,kind,payload,checksum:digest(payload)});
+}
 function decodeEnvelope(bytes, kind) {
   let envelope;
   try { envelope = deserialize(bytes); }
@@ -93,8 +98,7 @@ export class AtomicV8Journal {
     if (!Array.isArray(operations)) throw new TypeError('operations must be an array');
     const dir = path.dirname(this.#filePath);
     ensureDirectoryEntriesDurable(dir);
-    const payload = serialize(operations);
-    const bytes = serialize({ schema_version: SCHEMA_VERSION, kind: this.#kind, payload, checksum: digest(payload) });
+    const bytes = encodeEnvelope(operations,this.#kind);
     const temp = `${this.#filePath}.tmp-${process.pid}-${crypto.randomBytes(6).toString('hex')}`;
     let fd;
     let renamed = false;
@@ -117,6 +121,82 @@ export class AtomicV8Journal {
       if (fs.existsSync(temp)) { try { fs.unlinkSync(temp); } catch {} }
     }
   }
+}
+
+// CP143: optional PREPROD-only SQLite storage adapter for the existing journals.
+// No automatic fallback, migration, new scheduler or change to ATOMIC_V8.
+const SQLITE_APP_ID = 1128616786;
+const sqliteRequire = createRequire(import.meta.url);
+export class SqliteV8JournalLab {
+  #filePath; #kind; #revision=null; #poisoned=false;
+  constructor({file_path,kind}) {
+    this.#filePath=path.resolve(nonEmpty(file_path,'file_path'));
+    this.#kind=nonEmpty(kind,'kind');
+    if(path.extname(this.#filePath).toLowerCase()!=='.sqlite')throw Error('SQLITE_LAB_EXPLICIT_PATH_REQUIRED');
+    if(!fs.statSync(path.dirname(this.#filePath)).isDirectory())throw Error('SQLITE_LAB_PREPROVISIONED_DIRECTORY_REQUIRED');
+  }
+  get file_path(){return this.#filePath;}
+  get kind(){return this.#kind;}
+  get poisoned(){return this.#poisoned;}
+  #identity(db) {
+    if(db.prepare('PRAGMA application_id').get().application_id!==SQLITE_APP_ID || db.prepare('PRAGMA user_version').get().user_version!==1)throw Error('SQLITE_LAB_UNKNOWN_DATABASE');
+  }
+  #open(allowCreate=false) {
+    const {DatabaseSync}=sqliteRequire('node:sqlite');
+    let fresh=false;
+    if(!fs.existsSync(this.#filePath)){
+      if(!allowCreate)throw Error('SQLITE_LAB_JOURNAL_MISSING');
+      const fd=fs.openSync(this.#filePath,'wx',0o600);fs.closeSync(fd);fresh=true;
+    }
+    if(!fresh){
+      const reader=new DatabaseSync(this.#filePath,{readOnly:true});
+      try{this.#identity(reader);}finally{reader.close();}
+    }
+    const db=new DatabaseSync(this.#filePath);
+    try{
+      if(!fresh)this.#identity(db);
+      db.exec('PRAGMA busy_timeout=5000; PRAGMA trusted_schema=OFF; PRAGMA synchronous=EXTRA;');
+      if(db.prepare('PRAGMA journal_mode=DELETE').get().journal_mode!=='delete'||db.prepare('PRAGMA synchronous').get().synchronous!==3)throw Error('SQLITE_LAB_DURABILITY_UNAVAILABLE');
+      if(fresh){
+        db.exec('BEGIN IMMEDIATE');
+        db.exec('PRAGMA application_id='+SQLITE_APP_ID+'; PRAGMA user_version=1; CREATE TABLE journal (id INTEGER PRIMARY KEY CHECK(id=1), kind TEXT NOT NULL, revision INTEGER NOT NULL CHECK(revision>=0), envelope BLOB NOT NULL);');
+        db.prepare('INSERT INTO journal VALUES (1,?,0,?)').run(this.#kind,encodeEnvelope([],this.#kind));
+        db.exec('COMMIT');
+      }
+      this.#identity(db);return db;
+    }catch(error){try{db.close();}catch{}throw error;}
+  }
+  #read(db){
+    const row=db.prepare('SELECT kind,revision,envelope FROM journal WHERE id=1').get();
+    if(!row||row.kind!==this.#kind||!Number.isSafeInteger(row.revision)||row.revision<0)throw Error('SQLITE_LAB_JOURNAL_SCOPE_INVALID');
+    return {revision:row.revision,operations:decodeEnvelope(Buffer.from(row.envelope),this.#kind)};
+  }
+  load(){
+    if(this.#poisoned)throw Error('SQLITE_LAB_JOURNAL_POISONED_REOPEN_REQUIRED');
+    const db=this.#open(true);
+    try{const row=this.#read(db);this.#revision=row.revision;return row.operations;}
+    finally{db.close();}
+  }
+  commit(operations){
+    if(this.#poisoned||this.#revision===null)throw Error('SQLITE_LAB_JOURNAL_REOPEN_REQUIRED');
+    if(!Array.isArray(operations))throw TypeError('operations must be an array');
+    const bytes=encodeEnvelope(operations,this.#kind);
+    let db;
+    try{
+      db=this.#open(false);db.exec('BEGIN IMMEDIATE');
+      const row=this.#read(db);
+      if(row.revision!==this.#revision)throw Error('SQLITE_LAB_STALE_WRITER_REOPEN_REQUIRED');
+      if(this.#revision>=Number.MAX_SAFE_INTEGER)throw Error('SQLITE_LAB_REVISION_LIMIT');
+      const updated=db.prepare('UPDATE journal SET revision=revision+1,envelope=? WHERE id=1 AND revision=? AND kind=?').run(bytes,this.#revision,this.#kind);
+      if(updated.changes!==1)throw Error('SQLITE_LAB_CAS_FAILED');
+      db.exec('COMMIT');db.close();db=null;this.#revision++;
+    }catch(error){this.#poisoned=true;if(db){try{db.exec('ROLLBACK');}catch{}try{db.close();}catch{}}throw error;}
+  }
+}
+export function createRuntimeJournal({file_path,kind,journal_backend='ATOMIC_V8'}){
+  if(journal_backend==='ATOMIC_V8')return new AtomicV8Journal({file_path,kind});
+  if(journal_backend==='SQLITE_V8_LAB')return new SqliteV8JournalLab({file_path,kind});
+  throw Error('UNKNOWN_JOURNAL_BACKEND');
 }
 
 function replayEvents(operations) {
@@ -181,9 +261,9 @@ export class PersistentEventBus {
   #operations;
   #bus;
 
-  constructor({ file_path, environment = PREPROD }) {
+  constructor({ file_path, environment = PREPROD, journal_backend = 'ATOMIC_V8' }) {
     if (environment !== PREPROD) throw new Error('EVT-001 persistent V0 accepts exact PREPROD only');
-    this.#journal = new AtomicV8Journal({ file_path, kind: 'EVT-001' });
+    this.#journal = createRuntimeJournal({ file_path, kind: 'EVT-001', journal_backend });
     this.#operations = this.#journal.load();
     this.#bus = replayEvents(this.#operations).bus;
   }
