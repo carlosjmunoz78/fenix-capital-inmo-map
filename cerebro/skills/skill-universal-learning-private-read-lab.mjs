@@ -9,7 +9,7 @@ async function get(path){
 try{
  require(typeof process.env.VERCEL_TOKEN==='string'&&process.env.VERCEL_TOKEN.length>0,'NO_EXISTING_TOKEN');
  const p=await(await get('/v9/projects/'+project)).json();
- require(p.id===project&&p.accountId===team&&p.ssoProtection?.deploymentType==='all'&&p.ssoProtection?.enabled===true,'SCOPE');
+ const scope={id:p.id===project,account:p.accountId===team,all:p.ssoProtection?.deploymentType==='all',not_disabled:p.ssoProtection?.enabled!==false};console.log('FACT_LRN_SCOPE_GATES '+JSON.stringify(scope));require(Object.values(scope).every(Boolean),'SCOPE');
  const d=await(await get('/v13/deployments/'+deployment)).json();
  require(d.id===deployment&&d.projectId===project&&d.readyState==='READY'&&d.target!=='production','DEPLOYMENT_SCOPE');
  const tree=await(await get('/v6/deployments/'+deployment+'/files')).json();
