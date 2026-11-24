@@ -27,3 +27,26 @@ jobs:
 
       - name: Verify authenticated atomic persistence contract with synthetic identities and temporary SQLite
         run: node --test cerebro/skills/skill-private-commit-v1.test.mjs
+  machine-canary:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/lab/skill-chatgpt-evolution-bridge-20261124' && github.event_name == 'push' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: One-shot FACT machine canary; no candidate changes or provider calls
+        run: |
+          node --input-type=module <<'JS'
+          const url='https://cerebro-fact-skill-canary-lab-eu.carlosj-munozcabeza.workers.dev/v1/canary';
+          const p={company_id:'fenix',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',operation:'duplicate-existing'};
+          const audience='cerebro-fact-skill-canary-20261125';
+          const tokenUrl=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);tokenUrl.searchParams.set('audience',audience);
+          const t=await fetch(tokenUrl,{headers:{Authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'error',signal:AbortSignal.timeout(15000)});if(!t.ok)throw Error('OIDC_TOKEN_UNAVAILABLE');const token=(await t.json()).value;if(typeof token!=='string')throw Error('TOKEN_FORMAT');
+          async function call(body,auth){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(30000)});let v;try{v=await r.json()}catch{throw Error('NON_JSON_'+r.status)}return {http:r.status,v}}
+          const anon=await call(p);if(anon.http!==403||anon.v.code!=='MACHINE_DENIED')throw Error('ANON_NOT_DENIED');
+          const seg=token.split('.');seg[2]=(seg[2][0]==='A'?'B':'A')+seg[2].slice(1);const forged=await call(p,seg.join('.'));if(forged.http!==403||forged.v.code!=='MACHINE_DENIED')throw Error('FORGED_NOT_DENIED');
+          const wrong=await call({...p,company_id:'foreign'},token);if(wrong.http!==403||wrong.v.code!=='SCOPE_DENIED')throw Error('TENANT_NOT_DENIED');
+          for(const expected of ['COMMITTED','ALREADY_COMMITTED']){const r=await call(p,token),v=r.v;if(r.http!==200||v.status!==expected||v.machine!=='GITHUB_OIDC_VERIFIED'||v.distinct_skills!==45||v.revisions!==96||v.binding_count!==1152||v.added!==0||v.receipts!==1||v.provider_calls!==0||v.promotion_authorized!==false)throw Error('CANARY_'+r.http+'_'+String(v.code??v.status));console.log(JSON.stringify(v));}
+          console.log('FACT_MACHINE_CANARY_PASS: anonymous, forged signature, foreign company denied; one durable receipt; duplicate no write; inventory intact.');
+          JS
