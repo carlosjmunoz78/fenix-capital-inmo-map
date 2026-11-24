@@ -44,12 +44,14 @@ const notionSnapshot = notionEvidenceFresh ? Object.freeze({
 const repo = process.env.GITHUB_REPOSITORY ?? '';
 const token = process.env.GITHUB_TOKEN ?? '';
 const targetSha = process.env.TARGET_SHA || process.env.GITHUB_SHA || '';
+const validTargetSha = /^[a-f0-9]{40}$/.test(targetSha);
 let runs = [];
 
 const currentShaEvidencePath = 'artifacts/knowledge-100/current-sha-evidence.json';
 let currentShaEvidence = null;
 try { currentShaEvidence = readJson(currentShaEvidencePath); } catch { currentShaEvidence = null; }
 const currentShaEvidenceValid = Boolean(
+  validTargetSha &&
   currentShaEvidence &&
   currentShaEvidence.state_type === 'CEREBRO_KNOWLEDGE_100_CURRENT_SHA_EVIDENCE' &&
   currentShaEvidence.target_sha === targetSha &&
@@ -112,7 +114,7 @@ function normalizeWorkflowPath(value) {
 function workflowMatches(run, spec) {
   const names = new Set(spec.names ?? []);
   const paths = new Set((spec.paths ?? []).map(normalizeWorkflowPath));
-  return names.has(run?.name) || paths.has(normalizeWorkflowPath(run?.path));
+  return names.has(run?.name) && paths.has(normalizeWorkflowPath(run?.path));
 }
 function latestWorkflowEvidence(spec, {
   exactSha = false,
@@ -122,7 +124,7 @@ function latestWorkflowEvidence(spec, {
 } = {}) {
   const candidates = runs
     .filter((run) => workflowMatches(run, spec))
-    .filter((run) => !exactSha || !targetSha || run.head_sha === targetSha)
+    .filter((run) => !exactSha || (validTargetSha && run.head_sha === targetSha))
     .filter((run) => freshIso(run.updated_at || run.created_at, maxAgeMs))
     .filter((run) => !ignoreSkipped || run.conclusion !== 'skipped')
     .sort((a, b) => Date.parse(b.updated_at || b.created_at || 0) - Date.parse(a.updated_at || a.created_at || 0));
@@ -240,7 +242,7 @@ const staticChecks = {
   provenance: [
     check('skill_provenance_runtime', exists('cerebro/runtime/skill-eval-enhancements-v1.mjs')),
     check('notion_authorized_snapshot', notionEvidenceFresh),
-    check('target_sha', Boolean(targetSha))
+    check('target_sha', validTargetSha)
   ],
   evaluationTribunal: [
     check('tribunal', exists('cerebro/human-intelligence/evaluation/tribunal-v1.mjs')),

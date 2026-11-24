@@ -6,6 +6,7 @@ on:
     paths:
       - 'cerebro/qa/knowledge-100-v0.mjs'
       - 'cerebro/qa/knowledge-100-runner-v1.mjs'
+      - 'cerebro/qa/knowledge-100-evidence.test.mjs'
       - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
       - 'cerebro/human-intelligence/**'
       - 'cerebro/multichannel/**'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'cerebro/qa/knowledge-100-v0.mjs'
       - 'cerebro/qa/knowledge-100-runner-v1.mjs'
+      - 'cerebro/qa/knowledge-100-evidence.test.mjs'
       - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
       - 'cerebro/human-intelligence/**'
       - 'cerebro/multichannel/**'
@@ -54,6 +56,9 @@ jobs:
 
       - name: Install existing repository dependencies reproducibly
         run: npm ci
+
+      - name: Verify evidence selection fails closed
+        run: node --test cerebro/qa/knowledge-100-evidence.test.mjs
 
       - name: Build current-SHA live read-only and rollback evidence pack
         shell: bash
