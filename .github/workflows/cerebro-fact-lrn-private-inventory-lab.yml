@@ -1,0 +1,20 @@
+name: CEREBRO FACT-LRN private inventory LAB
+on:
+  push:
+    branches: [lab/skill-chatgpt-evolution-bridge-20261124]
+    paths: ['.github/workflows/cerebro-fact-lrn-private-inventory-lab.yml','cerebro/skills/skill-universal-learning-private-read-lab.mjs']
+permissions:
+  contents: read
+jobs:
+  private-inventory:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/lab/skill-chatgpt-evolution-bridge-20261124'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Read private snapshot with existing authorized Vercel identity; output aggregate only
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: node cerebro/skills/skill-universal-learning-private-read-lab.mjs
