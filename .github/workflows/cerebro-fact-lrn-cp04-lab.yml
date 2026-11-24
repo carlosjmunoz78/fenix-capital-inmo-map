@@ -11,6 +11,7 @@ permissions:
   contents: read
 jobs:
   integration:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/lab/skill-chatgpt-evolution-bridge-20261124'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
