@@ -1,3 +1,4 @@
+import {learningBinding,fourArmRequirements} from './skill-universal-learning-contract-v1.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -49,6 +50,8 @@ export function buildLabEvaluationPlans(valueReport,{topN=3}={}){
   const plans=eligible.map((item)=>({
     lab_eval_id:planId(item),
     status:'LAB_EVAL_PLAN_ONLY',
+    learning_binding:learningBinding({identity:item.candidate_id,revision_sha256:item.evidence_refs?.manifest_sha256}),
+    learning_comparison:(()=>{const binding=learningBinding({identity:item.candidate_id,revision_sha256:item.evidence_refs?.manifest_sha256});return binding.status==='BOUND_NOT_RUN'?fourArmRequirements(binding):{status:'HOLD_IDENTITY_OR_REVISION',promotion_authorized:false};})(),
     candidate_id:item.candidate_id,
     wrapper_id:item.wrapper_id,
     domain:item.domain,

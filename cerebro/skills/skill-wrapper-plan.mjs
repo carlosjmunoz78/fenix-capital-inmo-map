@@ -1,3 +1,4 @@
+import {learningBinding} from './skill-universal-learning-contract-v1.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -31,6 +32,7 @@ export function buildWrapperPlans(prelab,shortlist,manifests,licenses){
     plans.push({
       wrapper_id:wrapperId(admission.candidate_id,admission.upstream_head_commit??manifest.upstream_head_commit,manifest.sha256),
       status:'WRAPPER_PLAN_ONLY',
+      learning_binding:learningBinding({identity:admission.candidate_id,revision_sha256:manifest.sha256}),
       enabled:false,
       execution_authorized:false,
       install_authorized:false,

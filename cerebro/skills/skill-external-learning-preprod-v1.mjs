@@ -1,3 +1,4 @@
+import {learningBinding,validateLearningBinding,fourArmRequirements,POLICY_SHA256} from './skill-universal-learning-contract-v1.mjs';
 import {createHash} from 'node:crypto';
 import {prepareExternalSkillProposal} from './skill-chatgpt-evolution-bridge-v1.mjs';
 import {buildRsiShadowBridge} from './skill-rsi-shadow-bridge.mjs';
@@ -24,11 +25,13 @@ export function runExternalSkillLearningPreprod({proposal,baseline,candidate,evi
   const skill={company_id:context.company_id,environment:'PREPROD',skill_id:proposal.skill_id,skill_version:proposal.candidate_sha256,capabilities:entry.capabilities,tags:entry.tags??[],inputs:[],outputs:[],permissions:[],risk_class:'MEDIUM',source:'EXTERNAL_SKILL_REVISION_CANDIDATE',...noAuthority()};
   const impact=analyzeSkillImpact({skill,engines});
   if(impact.gap_detected) return {...hold('FACT_CAPABILITY_GAP_REVIEW'),proposal_id:receipt.proposal_id,impact};
-  const plans=buildOldVsNewPlans({skill,impact_analysis:impact});
-  const event_report={events:receipt.events.map(event=>({...event,target_engine_bindings:impact.impacts.map(x=>x.engine_id)}))};
+  const binding=learningBinding({identity:proposal.skill_id,revision_sha256:proposal.candidate_sha256});
+  validateLearningBinding(binding);
+  const plans=buildOldVsNewPlans({skill,impact_analysis:impact}).map(plan=>({...plan,learning_binding:binding,learning_comparison:fourArmRequirements(binding)}));
+  const event_report={events:receipt.events.map(event=>({...event,evidence_refs:[...event.evidence_refs,'learning-policy-sha256:'+POLICY_SHA256],target_engine_bindings:impact.impacts.map(x=>x.engine_id)}))};
   const shadow=buildRsiShadowBridge(event_report,observed_at?{observedAt:observed_at}:{});
   if(shadow.bridge_status!=='SHADOW_BRIDGE_GREEN'||shadow.learning_candidates_valid!==1) return hold('LRN_SHADOW_NOT_GREEN');
   const worker=runLearningWorkerOnce({event_report,ledger_file,preprod_version,environment:'PREPROD',policy_pass:true,security_pass:true,local_persistence_enabled:true,observed_at});
   const accepted=worker.status==='GREEN'&&worker.learning_candidates_valid===1&&worker.persisted_total+worker.duplicates_total===1;
-  return {status:accepted?'LRN_CANDIDATE_RECORDED':'HOLD',proposal_id:receipt.proposal_id,impact,plans,learning:{persisted_total:worker.persisted_total,duplicates_total:worker.duplicates_total,held_total:worker.held_total,bridge_status:worker.bridge_status},next_gate:accepted?'CONTROLLED_OLD_VS_NEW_AND_TRIBUNAL':'REVIEW_LRN_INGRESS',...noAuthority()};
+  return {status:accepted?'LRN_CANDIDATE_RECORDED':'HOLD',proposal_id:receipt.proposal_id,impact,plans,learning_binding:binding,learning:{persisted_total:worker.persisted_total,duplicates_total:worker.duplicates_total,held_total:worker.held_total,bridge_status:worker.bridge_status},next_gate:accepted?'CONTROLLED_OLD_VS_NEW_AND_TRIBUNAL':'REVIEW_LRN_INGRESS',...noAuthority()};
 }

@@ -1,0 +1,19 @@
+name: CEREBRO FACT-LRN CP04 LAB integration
+on:
+  push:
+    branches: [lab/skill-chatgpt-evolution-bridge-20261124]
+    paths:
+      - 'cerebro/skills/skill-universal-learning-contract-v1.mjs'
+      - '.github/workflows/cerebro-fact-lrn-cp04-lab.yml'
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Exercise existing FACT and LRN paths with synthetic fixtures
+        run: node --test cerebro/skills/skill-universal-learning-contract-v1.test.mjs cerebro/skills/skill-chatgpt-evolution-bridge-v1.test.mjs cerebro/skills/skill-external-learning-preprod-v1.test.mjs

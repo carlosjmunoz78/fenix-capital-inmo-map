@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {learningBinding,validateLearningBinding,fourArmRequirements,POLICY_SHA256} from './skill-universal-learning-contract-v1.mjs';
+import {buildWrapperPlans} from './skill-wrapper-plan.mjs';
+import {buildLabEvaluationPlans} from './skill-lab-eval-plan.mjs';
+const sha='a'.repeat(64),id='synthetic-factory-candidate';
+test('exact CP04 policy and 12 mechanisms',()=>{assert.equal(POLICY_SHA256,'225094152d5e676bddb52dde8238595d15b0baa6c7930fbd7e279ffd96da5fbc');const b=learningBinding({identity:id,revision_sha256:sha});assert.equal(Object.keys(b.mechanisms).length,12);assert.equal(validateLearningBinding(b),true);for(const k of Object.keys(b.mechanisms)){const x=structuredClone(b);delete x.mechanisms[k];assert.throws(()=>validateLearningBinding(x))}});
+test('canonical FACT wrapper inherits policy automatically',()=>{const p=buildWrapperPlans({results:[{candidate_id:id,prelab_state:'STATIC_PRELAB_READY_INSTRUCTION_ONLY'}]},{results:[{candidate_id:id,top_domain:'software-engineering-devops'}]},{results:[{candidate_id:id,sha256:sha}]},{results:[]});assert.equal(p.plans.length,1);assert.equal(validateLearningBinding(p.plans[0].learning_binding),true);assert.equal(p.plans[0].enabled,false)});
+test('canonical eval planner carries four equal-resource arms',()=>{const p=buildLabEvaluationPlans({results:[{candidate_id:id,wrapper_id:'synthetic-wrapper',domain:'software-engineering-devops',recommendation:'LAB_BENCHMARK',evidence_refs:{manifest_sha256:sha}}]});assert.equal(p.plans.length,1);assert.equal(validateLearningBinding(p.plans[0].learning_binding),true);assert.deepEqual(p.plans[0].learning_comparison.arms.map(x=>x.arm),['GPT_BASE','CHAMPION','EXTERNAL','CHALLENGER']);assert.equal(p.plans[0].learning_comparison.promotion_authorized,false)});
+test('absent hash does not invent enrollment',()=>{const b=learningBinding({identity:id});assert.equal(b.status,'HOLD_IDENTITY_OR_REVISION');assert.throws(()=>fourArmRequirements(b))});
+test('forged completion rejected',()=>{const b=learningBinding({identity:id,revision_sha256:sha});b.mechanisms.M01_SCOUT.execution='PASS';assert.throws(()=>validateLearningBinding(b))});
