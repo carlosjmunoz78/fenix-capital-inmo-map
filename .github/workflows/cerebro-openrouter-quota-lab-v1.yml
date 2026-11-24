@@ -2,7 +2,7 @@ name: CEREBRO OpenRouter quota LAB one-shot
 on:
   push:
     branches: [lab/openrouter-quota-v1-20261124]
-    paths: ['.github/workflows/cerebro-openrouter-quota-lab-v1.yml']
+    paths: ['.github/workflows/cerebro-openrouter-quota-lab-v1.yml', 'cerebro/router/openrouter-lab/dispatch.mjs']
 permissions:
   contents: write
 concurrency:

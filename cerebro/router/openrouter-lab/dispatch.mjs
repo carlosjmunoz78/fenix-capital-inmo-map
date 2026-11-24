@@ -8,8 +8,8 @@ const api=async(path,opts={})=>fetch('https://api.vercel.com'+path+'?teamId='+te
 try{
  if(mode==='preflight'){
   const r=await api('/v9/projects/'+project);if(!r.ok){console.log('HOLD_VERCEL_PROJECT_HTTP_'+r.status);process.exit(4)}
-  const p=await r.json();if(p.id!==project||p.name!==name||p.accountId!==team||p.ssoProtection?.enabled!==true){console.log('HOLD_PROJECT_SCOPE');process.exit(4)}
-  console.log('VERCEL_PRIVATE_LAB_PREFLIGHT_OK');console.log('GITHUB_OPENROUTER_SECRET_PRESENT='+Boolean(process.env.OPENROUTER_API_KEY));process.exit(0);
+  const p=await r.json();const gates={id:p.id===project,name:p.name===name,account:p.accountId===team,sso_all:p.ssoProtection?.deploymentType==='all'&&p.ssoProtection?.enabled!==false};console.log('PROJECT_SCOPE_GATES '+JSON.stringify(gates));console.log('GITHUB_OPENROUTER_SECRET_PRESENT='+Boolean(process.env.OPENROUTER_API_KEY));if(!Object.values(gates).every(Boolean)){console.log('HOLD_PROJECT_SCOPE');process.exit(4)}
+  console.log('VERCEL_PRIVATE_LAB_PREFLIGHT_OK');process.exit(0);
  }
  if(mode!=='dispatch'||process.env.CEREBRO_RESERVATION_CONFIRMED!=='true'){console.log('HOLD_RESERVATION');process.exit(4)}
  const body={name,project,files:[{file:'vercel.json',encoding:'utf-8',data:JSON.stringify({framework:null,installCommand:'echo No dependencies',buildCommand:'node probe.mjs',outputDirectory:'out'})},{file:'probe.mjs',encoding:'utf-8',data:fs.readFileSync(new URL('./probe.mjs',import.meta.url),'utf8')}],meta:{cerebro:'OPENROUTER_QUOTA_LAB_V1',cost_policy:'FIXED_PUBLIC_ONE_SHOT_NO_RETRY'}};
