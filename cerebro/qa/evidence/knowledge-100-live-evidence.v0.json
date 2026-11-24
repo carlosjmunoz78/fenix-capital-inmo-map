@@ -7,7 +7,7 @@
   "version": "v0",
   "observed_at": "2026-11-23T19:40:14.491Z",
   "observed_repo_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1",
-  "evidence_method": "AUTHORIZED_NOTION_CONNECTOR_DIRECT_PAGE_READ_ONLY",
+  "evidence_method": "AUTHORIZED_NOTION_CONNECTOR_DIRECT_PAGE_READ_AND_LIVE_SEARCH",
   "notion_sources": [
     {
       "id": "3f781b1a-756d-8165-8d6d-e8853d3c41e3",
@@ -31,7 +31,7 @@
     }
   ],
   "assertions": {
-    "notion_live_search_available": null,
+    "notion_live_search_available": true,
     "human_intelligence_master_found": true,
     "knowledge_foundry_found": true,
     "knowledge_router_found": true,
@@ -46,8 +46,27 @@
     "verification_method": "NOTION_FETCH_DIRECT_BY_STABLE_PAGE_ID",
     "verified_on": "2026-11-23T19:40:14.491Z",
     "verified_source_count": 4,
-    "scope": "PAGE_EXISTS_AND_CONTENT_RETRIEVABLE; DOES_NOT_PROVE_INDEX_SEARCH_OR_AUTONOMOUS_RAG",
-    "read_only": true
+    "scope": "PAGE_EXISTS_AND_CONTENT_RETRIEVABLE; LIVE_CONNECTOR_SEARCH_VERIFIED; DOES_NOT_PROVE_AUTONOMOUS_RAG",
+    "read_only": true,
+    "search_verification": {
+      "observed_date_local": "2026-11-24",
+      "timezone": "Europe/Madrid",
+      "verified_source_count": 4,
+      "method": "LIVE_NOTION_SEARCH_EXACT_STABLE_ID_MATCH",
+      "connectors": [
+        "Notion",
+        "CEREBRO Notion Universal"
+      ],
+      "matched_source_ids": [
+        "3f781b1a-756d-8165-8d6d-e8853d3c41e3",
+        "3f781b1a-756d-81ad-8a1d-cc9c33fff720",
+        "3c081b1a-756d-810e-8361-c19b018761fa",
+        "3f781b1a-756d-8119-93c9-da74aec6855d"
+      ],
+      "read_only": true,
+      "scope": "CONNECTOR_SEARCH_ONLY; NOT RAG OR AUTONOMOUS_PROD_RUNTIME",
+      "freshness_policy": "Original observed_at retained; no TTL extension from search alone."
+    }
   },
   "contains_customer_data": false,
   "contains_secrets": false,
