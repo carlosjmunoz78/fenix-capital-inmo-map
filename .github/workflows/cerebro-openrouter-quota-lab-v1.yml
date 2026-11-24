@@ -1,0 +1,47 @@
+name: CEREBRO OpenRouter quota LAB one-shot
+on:
+  push:
+    branches: [lab/openrouter-quota-v1-20261124]
+    paths: ['.github/workflows/cerebro-openrouter-quota-lab-v1.yml']
+permissions:
+  contents: write
+concurrency:
+  group: cerebro-openrouter-account-lab-v1
+  cancel-in-progress: false
+jobs:
+  quota-and-smoke:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref == 'refs/heads/lab/openrouter-quota-v1-20261124' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Test quota decisions
+        run: node --test cerebro/router/openrouter-lab/quota.test.mjs
+      - name: Verify authorized private Vercel LAB
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: node cerebro/router/openrouter-lab/dispatch.mjs preflight
+      - name: Persist reservation atomically before dispatch
+        shell: bash
+        env:
+          CEREBRO_RESERVATION_ID: gh-${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          BRANCH=lab/openrouter-quota-v1-20261124
+          git fetch origin "refs/heads/$BRANCH"
+          test "$(git rev-parse FETCH_HEAD)" = "$(git rev-parse HEAD)"
+          node cerebro/router/openrouter-lab/quota.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- cerebro/router/openrouter-lab/quota-state.json
+          git commit -m "LAB: reserve one OpenRouter learning slot before dispatch"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          echo "CEREBRO_RESERVATION_CONFIRMED=true" >> "$GITHUB_ENV"
+      - name: Send one controlled preview deployment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: node cerebro/router/openrouter-lab/dispatch.mjs dispatch

@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {reserve,LIMITS} from './quota.mjs';
+const now=1800000000000;
+const initial=()=>({version:1,last_seen:now-100000,halted:false,attempts:[]});
+const call=(s,id,bucket='learning',t=now)=>reserve(s,{id,bucket,now:t});
+test('learning preserves 45 other slots',()=>{let s=initial();for(let i=0;i<5;i++){const r=call(s,'a'+i);assert.equal(r.status,'RESERVED');s=r.state}assert.equal(call(s,'overflow').status,'HOLD_BUCKET_LIMIT');assert.equal(call(s,'ops','operativa').status,'RESERVED');assert.equal(LIMITS.total-LIMITS.learning,45)});
+test('global and per-bucket limits including separate minutes',()=>{let s=initial();let k=0;for(const [b,n] of Object.entries({operativa:30,research:10,learning:5,incident:5})){for(let i=0;i<n;i++){const r=call(s,'id'+k,b,now+k*61000);assert.equal(r.status,'RESERVED');s=r.state;k++}}assert.equal(call(s,'new','incident',now+k*61000).status,'HOLD_GLOBAL_LIMIT')});
+test('minute cap',()=>{let s=initial();for(let i=0;i<20;i++)s=call(s,'id'+i,'operativa').state;assert.equal(call(s,'next','research').status,'HOLD_MINUTE_LIMIT')});
+test('duplicate never resends even after day rollover',()=>{const s=call(initial(),'one').state;assert.equal(call(s,'one','learning',now+86400001).status,'HOLD_DUPLICATE')});
+test('rolling day expiry',()=>{let s=initial();for(let i=0;i<5;i++)s=call(s,'id'+i).state;assert.equal(call(s,'new','learning',now+86400001).status,'RESERVED')});
+test('clock rollback denied',()=>{const s=call(initial(),'one').state;assert.equal(call(s,'two','learning',now-1).status,'HOLD_STATE_OR_INPUT')});
+test('halt flag denied',()=>assert.equal(call({...initial(),halted:true},'one').status,'HOLD_STATE_OR_INPUT'));
+test('invalid bucket denied',()=>assert.equal(call(initial(),'one','untrusted').status,'HOLD_STATE_OR_INPUT'));
+test('malformed state fails closed',()=>assert.equal(call({...initial(),attempts:[{id:'x',bucket:'learning',ts:Infinity}]},'one').status,'HOLD_CORRUPT_LEDGER'));
+test('duplicate historical ledger fails closed',()=>{const a={id:'x',bucket:'learning',ts:now-100000};assert.equal(call({...initial(),attempts:[a,a]},'one').status,'HOLD_CORRUPT_LEDGER')});
+test('three historical attempts retain only two learning slots',()=>{let s=initial();s.attempts=[1,2,3].map(i=>({id:'prior-'+i,bucket:'learning',ts:now-100000}));for(let i=0;i<2;i++)s=call(s,'new'+i).state;assert.equal(call(s,'third').status,'HOLD_BUCKET_LIMIT')});

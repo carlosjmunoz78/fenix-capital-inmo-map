@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "last_seen": 1795542471000,
+  "halted": false,
+  "attempts": [
+    {
+      "id": "historical-public-probe-01",
+      "bucket": "learning",
+      "ts": 1795542386211
+    },
+    {
+      "id": "historical-public-probe-02",
+      "bucket": "learning",
+      "ts": 1795542416006
+    },
+    {
+      "id": "historical-public-probe-03",
+      "bucket": "learning",
+      "ts": 1795542471000
+    }
+  ]
+}

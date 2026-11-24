@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "engine_id": "ROUTE-001",
+  "environment": "LAB",
+  "status": "CANDIDATE_ONE_SHOT_ONLY",
+  "provider": "openrouter",
+  "private_skill_data_allowed": false,
+  "additional_cost_eur": 0,
+  "automatic_paid_fallback": false,
+  "learning_limit": 5,
+  "global_limit": 50,
+  "other_task_reserve": 45,
+  "quota_authority": "single Git ref with non-force push CAS and job concurrency",
+  "limitations": [
+    "Only controlled callers; external account usage not verified",
+    "Preview build can be manually redeployed; no autonomous release until non-replayable runtime dispatch and exclusive credential ownership",
+    "Only fixed public synthetic inference",
+    "Vercel Hobby capacity and production use not certified"
+  ],
+  "rollback": "Disable isolated workflow; retain ledger history and all prior deployments; no changes to main or existing engines"
+}
