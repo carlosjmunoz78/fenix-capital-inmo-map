@@ -4,6 +4,12 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
+      - '.github/workflows/cerebro-knowledge-100-v0.yml'
+      - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
+      - 'cerebro/qa/knowledge-100-evidence.test.mjs'
+      - 'cerebro/qa/knowledge-100-runner-v1.mjs'
+      - 'cerebro/qa/knowledge-100-v0.mjs'
       - 'cerebro/human-intelligence/**'
       - 'cerebro/multichannel/**'
       - 'cerebro/multicompany/digital-footprint-scanner-v1.mjs'
@@ -79,6 +85,7 @@ jobs:
           node-version: 24
           cache: npm
       - name: Assert exact PR head and strict Human Intelligence surface
+        id: scope
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
@@ -87,6 +94,28 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
           if [ -n "${PR_BASE_SHA:-}" ]; then git fetch origin "$PR_BASE_SHA" --depth=1; base="$PR_BASE_SHA"; else git fetch origin main --depth=1; base="$(git rev-parse FETCH_HEAD)"; fi
           changed="$(git diff --name-only "$base" HEAD)"
+          # CP142: explicit narrow Knowledge-only candidate route. No authority change.
+          # An actual PR base is required; manual/no-op runs cannot certify this scope.
+          if [ -n "${PR_BASE_SHA:-}" ] && [ -n "$changed" ]; then
+            knowledge_only=true
+            while IFS= read -r file; do
+              case "$file" in
+                .github/workflows/cerebro-continuous-human-qa-v0.yml) ;;
+                .github/workflows/cerebro-knowledge-100-v0.yml) ;;
+                cerebro/qa/evidence/knowledge-100-live-evidence.v0.json) ;;
+                cerebro/qa/knowledge-100-evidence.test.mjs) ;;
+                cerebro/qa/knowledge-100-runner-v1.mjs) ;;
+                cerebro/qa/knowledge-100-v0.mjs) ;;
+                .github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml) ;;
+                *) knowledge_only=false ;;
+              esac
+            done <<< "$changed"
+            if [ "$knowledge_only" = true ] && printf '%s\n' "$changed" | grep -Fx 'cerebro/qa/knowledge-100-v0.mjs' >/dev/null; then
+              echo 'knowledge_scope=true' >> "$GITHUB_OUTPUT"
+              echo "base_sha=$base" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
           # This readiness gate is domain-scoped. RSI workflow edits can trigger it
           # on JARVIS-only PRs; those PRs must not be treated as Human Intelligence promotions.
           human_surface='^(cerebro/human-intelligence/|cerebro/multichannel/|cerebro/multicompany/(digital-footprint-scanner-v1|post-scan-parallel-v1)\.mjs$|cerebro/tests/(human-intelligence-|multichannel-conversation-|channel-access-profiles-|continuous-human-qa-|scan001-|post-scan-parallel-)|cerebro/contracts/creative-output-pipeline-v1\.contract\.json$|cerebro/registry/creative-tool-capabilities\.v1\.json$|cerebro/runtime/creative-(job-runner|output-pipeline)-v1\.mjs$|supabase/functions/(cerebro-human-|cerebro-console-gateway-human-|cerebro-console-human-router-zero-|cerebro-telegram-|cerebro-creative-dispatch-v1/)|supabase/migrations/(20261012132000_|20261013010500_|20261013042000_|20261013093000_|20261013101500_|20261024103)|docs/CEREBRO_CREATIVE_OUTPUT_PIPELINE_V1_2026-10-24\.md$)'
@@ -182,3 +211,18 @@ jobs:
         run: |
           echo 'Human Intelligence readiness reuses existing LRN-001 and Continuous Human QA; multichannel surfaces only wrap passive conversation, require OLD-vs-NEW non-regression evidence, and preserve each channel authority.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Exact PREPROD Company Registry, COMP-ONB, SCAN-001 and post-SCAN persistence are service-role only, tenant fail-closed/read-only and grant no PROD writes, secrets disclosure or Trading access.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Assert applicable Knowledge readiness CP142
+        if: github.event_name == 'pull_request' && steps.scope.outputs.knowledge_scope == 'true'
+        shell: bash
+        env:
+          VERIFIED_BASE: ${{ steps.scope.outputs.base_sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$VERIFIED_BASE" =~ ^[0-9a-f]{40}$ ]]
+          test "$VERIFIED_BASE" = "$PR_BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+          git diff --quiet "$VERIFIED_BASE" HEAD -- src/ public/ tests/ scripts/ supabase/ .github/workflows/prod-runtime-smoke.yml
+          node --test cerebro/qa/knowledge-100-evidence.test.mjs
+          echo 'Knowledge candidate readiness only; no promotion, deployment, write, grant or spending authorized.' >> "$GITHUB_STEP_SUMMARY"

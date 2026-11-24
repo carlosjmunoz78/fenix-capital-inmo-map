@@ -38,3 +38,15 @@ test('wrong job attempt cannot certify the candidate',()=>assert.equal(qa(runFix
 test('unavailable job evidence is HOLD',()=>assert.equal(qa(runFixture(SHA,[row()],[],403)).accepted,false));
 test('duplicate matching jobs are rejected',()=>assert.equal(qa(runFixture(SHA,[row()],[job(),job({id:10})])).accepted,false));
 test('missing run attempt is HOLD',()=>assert.equal(qa(runFixture(SHA,[row({run_attempt:undefined})])).accepted,false));
+
+const readiness = report => report.live_evidence.workflows.promotion_readiness;
+const readinessRow = extra => row({id:2,name:'CEREBRO Human Intelligence Promotion Readiness V1',path:'.github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml',event:'pull_request',...extra});
+const readinessJob = extra => job({id:10,run_id:2,name:'scoped-readiness',steps:[{name:'Assert applicable Knowledge readiness CP142',status:'completed',conclusion:'success'}],...extra});
+test('exact applicable readiness accepted',()=>assert.equal(readiness(runFixture(SHA,[readinessRow()],[readinessJob()])).accepted,true));
+test('unrelated candidate readiness not accepted',()=>assert.equal(readiness(runFixture(SHA,[readinessRow({head_sha:OTHER})],[readinessJob()])),null));
+test('manual readiness cannot prove PR applicability',()=>assert.equal(readiness(runFixture(SHA,[readinessRow({event:'workflow_dispatch'})],[readinessJob()])).accepted,false));
+test('successful N/A without applicable marker is HOLD',()=>assert.equal(readiness(runFixture(SHA,[readinessRow()],[readinessJob({steps:[]})])).accepted,false));
+test('skipped readiness marker is HOLD',()=>assert.equal(readiness(runFixture(SHA,[readinessRow()],[readinessJob({steps:[{name:'Assert applicable Knowledge readiness CP142',status:'completed',conclusion:'skipped'}]})])).accepted,false));
+test('different attempt and wrong job SHA fail closed',()=>{for(const wrong of [{run_attempt:2},{head_sha:OTHER},{run_id:3}])assert.equal(readiness(runFixture(SHA,[readinessRow()],[readinessJob(wrong)])).accepted,false);});
+test('latest failure cannot be masked by old readiness success',()=>assert.equal(readiness(runFixture(SHA,[readinessRow({updated_at:new Date(Date.now()-5000).toISOString()}),readinessRow({id:3,conclusion:'failure'})],[readinessJob()])).accepted,false));
+test('readiness API unavailable and duplicate job fail closed',()=>{assert.equal(readiness(runFixture(SHA,[readinessRow()],[],403)).accepted,false);assert.equal(readiness(runFixture(SHA,[readinessRow()],[readinessJob(),readinessJob({id:11})])).accepted,false);});

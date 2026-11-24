@@ -185,11 +185,29 @@ async function certifyHumanQa(evidence) {
   } catch { return deny('QA_JOB_EVIDENCE_UNAVAILABLE'); }
 }
 
+// An applicable exact-candidate readiness result is required, not a green N/A run.
+async function certifyKnowledgeReadiness(evidence) {
+  if (!evidence?.accepted) return evidence;
+  const deny = (reason) => Object.freeze({...evidence, accepted:false, readiness_reason:reason});
+  if (evidence.event !== 'pull_request' || evidence.head_sha !== targetSha || !Number.isSafeInteger(evidence.id) || evidence.id < 1 || !Number.isSafeInteger(evidence.run_attempt) || evidence.run_attempt < 1 || !repo || !token) return deny('READINESS_SCOPE_OR_ATTEMPT_MISSING');
+  try {
+    const url = `https://api.github.com/repos/${repo}/actions/runs/${evidence.id}/attempts/${evidence.run_attempt}/jobs?per_page=100`;
+    const response = await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}});
+    if (!response.ok) return deny('READINESS_JOB_EVIDENCE_UNAVAILABLE');
+    const body = await response.json();
+    const jobs = Array.isArray(body.jobs) ? body.jobs.filter(j=>j.name==='scoped-readiness') : [];
+    if (jobs.length!==1 || jobs[0].status!=='completed' || jobs[0].conclusion!=='success' || jobs[0].run_id!==evidence.id || jobs[0].run_attempt!==evidence.run_attempt || jobs[0].head_sha!==targetSha) return deny('READINESS_JOB_SCOPE_OR_RESULT_INVALID');
+    const steps=(jobs[0].steps??[]).filter(s=>s.name==='Assert applicable Knowledge readiness CP142');
+    if(steps.length!==1 || steps[0].status!=='completed' || steps[0].conclusion!=='success') return deny('READINESS_APPLICABILITY_NOT_PROVEN');
+    return Object.freeze({...evidence,readiness_reason:'EXACT_KNOWLEDGE_CANDIDATE_READINESS_NO_PROMOTION',readiness_job_id:jobs[0].id});
+  } catch { return deny('READINESS_JOB_EVIDENCE_UNAVAILABLE'); }
+}
+
 const workflowEvidence = Object.freeze({
   human_qa: await certifyHumanQa(latestWorkflowEvidence(WF.humanQa, { exactSha: true, maxAgeMs: 24 * HOUR, evidenceScope: 'EXACT_TARGET_SHA' })),
   prod_runtime_smoke: latestWorkflowEvidence(WF.runtimeSmoke, { maxAgeMs: 24 * HOUR, evidenceScope: 'RECENT_PROD_ENVIRONMENT' }),
   full_owner_100: latestWorkflowEvidence(WF.owner100, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
-  promotion_readiness: latestWorkflowEvidence(WF.promotionReadiness, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
+  promotion_readiness: await certifyKnowledgeReadiness(latestWorkflowEvidence(WF.promotionReadiness, { exactSha:true, maxAgeMs:24 * HOUR, evidenceScope:'EXACT_TARGET_SHA' })),
   session_context_regression: latestWorkflowEvidence(WF.sessionRegression, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   multichannel_unification: latestWorkflowEvidence(WF.multichannel, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   lrn001_ingress: latestWorkflowEvidence(WF.learningIngress, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
@@ -384,13 +402,14 @@ const report = {
     stale_success_cannot_mask_newer_completed_failure: true,
     exact_target_sha_required_for: [
       'continuous_human_qa',
+      'applicable_knowledge_promotion_readiness',
       'real_domain_contract_and_live_readonly_probe',
       'old_new_tribunal_contract',
       'rollback_no_deploy_rehearsal'
     ],
     recent_prod_environment_allowed_for: ['prod_runtime_smoke'],
     recent_canonical_gate_allowed_for: [
-      'full_owner_100', 'promotion_readiness', 'session_context_regression', 'multichannel_unification', 'lrn001_ingress'
+      'full_owner_100', 'session_context_regression', 'multichannel_unification', 'lrn001_ingress'
     ]
   },
   safety: {

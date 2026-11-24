@@ -39,9 +39,9 @@ async function loadCanonicalWorkflowRuns() {
   if (!repo || !token) return [];
   const output = [];
   for (const workflowFile of canonicalWorkflowFiles) {
-    // Human QA must match the exact candidate, not merely a recent run.
+    // Human QA and applicable Knowledge Readiness must match the exact candidate.
     // Do not broaden the lookup if the target is missing or malformed.
-    const exactHumanQa = workflowFile === 'cerebro-continuous-human-qa-v0.yml';
+    const exactHumanQa = ['cerebro-continuous-human-qa-v0.yml','cerebro-human-intelligence-promotion-readiness-v1.yml'].includes(workflowFile);
     if (exactHumanQa && !validTargetSha) continue;
     const shaFilter = exactHumanQa ? `&head_sha=${encodeURIComponent(targetSha)}` : '';
     const url = `https://api.github.com/repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=20${shaFilter}`;
