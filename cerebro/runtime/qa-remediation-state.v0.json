@@ -5,7 +5,7 @@
   "engine_id": "SELF-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-11-24T19:33:11.705Z",
+  "updated_at": "2026-11-25T03:34:27.094Z",
   "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
   "open_cases": 5,
   "bug_cases": 2,
@@ -161,7 +161,7 @@
       ],
       "source_type": "ENGINE_ERROR",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-11-24T19:33:11.620Z",
+      "observed_at": "2026-11-25T03:34:27.005Z",
       "hypothesis": "Reproducir y corregir human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation sin relajar contratos debe reducir su reincidencia.",
       "expected_metric_delta": {
         "name": "qa_issue_presence",
@@ -194,7 +194,7 @@
       ],
       "source_type": "ENGINE_ERROR",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-11-24T19:33:11.620Z",
+      "observed_at": "2026-11-25T03:34:27.005Z",
       "hypothesis": "Reproducir y corregir human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation sin relajar contratos debe reducir su reincidencia.",
       "expected_metric_delta": {
         "name": "qa_issue_presence",
@@ -227,7 +227,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-11-24T19:33:11.659Z",
+      "observed_at": "2026-11-25T03:34:27.043Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -260,7 +260,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-11-24T19:33:11.659Z",
+      "observed_at": "2026-11-25T03:34:27.043Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -293,7 +293,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-11-24T19:33:11.659Z",
+      "observed_at": "2026-11-25T03:34:27.043Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -347,7 +347,7 @@
       "evidence_refs": [
         "qa:2bde0086f90207b526542ae3"
       ],
-      "created_at": "2026-11-24T19:33:11.620Z",
+      "created_at": "2026-11-25T03:34:27.005Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -410,7 +410,7 @@
       "evidence_refs": [
         "qa:106a1d44c42fd29681abaa93"
       ],
-      "created_at": "2026-11-24T19:33:11.620Z",
+      "created_at": "2026-11-25T03:34:27.005Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -473,7 +473,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:2c72c8984471e786fdae5674"
       ],
-      "created_at": "2026-11-24T19:33:11.659Z",
+      "created_at": "2026-11-25T03:34:27.043Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -536,7 +536,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:bff844dc5851a34667aad2b5"
       ],
-      "created_at": "2026-11-24T19:33:11.659Z",
+      "created_at": "2026-11-25T03:34:27.043Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -599,7 +599,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:04812c9c0f8c6e34fa6d5e4d"
       ],
-      "created_at": "2026-11-24T19:33:11.659Z",
+      "created_at": "2026-11-25T03:34:27.043Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {

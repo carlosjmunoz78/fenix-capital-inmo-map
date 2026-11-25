@@ -6,10 +6,10 @@
   "environment": "CONTROL_PLANE",
   "version": "0.2.0",
   "status": "FINDINGS_OPEN",
-  "updated_at": "2026-11-24T19:33:11.620Z",
+  "updated_at": "2026-11-25T03:34:27.005Z",
   "quality_score": 60,
-  "previous_quality_score": 40,
-  "quality_delta": 20,
+  "previous_quality_score": 60,
+  "quality_delta": 0,
   "tests": {
     "executed": 12,
     "passed": 10,
@@ -74,9 +74,7 @@
     "106a1d44c42fd29681abaa93"
   ],
   "new_issue_fingerprints": [],
-  "resolved_issue_fingerprints": [
-    "57076bcd76dda8e6642db6ab"
-  ],
+  "resolved_issue_fingerprints": [],
   "recurring_issue_fingerprints": [
     "2bde0086f90207b526542ae3",
     "106a1d44c42fd29681abaa93"
@@ -242,7 +240,7 @@
     }
   },
   "learning_bridge": {
-    "signals_total": 1,
+    "signals_total": 0,
     "downstream": "CEREBRO_RSI_UNIVERSAL_LEARNING_INGRESS_V0",
     "repair_semantics": "PREPROD_CANDIDATE_ONLY_UNTIL_EXISTING_PROMOTION_GATES_AUTHORIZE_MORE",
     "prod_write_authorized": false,
