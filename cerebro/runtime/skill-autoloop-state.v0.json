@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-25T04:28:51.280Z",
+  "updated_at": "2026-11-25T04:29:18.833Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -30988,13 +30988,14 @@
         "human_required": null,
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
-      "updated_at": "2026-11-25T04:28:51.280Z",
+      "updated_at": "2026-11-25T04:29:18.833Z",
       "prod_authorized": false,
       "autonomous_promotion_authorized": false,
       "action_id": "skill-action:05e9d7cca58355d63c6769f8",
       "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
-      "action_status": "WAITING_SAFE_ACTION_WORKER",
-      "next_gate": "INTERNAL_WRAPPER_BUILD_AND_REEVALUATE"
+      "action_status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
+      "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
+      "handoff_id": "skill-engine-extension:f95451d06ef78301903aa2a7"
     }
   },
   "terminal_hold": {
@@ -34653,7 +34654,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "QUEUE_BUILD_INTERNAL_WRAPPER_PLAN_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "ROUTE_SAFE_ACTION_BATCH_1_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -52361,46 +52362,7 @@
       "recorded_at": "2026-11-25T04:28:51.280Z"
     }
   },
-  "autonomy_action_queue": {
-    "github-wide-skills:a6a7384f61d00ff9adae": {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
-      "action_id": "skill-action:05e9d7cca58355d63c6769f8",
-      "decision_id": "skill-autonomy:12a74f71a0c4c56ec317846d",
-      "company_id": "GLOBAL",
-      "engine_id": "SKILL-AUTONOMY-ACTION",
-      "environment": "PREPROD",
-      "version": "1.0.0",
-      "skill_id": "github-wide-skills:a6a7384f61d00ff9adae",
-      "skill_version": "skillwrap:9f1837c9094923203282",
-      "decision": "ENVOLVER",
-      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
-      "status": "WAITING_SAFE_ACTION_WORKER",
-      "next_gate": "INTERNAL_WRAPPER_BUILD_AND_REEVALUATE",
-      "target_engine_ids": [
-        "API-001",
-        "CRM-001",
-        "DATA-001",
-        "DBOFF-001",
-        "STOROFF-001"
-      ],
-      "observed_at": null,
-      "human_required": null,
-      "queueable_safe_work": true,
-      "terminal_metadata_only": false,
-      "mutation_authorized": false,
-      "internal_wrapper_shadow_authorized": false,
-      "fact001_gap_candidate_authorized": false,
-      "fact001_create_authorized": false,
-      "paid_activation_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "external_skill_code_execution_authorized": false,
-      "additional_cost_eur": 0,
-      "recorded_at": "2026-11-25T04:28:51.280Z"
-    }
-  },
+  "autonomy_action_queue": {},
   "autonomy_action_handoffs": {
     "repo:96e72438df437e5b8cc2d6c5afff": {
       "schema_version": "1.0.0",
@@ -68438,6 +68400,44 @@
       "raw_external_skill_execution_forbidden": true,
       "shadow_activation_candidate": false,
       "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE"
+    },
+    "github-wide-skills:a6a7384f61d00ff9adae": {
+      "schema_version": "1.0.0",
+      "company_id": "GLOBAL",
+      "skill_id": "github-wide-skills:a6a7384f61d00ff9adae",
+      "skill_version": "skillwrap:9f1837c9094923203282",
+      "source_action_id": "skill-action:05e9d7cca58355d63c6769f8",
+      "source_decision_id": "skill-autonomy:12a74f71a0c4c56ec317846d",
+      "source_discovery_run_id": 45523285091,
+      "wrapper_id": "skillwrap:9f1837c9094923203282",
+      "domain": "data-database-supabase",
+      "environment": "PREPROD",
+      "additional_cost_eur": 0,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "paid_activation_authorized": false,
+      "auto_merge_authorized": false,
+      "state_type": "CEREBRO_SKILL_ENGINE_EXTENSION_HANDOFF",
+      "handoff_id": "skill-engine-extension:f95451d06ef78301903aa2a7",
+      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
+      "target_engine_ids": [
+        "API-001",
+        "CRM-001",
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001"
+      ],
+      "preservation_required": true,
+      "old_vs_new_required": true,
+      "tribunal_required": true,
+      "rollback_required": true,
+      "rebuild_required": true,
+      "internal_wrapper_only": true,
+      "raw_external_skill_execution_forbidden": true,
+      "shadow_activation_candidate": false,
+      "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE"
     }
   },
   "autonomy_action_history": {
@@ -73846,6 +73846,21 @@
       "handoff_id": "skill-engine-extension:42f2a1def670d9f1e7e982a9",
       "status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
       "routed_at": "2026-10-28T15:15:27.027Z",
+      "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
+      "environment": "PREPROD",
+      "additional_cost_eur": 0,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "paid_activation_authorized": false,
+      "auto_merge_authorized": false
+    },
+    "github-wide-skills:a6a7384f61d00ff9adae": {
+      "action_id": "skill-action:05e9d7cca58355d63c6769f8",
+      "handoff_id": "skill-engine-extension:f95451d06ef78301903aa2a7",
+      "status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
+      "routed_at": "2026-11-25T04:29:18.833Z",
       "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
       "environment": "PREPROD",
       "additional_cost_eur": 0,
