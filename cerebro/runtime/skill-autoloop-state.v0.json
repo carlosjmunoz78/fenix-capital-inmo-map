@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-25T02:24:58.728Z",
+  "updated_at": "2026-11-25T04:28:51.280Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -3061,39 +3061,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 45437685096,
       "checkpointed_at": "2026-11-24T16:29:50.433Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:a6a7384f61d00ff9adae": {
-      "candidate_id": "github-wide-skills:a6a7384f61d00ff9adae",
-      "name": "diagram-design",
-      "human_alias": "Diagram Design",
-      "wrapper_id": "skillwrap:9f1837c9094923203282",
-      "domain": "data-database-supabase",
-      "engine_bindings": [
-        "DATA-001",
-        "DBOFF-001",
-        "STOROFF-001",
-        "API-001",
-        "CRM-001"
-      ],
-      "value_score": 88.72,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "dabaige53/dabaige-skills",
-        "upstream_head_commit": "42a4c3d6a811835ed71eecb49cc654039ba1945e",
-        "manifest_sha256": "ef038c086bc97bd10f38dcbad553ae5a5232848a325f15aa80705fe04b5064c1",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 45523285091,
-      "checkpointed_at": "2026-11-25T01:07:24.387Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -30980,6 +30947,54 @@
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:a6a7384f61d00ff9adae": {
+      "candidate_id": "github-wide-skills:a6a7384f61d00ff9adae",
+      "name": "diagram-design",
+      "human_alias": "Diagram Design",
+      "wrapper_id": "skillwrap:9f1837c9094923203282",
+      "domain": "data-database-supabase",
+      "engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "value_score": 88.72,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "dabaige53/dabaige-skills",
+        "upstream_head_commit": "42a4c3d6a811835ed71eecb49cc654039ba1945e",
+        "manifest_sha256": "ef038c086bc97bd10f38dcbad553ae5a5232848a325f15aa80705fe04b5064c1",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 45523285091,
+      "checkpointed_at": "2026-11-25T01:07:24.387Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "ENVOLVER",
+      "evidence": {
+        "reason": "EXTEND_EXISTING_ENGINE_FIRST",
+        "decision_id": "skill-autonomy:12a74f71a0c4c56ec317846d",
+        "decision": "ENVOLVER",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-11-25T04:28:51.280Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:05e9d7cca58355d63c6769f8",
+      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
+      "action_status": "WAITING_SAFE_ACTION_WORKER",
+      "next_gate": "INTERNAL_WRAPPER_BUILD_AND_REEVALUATE"
     }
   },
   "terminal_hold": {
@@ -34638,7 +34653,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "QUEUE_BUILD_INTERNAL_WRAPPER_PLAN_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -52306,9 +52321,86 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-11-22T12:52:46.488Z"
+    },
+    "github-wide-skills:a6a7384f61d00ff9adae": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:05e9d7cca58355d63c6769f8",
+      "decision_id": "skill-autonomy:12a74f71a0c4c56ec317846d",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:a6a7384f61d00ff9adae",
+      "skill_version": "skillwrap:9f1837c9094923203282",
+      "decision": "ENVOLVER",
+      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
+      "status": "QUEUED_SAFE_WORK",
+      "next_gate": "INTERNAL_WRAPPER_BUILD_AND_REEVALUATE",
+      "target_engine_ids": [
+        "API-001",
+        "CRM-001",
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": true,
+      "terminal_metadata_only": false,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-11-25T04:28:51.280Z"
     }
   },
-  "autonomy_action_queue": {},
+  "autonomy_action_queue": {
+    "github-wide-skills:a6a7384f61d00ff9adae": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:05e9d7cca58355d63c6769f8",
+      "decision_id": "skill-autonomy:12a74f71a0c4c56ec317846d",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:a6a7384f61d00ff9adae",
+      "skill_version": "skillwrap:9f1837c9094923203282",
+      "decision": "ENVOLVER",
+      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
+      "status": "WAITING_SAFE_ACTION_WORKER",
+      "next_gate": "INTERNAL_WRAPPER_BUILD_AND_REEVALUATE",
+      "target_engine_ids": [
+        "API-001",
+        "CRM-001",
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": true,
+      "terminal_metadata_only": false,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-11-25T04:28:51.280Z"
+    }
+  },
   "autonomy_action_handoffs": {
     "repo:96e72438df437e5b8cc2d6c5afff": {
       "schema_version": "1.0.0",
