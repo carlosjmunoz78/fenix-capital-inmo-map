@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-25T01:05:37.190Z",
+  "updated_at": "2026-11-25T01:07:24.387Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -585,7 +585,8 @@
     "github-wide-skills:4f63d7fde6a6b57da5ca",
     "github-wide-skills:76b88b19c365f6ea7e9f",
     "github-wide-skills:d8e995961174e888d301",
-    "github-wide-skills:df9562d6a524239501bd"
+    "github-wide-skills:df9562d6a524239501bd",
+    "github-wide-skills:a6a7384f61d00ff9adae"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -3060,6 +3061,39 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 45437685096,
       "checkpointed_at": "2026-11-24T16:29:50.433Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:a6a7384f61d00ff9adae": {
+      "candidate_id": "github-wide-skills:a6a7384f61d00ff9adae",
+      "name": "diagram-design",
+      "human_alias": "Diagram Design",
+      "wrapper_id": "skillwrap:9f1837c9094923203282",
+      "domain": "data-database-supabase",
+      "engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "value_score": 88.72,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "dabaige53/dabaige-skills",
+        "upstream_head_commit": "42a4c3d6a811835ed71eecb49cc654039ba1945e",
+        "manifest_sha256": "ef038c086bc97bd10f38dcbad553ae5a5232848a325f15aa80705fe04b5064c1",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 45523285091,
+      "checkpointed_at": "2026-11-25T01:07:24.387Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34604,7 +34638,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34617,7 +34651,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 45451164881,
+  "last_discovery_run_id": 45523285091,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
