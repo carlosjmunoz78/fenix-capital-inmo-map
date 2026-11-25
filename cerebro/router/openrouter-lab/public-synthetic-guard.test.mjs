@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {validatePublicRequest,publicCase,buildPublicBody,zero,neutral} from './public-synthetic-guard.mjs';
+const req={version:2,id:'eval-public-synthetic-001',case_id:'synthetic-arithmetic-01',approved:true,mode:'OWNER_AUTHORIZED_PUBLIC_SYNTHETIC_REFERENCE'};
+for(const c of ['synthetic-arithmetic-01','synthetic-sampling-01','synthetic-recovery-01'])test('catalog '+c,()=>{assert.ok(validatePublicRequest({...req,case_id:c}));const b=buildPublicBody(c);assert.equal(b.messages[0].content,neutral);assert.equal(b.messages[1].content,publicCase(c).question);assert.equal(b.provider.data_collection,'deny');assert.equal(b.provider.allow_fallbacks,false);assert.deepEqual(b.provider.max_price,{prompt:0,completion:0});assert.ok(!JSON.stringify(b).includes('oracle'))});
+for(const [k,v] of [['skill_text','PRIVATE'],['question','PRIVATE'],['packet_env','SECRET'],['oracle',{}],['case_id','PRIVATE'],['case_id',['synthetic-arithmetic-01']],['version',1],['mode','OWNER_AUTHORIZED_SYNTHETIC_SKILL_EVAL'],['id','PRIVATE'],['approved',false]])test('reject '+k+' '+JSON.stringify(v),()=>assert.equal(validatePublicRequest({...req,[k]:v}),false));
+for(const x of [false,null,'',' ', '1e-999','0.0001',1])test('reject price '+JSON.stringify(x),()=>assert.equal(zero(x),false));
+test('zero prices',()=>{for(const x of [0,'0','0.000'])assert.equal(zero(x),true)});
+test('unknown catalog',()=>assert.throws(()=>buildPublicBody('private')));

@@ -19,7 +19,7 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
       - name: Verify quota and behavioral oracle
-        run: node --test cerebro/router/openrouter-lab/quota.test.mjs cerebro/router/openrouter-lab/skill-oracle.test.mjs
+        run: node --test cerebro/router/openrouter-lab/quota.test.mjs cerebro/router/openrouter-lab/skill-oracle.test.mjs cerebro/router/openrouter-lab/public-synthetic-guard.test.mjs
       - name: Verify private LAB project
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
