@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-26T03:10:58.582Z",
+  "updated_at": "2026-11-26T05:00:32.094Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -588,7 +588,8 @@
     "github-wide-skills:df9562d6a524239501bd",
     "github-wide-skills:a6a7384f61d00ff9adae",
     "github-wide-skills:b03a95b53371752b69e3",
-    "github-wide-skills:ba6c7963525b712f1739"
+    "github-wide-skills:ba6c7963525b712f1739",
+    "github-wide-skills:6458ff4cd1457ae9eefc"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -3135,6 +3136,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 45747213163,
       "checkpointed_at": "2026-11-26T03:10:58.582Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:6458ff4cd1457ae9eefc": {
+      "candidate_id": "github-wide-skills:6458ff4cd1457ae9eefc",
+      "name": "swarm-review",
+      "human_alias": "Swarm Review",
+      "wrapper_id": "skillwrap:a6aa60015d40f5bbef6a",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 93.39,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Kumar4779/skillforge",
+        "upstream_head_commit": "8c39f8b2d41655575a9496564c1e60f2d34fd44a",
+        "manifest_sha256": "63bb66ab97d364a2bc4c972e5bf6ddb32520d72cfba7d779c55f4683d176e4f0",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 45758698442,
+      "checkpointed_at": "2026-11-26T05:00:32.094Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34741,7 +34778,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 45747213163,
+  "last_discovery_run_id": 45758698442,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
