@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createCronosCloudflareReadPortV1,SOURCE} from '../runtime/cronos-workflow-read-port-v1.mjs';
+const credential=async()=> 'fixture-token-not-real-123456789';
+const reply=(patch={})=>({success:true,result:{versionId:SOURCE.workflow_version,status:'complete',success:true,error:null,step_count:3,start:'2026-11-26T21:27:45.572Z',end:'2026-11-26T21:27:48.288Z',output:{fixture:true},steps:Array.from({length:3},(_,i)=>({name:'step-'+i,success:true,config:{retries:{limit:0}},attempts:[{}],output:'{}'})),...patch}});
+const json=x=>new Response(JSON.stringify(x),{headers:{'content-type':'application/json'}});
+const make=fn=>createCronosCloudflareReadPortV1({getReadCredential:credential,fetchImpl:fn});
+test('GET fixed official endpoint, no follow redirect',async()=>{let calls=0;const read=make(async(u,o)=>{calls++;assert.equal(u,'https://api.cloudflare.com/client/v4/accounts/e39a57e1ac42650ca5a6d5307cf0ac8e/workflows/'+SOURCE.workflow+'/instances/'+SOURCE.instance_id);assert.equal(o.method,'GET');assert.equal(o.redirect,'manual');return json(reply())});const r=await read(SOURCE);assert.equal(calls,1);assert.equal(r.provider.steps.length,3);assert.equal(r.source,SOURCE)});
+test('other workflow denied without credential or network',async()=>{let called=false;const read=createCronosCloudflareReadPortV1({getReadCredential:async()=>{called=true;return 'x'},fetchImpl:async()=>{called=true}});await assert.rejects(read({...SOURCE,instance_id:'other'}),/SOURCE_DENIED/);assert.equal(called,false)});
+test('missing credential fails closed',async()=>{const read=createCronosCloudflareReadPortV1({getReadCredential:async()=>null,fetchImpl:async()=>assert.fail()});await assert.rejects(read(SOURCE),/CREDENTIAL_UNAVAILABLE/)});
+test('redirect rejected',async()=>assert.rejects(make(async()=>new Response(null,{status:302,headers:{location:'https://example.invalid'}}))(SOURCE),/READ_DENIED/));
+test('401 rejected',async()=>assert.rejects(make(async()=>new Response(null,{status:401}))(SOURCE),/READ_DENIED/));
+test('wrong version rejected',async()=>assert.rejects(make(async()=>json(reply({versionId:'wrong'})))(SOURCE),/TERMINAL_DENIED/));
+test('pending state rejected',async()=>assert.rejects(make(async()=>json(reply({status:'running'})))(SOURCE),/TERMINAL_DENIED/));
+test('response size capped',async()=>assert.rejects(make(async()=>new Response('x'.repeat(66000),{headers:{'content-type':'application/json'}}))(SOURCE),/RESPONSE_LIMIT/));
+test('aborted request cannot use credential',async()=>{const a=new AbortController();a.abort();await assert.rejects(createCronosCloudflareReadPortV1({getReadCredential:async()=>assert.fail(),fetchImpl:async()=>assert.fail()})(SOURCE,{signal:a.signal}),/ABORTED/)});
+test('invalid step count rejected',async()=>assert.rejects(make(async()=>json(reply({step_count:4})))(SOURCE),/STEP_COUNT/));
