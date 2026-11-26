@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-26T13:09:50.943Z",
+  "updated_at": "2026-11-26T13:12:50.321Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -589,7 +589,8 @@
     "github-wide-skills:a6a7384f61d00ff9adae",
     "github-wide-skills:b03a95b53371752b69e3",
     "github-wide-skills:ba6c7963525b712f1739",
-    "github-wide-skills:6458ff4cd1457ae9eefc"
+    "github-wide-skills:6458ff4cd1457ae9eefc",
+    "github-wide-skills:892cc651d6ecffd9e0f0"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -3136,6 +3137,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 45747213163,
       "checkpointed_at": "2026-11-26T03:10:58.582Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:892cc651d6ecffd9e0f0": {
+      "candidate_id": "github-wide-skills:892cc651d6ecffd9e0f0",
+      "name": "prompt-port",
+      "human_alias": "Prompt Port",
+      "wrapper_id": "skillwrap:db25f1ad717b40ed83e8",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 86.57,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "shashikantdev3/noslop-skills",
+        "upstream_head_commit": "00967ede41c261f124f74149d7d910630ff93e25",
+        "manifest_sha256": "a40067463f068d86ec971980cd93d5d2c95bbad0a0c2a0b0eaf2c1c598379917",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 45826862826,
+      "checkpointed_at": "2026-11-26T13:12:50.321Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34780,7 +34817,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34793,7 +34830,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 45758693028,
+  "last_discovery_run_id": 45826862826,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
