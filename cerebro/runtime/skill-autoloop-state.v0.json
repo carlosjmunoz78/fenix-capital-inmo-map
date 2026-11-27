@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-27T14:57:28.750Z",
+  "updated_at": "2026-11-27T18:57:08.213Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -593,7 +593,8 @@
     "github-wide-skills:892cc651d6ecffd9e0f0",
     "github-wide-skills:105eb608faa8980556b9",
     "github-wide-skills:05c442270b349d875250",
-    "github-wide-skills:77491469e8a97be19325"
+    "github-wide-skills:77491469e8a97be19325",
+    "github-wide-skills:969795c86dedea9235a4"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -3278,6 +3279,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 46015658533,
       "checkpointed_at": "2026-11-27T14:25:10.785Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:969795c86dedea9235a4": {
+      "candidate_id": "github-wide-skills:969795c86dedea9235a4",
+      "name": "docs-deconstructor",
+      "human_alias": "Docs Deconstructor",
+      "wrapper_id": "skillwrap:69d440c9291dce9b3fce",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.51,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "hikarilucky79/agent-learn-skills",
+        "upstream_head_commit": "4a0e771de55a6af26c650db99db30912e76169cd",
+        "manifest_sha256": "341c9d4fe137522b98f628a44a1287481fe469e02dddddc3ad9c9abf3a0c76f8",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 46053132420,
+      "checkpointed_at": "2026-11-27T18:57:08.213Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34922,7 +34957,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -34935,7 +34970,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 46020479629,
+  "last_discovery_run_id": 46053132420,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
