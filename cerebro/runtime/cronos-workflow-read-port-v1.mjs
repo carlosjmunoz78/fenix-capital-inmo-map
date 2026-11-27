@@ -13,19 +13,23 @@ export function createCronosCloudflareReadPortV1({getReadCredential,fetchImpl=gl
   check(typeof token==='string'&&token.length>=20&&token.length<=512&&!/[\r\n\s]/.test(token),'BROKER_CREDENTIAL_UNAVAILABLE');
   check(!signal?.aborted,'CRONOS_ABORTED');
   let response;try{response=await fetchImpl(URL_FIXED,{method:'GET',headers:{Authorization:'Bearer '+token,Accept:'application/json'},redirect:'manual',cache:'no-store',signal});}catch{throw new Error('CLOUDFLARE_READ_FAILED')}
-  check(response?.status===200&&!response.redirected,'CLOUDFLARE_READ_DENIED');
-  check(/^application\/json(?:;|$)/i.test(response.headers.get('content-type')??''),'CLOUDFLARE_CONTENT_TYPE');
-  const declared=response.headers.get('content-length');
-  check(declared===null||(/^\d+$/.test(declared)&&Number(declared)<=65536),'CLOUDFLARE_RESPONSE_LIMIT');
-  const reader=response.body?.getReader();check(reader,'CLOUDFLARE_BODY_MISSING');
-  let total=0;const chunks=[];
-  try{while(true){const {done,value}=await reader.read();if(done)break;total+=value.byteLength;check(total<=65536,'CLOUDFLARE_RESPONSE_LIMIT');chunks.push(Buffer.from(value));}}finally{await reader.cancel().catch(()=>{});}
-  let envelope;try{envelope=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{throw new Error('CLOUDFLARE_JSON_INVALID')}
-  const x=envelope?.result;
-  check(envelope?.success===true&&x?.versionId===SOURCE.workflow_version&&x?.status==='complete'&&x.success===true&&x.error===null,'CLOUDFLARE_TERMINAL_DENIED');
-  check(x.step_count===3&&Array.isArray(x.steps)&&x.steps.length===3,'CLOUDFLARE_STEP_COUNT');
-  const steps=x.steps.map(s=>{check(typeof s.output==='string'&&s.output.length<=16384&&Array.isArray(s.attempts),'CLOUDFLARE_STEP_INVALID');let output;try{output=JSON.parse(s.output)}catch{throw new Error('CLOUDFLARE_STEP_JSON')};return {name:s.name,success:s.success,retries:s.config?.retries?.limit,attempt_count:s.attempts.length,output};});
-  return {source:SOURCE,observed_at:new Date().toISOString(),provider:{status:x.status,success:x.success,error:x.error,start:x.start,end:x.end,output:x.output,steps}};
+  return normalizeCronosCloudflareResponseV1(response);
  };
+}
+
+export async function normalizeCronosCloudflareResponseV1(response){
+ check(response?.status===200&&!response.redirected,'CLOUDFLARE_READ_DENIED');
+ check(/^application\/json(?:;|$)/i.test(response.headers.get('content-type')??''),'CLOUDFLARE_CONTENT_TYPE');
+ const declared=response.headers.get('content-length');
+ check(declared===null||(/^\d+$/.test(declared)&&Number(declared)<=65536),'CLOUDFLARE_RESPONSE_LIMIT');
+ const reader=response.body?.getReader();check(reader,'CLOUDFLARE_BODY_MISSING');
+ let total=0;const chunks=[];
+ try{while(true){const {done,value}=await reader.read();if(done)break;total+=value.byteLength;check(total<=65536,'CLOUDFLARE_RESPONSE_LIMIT');chunks.push(Buffer.from(value));}}finally{await reader.cancel().catch(()=>{});}
+ let envelope;try{envelope=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{throw new Error('CLOUDFLARE_JSON_INVALID')}
+ const x=envelope?.result;
+ check(envelope?.success===true&&x?.versionId===SOURCE.workflow_version&&x?.status==='complete'&&x.success===true&&x.error===null,'CLOUDFLARE_TERMINAL_DENIED');
+ check(x.step_count===3&&Array.isArray(x.steps)&&x.steps.length===3,'CLOUDFLARE_STEP_COUNT');
+ const steps=x.steps.map(s=>{check(typeof s.output==='string'&&s.output.length<=16384&&Array.isArray(s.attempts),'CLOUDFLARE_STEP_INVALID');let output;try{output=JSON.parse(s.output)}catch{throw new Error('CLOUDFLARE_STEP_JSON')};return {name:s.name,success:s.success,retries:s.config?.retries?.limit,attempt_count:s.attempts.length,output};});
+ return {source:SOURCE,observed_at:new Date().toISOString(),provider:{status:x.status,success:x.success,error:x.error,start:x.start,end:x.end,output:x.output,steps}};
 }
 export const CRONOS_CLOUDFLARE_READ_PORT_V1=Object.freeze({capability:'CRONOS.EVIDENCE.READ',environment:'LAB',method:'GET',source:SOURCE,broker_only:true,credential_in_job:false,public_route:false,creates_workflow:false,paid_ai:false,prod_authorized:false});
