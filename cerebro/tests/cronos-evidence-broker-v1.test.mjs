@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {handle,canonical,PATH,accessValid} from '../cloudflare/cronos-evidence-broker-lab/worker.mjs';
+const url='https://lab.example'+PATH,now=1795737600;
+const h={'x-cerebro-company':'fenix','x-cerebro-engine':'CRONOS-001','x-cerebro-environment':'LAB','x-cerebro-capability':'CRONOS.EVIDENCE.READ','x-cerebro-ts':String(now),'x-cerebro-nonce':'a'.repeat(32),'x-cerebro-signature':'A'.repeat(86)};
+let hits=0;const opts={now,fetcher:async()=>{hits++;throw Error('forbidden')}};
+for(const [name,req,status] of [['wrong method',new Request(url,{method:'POST',headers:h}),404],['query injection',new Request(url+'?foo=1',{headers:h}),404],['wrong path',new Request('https://lab.example/other',{headers:h}),404],['wrong tenant',new Request(url,{headers:{...h,'x-cerebro-company':'other'}}),403],['wrong capability',new Request(url,{headers:{...h,'x-cerebro-capability':'FACT.INVENTORY.READ'}}),403],['expired',new Request(url,{headers:{...h,'x-cerebro-ts':String(now-61)}}),401],['forged signature',new Request(url,{headers:h}),401]])test(name,async()=>{assert.equal((await handle(req,{},opts)).status,status);assert.equal(hits,0)});
+test('canonical',()=>assert.equal(canonical('123','abc'),['1','GET',PATH,'fenix','CRONOS-001','LAB','CRONOS.EVIDENCE.READ','123','abc'].join('\n')));
+test('missing access assertion',async()=>assert.equal(await accessValid(null,opts.fetcher,now),false));
