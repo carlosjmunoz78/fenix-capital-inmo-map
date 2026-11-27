@@ -32,6 +32,9 @@ function assertPersistedPreprod(context, label) {
 }
 
 function fsyncDirectory(directory) {
+  // Node/Windows does not provide POSIX directory fsync semantics.
+  // File contents are fsync'ed before atomic rename; directory fsync remains POSIX-only.
+  if (process.platform === 'win32') return;
   const fd = fs.openSync(directory, 'r');
   try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
 }
