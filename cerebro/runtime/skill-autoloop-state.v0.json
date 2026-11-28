@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-28T00:31:09.852Z",
+  "updated_at": "2026-11-28T01:58:00.670Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -595,7 +595,8 @@
     "github-wide-skills:05c442270b349d875250",
     "github-wide-skills:77491469e8a97be19325",
     "github-wide-skills:969795c86dedea9235a4",
-    "github-wide-skills:818a4106190773f3eb0d"
+    "github-wide-skills:818a4106190773f3eb0d",
+    "github-wide-skills:158062f16c93069c21a2"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -3348,6 +3349,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 46079816199,
       "checkpointed_at": "2026-11-27T22:59:15.185Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:158062f16c93069c21a2": {
+      "candidate_id": "github-wide-skills:158062f16c93069c21a2",
+      "name": "code-review",
+      "human_alias": "Code Review",
+      "wrapper_id": "skillwrap:9949a192f6af10815613",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 92.38,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "bozbornehoo09/bozz-agents",
+        "upstream_head_commit": "22ee727410821279bc0528ed18bd8a482afa10ae",
+        "manifest_sha256": "17b05f0ebf93cb4ce19460fbfbc8442aeeac3f9f31bb266f9d0396aea3ab1268",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 46095668854,
+      "checkpointed_at": "2026-11-28T01:58:00.670Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -34992,7 +35029,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -35005,7 +35042,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 46088267229,
+  "last_discovery_run_id": 46095668854,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
