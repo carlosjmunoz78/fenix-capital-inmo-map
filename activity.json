@@ -1,0 +1,395 @@
+{
+  "schema": "cerebro-actions-feed-v1",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "generated_at": "2026-11-28T20:25:31.814Z",
+  "method": "AUTHENTICATED_GITHUB_ACTIONS",
+  "in_progress": {
+    "total_count": 1,
+    "workflow_runs": [
+      {
+        "id": 46186319142,
+        "name": "CEREBRO Activity · Authenticated GitHub metadata feed",
+        "path": ".github/workflows/cerebro-activity-feed-v1.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46186319142",
+        "created_at": "2026-11-28T20:25:23Z",
+        "run_started_at": "2026-11-28T20:25:23Z",
+        "updated_at": "2026-11-28T20:25:26Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      }
+    ]
+  },
+  "queued": {
+    "total_count": 0,
+    "workflow_runs": []
+  },
+  "history": {
+    "workflow_runs": [
+      {
+        "id": 46185937370,
+        "name": "CEREBRO Browser 1 V2 Live Worker",
+        "path": ".github/workflows/cerebro-browser-job-runner-v2-live.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46185937370",
+        "created_at": "2026-11-28T20:21:04Z",
+        "run_started_at": "2026-11-28T20:21:04Z",
+        "updated_at": "2026-11-28T20:25:19Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46185883416,
+        "name": "CEREBRO Skill PROD Real Consumer V1",
+        "path": ".github/workflows/cerebro-skill-prod-real-consumer-v1.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46185883416",
+        "created_at": "2026-11-28T20:20:28Z",
+        "run_started_at": "2026-11-28T20:20:28Z",
+        "updated_at": "2026-11-28T20:20:37Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46185864995,
+        "name": "CEREBRO Skill PROD Operational Fast Lane V1",
+        "path": ".github/workflows/cerebro-skill-prod-operational-fastlane-v1.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46185864995",
+        "created_at": "2026-11-28T20:20:18Z",
+        "run_started_at": "2026-11-28T20:20:18Z",
+        "updated_at": "2026-11-28T20:20:26Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46185812256,
+        "name": "CEREBRO PROD Source Audit V1",
+        "path": ".github/workflows/cerebro-prod-source-audit-v1.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46185812256",
+        "created_at": "2026-11-28T20:19:46Z",
+        "run_started_at": "2026-11-28T20:19:46Z",
+        "updated_at": "2026-11-28T20:19:54Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46184570613,
+        "name": "CEREBRO Skill Autonomy Safe Action Worker V1",
+        "path": ".github/workflows/cerebro-skill-autonomy-safe-action-worker-v1.yml",
+        "status": "completed",
+        "conclusion": "skipped",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46184570613",
+        "created_at": "2026-11-28T20:05:49Z",
+        "run_started_at": "2026-11-28T20:05:49Z",
+        "updated_at": "2026-11-28T20:05:50Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46184528687,
+        "name": "CEREBRO Skill AutoLoop Safe Handler V0",
+        "path": ".github/workflows/cerebro-skill-autoloop-safe-handler.yml",
+        "status": "completed",
+        "conclusion": "failure",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46184528687",
+        "created_at": "2026-11-28T20:05:21Z",
+        "run_started_at": "2026-11-28T20:05:21Z",
+        "updated_at": "2026-11-28T20:05:46Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46178496537,
+        "name": "CEREBRO RSI Real Domain Evidence Wiring V0",
+        "path": ".github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46178496537",
+        "created_at": "2026-11-28T18:56:04Z",
+        "run_started_at": "2026-11-28T18:56:04Z",
+        "updated_at": "2026-11-28T18:56:26Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46178405973,
+        "name": "CEREBRO Skill GitHub Wide Scout",
+        "path": ".github/workflows/cerebro-skill-github-wide-scout.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46178405973",
+        "created_at": "2026-11-28T18:55:02Z",
+        "run_started_at": "2026-11-28T18:55:02Z",
+        "updated_at": "2026-11-28T18:55:35Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46178402804,
+        "name": "CEREBRO Skill Discovery Scout",
+        "path": ".github/workflows/cerebro-skill-discovery-scout.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46178402804",
+        "created_at": "2026-11-28T18:55:00Z",
+        "run_started_at": "2026-11-28T18:55:00Z",
+        "updated_at": "2026-11-28T18:55:47Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46178396321,
+        "name": "CEREBRO Skill Discovery Hourly Trigger",
+        "path": ".github/workflows/cerebro-skill-discovery-hourly-trigger.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46178396321",
+        "created_at": "2026-11-28T18:54:55Z",
+        "run_started_at": "2026-11-28T18:54:55Z",
+        "updated_at": "2026-11-28T18:55:05Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46178051850,
+        "name": "CEREBRO Skill Autonomy Read-only V1",
+        "path": ".github/workflows/cerebro-skill-autonomy-readonly-v1.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46178051850",
+        "created_at": "2026-11-28T18:50:53Z",
+        "run_started_at": "2026-11-28T18:50:53Z",
+        "updated_at": "2026-11-28T18:51:15Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46176269657,
+        "name": "CEREBRO Activity · Authenticated GitHub metadata feed",
+        "path": ".github/workflows/cerebro-activity-feed-v1.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46176269657",
+        "created_at": "2026-11-28T18:30:54Z",
+        "run_started_at": "2026-11-28T18:30:54Z",
+        "updated_at": "2026-11-28T18:31:10Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46175629235,
+        "name": "CEREBRO RSI Real Domain Evidence Wiring V0",
+        "path": ".github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46175629235",
+        "created_at": "2026-11-28T18:23:49Z",
+        "run_started_at": "2026-11-28T18:23:49Z",
+        "updated_at": "2026-11-28T18:24:13Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46175576290,
+        "name": "CEREBRO RSI Learning Control Plane V0",
+        "path": ".github/workflows/cerebro-rsi-learning-control-plane-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46175576290",
+        "created_at": "2026-11-28T18:23:14Z",
+        "run_started_at": "2026-11-28T18:23:14Z",
+        "updated_at": "2026-11-28T18:23:45Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46168704197,
+        "name": "CEREBRO Skill AutoLoop Safe Handler V0",
+        "path": ".github/workflows/cerebro-skill-autoloop-safe-handler.yml",
+        "status": "completed",
+        "conclusion": "failure",
+        "event": "workflow_dispatch",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46168704197",
+        "created_at": "2026-11-28T17:06:33Z",
+        "run_started_at": "2026-11-28T17:06:33Z",
+        "updated_at": "2026-11-28T17:06:51Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46168679215,
+        "name": "CEREBRO Skill Chain Driver V0",
+        "path": ".github/workflows/cerebro-skill-chain-driver-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46168679215",
+        "created_at": "2026-11-28T17:06:16Z",
+        "run_started_at": "2026-11-28T17:06:16Z",
+        "updated_at": "2026-11-28T17:06:57Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46167782062,
+        "name": "CEREBRO AUTO-001 PROD Closure V1",
+        "path": ".github/workflows/cerebro-auto001-prod-closure-v1.yml",
+        "status": "completed",
+        "conclusion": "failure",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46167782062",
+        "created_at": "2026-11-28T16:56:13Z",
+        "run_started_at": "2026-11-28T16:56:13Z",
+        "updated_at": "2026-11-28T16:56:36Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46167745014,
+        "name": "CEREBRO AUTO-001 PREPROD Patch Executor V0",
+        "path": ".github/workflows/cerebro-auto001-preprod-patch-executor-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46167745014",
+        "created_at": "2026-11-28T16:55:46Z",
+        "run_started_at": "2026-11-28T16:55:46Z",
+        "updated_at": "2026-11-28T16:56:10Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46167669748,
+        "name": "CEREBRO Knowledge 100 Gate V0",
+        "path": ".github/workflows/cerebro-knowledge-100-v0.yml",
+        "status": "completed",
+        "conclusion": "failure",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46167669748",
+        "created_at": "2026-11-28T16:54:55Z",
+        "run_started_at": "2026-11-28T16:54:55Z",
+        "updated_at": "2026-11-28T16:55:34Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46167669737,
+        "name": "CEREBRO QA Source Mapping V0",
+        "path": ".github/workflows/cerebro-qa-source-mapping-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46167669737",
+        "created_at": "2026-11-28T16:54:55Z",
+        "run_started_at": "2026-11-28T16:54:55Z",
+        "updated_at": "2026-11-28T16:55:43Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46167669721,
+        "name": "CEREBRO Owner Executor Capability Audit V0",
+        "path": ".github/workflows/cerebro-owner-executor-capability-audit-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "workflow_run",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46167669721",
+        "created_at": "2026-11-28T16:54:55Z",
+        "run_started_at": "2026-11-28T16:54:55Z",
+        "updated_at": "2026-11-28T16:55:19Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46167559493,
+        "name": "CEREBRO Continuous Human QA V0",
+        "path": ".github/workflows/cerebro-continuous-human-qa-v0.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46167559493",
+        "created_at": "2026-11-28T16:53:36Z",
+        "run_started_at": "2026-11-28T16:53:36Z",
+        "updated_at": "2026-11-28T16:54:52Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46167417859,
+        "name": "STATE001 · Cloudflare inventory refresh (zero provider writes)",
+        "path": ".github/workflows/cerebro-state001-provider-refresh.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46167417859",
+        "created_at": "2026-11-28T16:51:58Z",
+        "run_started_at": "2026-11-28T16:51:58Z",
+        "updated_at": "2026-11-28T16:52:19Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      },
+      {
+        "id": 46163435866,
+        "name": "CEREBRO Scheduled Soak Reconciler V1",
+        "path": ".github/workflows/cerebro-scheduled-soak-reconciler-v1.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "event": "schedule",
+        "html_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/46163435866",
+        "created_at": "2026-11-28T16:07:18Z",
+        "run_started_at": "2026-11-28T16:07:18Z",
+        "updated_at": "2026-11-28T16:08:33Z",
+        "head_sha": "0a84c0b75d26aeac0512ab047d23819c547f76a1"
+      }
+    ]
+  },
+  "details": {
+    "46186319142": [
+      {
+        "name": "publish",
+        "status": "in_progress",
+        "conclusion": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Fetch authenticated public Actions status with ephemeral token",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "name": "Verify source, age, JSON size and documented schema",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Publish only isolated feed branch with ref lease",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+            "status": "pending",
+            "conclusion": null
+          }
+        ]
+      }
+    ]
+  }
+}
